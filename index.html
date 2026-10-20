@@ -2126,7 +2126,7 @@
     }
     if (cam.absorb && cam.absorbSeen && performance.now() - cam.lastIn > 160) cam.absorb = cam.absorbSeen = false;   // that scroll is over
     if (performance.now() - cam.lastIn > 90 && cam.vel) {
-      advance(cam.vel * f); cam.vel *= Math.pow(0.955, f);
+      advance(cam.vel * f); cam.vel *= Math.pow(0.88, f);
       if (Math.abs(cam.vel) < 0.0015) { cam.vel = 0; if (Math.abs(cam.target - Math.round(cam.target)) < 0.1) cam.target = Math.round(cam.target); }
     }
     // quick on the way, easing off as an object comes in: the last stretch before it slows right down
@@ -2149,11 +2149,11 @@
   const mainActive = () => heroState.shown && intro.entered && !work.open && !about.open && !contact.open && !caseOpen;
   Observer.create({ target: window, type: 'wheel,touch', tolerance: 0, onChangeY: self => {
     if (!mainActive()) return;
-    const touch = self.event && self.event.type.startsWith('touch'), d = touch ? -self.deltaY / 480 : self.deltaY / 1250;
+    const touch = self.event && self.event.type.startsWith('touch'), d = touch ? -self.deltaY / 900 : self.deltaY / 1500;
     if (cam.catching) return;                                                  // gliding in: scrolling waits
     if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = performance.now(); return; }   // the one scroll of rest on an object
     advance(d);
-    if (!cam.catching) cam.vel = cam.vel * 0.5 + d * 0.15;
+    if (!cam.catching) cam.vel = cam.vel * 0.5 + d * 0.03;
     cam.lastIn = performance.now();
   } });
   function camGo(i, instant) {
