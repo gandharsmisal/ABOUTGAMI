@@ -881,7 +881,6 @@
     <p>Open this website on a desktop or laptop.</p>
     <p>Trust me, it’s worth the effort.</p>
     <div class="warn"><b>Beware:</b> mobile view is in progress</div>
-    <button type="button" id="wipPeek">peek anyway</button>
   </div>
 </div>
 <div id="grain" aria-hidden="true"></div>
@@ -1321,7 +1320,6 @@
     wipDone = true;
     const c = document.getElementById('wipCard');
     setTimeout(() => { c.classList.add('on'); gsap.fromTo('#wipCard .wipPaper', { y: 40, opacity: 0, rotation: -8 }, { y: 0, opacity: 1, rotation: -2, duration: 0.7, ease: 'back.out(1.6)' }); }, 900);
-    document.getElementById('wipPeek').onclick = () => gsap.to('#wipCard .wipPaper', { y: 30, opacity: 0, duration: 0.3, onComplete: () => c.classList.remove('on') });
   }
   let heroFigReset = () => {}, heroFigStart = () => {};
   function heroReset() { heroState.shown = false; heroIn.pause(0); heroFigReset(); heroFrame(); }
