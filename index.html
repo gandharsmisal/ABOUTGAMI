@@ -186,6 +186,10 @@
   /* inside of the cover: the picture's left half (the face is 1038 wide, the picture's left half 841) */
   .abBack { transform: rotateY(180deg); background-position: 197px 0; }
   .abStrap { display: none; }
+  .abHalf::before, .abFace::before, .abLeaf .abPage::before { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background-image: var(--grain); opacity: 0.13; mix-blend-mode: multiply; border-radius: inherit; }
+  .abHalfR::before { -webkit-mask: url(assets/about/planner.png) -841px 0 / 1879px 1194px no-repeat; mask: url(assets/about/planner.png) -841px 0 / 1879px 1194px no-repeat; }
+  .abBack::before { -webkit-mask: url(assets/about/planner.png) 197px 0 / 1879px 1194px no-repeat; mask: url(assets/about/planner.png) 197px 0 / 1879px 1194px no-repeat; }
   /* the pages: the picture's paper; the writing sits in a 712 x 900 block, centred down the page */
   .abPage { position: absolute; top: 71px; width: 712px; height: 1061px; overflow: hidden;
     font: 400 29px/1.08 "Reenie Beanie", var(--hand); color: #2A2A2A; }
@@ -205,6 +209,8 @@
   .abArrow { position: absolute; left: 1650px; top: 520px; width: 112px; height: 86px; overflow: visible; opacity: 0;
     cursor: pointer; }
   .abArrow .hit { fill: transparent; }
+  .abArrow { scale: 1.4; transform-origin: 50% 50%; }
+  .abPage svg.doodle:not(.red) { scale: 1.3; }
   .abArrow:focus { outline: none; }  .abFull { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 55%; }
   .abDownload { transition: transform 0.2s ease; }
   .abDownload:hover { transform: rotate(-3deg) translateY(2px); }
@@ -691,7 +697,14 @@
           </linearGradient>
         </defs>
         <rect x="800" y="6" width="83" height="1182" fill="#2B2A28"></rect>
-        <rect x="830" y="12" width="22" height="1170" rx="11" fill="url(#abBar)" stroke="#7d7d7d" stroke-width="1"></rect>
+        <linearGradient id="abGutter" x1="0" x2="1"><stop offset="0" stop-color="#F3F1EB"></stop><stop offset="0.42" stop-color="#D9D6CE"></stop><stop offset="0.5" stop-color="#C9C6BE"></stop><stop offset="0.58" stop-color="#D9D6CE"></stop><stop offset="1" stop-color="#F3F1EB"></stop></linearGradient>
+        <rect x="800" y="72" width="83" height="1060" fill="url(#abGutter)"></rect>
+        <rect x="822" y="58" width="38" height="1088" rx="12" fill="url(#abBar)" stroke="#8c8c8c" stroke-width="1"></rect>
+        <rect x="829" y="64" width="7" height="1076" rx="3.5" fill="#fff" opacity="0.55"></rect>
+        <g fill="#9a9a9a" stroke="#d8d8d8" stroke-width="1.2">
+          <ellipse cx="841" cy="96" rx="9" ry="11"></ellipse><ellipse cx="841" cy="306" rx="5" ry="6"></ellipse><ellipse cx="841" cy="408" rx="5" ry="6"></ellipse>
+          <ellipse cx="841" cy="597" rx="6" ry="8"></ellipse><ellipse cx="841" cy="786" rx="5" ry="6"></ellipse><ellipse cx="841" cy="889" rx="5" ry="6"></ellipse><ellipse cx="841" cy="1100" rx="9" ry="11"></ellipse>
+        </g>
         <g id="abRingSet"></g>
       </svg>
       <!-- a thick marker arrow pointing at the strap (a darker edge under the orange, like a felt pen): turns the page;
@@ -1953,16 +1966,18 @@
     // six rings: three up top, three below, each through a hole in both pages
     let s = '';
     [252, 355, 460, 733, 836, 942].forEach(y => {
-      s += `<ellipse cx="841" cy="${y}" rx="75" ry="13" fill="none" stroke="#5a5a5a" stroke-width="8"></ellipse>` +
-        `<ellipse cx="841" cy="${y}" rx="75" ry="13" fill="none" stroke="url(#abRing)" stroke-width="5.5"></ellipse>` +
-        `<path d="M 770 ${y - 5} C 800 ${y - 15}, 882 ${y - 15}, 912 ${y - 5}" fill="none" stroke="#fff" stroke-opacity="0.75" stroke-width="1.4"></path>`;
+      s += `<ellipse cx="771" cy="${y}" rx="7" ry="9" fill="#3a3834"></ellipse><ellipse cx="911" cy="${y}" rx="7" ry="9" fill="#3a3834"></ellipse>` +   // the holes in the pages
+        `<path d="M 771 ${y + 2} C 778 ${y + 12}, 904 ${y + 12}, 911 ${y + 2}" fill="none" stroke="#6d6d6d" stroke-width="5"></path>` +     // the ring behind
+        `<path d="M 771 ${y - 1} C 776 ${y - 14}, 906 ${y - 14}, 911 ${y - 1}" fill="none" stroke="#555" stroke-width="8" stroke-linecap="round"></path>` +
+        `<path d="M 771 ${y - 1} C 776 ${y - 14}, 906 ${y - 14}, 911 ${y - 1}" fill="none" stroke="url(#abRing)" stroke-width="5.5" stroke-linecap="round"></path>` +
+        `<path d="M 785 ${y - 8} C 805 ${y - 12}, 877 ${y - 12}, 897 ${y - 8}" fill="none" stroke="#fff" stroke-opacity="0.85" stroke-width="1.4"></path>`;
     });
     $('abRingSet').innerHTML = s;
   }
   // the open book (the planner picture, 1879 x 1194 at stage 0,0, the strap overhanging) fits between the menu bar and the bottom edge
   const AB_TOP = 96, AB_BOTTOM = 34;
   function aboutLayout() {
-    const vw = innerWidth, vh = innerHeight, k = Math.min((vh - AB_TOP - AB_BOTTOM) / 1194, (vw - 60) / 1879);
+    const vw = innerWidth, vh = innerHeight, k = Math.min((vh - AB_TOP - AB_BOTTOM) / 1194, (vw - 60) / 1879) * 0.88;
     const ox = (vw - 1879 * k) / 2, oy = AB_TOP + (vh - AB_TOP - AB_BOTTOM - 1194 * k) / 2;
     abStage.style.transform = `translate(${ox}px, ${oy}px) scale(${k})`;
     return { k, ox, oy };
