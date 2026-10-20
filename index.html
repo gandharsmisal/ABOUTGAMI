@@ -2084,14 +2084,14 @@
     { hpLaptop: [-105, 530, 15, 1.5], hpCup: [1925, 280, 0, 1], hpPhone: [1940, 390, 0, 0.9], hpBook: [958, 528, 2, 2.2], ly: 97 },
     { hpLaptop: [-17, 1207, 0, 1.5], hpCup: [950, 721, 0, 1.38], hpPhone: [985, 840, 2, 1.25], hpBook: [560, -156, 2, 2], ly: -458 }
   ];
-  const NOTES = [null, 'hnLaptop', 'hnBook', 'hnMug'], NS = CAM.length, SLIDE = 215;   // how far the mug slides off the phone
+  const NOTES = [null, 'hnLaptop', 'hnBook', 'hnMug'], NS = CAM.length, SLIDE = 125;   // how far the mug slides off the phone
   /* The scroll is in the visitor's hands: the wheel / finger moves a target along the steps (about 4 notches a step),
      the canvas follows it softly and every prop trails a little behind at its own pace, tilting as it drifts, so
      they float rather than slide. When the scrolling stops it settles on the nearest step (leaning the way it was
      going), and that step's note and figure appear. */
   const cam = { pos: 0, target: 0, vel: 0, lastIn: 0, catching: false, absorb: false, absorbSeen: false, lag: {}, lift: 0, shown: null, ex: 0, ey: 0, t: 0 };
   // the mug and the phone travel together (same pace, same bob)
-  const LAG = { hpLaptop: 0.06, hpBook: 0.05, hpCup: 0.055, hpPhone: 0.055, line: 0.055 }, BOB = { hpLaptop: 0, hpBook: 2.1, hpCup: 4.2, hpPhone: 4.2 };
+  const LAG = { hpLaptop: 0.045, hpBook: 0.038, hpCup: 0.042, hpPhone: 0.042, line: 0.042 }, BOB = { hpLaptop: 0, hpBook: 2.1, hpCup: 4.2, hpPhone: 4.2 };
   for (const k in LAG) cam.lag[k] = 0;
   const mod = a => ((a % NS) + NS) % NS, smooth = x => x * x * (3 - 2 * x);
   const edges = () => { const hb = hero.getBoundingClientRect(), k = Math.min(hb.width / 1920, hb.height / 1080) || 1;
@@ -2118,8 +2118,8 @@
     if (!NOTES[step]) return;
     if (step === 3) {                                                       // the figure comes, pulls the mug off the phone, then the note
       mugTl = gsap.timeline()
-        .to(cam, { lift: 1, duration: 1.6, ease: 'power2.inOut' })
-        .to('#hnMug', { opacity: 1, duration: 0.5 }, 1.3);
+        .to(cam, { lift: 1, duration: 0.55, ease: 'power2.out' })
+        .to('#hnMug', { opacity: 1, duration: 0.4 }, 0.4);
     } else gsap.to('#' + NOTES[step], { opacity: 1, duration: 0.6 });
   }
   function hideNotes() {
@@ -2137,10 +2137,10 @@
     }
     if (cam.absorb && cam.absorbSeen && performance.now() - cam.lastIn > 160) cam.absorb = cam.absorbSeen = false;   // that scroll is over
     if (performance.now() - cam.lastIn > 90 && cam.vel) {
-      advance(cam.vel * f); cam.vel *= Math.pow(0.94, f);
+      advance(cam.vel * f); cam.vel *= Math.pow(0.955, f);
       if (Math.abs(cam.vel) < 0.0015) { cam.vel = 0; if (Math.abs(cam.target - Math.round(cam.target)) < 0.1) cam.target = Math.round(cam.target); }
     }
-    cam.pos += (cam.target - cam.pos) * (1 - Math.pow(1 - 0.032, f));
+    cam.pos += (cam.target - cam.pos) * (1 - Math.pow(1 - 0.025, f));
     for (const k in LAG) cam.lag[k] += (cam.pos - cam.lag[k]) * (1 - Math.pow(1 - LAG[k], f));
     const settled = Math.abs(cam.target - cam.pos) < 0.01 && Math.abs(cam.pos - cam.lag.hpBook) < 0.01 && cam.target === Math.round(cam.target);
     if (settled && cam.shown !== mod(cam.target)) showNote(mod(cam.target));
@@ -2157,7 +2157,7 @@
   const mainActive = () => heroState.shown && intro.entered && !work.open && !about.open && !contact.open && !caseOpen;
   Observer.create({ target: window, type: 'wheel,touch', tolerance: 0, onChangeY: self => {
     if (!mainActive()) return;
-    const touch = self.event && self.event.type.startsWith('touch'), d = touch ? -self.deltaY / 650 : self.deltaY / 1700;
+    const touch = self.event && self.event.type.startsWith('touch'), d = touch ? -self.deltaY / 800 : self.deltaY / 2200;
     if (cam.catching) return;                                                  // gliding in: scrolling waits
     if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = performance.now(); return; }   // the one scroll of rest on an object
     advance(d);
@@ -2165,7 +2165,8 @@
     cam.lastIn = performance.now();
   } });
   function camGo(i, instant) {
-    cam.target = Math.round(cam.target) - mod(Math.round(cam.target)) + i;
+    const r0 = Math.round(cam.target); let dI = mod(i - mod(r0)); if (dI > NS / 2) dI -= NS;   // the short way round
+    cam.target = r0 + dI;
     cam.vel = 0; cam.catching = !instant; cam.absorb = false;
     if (instant) { cam.pos = cam.target; for (const k in LAG) cam.lag[k] = cam.target; hideNotes(); camDraw(); }
   }
@@ -2178,6 +2179,8 @@
   });
   $('heroProps').addEventListener('click', e => {
     const g = e.target.closest('[data-open]'); if (!g || !mainActive()) return;
+    const want = { work: 1, about: 2, contact: 3 }[g.dataset.open];
+    if (cam.shown !== want) { if (!cam.catching) camGo(want); return; }
     if (g.dataset.open === 'about') return openAbout();
     if (g.dataset.open === 'contact') return openContact(true);
     // Work grows out of the laptop's screen and fills the window
