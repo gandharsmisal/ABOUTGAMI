@@ -545,15 +545,11 @@
     <g id="heroNotes">
       <!-- step 1: the laptop; the figure stands to the right, pointing -->
       <g id="hnLaptop" opacity="0"><text class="hnote" x="1415" y="728">tap to</text><text class="hnote" x="1415" y="756">view</text>
-        <path class="hpen" d="M1400 707 C 1360 714, 1310 724, 1282 722 C 1262 720, 1258 692, 1280 680 C 1302 668, 1322 690, 1310 708 C 1296 728, 1258 722, 1240 700 C 1230 686, 1225 668, 1223 652 M1219 662 L1223 650 L1228 661"></path>
-        <image class="hchar" href="assets/fig-laptop.png" x="1548" y="790" width="71" height="236"></image></g>
+        <path class="hpen" d="M1400 707 C 1360 714, 1310 724, 1282 722 C 1262 720, 1258 692, 1280 680 C 1302 668, 1322 690, 1310 708 C 1296 728, 1258 722, 1240 700 C 1230 686, 1225 668, 1223 652 M1219 662 L1223 650 L1228 661"></path></g>
       <!-- step 2: the notebook; a little figure sits on it reading -->
       <g id="hnBook" opacity="0"><text class="hnote" x="527" y="403">Click to Know more</text><text class="hnote" x="527" y="431">Scroll to continue</text>
-        <path class="hpen" d="M744 426 C 800 426, 850 432, 872 446 C 885 456, 878 476, 858 478 C 836 480, 826 460, 840 450 C 860 438, 900 462, 922 512"></path>
-        <image class="hchar" href="assets/fig-book.png" x="887" y="468" width="111" height="174"></image></g>
-      <!-- step 3: the mug sits on the phone; the figure standing on the phone stretches up, its arms lifting the mug,
-           and once the screen shows, the note appears -->
-      <g id="hnMugFig" opacity="0"><image id="hnMugFigImg" class="hchar" href="assets/fig-cup.png" x="902" y="588" width="163" height="229" preserveAspectRatio="none"></image></g>
+        <path class="hpen" d="M744 426 C 800 426, 850 432, 872 446 C 885 456, 878 476, 858 478 C 836 480, 826 460, 840 450 C 860 438, 900 462, 922 512"></path></g>
+      <!-- step 3: the mug sits on the phone and slides off it to the side; once the screen shows, the note appears -->
       <g id="hnMug" opacity="0"><text class="hnote" x="1147" y="778">Tap to view</text><text class="hnote" x="1147" y="806">contact info</text><text class="hnote" x="1147" y="834">be quick , cup is heavy</text>
         <path class="hpen" d="M1131 763 C 1100 762, 1072 764, 1056 770 C 1042 776, 1046 792, 1064 792 C 1082 792, 1082 772, 1064 772 C 1050 772, 1036 790, 1022 810 M1024 798 L1021 811 L1033 806"></path></g>
     </g>
@@ -2080,7 +2076,7 @@
     { hpLaptop: [-105, 530, 15, 1.5], hpCup: [1925, 280, 0, 1], hpPhone: [1940, 390, 0, 0.9], hpBook: [958, 528, 2, 2.2], ly: 97 },
     { hpLaptop: [-17, 1207, 0, 1.5], hpCup: [950, 721, 0, 1.38], hpPhone: [985, 840, 2, 1.25], hpBook: [560, -156, 2, 2], ly: -458 }
   ];
-  const NOTES = [null, 'hnLaptop', 'hnBook', 'hnMug'], NS = CAM.length, LIFT = 229;   // the figure's full height
+  const NOTES = [null, 'hnLaptop', 'hnBook', 'hnMug'], NS = CAM.length, SLIDE = 215;   // how far the mug slides off the phone
   /* The scroll is in the visitor's hands: the wheel / finger moves a target along the steps (about 4 notches a step),
      the canvas follows it softly and every prop trails a little behind at its own pace, tilting as it drifts, so
      they float rather than slide. When the scrolling stops it settles on the nearest step (leaning the way it was
@@ -2101,14 +2097,11 @@
       let [x, y, r, s] = between(cam.lag[id], i => at(i, id));
       const drift = cam.pos - cam.lag[id];                                  // how far it trails: it tilts and lifts as it floats
       r += drift * 7; y -= Math.abs(drift) * 18; y += Math.sin(cam.t * 0.9 + BOB[id]) * 2.2;
-      if (id === 'hpCup') y -= LIFT * cam.lift;
+      if (id === 'hpCup') x -= SLIDE * cam.lift;                         // slid along the table, never lifted
       const c = PROPS[id];
       $(id).setAttribute('transform', `translate(${x} ${y}) rotate(${r}) scale(${s}) translate(${-c[0]} ${-c[1]})`);
     }
     $('heroLineMove').setAttribute('transform', `translate(0 ${between(cam.lag.line, i => [CAM[i].ly])[0]})`);
-    const fig = $('hnMugFigImg'), u = cam.lift;                         // feet stay on the phone; the arms reach up to the mug
-    fig.setAttribute('y', 817 - LIFT * u); fig.setAttribute('height', Math.max(0.01, LIFT * u));
-    $('hnMugFig').setAttribute('opacity', Math.min(1, u * 4));
     const step = mod(Math.round(cam.pos)), near = Math.max(0, 1 - Math.abs(cam.pos - Math.round(cam.pos)) * 5);
     $('heroFig').style.opacity = step === 0 ? near : 0;
   }
