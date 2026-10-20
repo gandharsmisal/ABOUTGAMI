@@ -125,7 +125,7 @@
   /* its 1400 wide text column narrowed to 1250: the design is drawn at 1250/1400 of the page width, centred */
   .csDocHolder { position: relative; width: 100%; aspect-ratio: var(--doc-ratio); overflow: hidden; }   /* per case: (shown design height - 1100) * 1250 / 1400; an empty foot is left off */
   /* inside a case study the menu gives way to a close button: a soft round badge with a hand-drawn cross, "close" */
-  #caseClose { position: fixed; z-index: 50; top: calc(env(safe-area-inset-top, 0px) + 18px); right: 92px; height: 48px;
+  #caseClose { position: fixed; z-index: 50; top: calc(env(safe-area-inset-top, 0px) + 18px); right: 36px; height: 48px;
     display: none; align-items: center; gap: 12px; padding: 0; border: 0; background: none; cursor: pointer;
     font: 400 16px "Walter Turncoat", var(--hand); color: var(--pen); text-transform: lowercase; letter-spacing: 0.04em; }
   #caseClose .badge { width: 42px; height: 42px; border-radius: 50%; background: transparent; display: grid; place-items: center;
@@ -136,7 +136,7 @@
   #caseClose:hover .badge { transform: rotate(90deg); }
   html.in-case #menu { display: none; }
   html.in-case #caseClose { display: inline-flex; }
-  @media (max-width: 600px) { #caseClose { right: 62px; top: calc(env(safe-area-inset-top, 0px) + 10px); } }
+  @media (max-width: 600px) { #caseClose { right: 14px; top: calc(env(safe-area-inset-top, 0px) + 10px); } }
   .csDocHolder svg { display: block; width: calc(100% * 1250 / 1400); height: auto;
     margin: calc(-100% * 1100 / 1920 * 1250 / 1400) auto 0; }
 
@@ -203,6 +203,13 @@
     transform-style: preserve-3d; }
   .abLeafFace { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
   .abLeafBack { transform: rotateY(180deg); }
+  /* open and still: the same picture without 3D, so the writing and photos are drawn sharp */
+  .abBook.flat { perspective: none; }
+  .abBook.flat .abCover, .abBook.flat .abLeaf { transform: none !important; transform-style: flat; }
+  .abBook.flat .abFront, .abBook.flat .abLeafBack { display: none; }
+  .abBook.flat .abBack { transform: translateX(-1038px); }
+  .abBook.flat.p2 .abLeafFront { display: none; }
+  .abBook.flat.p2 .abLeafBack { display: block; transform: translateX(-786px); }
   .abLeaf .abPage { top: 0; left: 0; width: 706px; background: #F4F2EC; }
   .abLeafFront .abPage { background: linear-gradient(to right, #E6E4DE, #F3F1EB 12%, #F5F3ED 60%, #F7F5EF); }
   .abLeafBack .abPage { background: linear-gradient(to left, #E6E4DE, #F3F1EB 12%, #F5F3ED 60%, #F7F5EF); }
@@ -335,7 +342,7 @@
      difference blend flips it), with the old scribbled underline on hover. Each icon acts on hover: the hammer
      hammers, the eyes follow the mouse, the heart pops. */
   #menu {
-    position: fixed; z-index: 50; top: calc(env(safe-area-inset-top, 0px) + 18px); right: 92px;
+    position: fixed; z-index: 50; top: calc(env(safe-area-inset-top, 0px) + 18px); right: 36px;
     height: 48px; display: flex; align-items: center;
     color: #fff; mix-blend-mode: difference;
   }
@@ -398,25 +405,11 @@
   #menu .menu-toggle .cross { display: none; }
   #menu.open .menu-toggle .bars { display: none; }
   #menu.open .menu-toggle .cross { display: inline; }
-  /* sound toggle: browsers only allow sound after a click, so it starts off */  #sound {
-    position: fixed; z-index: 50;
-    top: calc(env(safe-area-inset-top, 0px) + 20px); right: 36px;
-    display: flex; align-items: center; gap: 8px;
-    padding: 6px; border: 0; border-radius: 6px;
-    background: transparent; color: #fff; mix-blend-mode: difference;   /* reads on black and on white */
-    font: 20px/1 var(--hand); letter-spacing: 0.04em; cursor: pointer;
-  }
-  #sound svg { width: 32px; height: 32px; display: block; }
-  #sound svg path { stroke-width: 1px; vector-effect: non-scaling-stroke; }   /* 1px on screen at any icon size */
-  #sound .wave { opacity: 0; }
-  #sound[aria-pressed="true"] .wave { opacity: 1; }
-  #sound[aria-pressed="true"] .mute { opacity: 0; }
 
   /* ---------- phones (portrait, up to ~600px wide) ---------- */
   @media (max-width: 600px) {
     :root { --hair: 1px; }                                   /* thin lines, but never under 1px */
-    #sound { top: calc(env(safe-area-inset-top, 0px) + 10px); right: 10px; }
-    #menu { top: calc(env(safe-area-inset-top, 0px) + 10px); right: 62px; }     /* the icon sits just left of the sound button */
+    #menu { top: calc(env(safe-area-inset-top, 0px) + 10px); right: 14px; }
     #menu .menu-toggle { display: inline-flex; }
     #logo { left: 14px; top: calc(env(safe-area-inset-top, 0px) + 20px); }
     #logo img { height: 22px; }
@@ -935,13 +928,6 @@
 </nav>
 <!-- the GA.MI logo, top left (white ink, flipped dark on the white scenes like the menu) -->
 <a id="logo" href="#" aria-label="GA.MI - back to the start"><img src="assets/logo.png" alt="GA.MI" width="312" height="106"></a>
-<button id="sound" type="button" aria-pressed="false" aria-label="Sound effects">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"></path>
-    <path class="wave" d="M15.5 9.2a4 4 0 0 1 0 5.6M18 7a7 7 0 0 1 0 10"></path>
-    <path class="mute" d="M16 9.5l5 5M21 9.5l-5 5"></path>
-  </svg>
-</button>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -2002,12 +1988,14 @@
       .to('#abCover', { rotationY: -180, duration: 1.1, ease: 'power2.inOut' }, 0.7)                          // the cover turns over
       .to(abBook, { x: 0, scale: 1, duration: 1.1, ease: 'power2.inOut' }, 0.7)                                 // and the open book centres
       .set('#abLeaf', { zIndex: 2 }, 1.25)
-      .to('#abRings, #abArrow', { opacity: 1, duration: 0.3, ease: 'none' }, 1.5);
+      .to('#abRings, #abArrow', { opacity: 1, duration: 0.3, ease: 'none' }, 1.5)
+      .call(() => flat(true));
   }
+  const flat = on => { abBook.classList.toggle('flat', on); abBook.classList.toggle('p2', on && about.page === 1); };
   // the arrow by the strap turns the page over; on the second spread it points back and turns it back
   function turnAbout(to) {
-    about.page = to;
-    gsap.to('#abLeaf', { rotationY: to ? -180 : 0, duration: 1, ease: 'power2.inOut', overwrite: true });
+    about.page = to; flat(false);
+    gsap.to('#abLeaf', { rotationY: to ? -180 : 0, duration: 1, ease: 'power2.inOut', overwrite: true, onComplete: () => { if (about.open) flat(true); } });
     gsap.to('#abArrow g', { scaleX: to ? -1 : 1, transformOrigin: '50% 50%', duration: 0.4, ease: 'power2.inOut', delay: 0.3 });
     gsap.to('#abArrow', { x: to ? -1640 : 0, duration: 1, ease: 'power2.inOut' });
     $('abArrow').setAttribute('aria-label', to ? 'Turn the page back' : 'Turn the page');
@@ -2018,7 +2006,7 @@
   // fast: put it away at once (another page is opening); otherwise it closes and goes back onto the main page
   function closeAbout(fast) {
     if (!about.open) return false;
-    about.open = false;
+    about.open = false; flat(false);
     const tl = about.tl, done = () => {
       gsap.set(aboutPage, { autoAlpha: 0 }); if (!contact.open) document.documentElement.classList.remove('in-about');
       const nb = heroNotebook(); if (nb) nb.style.opacity = '';
@@ -2091,7 +2079,7 @@
      going), and that step's note and figure appear. */
   const cam = { pos: 0, target: 0, vel: 0, lastIn: 0, catching: false, absorb: false, absorbSeen: false, lag: {}, lift: 0, shown: null, ex: 0, ey: 0, t: 0 };
   // the mug and the phone travel together (same pace, same bob)
-  const LAG = { hpLaptop: 0.045, hpBook: 0.038, hpCup: 0.042, hpPhone: 0.042, line: 0.042 }, BOB = { hpLaptop: 0, hpBook: 2.1, hpCup: 4.2, hpPhone: 4.2 };
+  const LAG = { hpLaptop: 0.075, hpBook: 0.062, hpCup: 0.07, hpPhone: 0.07, line: 0.07 }, BOB = { hpLaptop: 0, hpBook: 2.1, hpCup: 4.2, hpPhone: 4.2 };
   for (const k in LAG) cam.lag[k] = 0;
   const mod = a => ((a % NS) + NS) % NS, smooth = x => x * x * (3 - 2 * x);
   const edges = () => { const hb = hero.getBoundingClientRect(), k = Math.min(hb.width / 1920, hb.height / 1080) || 1;
@@ -2119,8 +2107,8 @@
     if (step === 3) {                                                       // the figure comes, pulls the mug off the phone, then the note
       mugTl = gsap.timeline()
         .to(cam, { lift: 1, duration: 0.55, ease: 'power2.out' })
-        .to('#hnMug', { opacity: 1, duration: 0.4 }, 0.4);
-    } else gsap.to('#' + NOTES[step], { opacity: 1, duration: 0.6 });
+        .to('#hnMug', { opacity: 1, duration: 0.25 }, 0.3);
+    } else gsap.to('#' + NOTES[step], { opacity: 1, duration: 0.25 });
   }
   function hideNotes() {
     cam.shown = null;
@@ -2132,7 +2120,8 @@
     if (!heroState.shown) return;
     const f = Math.min(3, dt / 16.67);                                      // frame-rate independent easing
     cam.t = time;
-    if (cam.catching && Math.abs(cam.target - cam.pos) < 0.01 && Math.abs(cam.pos - cam.lag.hpBook) < 0.02) {
+    const arrived = Math.abs(cam.target - cam.pos) < 0.04 && Object.values(cam.lag).every(v => Math.abs(cam.target - v) < 0.06);
+    if (cam.catching && arrived) {
       cam.catching = false; cam.absorb = true; cam.absorbSeen = false;       // the next scroll is spent here (the note shows)
     }
     if (cam.absorb && cam.absorbSeen && performance.now() - cam.lastIn > 160) cam.absorb = cam.absorbSeen = false;   // that scroll is over
@@ -2140,9 +2129,9 @@
       advance(cam.vel * f); cam.vel *= Math.pow(0.955, f);
       if (Math.abs(cam.vel) < 0.0015) { cam.vel = 0; if (Math.abs(cam.target - Math.round(cam.target)) < 0.1) cam.target = Math.round(cam.target); }
     }
-    cam.pos += (cam.target - cam.pos) * (1 - Math.pow(1 - 0.025, f));
+    cam.pos += (cam.target - cam.pos) * (1 - Math.pow(1 - 0.045, f));
     for (const k in LAG) cam.lag[k] += (cam.pos - cam.lag[k]) * (1 - Math.pow(1 - LAG[k], f));
-    const settled = Math.abs(cam.target - cam.pos) < 0.01 && Math.abs(cam.pos - cam.lag.hpBook) < 0.01 && cam.target === Math.round(cam.target);
+    const settled = arrived && cam.target === Math.round(cam.target);
     if (settled && cam.shown !== mod(cam.target)) showNote(mod(cam.target));
     else if (!settled && cam.shown !== null && Math.abs(cam.target - cam.pos) > 0.06) hideNotes();
     camDraw();
@@ -2157,7 +2146,7 @@
   const mainActive = () => heroState.shown && intro.entered && !work.open && !about.open && !contact.open && !caseOpen;
   Observer.create({ target: window, type: 'wheel,touch', tolerance: 0, onChangeY: self => {
     if (!mainActive()) return;
-    const touch = self.event && self.event.type.startsWith('touch'), d = touch ? -self.deltaY / 800 : self.deltaY / 2200;
+    const touch = self.event && self.event.type.startsWith('touch'), d = touch ? -self.deltaY / 480 : self.deltaY / 1250;
     if (cam.catching) return;                                                  // gliding in: scrolling waits
     if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = performance.now(); return; }   // the one scroll of rest on an object
     advance(d);
@@ -2944,31 +2933,7 @@
     };
   })();
 
-  // sound is on from the start: set up the audio now and unlock it on the visitor's first click, tap or key
-  // press (browsers don't allow sound before that; a mouse-wheel scroll doesn't count)
-  try { SFX.init(); } catch (e) {}
-  ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'click', 'keydown', 'touchstart', 'touchend', 'wheel'].forEach(ev =>
-    addEventListener(ev, () => SFX.wake(), { passive: true, capture: true }));
-
-
-  const soundBtn = $('sound');
-  // the icon always matches what you hear. Sound is switched on from the start, but browsers keep a page silent
-  // until its first click / tap / key, so the icon shows 'off' until then and turns 'on' by itself the moment
-  // sound really plays (straight away where the browser allows autoplay). Clicking it while off turns sound on.
-  soundBtn.addEventListener('click', () => {
-    SFX.set(SFX.on && SFX.audible ? false : true);
-    syncSound();
-  });
-  // a click sound on the menu (the sound toggle clicks by itself when it turns on)
-  document.addEventListener('click', e => {
-    if (e.target.closest('#menu button')) SFX.play('click', 0.8);
-  }, true);
-  function syncSound() {
-    const v = String(SFX.audible);
-    if (soundBtn.getAttribute('aria-pressed') !== v) soundBtn.setAttribute('aria-pressed', v);
-  }
-  syncSound();
-  gsap.ticker.add(syncSound);
+  // (no sound: the audio is never set up, so SFX.play does nothing)
 
   // Triggers: every frame, compare each scene's state with the last frame and play the matching sound
   // when something crosses a point (a step lands, the door starts to swing, a note starts writing ...).
