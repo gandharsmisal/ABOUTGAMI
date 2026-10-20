@@ -697,14 +697,7 @@
           </linearGradient>
         </defs>
         <rect x="800" y="6" width="83" height="1182" fill="#2B2A28"></rect>
-        <linearGradient id="abGutter" x1="0" x2="1"><stop offset="0" stop-color="#F3F1EB"></stop><stop offset="0.42" stop-color="#D9D6CE"></stop><stop offset="0.5" stop-color="#C9C6BE"></stop><stop offset="0.58" stop-color="#D9D6CE"></stop><stop offset="1" stop-color="#F3F1EB"></stop></linearGradient>
-        <rect x="800" y="72" width="83" height="1060" fill="url(#abGutter)"></rect>
-        <rect x="822" y="58" width="38" height="1088" rx="12" fill="url(#abBar)" stroke="#8c8c8c" stroke-width="1"></rect>
-        <rect x="829" y="64" width="7" height="1076" rx="3.5" fill="#fff" opacity="0.55"></rect>
-        <g fill="#9a9a9a" stroke="#d8d8d8" stroke-width="1.2">
-          <ellipse cx="841" cy="96" rx="9" ry="11"></ellipse><ellipse cx="841" cy="306" rx="5" ry="6"></ellipse><ellipse cx="841" cy="408" rx="5" ry="6"></ellipse>
-          <ellipse cx="841" cy="597" rx="6" ry="8"></ellipse><ellipse cx="841" cy="786" rx="5" ry="6"></ellipse><ellipse cx="841" cy="889" rx="5" ry="6"></ellipse><ellipse cx="841" cy="1100" rx="9" ry="11"></ellipse>
-        </g>
+        <image href="assets/about/spine.png" x="735" y="72" width="211" height="1060" preserveAspectRatio="none"></image>
         <g id="abRingSet"></g>
       </svg>
       <!-- a thick marker arrow pointing at the strap (a darker edge under the orange, like a felt pen): turns the page;
@@ -1965,7 +1958,7 @@
   {
     // six rings: three up top, three below, each through a hole in both pages
     let s = '';
-    [252, 355, 460, 733, 836, 942].forEach(y => {
+    [].forEach(y => {                                                        // (the rings are part of the spine picture now)
       s += `<ellipse cx="771" cy="${y}" rx="7" ry="9" fill="#3a3834"></ellipse><ellipse cx="911" cy="${y}" rx="7" ry="9" fill="#3a3834"></ellipse>` +   // the holes in the pages
         `<path d="M 771 ${y + 2} C 778 ${y + 12}, 904 ${y + 12}, 911 ${y + 2}" fill="none" stroke="#6d6d6d" stroke-width="5"></path>` +     // the ring behind
         `<path d="M 771 ${y - 1} C 776 ${y - 14}, 906 ${y - 14}, 911 ${y - 1}" fill="none" stroke="#555" stroke-width="8" stroke-linecap="round"></path>` +
@@ -2118,7 +2111,6 @@
     }
     $('heroLineMove').setAttribute('transform', `translate(0 ${between(cam.lag.line, i => [CAM[i].ly])[0]})`);
     const step = mod(Math.round(cam.pos)), near = Math.max(0, 1 - Math.abs(cam.pos - Math.round(cam.pos)) * 5);
-    $('heroFig').style.opacity = step === 0 ? near : 0;
   }
   let mugTl = null;
   function showNote(step) {
@@ -2145,10 +2137,10 @@
     }
     if (cam.absorb && cam.absorbSeen && performance.now() - cam.lastIn > 160) cam.absorb = cam.absorbSeen = false;   // that scroll is over
     if (performance.now() - cam.lastIn > 90 && cam.vel) {
-      advance(cam.vel * f); cam.vel *= Math.pow(0.92, f);
+      advance(cam.vel * f); cam.vel *= Math.pow(0.94, f);
       if (Math.abs(cam.vel) < 0.0015) { cam.vel = 0; if (Math.abs(cam.target - Math.round(cam.target)) < 0.1) cam.target = Math.round(cam.target); }
     }
-    cam.pos += (cam.target - cam.pos) * (1 - Math.pow(1 - 0.04, f));
+    cam.pos += (cam.target - cam.pos) * (1 - Math.pow(1 - 0.032, f));
     for (const k in LAG) cam.lag[k] += (cam.pos - cam.lag[k]) * (1 - Math.pow(1 - LAG[k], f));
     const settled = Math.abs(cam.target - cam.pos) < 0.01 && Math.abs(cam.pos - cam.lag.hpBook) < 0.01 && cam.target === Math.round(cam.target);
     if (settled && cam.shown !== mod(cam.target)) showNote(mod(cam.target));
@@ -2165,7 +2157,7 @@
   const mainActive = () => heroState.shown && intro.entered && !work.open && !about.open && !contact.open && !caseOpen;
   Observer.create({ target: window, type: 'wheel,touch', tolerance: 0, onChangeY: self => {
     if (!mainActive()) return;
-    const touch = self.event && self.event.type.startsWith('touch'), d = touch ? -self.deltaY / 450 : self.deltaY / 1200;
+    const touch = self.event && self.event.type.startsWith('touch'), d = touch ? -self.deltaY / 650 : self.deltaY / 1700;
     if (cam.catching) return;                                                  // gliding in: scrolling waits
     if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = performance.now(); return; }   // the one scroll of rest on an object
     advance(d);
