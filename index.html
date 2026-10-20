@@ -318,10 +318,20 @@
     aspect-ratio: 619 / 1289; }   /* centred by GSAP (xPercent / yPercent -50) */
   .ctPhone > img { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-drag: none; }
   /* the screen: 63,152 - 521,639 of the 619 x 1289 picture; sizes in cqw so it all scales with the phone */
+  .ctWear { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+    -webkit-mask: url(assets/contact-phone3.png) 0 0 / 100% 100% no-repeat; mask: url(assets/contact-phone3.png) 0 0 / 100% 100% no-repeat; }
+  .ctWear path { fill: none; stroke-linecap: round; }
+  /* an old, dull screen: greyed, a faint green tint, darker towards the edges, a little smudged */
+  .ctScreen::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 35% 30%, rgba(255, 255, 255, 0.10), transparent 45%),
+      radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(40, 45, 35, 0.28)),
+      repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.035) 0 1px, transparent 1px 3px);
+    mix-blend-mode: multiply; }
+  .ctScreen { filter: saturate(0.45) contrast(0.88); }
   .ctScreen { position: absolute; left: 10.18%; top: 11.79%; width: 74.15%; height: 37.88%; container-type: inline-size;
     display: flex; flex-direction: column; overflow: hidden; color: #555;
     font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
-    background: linear-gradient(160deg, #F1F1EE, #DCDCD7); }
+    background: linear-gradient(160deg, #D9DBD0, #C3C6B9); }
   .ctCracks { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
   .ctCracks path { fill: none; stroke: rgba(80, 85, 75, 0.35); stroke-width: 0.6; stroke-linecap: round; }
   .ctScreen > *:not(.ctCracks) { position: relative; }
@@ -329,7 +339,7 @@
   .ctStatus .bat { padding: 0 1.2cqw; border: 0.35cqw solid #111; border-radius: 1cqw; font-size: 3.2cqw; }
   .ctHead { display: flex; justify-content: space-between; align-items: center; padding: 1.6cqw 3cqw 2cqw; border-bottom: 0.3cqw solid #B9B9B4; }
   .ctHead b { font-size: 4.8cqw; color: #111; }
-  .ctHead button { padding: 0; border: 0; background: none; font-family: inherit; font-size: 4.6cqw; line-height: 1; color: #1E6FD9; cursor: pointer; }
+  .ctHead button { padding: 0; border: 0; background: none; font-family: inherit; font-size: 4.6cqw; line-height: 1; color: #3E5F86; cursor: pointer; }
   .ctHead .send:disabled { color: #9A9A96; cursor: default; }
   .ctRow { display: flex; gap: 2cqw; padding: 1.8cqw 3cqw; border-bottom: 0.3cqw solid #B9B9B4; font-size: 4.3cqw; line-height: 1.25; }
   .ctRow span:first-child { flex: none; width: 15cqw; color: #6B6B67; }
@@ -734,7 +744,9 @@
       <feMerge><feMergeNode in="paper"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
     </filter></svg>
     <!-- cut out round its edge like a paper scrap, grained like the rest of the site, taped down -->
-    <img src="assets/contact-phone3.png" alt="" width="619" height="1289" style="filter: url(#grainFx) drop-shadow(0 10px 16px rgba(0, 0, 0, 0.22))">
+    <img src="assets/contact-phone3.png" alt="" width="619" height="1289" style="filter: url(#grainFx) sepia(0.18) contrast(0.86) brightness(0.96) drop-shadow(0 10px 16px rgba(0, 0, 0, 0.22))">
+    <!-- wear: scratches and scuffs over the body and keys (drawn in JS), kept inside the phone's own outline -->
+    <svg class="ctWear" id="ctWear" viewBox="0 0 619 1289" preserveAspectRatio="none" aria-hidden="true"></svg>
     <span class="abTape" style="left: 8%; top: 3%; transform: rotate(-24deg)"></span>
     <span class="abTape" style="right: 6%; bottom: 5%; transform: rotate(-20deg)"></span>
     <div class="ctScreen">
@@ -2061,6 +2073,17 @@
   /* ---------- Contact: the phone rises into the middle with a new mail open; Send opens the visitor's mail app ---------- */
   const contactPage = $('contactPage'), ctMsg = $('ctMsg'), ctSend = contactPage.querySelector('.send');
   const contact = { open: false };
+  {
+    // scratches: many fine hairlines (most on the keypad, where thumbs wear it), a few deeper ones, scuffed corners
+    let s = '', seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const line = (x, y, len, a, w, o) => { const x2 = x + Math.cos(a) * len, y2 = y + Math.sin(a) * len, b = (rnd() - 0.5) * len * 0.25;
+      s += `<path d="M${x.toFixed(1)} ${y.toFixed(1)} Q ${((x + x2) / 2 + b).toFixed(1)} ${((y + y2) / 2 - b).toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}" stroke="rgba(235,232,222,${o})" stroke-width="${w}"/>`; };
+    for (let i = 0; i < 140; i++) line(70 + rnd() * 480, 650 + rnd() * 560, 8 + rnd() * 40, rnd() * Math.PI * 2, 0.6 + rnd() * 0.6, (0.12 + rnd() * 0.25).toFixed(2));
+    for (let i = 0; i < 40; i++) line(30 + rnd() * 560, 20 + rnd() * 620, 10 + rnd() * 60, rnd() * Math.PI * 2, 0.6, (0.10 + rnd() * 0.2).toFixed(2));
+    for (let i = 0; i < 7; i++) line(80 + rnd() * 460, 680 + rnd() * 480, 60 + rnd() * 110, -0.4 + rnd() * 0.8, 1.3, '0.32');
+    [[40, 40], [580, 50], [40, 1250], [580, 1245]].forEach(([x, y]) => { for (let i = 0; i < 18; i++) line(x + (rnd() - 0.5) * 50, y + (rnd() - 0.5) * 50, 3 + rnd() * 10, rnd() * 6.3, 1.4, '0.35'); });
+    $('ctWear').innerHTML = s;
+  }
   gsap.set('#ctPhone', { xPercent: -50, yPercent: -50 });
   // from: the phone on the main page, which the phone grows out of (else it rises from below)
   function openContact(from) {
