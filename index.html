@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>GA.MI Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand+SC&family=Walter+Turncoat&family=Playfair+Display:wght@700&family=Source+Serif+4:wght@400;600&family=Reenie+Beanie&family=Outfit:wght@400;600&family=Architects+Daughter&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand+SC&family=Playfair+Display:wght@700&family=Source+Serif+4:wght@400;600&family=Reenie+Beanie&family=Outfit:wght@400;600&family=Architects+Daughter&family=Indie+Flower&display=swap">
 <style>
   /* Layout: one pinned full-screen intro; scroll distance drives its scrubbed timeline. */
   :root {
     --ink: #000;
     --line: #fff;
-    --paper: #fff;
+    --paper: #F9F7F1;
     --pen: #141414;
     --muted: #8d8d8d;
     --muted-2: #a2a2a2;
@@ -51,7 +51,7 @@
     vector-effect: non-scaling-stroke;
   }
   #scene .solid { fill: var(--ink); }
-  #label text { font-family: "Walter Turncoat", var(--hand); font-size: 20px; fill: var(--line); letter-spacing: 0.08em; }
+  #label text { font-family: "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); font-size: 24px; fill: var(--line); letter-spacing: 0.08em; }
   /* before the visitor clicks: no scrolling, the whole door scene is the button */
   html.intro-locked, html.intro-locked body { overflow: hidden; }
   html.intro-locked #stage { cursor: pointer; }
@@ -62,18 +62,20 @@
   #heroSvg { display: block; width: 100%; height: 100%; }
   #heroLine .hline { font: 400 22px var(--serif); fill: var(--pen); letter-spacing: 0.01em; }
   /* the changing word, in a loose hand like the "create" sample */
-  #heroLine .hword { font: 400 58px "Reenie Beanie", var(--hand); fill: var(--pen); letter-spacing: 0.01em;
+  #heroLine .hword { filter: url(#crayon); font: 400 50px "Gandhar Hand", "Indie Flower", var(--hand); fill: var(--pen); letter-spacing: 0.01em; stroke: none !important;
     stroke: var(--pen); stroke-width: 0.4px; }
   #heroProps > g { pointer-events: auto; cursor: pointer; }
-  .hnote { font: 400 22px "Walter Turncoat", var(--hand); fill: var(--pen); letter-spacing: 0.03em; }
-  #heroScroll { font-family: "Walter Turncoat", var(--hand); font-size: 24px; fill: var(--pen); text-transform: lowercase; letter-spacing: 0.04em; }
+  #heroDecor { pointer-events: none; }
+  .deskBit image { filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.12)); }
+  .hnote { font: 400 26px "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); fill: var(--pen); letter-spacing: 0.03em; }
+  #heroScroll { font-family: "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); font-size: 28px; fill: var(--pen); text-transform: lowercase; letter-spacing: 0.04em; }
   /* ---------- case study pages: over the Work page (and the figure); they scroll on their own ---------- */
   .case { position: fixed; inset: 0; z-index: 40; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
     background: var(--paper); visibility: hidden; opacity: 0; color-scheme: light; outline: none; }
   .case { scrollbar-width: none; }
   /* in a case study the grain lies on the paper only, under the text and pictures (the app screens stay clean) */
   html.in-case #grain { display: none; }
-  .case::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.08;
+  .case::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.115;
     background-image: var(--grain); background-repeat: repeat; }
   .csInner { position: relative; z-index: 1; }
   /* "Next" at the bottom of a case study, centred: a plain label with a hand-drawn arrow; on hover the whole button
@@ -83,7 +85,7 @@
   /* "Previous" is its mirror: the arrow on the left, pointing left, stretching out to the left */
   .csPrev .csNextArrow { margin: 0 14px 0 0; transform: scaleX(-1); }
   .csNext { display: inline-flex; align-items: center; padding: 14px 28px; border: 0; border-radius: 999px; background: transparent;
-    cursor: pointer; font: 600 20px "Outfit", system-ui, sans-serif; color: var(--pen);
+    cursor: pointer; font: 400 26px "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); color: var(--pen);
     transition: background-color 0.3s ease; }
   .csNext:hover, .csNext:focus-visible { background: #D6D6D6; }
   /* the hover fills carry the page's grain too (a grain layer inside the shape, shown with the fill) */
@@ -113,7 +115,7 @@
   .case.sand .csHeroImg { visibility: hidden; }
   .csTitle { position: absolute; left: 50%; top: 100%; transform: translate(-50%, -1.3em); margin: 0;
     display: flex; flex-direction: column; align-items: center; gap: 0.15em;
-    font: 400 clamp(16px, 1.75vw, 36px) / 1.1 "Walter Turncoat", var(--hand); color: var(--cs);
+    font: 400 clamp(18px, 2vw, 40px) / 1.1 "Gandhar Hand", "Indie Flower", var(--hand); color: var(--cs);
     text-transform: uppercase; letter-spacing: 0.12em; white-space: nowrap; pointer-events: none; }
   .csTitle span { display: block; }
   /* a dark title (HobbyHop) would vanish on its dark picture: it sits just under the picture instead */
@@ -127,7 +129,7 @@
   /* inside a case study the menu gives way to a close button: a soft round badge with a hand-drawn cross, "close" */
   #caseClose { position: fixed; z-index: 50; top: calc(env(safe-area-inset-top, 0px) + 18px); right: 36px; height: 48px;
     display: none; align-items: center; gap: 12px; padding: 0; border: 0; background: none; cursor: pointer;
-    font: 400 16px "Walter Turncoat", var(--hand); color: var(--pen); text-transform: lowercase; letter-spacing: 0.04em; }
+    font: 400 22px "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); color: var(--pen); text-transform: lowercase; letter-spacing: 0.04em; }
   #caseClose .badge { width: 42px; height: 42px; border-radius: 50%; background: transparent; display: grid; place-items: center;
     transition: transform 0.25s ease, background-color 0.3s ease; }
   #caseClose:hover .badge, #caseClose:focus-visible .badge { background: #D6D6D6; }
@@ -144,7 +146,6 @@
   #hero .hpen, #figSvg .hpen { fill: none; stroke: var(--pen); stroke-width: 1.4px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
   #hero .hsolid, #figSvg .hsolid { fill: var(--paper); }
   #hero .harrow { stroke-width: 1.2px; }
-  #figSvg .hpen { stroke-width: 1.6px; }
   .hchar { filter: url(#charInk); }
 
   /* ---------- Work: one project at a time in a hand-drawn frame, its details written round the frame; the page
@@ -158,23 +159,26 @@
   #wpCanvas { left: 442px; top: 182px; width: 1036px; height: 714px; }
   .wpFrame { fill: none; stroke: var(--pen); stroke-width: 2.4px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
   #wpFront text { fill: var(--pen); font: 400 21px "Outfit", system-ui, sans-serif; letter-spacing: 0.005em; }
-  #wpFront .wpName { font: 400 38px "Reenie Beanie", var(--hand); letter-spacing: 0.02em; }
+  #wpFront .wpName { font: 400 36px "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); letter-spacing: 0.01em; }
   #wpFront .wpStar { font-size: 19px; }
   #wpDots .wpDot { fill: none; stroke: #8f8f8f; stroke-width: 1.2px; vector-effect: non-scaling-stroke; }
   #wpDots .wpDot.on { stroke: var(--pen); }
   #wpDots .wpX { fill: none; stroke: var(--pen); stroke-width: 1.4px; stroke-linecap: round; vector-effect: non-scaling-stroke; }
 
+  @font-face { font-family: "Gandhar Hand"; src: url(assets/fonts/gandhar-hand.otf) format("opentype"); font-display: swap; }
+  @font-face { font-family: "Gandhar Hand Thin"; src: url(assets/fonts/gandhar-hand-thin.otf?v=5) format("opentype"); font-display: swap; }   /* the same hand, a fine pen */
   /* ---------- About: the notebook from the main page lifts off, grows and opens into a leather ring binder ---------- */
   #aboutPage { position: fixed; inset: 0; z-index: 38; overflow: hidden; visibility: hidden; color-scheme: light; }
   .abBg { position: absolute; inset: 0; background: var(--paper); opacity: 0; }
   /* the site's grain on the background only, under the book and the phone */
-  .abBg::before, .ctBg::before { content: ""; position: absolute; inset: 0; opacity: 0.08; background-image: var(--grain); }
+  .abBg::before, .ctBg::before { content: ""; position: absolute; inset: 0; opacity: 0.115; background-image: var(--grain); }
   .abStage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
-  /* the open book: their planner picture (assets/about/planner.png, 1879 x 1194 on the stage, the spine at x 841),
+  #abStage { filter: sepia(0.08) saturate(0.55) brightness(1.05) contrast(0.97); }
+  /* the open book: a real sketchbook scan, cream pages sewn at the gutter (assets/about/book.png, 1879 x 1194 on the stage, the spine at x 841),
      split at the spine so its cover can turn; the pages are the picture's own, the writing laid on top */
   .abBook { position: absolute; left: 0; top: 0; width: 1879px; height: 1194px; perspective: 3000px;
     perspective-origin: 841px 597px; }
-  .abHalf, .abFace { position: absolute; top: 0; height: 1194px; background: url(assets/about/planner.png) no-repeat;
+  .abHalf, .abFace { position: absolute; top: 0; height: 1194px; background: url(assets/about/book.png) no-repeat;
     background-size: 1879px 1194px; }
   .abHalfR, .abCover { left: 841px; width: 1038px; }
   .abHalfR { background-position: -841px 0; filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.22)); }
@@ -186,17 +190,27 @@
   /* inside of the cover: the picture's left half (the face is 1038 wide, the picture's left half 841) */
   .abBack { transform: rotateY(180deg); background-position: 197px 0; }
   .abStrap { display: none; }
-  .abHalf::before, .abFace::before, .abLeaf .abPage::before { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
-    background-image: var(--grain); opacity: 0.13; mix-blend-mode: multiply; border-radius: inherit; }
-  .abHalfR::before { -webkit-mask: url(assets/about/planner.png) -841px 0 / 1879px 1194px no-repeat; mask: url(assets/about/planner.png) -841px 0 / 1879px 1194px no-repeat; }
-  .abBack::before { -webkit-mask: url(assets/about/planner.png) 197px 0 / 1879px 1194px no-repeat; mask: url(assets/about/planner.png) 197px 0 / 1879px 1194px no-repeat; }
+  .abHalf::before, .abBack::before, .abPage::before, .abPage::after { display: none; }   /* the scan has its own gutter shading */
+  .abFace::before { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background: var(--wearTex) 0 0 / 100% 100%; mix-blend-mode: overlay; border-radius: inherit; }
+  .abPage::before { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background: var(--paperTex) 0 0 / 100% 100%; mix-blend-mode: multiply; }
+  .abHalfR .abPage::before { transform: scaleX(-1); }
+  /* photocopies glued in: torn white paper round a grainy print (the tear is cut in JS) */
+  .abCopy { position: absolute; margin: 0; filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.22)); }
+  .abCopy .tear { padding: 9px; background: linear-gradient(rgba(150, 140, 148, 0.24), rgba(150, 140, 148, 0.24)), url(assets/about/paper-white.jpg) center / cover; }
+  .abCopy img { display: block; object-fit: cover; }
+  .abHalfR::before { -webkit-mask: url(assets/about/book.png) -841px 0 / 1879px 1194px no-repeat; mask: url(assets/about/book.png) -841px 0 / 1879px 1194px no-repeat; }
+  .abBack::before { -webkit-mask: url(assets/about/book.png) 197px 0 / 1879px 1194px no-repeat; mask: url(assets/about/book.png) 197px 0 / 1879px 1194px no-repeat; }
   /* the pages: the picture's paper; the writing sits in a 712 x 900 block, centred down the page */
   .abPage { position: absolute; top: 71px; width: 712px; height: 1061px; overflow: hidden;
-    font: 400 29px/1.08 "Reenie Beanie", var(--hand); color: #2A2A2A; }
+    font: 400 26px/1.28 "Gandhar Hand", "Indie Flower", var(--hand); color: #2A2A2A; }
+  .abLeafFront .abPage > :not(.abSoft), .abHalfR .abPage > :not(.abSoft) { margin-left: 20px; }   /* clear of the rings */
   .abPage > :not(.abSoft, .abDownload) { translate: 0 80px; }
   .abBack .abPage { left: 287px; }
   .abHalfR .abPage { left: 40px; width: 706px; }
-  html.in-about #grain { display: none; }            /* no film grain over the book */
+  #grain { transition: opacity 0.6s ease 0.1s; }
+  html.in-about #grain { opacity: 0; }               /* no film grain over the book (the backdrop has its own) */
   /* the page that turns (the arrow on the strap): it lies on the right page and turns over on the spine (40px to its
      left); its back is the next spread's left page. It has its own paper, shaded like the picture's. */
   .abLeaf { position: absolute; left: 881px; top: 71px; width: 706px; height: 1061px; transform-origin: -40px 50%;
@@ -210,10 +224,10 @@
   .abBook.flat .abBack { transform: translateX(-1038px); }
   .abBook.flat.p2 .abLeafFront { display: none; }
   .abBook.flat.p2 .abLeafBack { display: block; transform: translateX(-786px); }
-  .abLeaf .abPage { top: 0; left: 0; width: 706px; background: #F4F2EC; }
-  .abLeafFront .abPage { background: linear-gradient(to right, #E6E4DE, #F3F1EB 12%, #F5F3ED 60%, #F7F5EF); }
-  .abLeafBack .abPage { background: linear-gradient(to left, #E6E4DE, #F3F1EB 12%, #F5F3ED 60%, #F7F5EF); }
-  .abArrow { position: absolute; left: 1650px; top: 520px; width: 112px; height: 86px; overflow: visible; opacity: 0;
+  .abLeaf .abPage { top: 0; left: 0; width: 706px; background: url(assets/about/book.png) no-repeat; background-size: 1879px 1194px; }
+  .abLeafFront .abPage { background-position: -881px -71px; }   /* the same paper as the page it lies on */
+  .abLeafBack .abPage { background-position: -95px -71px; }
+  .abArrow { position: absolute; left: 1606px; top: 520px; width: 112px; height: 86px; overflow: visible; opacity: 0;
     cursor: pointer; }
   .abArrow .hit { fill: transparent; }
   .abArrow { scale: 1.4; transform-origin: 50% 50%; }
@@ -236,11 +250,10 @@
   .abCv li { position: relative; }
   .abCv li::before { content: "–"; position: absolute; left: -16px; }
   .abCv p { margin: 0; }
-  .abDownload { position: absolute; right: 40px; bottom: 34px; display: inline-flex; align-items: center; gap: 8px;
-    font: 400 36px/1 "Reenie Beanie", var(--hand); color: #F08A2C; text-decoration: none; transform: rotate(-3deg);
-    -webkit-text-stroke: 0.4px #F08A2C; }
+  .abDownload { position: absolute; right: 78px; bottom: 34px; display: inline-flex; align-items: center; gap: 8px;
+    font: 400 26px/1 "Gandhar Hand", "Indie Flower", var(--hand); color: #2E2E30; text-decoration: none; transform: rotate(-3deg); }
   .abDownload svg { width: 26px; height: 32px; overflow: visible; }
-  .abDownload path { fill: none; stroke: #F08A2C; stroke-width: 2px; stroke-linecap: round; stroke-linejoin: round; }
+  .abDownload path { fill: none; stroke: #2E2E30; stroke-width: 2px; stroke-linecap: round; stroke-linejoin: round; }
   .abDownload .ul { position: absolute; left: 0; right: 30px; bottom: -8px; height: 10px; width: calc(100% - 30px); }
   .abDownload:hover { color: #D9741A; }
   /* "my software": an old beige computer, the tools as icons on its desktop */
@@ -281,19 +294,18 @@
   .crtBase { width: 340px; height: 26px; margin: 0 auto; border-radius: 0 0 14px 14px; background: linear-gradient(#CFC7B6, #B7AE9B);
     box-shadow: 0 8px 14px rgba(0, 0, 0, 0.18); }
   /* a scrapbook: everything written by hand (the "design" hand of the main page) and stuck down a little crooked */
-  .abPage h2 { position: absolute; margin: 0; font: 400 66px/1 "Reenie Beanie", var(--hand); color: #F08A2C; white-space: nowrap;
-    -webkit-text-stroke: 0.5px #F08A2C; }
+  .abPage h2 { position: absolute; margin: 0; font: 400 54px/1 "Gandhar Hand", "Indie Flower", var(--hand); color: #3E3E42; white-space: nowrap; }
   .abPage p { margin: 0 0 10px; }
   .abText { position: absolute; }
   .abPage svg.doodle { position: absolute; overflow: visible; }
-  .abPage .doodle path { fill: none; stroke: #2A2A2A; stroke-width: 1.5px; stroke-linecap: round; stroke-linejoin: round; }
-  .abPage .doodle.red path { stroke: #F08A2C; }
+  .abPage .doodle path { fill: none; stroke: #1C1C1E; stroke-width: 0.9px; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; }
+  .abPage .doodle.red path { stroke: #2E2E30; }
   /* photos: a white border (a wide bottom on the polaroids, where a caption is written), a soft shadow */
-  .abPhoto { position: absolute; margin: 0; padding: 9px; background: #FCFCF9;
+  .abPhoto { position: absolute; margin: 0; padding: 9px; background: url(assets/about/paper-white.jpg) center / cover;
     box-shadow: 0 5px 14px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.18); }
   .abPhoto img { display: block; object-fit: cover; }
   .abPhoto.pola { padding-bottom: 0; }
-  .abPhoto .cap { height: 46px; line-height: 50px; text-align: center; font-size: 30px; white-space: nowrap; }
+  .abPhoto .cap { height: 46px; line-height: 50px; text-align: center; font-size: 21px; white-space: nowrap; }
   /* a strip of masking tape */
   .abTape { position: absolute; z-index: 2; width: 86px; height: 26px; background: rgba(226, 219, 199, 0.85);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); }
@@ -301,14 +313,44 @@
   .abCorner { position: absolute; z-index: 2; width: 26px; height: 26px; background: #2E2C29;
     clip-path: polygon(0 0, 100% 0, 0 100%); }
   /* notes: a kraft sticky note, a torn bit of lined paper */
-  .abSticky { position: absolute; padding: 22px 22px 18px; background: #EADFC6;
+  .abSticky { position: absolute; padding: 22px 22px 18px; background: none !important; box-shadow: none !important;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.16), 0 1px 1px rgba(0, 0, 0, 0.1); }
-  .abLined { position: absolute; padding: 28px 24px 20px 26px; background-color: #FEFEFB; line-height: 32px;
+  .abLined { position: absolute; padding: 28px 24px 20px 26px; background: none !important; box-shadow: none !important; clip-path: none !important; line-height: 32px;
     box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
     clip-path: polygon(0 3%, 6% 0, 13% 2%, 21% 0, 30% 2.5%, 38% 0.5%, 47% 2%, 56% 0, 64% 2%, 73% 0.5%, 82% 2.5%, 91% 0, 100% 2%, 100% 100%, 0 100%); }
-  .abNote { position: absolute; font-size: 28px; line-height: 1; }
+  .abSticky, .abLined, .abNote, .abText, .abPage p { color: #48484C; filter: url(#pencil); }
+  .abPage h2, .abDownload { filter: url(#pencil); }
+  .abWord { display: inline-block; }
+  /* the clean, even pen version of his hand, thickened evenly to heading weight (stroke in its own colour) */
+  .csHand.csCrayon { filter: url(#crayon); }
+  .csHand.csCrayon text { font-family: "Gandhar Hand", "Indie Flower", var(--hand); }
+  .csHand text { font-family: "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); stroke-linejoin: round; stroke-linecap: round; paint-order: stroke; }
+  /* the stick figures and the case studies' sketches drawn by hand */
+  /* the stick figures and the case studies' sketches: one thin, dark pen line */
+  #figSvg .hpen, #hero .hpen { stroke: #1C1C1E; stroke-width: 0.9px; }
+  #heroFig, #heroNotes path, .csDocHolder .csSketch { filter: url(#graphite); }
+  .csDocHolder .csInkFill { stroke: #F9F7F1; stroke-width: 0.38px; vector-effect: non-scaling-stroke; filter: url(#graphite); }
+  .csDocHolder .csInk { stroke: #1C1C1E; stroke-width: 0.9px; vector-effect: non-scaling-stroke; }
+  .abResume { cursor: zoom-in; }
+  .abResume { mix-blend-mode: multiply; } .abResume img { display: block; }   /* the page's own paper shows through: no separate sheet */
+  /* the resume, held up close to read */
+  #abZoom { position: fixed; inset: 0; z-index: 90; display: none; align-items: center; justify-content: center; padding: 3vh;
+    background: rgba(30, 28, 26, 0.55); cursor: zoom-out; }
+  #abZoom.on { display: flex; }
+  #abZoom img { max-height: 94vh; max-width: 92vw; box-shadow: 0 14px 40px rgba(0, 0, 0, 0.4); }
+  /* the same pencil on all the hand lettering of the site */
+  .csTitle { filter: url(#crayon); }
+  .wipPaper h2 { filter: url(#pencil); }
+  /* the menu is written in a fine pen: solid ink, thin lines */
+  #menu .label { font-family: "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); font-size: 22px; }
+  .abMess { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+  .abMess text { font-family: "Gandhar Hand", "Indie Flower", var(--hand); fill: #48484C; }
+  .abMess .scrib { fill: none; stroke: #3A3A3E; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .abMess .ghost { opacity: 0.16; }
+  .abNote { position: absolute; font-size: 24px; line-height: 1.22; }
   .abNote svg { display: block; margin: 0 auto 4px; overflow: visible; }
   .abNote path, .abRings .pen { fill: none; stroke: #2A2A2A; stroke-width: 1.4px; stroke-linecap: round; stroke-linejoin: round; }
+  .abRings { display: none !important; }
   .abRings { position: absolute; z-index: 3; left: 0; top: 0; width: 1879px; height: 1194px; overflow: visible; pointer-events: none; opacity: 0; }
 
   /* ---------- Contact: the old keypad phone comes up in the middle, a new mail open on its screen ---------- */
@@ -327,13 +369,26 @@
       radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(40, 45, 35, 0.28)),
       repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.035) 0 1px, transparent 1px 3px);
     mix-blend-mode: multiply; }
-  .ctScreen { filter: saturate(0.45) contrast(0.88); }
+  .ctScreen { filter: saturate(0.4) contrast(0.86) sepia(0.15); }
   .ctScreen { position: absolute; left: 10.18%; top: 11.79%; width: 74.15%; height: 37.88%; container-type: inline-size;
     display: flex; flex-direction: column; overflow: hidden; color: #555;
     font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
     background: linear-gradient(160deg, #D9DBD0, #C3C6B9); }
   .ctCracks { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-  .ctCracks path { fill: none; stroke: rgba(80, 85, 75, 0.35); stroke-width: 0.6; stroke-linecap: round; }
+  .ctCracks { z-index: 3; }
+  .ctCracks path { fill: none; stroke: rgba(50, 54, 46, 0.55); stroke-width: 0.45; stroke-linecap: round; }
+  .ctCracks path.hi { stroke: rgba(255, 255, 250, 0.5); stroke-width: 0.25; }
+  .ctScreen::before { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; mix-blend-mode: multiply;
+    background: radial-gradient(ellipse 40% 30% at 80% 85%, rgba(90, 85, 60, 0.28), transparent 70%),
+      radial-gradient(ellipse 35% 25% at 15% 20%, rgba(120, 110, 80, 0.22), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(70, 70, 55, 0.25), transparent 70%); }
+  .ctGrime { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: var(--grain); background-size: 160px; opacity: 0.16; mix-blend-mode: multiply; }
+  .ctPhone::after { content: ""; position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply;
+    -webkit-mask: url(assets/contact-phone3.png) 0 0 / 100% 100% no-repeat; mask: url(assets/contact-phone3.png) 0 0 / 100% 100% no-repeat;
+    background: radial-gradient(ellipse 30% 20% at 20% 75%, rgba(60, 55, 40, 0.45), transparent 70%),
+      radial-gradient(ellipse 25% 15% at 85% 60%, rgba(70, 60, 40, 0.4), transparent 70%),
+      radial-gradient(ellipse 50% 12% at 50% 98%, rgba(40, 38, 30, 0.5), transparent 70%),
+      radial-gradient(ellipse 30% 10% at 50% 2%, rgba(40, 38, 30, 0.45), transparent 70%); }
   .ctScreen > *:not(.ctCracks) { position: relative; }
   .ctStatus { display: flex; justify-content: space-between; align-items: center; padding: 1.2cqw 3cqw 0; font-weight: 600; font-size: 4cqw; line-height: 1.2; color: #111; }
   .ctStatus .bat { padding: 0 1.2cqw; border: 0.35cqw solid #111; border-radius: 1cqw; font-size: 3.2cqw; }
@@ -354,12 +409,12 @@
   #wipCard.on { display: flex; }
   .wipPaper { position: relative; width: min(340px, 100%); box-sizing: border-box; padding: 40px 26px 26px; background: #FCFBF7;
     transform: rotate(-2deg); box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18), 0 1px 2px rgba(0, 0, 0, 0.15); text-align: center; color: #2A2A2A; }
-  .wipPaper::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.08; background-image: var(--grain); }
+  .wipPaper::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.115; background-image: var(--grain); }
   .wipPaper .abTape { left: 50%; top: -12px; margin-left: -43px; transform: rotate(-4deg); }
-  .wipPaper h2 { margin: 0; font: 400 52px/1 "Walter Turncoat", var(--hand); color: #F08A2C; letter-spacing: 0.06em; }
-  .wipPaper .sub { margin: 4px 0 18px; font: 400 15px/1 "Walter Turncoat", var(--hand); letter-spacing: 0.08em; text-transform: lowercase; }
+  .wipPaper h2 { margin: 0; font: 400 58px/1 "Gandhar Hand", "Indie Flower", var(--hand); color: #F08A2C; letter-spacing: 0.06em; }
+  .wipPaper .sub { margin: 4px 0 18px; font: 400 18px/1 "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); letter-spacing: 0.08em; text-transform: lowercase; }
   .wipPaper p { margin: 0 0 12px; font: 400 27px/1.08 "Reenie Beanie", var(--hand); }
-  .wipPaper .warn { margin-top: 18px; font: 400 15px/1.3 "Walter Turncoat", var(--hand); text-transform: lowercase; letter-spacing: 0.04em; }
+  .wipPaper .warn { margin-top: 18px; font: 400 21px/1.3 "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); text-transform: lowercase; letter-spacing: 0.04em; }
   .wipPaper .warn b { color: #F08A2C; font-weight: 400; }
   .wipPaper button { margin-top: 18px; padding: 8px 4px; border: 0; background: none; font: 400 24px/1 "Reenie Beanie", var(--hand);
     color: #2A2A2A; text-decoration: underline wavy #F08A2C 1px; text-underline-offset: 6px; cursor: pointer; }
@@ -376,15 +431,14 @@
   #menu button {
     position: relative; display: inline-flex; align-items: center; gap: 8px;
     min-height: 44px; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer;
-    /* all small caps: Walter Turncoat's lowercase letters are its small capitals */
-    font: 400 18px/1 "Walter Turncoat", var(--hand); text-transform: lowercase; letter-spacing: 0.06em;
+    font: 400 22px/1 "Gandhar Hand", "Indie Flower", var(--hand); text-transform: lowercase; letter-spacing: 0.02em;
     -webkit-tap-highlight-color: transparent;
   }
   #menu button:focus-visible { outline: none; }
   #menu .label { position: relative; }
   #menu .pill-icon { width: 28px; height: 28px; flex: none; overflow: visible; }
   /* thin pen lines, like the logo and the drawings */
-  #menu .pill-icon .ink { fill: none; stroke: currentColor; stroke-width: 1.3px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  #menu .pill-icon .ink { fill: none; stroke: currentColor; stroke-width: 1.1px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
   #menu .pill-icon .dot { fill: currentColor; transition: transform 0.12s ease-out; }
   /* hover: a hand-drawn line scribbles itself in under the word, and rubs out again when the pointer leaves */
   #menu .scribble { position: absolute; left: -3px; right: -3px; top: calc(100% + 4px); width: calc(100% + 6px); height: 7px; overflow: visible; pointer-events: none; }
@@ -451,7 +505,7 @@
   .clickfx { position: fixed; z-index: 70; width: 60px; height: 60px; margin: -30px 0 0 -30px; overflow: visible;
     pointer-events: none; mix-blend-mode: difference; color: #fff; }
   .clickfx path { fill: none; stroke: currentColor; stroke-width: 1.8px; stroke-linecap: round; vector-effect: non-scaling-stroke; }
-  #grain { position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: 0.08; background-repeat: repeat; }   /* over the menu too */
+  #grain { position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: 0.115; background-repeat: repeat; }   /* over the menu too */
 
 </style>
 </head>
@@ -523,7 +577,7 @@
     <path id="arm" class="ln" d="M 0 0" style="visibility:hidden"></path>
 
     <!-- light: the room turns white -->
-    <rect id="whiteout" x="-2000" y="-2000" width="6000" height="6000" fill="#fff" opacity="0"></rect>
+    <rect id="whiteout" x="-2000" y="-2000" width="6000" height="6000" fill="#F9F7F1" opacity="0"></rect>
   </svg>
 </section>
 
@@ -534,6 +588,13 @@
 <section id="hero" aria-label="Hello">
   <svg id="heroSvg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet">
     <g id="heroCam">   <!-- the camera: moved and zoomed by the main-page scroll steps (set in JS) -->
+    <g id="heroDecor" aria-hidden="true">   <!-- the rest of the desk, peeking in at the edges (placed in JS) -->
+        <g id="dk-paper" class="deskBit"><image href="assets/desk-paper.png" x="-150" y="-114" width="300" height="228"></image></g>
+        <g id="dk-marker" class="deskBit"><image href="assets/desk-marker.png" x="-52" y="-64" width="104" height="128"></image></g>
+        <g id="dk-scissors" class="deskBit"><image href="assets/desk-scissors.png" x="-105" y="-126" width="210" height="252"></image></g>
+        <g id="dk-sketchbook" class="deskBit"><image href="assets/desk-sketchbook.png" x="-125" y="-98" width="250" height="196"></image></g>
+        <g id="dk-camera" class="deskBit"><image href="assets/desk-camera.png" x="-115" y="-145.5" width="230" height="291"></image></g>
+    </g>
     <g id="heroProps">
       <!-- each prop 1.2x, spread apart and set down a little off-square (own height and tilt) so they look dropped there -->
       <!-- each prop is placed by JS (translate / rotate / scale about its own centre) for each scroll step -->
@@ -609,6 +670,7 @@
 
 <!-- ======================= ABOUT (opened from the menu): the main page's notebook opens up ======================= -->
 <section id="aboutPage" aria-label="About me">
+
   <div class="abBg"></div>
   <div class="abStage" id="abStage">
     <div class="abBook" id="abBook">
@@ -629,34 +691,36 @@
       <div class="abLeaf" id="abLeaf">
         <div class="abLeafFace abLeafFront">
         <div class="abPage">
+          <svg class="abMess" viewBox="0 0 706 1061" aria-hidden="true">
+      <image href="assets/about/ink-2.png" x="510" y="710" width="420" height="420" transform="rotate(165 602 899)"></image>
+      <g transform="translate(70 930) rotate(4)" filter="url(#pencil)"><text x="0" y="0" font-size="30">too many tabs</text>
+        <path class="scrib" d="M-6 -7.68 C 39.312 -10.08, 78.624 -4.800000000000001, 139.04 -8.64 M-4 -4.800000000000001 C 45.864 -2.88, 91.728 -8.16, 137.04 -4.32 M13.104 -1.2000000000000002 C 52.416 -12, 78.624 -2.4000000000000004, 124.48799999999999 -10.8"></path></g>
+      <g class="ghost" transform="translate(300 880) rotate(3)"><text x="0" y="0" font-size="20">notice the small</text><text x="14" y="24" font-size="20">things</text></g>
+    </svg>
           <h2 style="left: 40px; top: 34px; transform: rotate(2deg)">when I’m not designing</h2>
           <svg class="doodle red" style="left: 498px; top: 14px" width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 4 C 21 12, 23 15, 34 17 C 25 20, 22 23, 21 35 C 18 24, 15 21, 5 19 C 14 16, 18 12, 20 4 Z"></path></svg>
           <!-- the words on a torn bit of lined paper -->
-          <div class="abLined" style="left: 36px; top: 124px; width: 300px; transform: rotate(-1.6deg)">
+          <div class="abLined" style="left: 36px; top: 124px; width: 340px; transform: rotate(-1.6deg)">
             I’m still figuring out what makes things click — sometimes in a design, sometimes in a place, sometimes in the most unexpected details. I collect little observations, chase interesting ideas, and probably overthink things that other people walk straight past.
           </div>
-          <span class="abTape" style="left: 150px; top: 108px; transform: rotate(-6deg)"></span>
-          <!-- big: the Typical poster, as a polaroid -->
-          <figure class="abPhoto pola" style="left: 432px; top: 104px; transform: rotate(5deg)">
-            <img src="assets/about/typical.jpg" alt="Poster for Typical, a short film by AGR Reels" width="226" height="320">
-            <figcaption class="cap">typical</figcaption>
+          <!-- big: the Typical poster, photocopied -->
+          <figure class="abCopy" style="left: 414px; top: 104px; transform: rotate(4deg)">
+            <div class="tear"><img src="assets/about/copy-typical.jpg" alt="Poster for Typical, a short film by AGR Reels, as a photocopy" width="226" height="320"></div>
           </figure>
-          <span class="abTape" style="left: 500px; top: 92px; transform: rotate(8deg)"></span>
-          <div class="abNote" style="left: 452px; top: 506px; width: 220px; transform: rotate(-3deg)">a short film poster,<br>AGR Reels</div>
+          <span class="abTape" style="left: 482px; top: 92px; transform: rotate(8deg)"></span>
+          <div class="abNote" style="left: 432px; top: 506px; width: 250px; transform: rotate(-3deg)">“typical” — a short<br>film poster, AGR Reels</div>
           <svg class="doodle" style="left: 600px; top: 470px" width="40" height="44" viewBox="0 0 40 44" aria-hidden="true"><path d="M8 40 C 22 36, 30 24, 28 6 M 21 13 C 24 10, 26 7, 28 4 C 30 8, 32 11, 35 13"></path></svg>
-          <!-- medium: the pen portraits, held in by photo corners -->
-          <figure class="abPhoto" style="left: 58px; top: 546px; transform: rotate(-4deg)">
-            <img src="assets/about/pen.jpg" alt="Pen portraits: a turtle, a koala, a dancer, a squirrel, a Kathakali face and a warkari" width="206" height="283">
-            <span class="abCorner" style="left: 0; top: 0"></span>
-            <span class="abCorner" style="right: 0; bottom: 0; transform: rotate(180deg)"></span>
+          <!-- medium: the pen portraits, photocopied -->
+          <figure class="abCopy" style="left: 58px; top: 546px; transform: rotate(-4deg)">
+            <div class="tear"><img src="assets/about/copy-pen.jpg" alt="Pen portraits: a turtle, a koala, a dancer, a squirrel, a Kathakali face and a warkari" width="206" height="283"></div>
           </figure>
-          <div class="abNote" style="left: 314px; top: 560px; width: 240px; transform: rotate(2deg)">pen &amp; ink —<br>a turtle, a sleepy koala<br>&amp; a few faces</div>
+          <div class="abNote" style="left: 300px; top: 560px; width: 280px; transform: rotate(2deg)">pen &amp; ink —<br>a turtle, a sleepy koala<br>&amp; a few faces</div>
           <svg class="doodle" style="left: 270px; top: 640px" width="60" height="40" viewBox="0 0 60 40" aria-hidden="true"><path d="M56 6 C 44 24, 26 30, 6 28 M 14 21 C 11 24, 8 26, 5 28 C 9 30, 12 32, 14 36"></path></svg>
           <!-- small: The Door Step -->
-          <figure class="abPhoto" style="left: 536px; top: 640px; transform: rotate(7deg)">
-            <img src="assets/about/doorstep.jpg" alt="Poster for The Door Step, a film by AGR Reels" width="134" height="190">
+          <figure class="abCopy" style="left: 514px; top: 640px; transform: rotate(7deg)">
+            <div class="tear"><img src="assets/about/copy-doorstep.jpg" alt="Poster for The Door Step, a film by AGR Reels, as a photocopy" width="134" height="190"></div>
           </figure>
-          <span class="abTape" style="left: 572px; top: 626px; width: 64px; transform: rotate(-10deg)"></span>
+          <span class="abTape" style="left: 550px; top: 626px; width: 64px; transform: rotate(-10deg)"></span>
           <div class="abNote" style="left: 350px; top: 820px; width: 190px; transform: rotate(-2deg)">“the door step”</div>
           <svg class="doodle" style="left: 494px; top: 800px" width="40" height="30" viewBox="0 0 40 30" aria-hidden="true"><path d="M4 22 C 16 24, 28 18, 34 6 M 26 9 C 29 8, 32 7, 35 5 C 35 9, 36 12, 37 15"></path></svg>
         </div>
@@ -665,11 +729,10 @@
         <div class="abLeafFace abLeafBack">
           <div class="abPage">
             <h2 style="left: 40px; top: 30px; transform: rotate(-2deg)">my resume</h2>
-            <figure class="abPhoto" style="left: 70px; top: 120px; transform: rotate(-2.5deg)">
-              <img src="assets/about/resume.png?v=2" alt="Resume of Gandhar Misal, UI/UX Designer" width="430" height="608">
+            <figure class="abResume" style="position: absolute; margin: 0; left: 46px; top: 96px; transform: rotate(-1.5deg)" title="click to read">
+              <div><img src="assets/about/copy-resume.jpg?v=3" alt="Resume of Gandhar Misal, UI/UX Designer" width="560" height="792"></div>
             </figure>
-            <span class="abTape" style="left: 230px; top: 106px; transform: rotate(3deg)"></span>
-            <a class="abDownload" href="assets/about/Gandhar-Misal-Resume.pdf" download="Gandhar-Misal-Resume.pdf">download resume
+                        <a class="abDownload" href="assets/about/Gandhar-Misal-Resume.pdf" download="Gandhar-Misal-Resume.pdf">download resume
               <svg viewBox="0 0 26 32" aria-hidden="true"><path d="M13 3 C 12 11, 14 18, 13 26 M 6 19 C 9 22, 11 24, 13 27 C 15 24, 18 21, 21 18"></path></svg>
             </a>
           </div>
@@ -680,28 +743,37 @@
         <div class="abFace abFront"><div class="abStrap" aria-hidden="true"></div></div>
         <div class="abFace abBack">
           <div class="abPage">
+            <svg class="abMess" viewBox="0 0 712 1061" aria-hidden="true">
+      <g transform="translate(290 958) rotate(-3)" filter="url(#pencil)"><text x="0" y="0" font-size="28">overthinker</text>
+        <path class="scrib" d="M-6 -8.32 C 36.035999999999994 -10.92, 72.07199999999999 -5.2, 128.12 -9.36 M-4 -5.2 C 42.041999999999994 -3.12, 84.08399999999999 -8.84, 126.11999999999999 -4.68 M12.012 -1.3 C 48.048 -13, 72.07199999999999 -2.6, 114.11399999999999 -11.700000000000001"></path></g>
+      <g class="ghost" transform="translate(530 704) rotate(-4)"><text x="0" y="0" font-size="20">chairs first,</text><text x="14" y="24" font-size="20">then screens</text><text x="0" y="48" font-size="20">then ?</text></g>
+    </svg>
             <h2 style="left: 34px; top: 34px; transform: rotate(-3deg)">a little bit about me</h2>
             <svg class="doodle red" style="left: 40px; top: 96px" width="320" height="16" viewBox="0 0 320 16" aria-hidden="true"><path d="M2 10 C 60 4, 120 12, 190 7 S 280 5, 318 9"></path></svg>
             <!-- the first line on a kraft sticky note -->
             <div class="abSticky" style="left: 44px; top: 140px; width: 230px; transform: rotate(-3deg)">I started by moving furniture around on a screen. Now I move buttons around on one.</div>
-            <span class="abTape" style="left: 110px; top: 126px; transform: rotate(4deg)"></span>
-            <!-- big: arms crossed, as a polaroid -->
-            <figure class="abPhoto pola" style="left: 418px; top: 118px; transform: rotate(4deg)">
-              <img src="assets/about/me-1.jpg" alt="Gandhar, smiling" width="226" height="272" style="object-position: 50% 30%">
-              <figcaption class="cap">that’s me!</figcaption>
+            <!-- big: sitting by the curtain, photocopied -->
+            <figure class="abCopy" style="left: 388px; top: 112px; transform: rotate(3deg)">
+              <div class="tear"><img src="assets/about/copy-sit.jpg" alt="Gandhar sitting by a curtain, as a grainy photocopy" width="246" height="271"></div>
             </figure>
-            <span class="abTape" style="left: 500px; top: 104px; transform: rotate(-5deg)"></span>
+            <span class="abTape" style="left: 476px; top: 100px; transform: rotate(-5deg)"></span>
+            <div class="abNote" style="left: 440px; top: 404px; width: 200px; transform: rotate(-2deg)">that’s me!</div>
             <!-- the story on a torn bit of lined paper -->
-            <div class="abLined" style="left: 30px; top: 336px; width: 330px; transform: rotate(1.3deg)">
+            <div class="abLined" style="left: 30px; top: 335px; width: 352px; font-size: 24px; transform: rotate(1.3deg)">
               Four years of interior design, a year of practice, and one career plot twist later, I found myself designing digital products instead of physical spaces. My first stop was Varuna Marine Services, where I was the entire design department of one. Then came Centralogic, a Master’s in UX, and a growing collection of problems I genuinely enjoy solving.
             </div>
-            <!-- the mirror selfie, taped -->
-            <figure class="abPhoto" style="left: 566px; top: 566px; transform: rotate(8deg)">
-              <img src="assets/about/me-3.jpg" alt="Gandhar taking a mirror selfie" width="104" height="140">
+            <!-- the mirror selfie, double exposed -->
+            <figure class="abCopy" style="left: 470px; top: 520px; transform: rotate(7deg)">
+              <div class="tear"><img src="assets/about/copy-mirror.jpg" alt="Gandhar taking a mirror selfie, double exposed" width="128" height="144"></div>
             </figure>
-            <span class="abTape" style="left: 580px; top: 554px; width: 64px; transform: rotate(12deg)"></span>
+            <span class="abTape" style="left: 490px; top: 510px; width: 64px; transform: rotate(12deg)"></span>
+            <!-- small, in the corner: standing in an empty room -->
+            <figure class="abCopy" style="left: 486px; top: 768px; transform: rotate(5deg)">
+              <div class="tear"><img src="assets/about/copy-room.jpg" alt="Gandhar standing alone in an empty room" width="142" height="173"></div>
+            </figure>
+            <span class="abTape" style="left: 520px; top: 758px; width: 70px; transform: rotate(8deg)"></span>
            <!-- the last line, just written on the page -->
-            <div class="abNote" style="left: 404px; top: 764px; width: 280px; font-size: 31px; transform: rotate(-2deg)">Apparently, changing the medium doesn’t change the obsession.</div>
+            <div class="abNote" style="left: 50px; top: 828px; width: 380px; font-size: 26px; transform: rotate(-2deg)">Apparently, changing the medium doesn’t change the obsession.</div>
          </div>
         </div>
       </div>
@@ -716,7 +788,7 @@
           </linearGradient>
         </defs>
         <rect x="800" y="6" width="83" height="1182" fill="#2B2A28"></rect>
-        <image href="assets/about/spine.png" x="735" y="72" width="211" height="1060" preserveAspectRatio="none"></image>
+        <image href="assets/about/spine.png" style="filter: brightness(0.84) sepia(0.2) contrast(0.92)" x="752" y="72" width="178" height="1060" preserveAspectRatio="none"></image>
         <g id="abRingSet"></g>
       </svg>
       <!-- a thick marker arrow pointing at the strap (a darker edge under the orange, like a felt pen): turns the page;
@@ -724,8 +796,8 @@
       <svg class="abArrow" id="abArrow" viewBox="1640 436 112 86" role="button" tabindex="0" aria-label="Turn the page">
         <rect class="hit" x="1640" y="436" width="112" height="86"></rect>
         <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M1646 508 C 1652 490, 1666 480, 1688 478 L 1714 477 M1700 462 C 1707 467, 1713 472, 1720 477 C 1713 482, 1707 487, 1701 493" stroke="#F08A2C" stroke-width="11"></path>
-          <path d="M1646 508 C 1652 490, 1666 480, 1688 478 L 1714 477 M1700 462 C 1707 467, 1713 472, 1720 477 C 1713 482, 1707 487, 1701 493" stroke="#000000" stroke-width="7"></path>
+          <path d="M1646 508 C 1652 490, 1666 480, 1688 478 L 1714 477 M1700 462 C 1707 467, 1713 472, 1720 477 C 1713 482, 1707 487, 1701 493" stroke="#2E2E30" stroke-width="4.5" filter="url(#crayon)"></path>
+          <path d="M1649 504 C 1657 489, 1670 482, 1690 481 L 1712 480" stroke="#2E2E30" stroke-width="1.6" opacity="0.6" filter="url(#crayon)"></path>
         </g>
       </svg>
     </div>
@@ -750,6 +822,7 @@
     <span class="abTape" style="left: 8%; top: 3%; transform: rotate(-24deg)"></span>
     <span class="abTape" style="right: 6%; bottom: 5%; transform: rotate(-20deg)"></span>
     <div class="ctScreen">
+      <div class="ctGrime"></div>
       <svg class="ctCracks" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M0 62 C 18 58, 30 70, 44 64 S 70 48, 100 56 M44 64 C 48 76, 46 88, 52 100 M30 66 C 26 50, 34 38, 28 22 M70 52 C 74 40, 86 34, 100 30 M58 58 C 62 72, 78 80, 84 100 M28 22 C 20 14, 10 12, 0 6"/></svg>
       <div class="ctStatus"><span>06:55</span><span class="bat">15</span></div>
       <div class="ctHead"><button type="button" class="cancel">Cancel</button><b>New Message</b><button type="button" class="send" disabled>Send</button></div>
@@ -895,6 +968,39 @@
     <div class="warn"><b>Beware:</b> mobile view is in progress</div>
   </div>
 </div>
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <!-- pencil: the strokes lose a little ink at random (paper tooth) and wobble very slightly -->
+    <!-- a hand-drawn pen line: slightly uneven and wavering -->
+    <filter id="penShake" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.08" numOctaves="2" seed="5" result="n"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+    </filter>
+    <!-- a hand-drawn line: slow, gentle waver along the stroke (low frequency, so thin lines stay whole) -->
+    <filter id="handLine" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="2" seed="11" result="n"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+    </filter>
+    <!-- graphite: the line's darkness varies grain by grain (55-100%), but it is never cut -->
+    <filter id="graphite" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"></feTurbulence>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.9 0 0 0 0.4" result="g"></feColorMatrix>
+      <feComposite in="SourceGraphic" in2="g" operator="in"></feComposite>
+    </filter>
+    <filter id="pencil" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3" result="n"></feTurbulence>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2.7 0 0 0 2.15" result="tooth"></feColorMatrix>
+      <feComposite in="SourceGraphic" in2="tooth" operator="in" result="graphite"></feComposite>
+      <feDisplacementMap in="graphite" in2="n" scale="1.6" xChannelSelector="G" yChannelSelector="B"></feDisplacementMap>
+    </filter>
+    <!-- crayon: coarser, waxier gaps -->
+    <filter id="crayon" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.32" numOctaves="3" seed="8" result="n"></feTurbulence>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -1.5 0 0 0 1.85" result="wax"></feColorMatrix>
+      <feComposite in="SourceGraphic" in2="wax" operator="in" result="c"></feComposite>
+      <feDisplacementMap in="c" in2="n" scale="2.4" xChannelSelector="G" yChannelSelector="B"></feDisplacementMap>
+    </filter>
+  </svg>
+<div id="abZoom" role="dialog" aria-label="Resume"><img src="assets/about/copy-resume.jpg?v=3" alt="Resume of Gandhar Misal, UI/UX Designer"></div>
 <div id="grain" aria-hidden="true"></div>
 <script>
   // a click anywhere: a little burst of hand-drawn dashes springs out around the pointer and fades (white on black,
@@ -982,7 +1088,7 @@
   };
   gsap.registerPlugin(ScrollTrigger);
   // fetch the About title font up front (it's only used once the About scene shows)
-  if (document.fonts && document.fonts.load) document.fonts.load('64px "Walter Turncoat"');
+  if (document.fonts && document.fonts.load) document.fonts.load('64px "Gandhar Hand"');
   ScrollTrigger.config({ ignoreMobileResize: true });   // mobile address bar showing/hiding won't re-layout
   const $ = id => document.getElementById(id);
   const Q = Math.PI / 2;
@@ -1454,6 +1560,14 @@
       gsap.to(F, { settle: 1, duration: 0.16, delay: 1.62, ease: 'sine.out', yoyo: true, repeat: 1 });   // lands with a little sag
       gsap.to(F, { idle: 1, duration: 1.2, delay: 1.3, ease: 'sine.inOut' });
     }
+    // back on its feet (opening Work): stands up, raises the hand, and the "scroll" bubble comes back
+    window.heroStandUp = () => {
+      if (!lowered) return;
+      lowered = false;
+      gsap.killTweensOf(F, 'down,idle,sit,settle,arm');
+      gsap.to(F, { sit: 0, settle: 0, idle: 0, duration: 0.9, ease: 'sine.inOut', onUpdate: figFrame });
+      gsap.to(F, { down: 0, arm: 1, duration: 0.6, delay: 0.6, ease: 'sine.out', onUpdate: figFrame, onComplete: figFrame });
+    };
     addEventListener('wheel', lowerHand, { passive: true });
     addEventListener('touchmove', lowerHand, { passive: true });
     addEventListener('keydown', e => { if (/^(Arrow(Up|Down)|Page(Up|Down))$/.test(e.key)) lowerHand(); });
@@ -1566,8 +1680,9 @@
     b.addEventListener('click', () => {
       setMenu(false);
       if (b.dataset.go === 'work') { closeAbout(true); closeContact(true); closeCase(); openWork(); }
-      if (b.dataset.go === 'about') { closeContact(true); openAbout(); }
-      if (b.dataset.go === 'contact') openContact();
+      const onDesk = () => heroState.shown && !work.open && !caseOpen;
+      if (b.dataset.go === 'about' && !about.open) { if (contact.open) closeContact(false, () => openAbout()); else openAbout(); }
+      if (b.dataset.go === 'contact' && !contact.open) { if (about.open) closeAbout(false, () => openContact(onDesk())); else openContact(onDesk()); }   // the book goes back, the phone is picked up
     });
   });
   // About: while the pointer is over it, the pupils look toward the pointer; they settle back when it leaves
@@ -1965,6 +2080,7 @@
     return work.loading;
   }
   function openWork() {
+    if (window.heroStandUp) window.heroStandUp();
     if (!intro.entered) skipToMain();
     workLayout();
     work.open = true;
@@ -1986,6 +2102,66 @@
      (left page: a little bit about me + a film strip; right page: when I'm not designing + polaroids). Escape or a
      click beside the book closes it again, back onto the main page. ---------- */
   const aboutPage = $('aboutPage'), abStage = $('abStage'), abBook = $('abBook');
+  /* textures for the book, drawn once: old, dull grid paper (multiplied onto the pages: a grey-green tone, faint squares,
+     crumples, grime, stains, rubbed pencil, darker edges) and a worn, dirty cover (overlaid on mid-grey) */
+  {
+    const tex = (w, h, seed, draw) => { const c = document.createElement('canvas'); c.width = w; c.height = h;
+      let s = seed; const r = () => (s = (s * 16807) % 2147483647) / 2147483647; draw(c.getContext('2d'), w, h, r); return `url(${c.toDataURL('image/jpeg', 0.86)})`; };
+    const crease = (g, w, h, r, dark, light, width = 7) => {
+      let x = -20 + r() * w * 0.3, y = r() * h; const ang = (r() - 0.5) * 1.4, pts = [[x, y]];
+      while (x < w * 1.1 && y > -60 && y < h + 60) { x += 30 + r() * 50; y += Math.tan(ang) * 40 + (r() - 0.5) * 22; pts.push([x, y]); }
+      const path = off => { g.beginPath(); pts.forEach(([a, b], i) => i ? g.lineTo(a, b + off) : g.moveTo(a, b + off)); g.stroke(); };
+      g.lineCap = 'round'; g.lineJoin = 'round'; g.strokeStyle = dark; g.lineWidth = width; g.globalAlpha = 0.3; path(2); g.lineWidth = 1.1; g.globalAlpha = 1; path(0);
+      if (light) { g.strokeStyle = light; g.lineWidth = 1.4; path(-1.5); }
+    };
+    const blot = (g, x, y, rad, col, a) => { const gr = g.createRadialGradient(x, y, 0, x, y, rad);
+      gr.addColorStop(0, `rgba(${col},${a})`); gr.addColorStop(0.6, `rgba(${col},${a * 0.5})`); gr.addColorStop(1, `rgba(${col},0)`); g.fillStyle = gr; g.fillRect(x - rad, y - rad, rad * 2, rad * 2); };
+    const wear = tex(1100, 1300, 4, (g, w, h, r) => {
+      g.fillStyle = '#808080'; g.fillRect(0, 0, w, h);
+      const im = g.getImageData(0, 0, w, h), d = im.data;                                                              // grain
+      for (let i = 0; i < d.length; i += 4) { const v = 128 + (r() - 0.5) * 60; d[i] = d[i + 1] = d[i + 2] = v; }
+      g.putImageData(im, 0, 0);
+      for (let i = 0; i < 26; i++) blot(g, r() * w, r() * h, 30 + r() * 150, r() < 0.65 ? '20,18,12' : '200,195,180', 0.18 + r() * 0.25);   // dirt and worn patches
+      for (let i = 0; i < 12; i++) crease(g, w, h, r, 'rgba(10,10,10,0.6)', 'rgba(255,255,255,0.5)', 9);               // creases in the leather
+      g.lineCap = 'round';
+      for (let i = 0; i < 520; i++) { const x = r() * w, y = r() * h, a = r() * 6.3, l = 5 + r() * 50;                     // scratches
+        g.strokeStyle = `rgba(255,255,255,${0.15 + r() * 0.4})`; g.lineWidth = 0.6 + r() * 1;
+        g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke(); }
+      [[0, 0], [w, 0], [0, h], [w, h]].forEach(([x, y]) => blot(g, x, y, 220, '235,230,215', 0.55));                    // rubbed corners
+      const e = g.createLinearGradient(0, 0, w, 0); e.addColorStop(0, 'rgba(230,225,210,0.35)'); e.addColorStop(0.06, 'rgba(230,225,210,0)');
+      e.addColorStop(0.94, 'rgba(230,225,210,0)'); e.addColorStop(1, 'rgba(230,225,210,0.35)'); g.fillStyle = e; g.fillRect(0, 0, w, h);   // worn edges
+    });
+    document.documentElement.style.setProperty('--wearTex', wear);
+    // handwriting isn't typeset: every word gets its own small lift and tilt
+    {
+      let s = 5; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+      document.querySelectorAll('#aboutPage .abSticky, #aboutPage .abLined, #aboutPage .abNote, #aboutPage h2, #aboutPage .abPage p').forEach(el => {
+        const walk = n => { [...n.childNodes].forEach(c => {
+          if (c.nodeType === 3 && c.textContent.trim()) {
+            const frag = document.createDocumentFragment();
+            c.textContent.split(/(\s+)/).forEach(w => {
+              if (!w) return;
+              if (/^\s+$/.test(w)) { frag.appendChild(document.createTextNode(w)); return; }
+              const sp = document.createElement('span'); sp.className = 'abWord'; sp.textContent = w;
+              sp.style.transform = `translateY(${((r() - 0.5) * 2.4).toFixed(1)}px) rotate(${((r() - 0.5) * 3).toFixed(1)}deg)`;
+              frag.appendChild(sp);
+            });
+            c.replaceWith(frag);
+          } else if (c.nodeType === 1 && c.tagName !== 'SVG') walk(c);
+        }); };
+        walk(el);
+      });
+    }
+    // each glued photocopy gets its own torn edge
+    document.querySelectorAll('.abCopy .tear').forEach((el, k) => {
+      let s = 31 + k * 7; const r = () => (s = (s * 16807) % 2147483647) / 2147483647, p = [], n = 16, j = () => (r() * 2.6).toFixed(2);
+      for (let i = 0; i <= n; i++) p.push(`${(i / n * 100).toFixed(1)}% ${j()}%`);
+      for (let i = 1; i <= n; i++) p.push(`${(100 - +j()).toFixed(2)}% ${(i / n * 100).toFixed(1)}%`);
+      for (let i = n - 1; i >= 0; i--) p.push(`${(i / n * 100).toFixed(1)}% ${(100 - +j()).toFixed(2)}%`);
+      for (let i = n - 1; i > 0; i--) p.push(`${j()}% ${(i / n * 100).toFixed(1)}%`);
+      el.style.clipPath = `polygon(${p.join(', ')})`;
+    });
+  }
   const about = { open: false, tl: null };
   const heroNotebook = () => document.querySelector('#heroProps image[href*="hero-notebook"]');
   {
@@ -2003,7 +2179,7 @@
   // the open book (the planner picture, 1879 x 1194 at stage 0,0, the strap overhanging) fits between the menu bar and the bottom edge
   const AB_TOP = 96, AB_BOTTOM = 34;
   function aboutLayout() {
-    const vw = innerWidth, vh = innerHeight, k = Math.min((vh - AB_TOP - AB_BOTTOM) / 1194, (vw - 60) / 1879) * 0.88;
+    const vw = innerWidth, vh = innerHeight, k = Math.min((vh - AB_TOP - AB_BOTTOM) / 1194, (vw - 60) / 1879) * 0.98;
     const ox = (vw - 1879 * k) / 2, oy = AB_TOP + (vh - AB_TOP - AB_BOTTOM - 1194 * k) / 2;
     abStage.style.transform = `translate(${ox}px, ${oy}px) scale(${k})`;
     return { k, ox, oy };
@@ -2018,8 +2194,10 @@
     // start: the closed book (its right half) lying where the notebook is, at its size and tilt
     const nb = heroNotebook(), r = nb && nb.getBoundingClientRect();
     let cx = 1490, cy = 540, s0 = 0.3;
-    if (r && r.width) { cx = (r.left + r.width / 2 - ox) / k; cy = (r.top + r.height / 2 - oy) / k; s0 = (r.height / k) * 0.8 / 950; }
-    gsap.set(abBook, { x: cx - 1255, y: cy - 597, scale: s0 * 950 / 1194, rotation: -14, transformOrigin: '1255px 597px' });
+    const bp = nb && deskPose(nb); let rot0 = -14;
+    if (bp && bp.h) { cx = (bp.x - ox) / k; cy = (bp.y - oy) / k; s0 = (bp.h / k) * 0.92 / 950; rot0 = bp.rot; }
+    else if (r && r.width) { cx = (r.left + r.width / 2 - ox) / k; cy = (r.top + r.height / 2 - oy) / k; s0 = (r.height / k) * 0.8 / 950; }
+    gsap.set(abBook, { x: cx - 1255, y: cy - 597, scale: s0 * 950 / 1194, rotation: rot0, transformOrigin: '1255px 597px' });
     gsap.set('#abCover', { rotationY: 0 });
     gsap.set('#abLeaf', { rotationY: 0, zIndex: 0 });              // under the closed cover until it has turned
     gsap.set('#abArrow g', { scaleX: 1 }); gsap.set('#abArrow', { x: 0 }); $('abArrow').classList.remove('back');
@@ -2030,12 +2208,11 @@
     document.documentElement.classList.add('in-about');
     if (nb) nb.style.opacity = 0;
     about.tl = gsap.timeline()
-      .to('#aboutPage .abBg', { opacity: 1, duration: 0.5, ease: 'sine.inOut' }, 0.1)
-      .to(abBook, { x: -316, y: 0, scale: 0.92, rotation: 0, duration: 0.8, ease: 'power3.inOut' }, 0)        // to the middle, closed
-      .to('#abCover', { rotationY: -180, duration: 1.1, ease: 'power2.inOut' }, 0.7)                          // the cover turns over
-      .to(abBook, { x: 0, scale: 1, duration: 1.1, ease: 'power2.inOut' }, 0.7)                                 // and the open book centres
-      .set('#abLeaf', { zIndex: 2 }, 1.25)
-      .to('#abRings, #abArrow', { opacity: 1, duration: 0.3, ease: 'none' }, 1.5)
+      .to('#aboutPage .abBg', { opacity: 1, duration: 0.6, ease: 'sine.inOut' }, 0.1)
+      .to(abBook, { x: 0, y: 0, scale: 1, rotation: 0, duration: 1.15, ease: 'power3.inOut' }, 0)             // comes over from the desk...
+      .to('#abCover', { rotationY: -180, duration: 1, ease: 'power2.inOut' }, 0.15)                           // ...opening as it comes
+      .set('#abLeaf', { zIndex: 2 }, 0.65)
+      .to('#abRings, #abArrow', { opacity: 1, duration: 0.25, ease: 'none' }, 1)
       .call(() => flat(true));
   }
   const flat = on => { abBook.classList.toggle('flat', on); abBook.classList.toggle('p2', on && about.page === 1); };
@@ -2044,29 +2221,36 @@
     about.page = to; flat(false);
     gsap.to('#abLeaf', { rotationY: to ? -180 : 0, duration: 1, ease: 'power2.inOut', overwrite: true, onComplete: () => { if (about.open) flat(true); } });
     gsap.to('#abArrow g', { scaleX: to ? -1 : 1, transformOrigin: '50% 50%', duration: 0.4, ease: 'power2.inOut', delay: 0.3 });
-    gsap.to('#abArrow', { x: to ? -1640 : 0, duration: 1, ease: 'power2.inOut' });
+    gsap.to('#abArrow', { x: to ? -1560 : 0, duration: 1, ease: 'power2.inOut' });
     $('abArrow').setAttribute('aria-label', to ? 'Turn the page back' : 'Turn the page');
     $('abArrow').classList.toggle('back', !!to);
   }
   $('abArrow').addEventListener('click', () => { if (about.open) turnAbout(about.page ? 0 : 1); });
   $('abArrow').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); turnAbout(about.page ? 0 : 1); } });
   // fast: put it away at once (another page is opening); otherwise it closes and goes back onto the main page
-  function closeAbout(fast) {
+  function closeAbout(fast, then) {
     if (!about.open) return false;
     about.open = false; flat(false);
+    if (!contact.open && !fast) document.documentElement.classList.remove('in-about');   // the site's grain comes back as the backdrop goes
     const tl = about.tl, done = () => {
       gsap.set(aboutPage, { autoAlpha: 0 }); if (!contact.open) document.documentElement.classList.remove('in-about');
       const nb = heroNotebook(); if (nb) nb.style.opacity = '';
+      if (then) then();
     };
     if (fast || !tl) { if (tl) tl.kill(); gsap.to(aboutPage, { autoAlpha: 0, duration: 0.35, ease: 'sine.inOut', onComplete: done }); return true; }
     tl.eventCallback('onReverseComplete', done);
     // on the second spread the page turns back first, then the cover closes
-    const back = about.page ? 0.75 : 0;
+    const back = about.page ? 0.4 : 0;
     if (about.page) { about.page = 0; gsap.to('#abLeaf', { rotationY: 0, duration: back, ease: 'power2.inOut', overwrite: true }); gsap.to('#abArrow', { opacity: 0, duration: 0.2 }); }
-    gsap.delayedCall(back, () => tl.timeScale(1.4).reverse());
+    gsap.delayedCall(back, () => tl.timeScale(1.6).reverse());
     return true;
   }
-  aboutPage.addEventListener('click', e => { if (!e.target.closest('.abHalf, .abFace, .abLeaf, .abArrow')) closeAbout(); });
+  aboutPage.addEventListener('click', e => {
+    if (e.target.closest('.abResume')) { $('abZoom').classList.add('on'); return; }
+    if (!e.target.closest('.abHalf, .abFace, .abLeaf, .abArrow')) closeAbout();
+  });
+  $('abZoom').addEventListener('click', () => $('abZoom').classList.remove('on'));
+  addEventListener('keydown', e => { if (e.key === 'Escape' && $('abZoom').classList.contains('on')) { e.stopImmediatePropagation(); $('abZoom').classList.remove('on'); } }, true);
   addEventListener('keydown', e => { if (e.key === 'Escape') closeAbout(); });
   addEventListener('resize', () => { if (about.open) aboutLayout(); });
 
@@ -2083,9 +2267,24 @@
     for (let i = 0; i < 7; i++) line(80 + rnd() * 460, 680 + rnd() * 480, 60 + rnd() * 110, -0.4 + rnd() * 0.8, 1.3, '0.32');
     [[40, 40], [580, 50], [40, 1250], [580, 1245]].forEach(([x, y]) => { for (let i = 0; i < 18; i++) line(x + (rnd() - 0.5) * 50, y + (rnd() - 0.5) * 50, 3 + rnd() * 10, rnd() * 6.3, 1.4, '0.35'); });
     $('ctWear').innerHTML = s;
+    // a smashed screen: an impact point with cracks running out from it, each branching as it goes
+    let c = ''; const crack = (x, y, a, len, depth) => {
+      let px = x, py = y; const pts = [[x, y]];
+      for (let k = 0; k < 6; k++) { a += (rnd() - 0.5) * 0.7; px += Math.cos(a) * len / 6; py += Math.sin(a) * len / 6; pts.push([px, py]); }
+      const d = 'M' + pts.map(p => p.map(v => v.toFixed(1)).join(' ')).join(' L ');
+      c += `<path d="${d}"/><path class="hi" d="${d}" transform="translate(0.25 -0.2)"/>`;
+      if (depth < 3) for (let k = 0; k < 2; k++) { const p = pts[2 + Math.floor(rnd() * 4)]; crack(p[0], p[1], a + (rnd() - 0.5) * 1.6, len * 0.55, depth + 1); }
+    };
+    for (let k = 0; k < 9; k++) crack(68, 30, k / 9 * Math.PI * 2 + rnd() * 0.4, 45 + rnd() * 40, 0);
+    document.querySelector('#contactPage .ctCracks').innerHTML = c;
   }
   gsap.set('#ctPhone', { xPercent: -50, yPercent: -50 });
   // from: the phone on the main page, which the phone grows out of (else it rises from below)
+  function deskPose(img) {
+    const m = img.getScreenCTM(), b = img.getBBox(); if (!m) return null;
+    const c = new DOMPoint(b.x + b.width / 2, b.y + b.height / 2).matrixTransform(m);
+    return { x: c.x, y: c.y, h: b.height * Math.hypot(m.c, m.d), rot: Math.atan2(m.b, m.a) * 180 / Math.PI };
+  }
   function openContact(from) {
     if (contact.open) return;
     if (!intro.entered) skipToMain();
@@ -2093,22 +2292,32 @@
     contact.open = true;
     gsap.set(contactPage, { autoAlpha: 1 });
     document.documentElement.classList.add('in-about');          // no grain over the phone either
-    gsap.fromTo('#contactPage .ctBg', { opacity: 0 }, { opacity: 1, duration: 0.45, ease: 'sine.inOut' });
-    const hp = from && document.querySelector('#hpPhone image').getBoundingClientRect();
-    if (hp && hp.width) {
-      const pr = $('ctPhone').getBoundingClientRect(), k = hp.height / pr.height;
+    gsap.fromTo('#contactPage .ctBg', { opacity: 0 }, { opacity: 1, duration: 0.6, delay: from ? 0.1 : 0, ease: 'sine.inOut' });
+    const hp = from && deskPose(document.querySelector('#hpPhone image'));
+    if (hp && hp.h) {
+      gsap.set('#ctPhone', { x: 0, y: 0, scale: 1, rotation: 0 });
+      const pr = $('ctPhone').getBoundingClientRect(), k = hp.h / pr.height, sx = hp.x - innerWidth / 2, sy = hp.y - (pr.top + pr.height / 2);
       $('hpPhone').style.opacity = 0;
-      gsap.fromTo('#ctPhone', { x: hp.left + hp.width / 2 - innerWidth / 2, y: hp.top + hp.height / 2 - (pr.top + pr.height / 2), scale: k, rotation: 0 },
-        { x: 0, y: 0, scale: 1, rotation: 0, duration: 1, ease: 'power3.inOut' });
+      gsap.fromTo('#ctPhone', { x: sx, y: sy, scale: k, rotation: hp.rot, filter: 'drop-shadow(0px 2px 3px rgba(0,0,0,0.18))' },
+        { x: 0, y: 0, scale: 1, rotation: 0, filter: 'drop-shadow(0px 10px 14px rgba(0,0,0,0.2))', duration: 1.05, ease: 'power3.inOut' });   // from the desk to the middle
     } else gsap.fromTo('#ctPhone', { x: 0, y: innerHeight * 0.7, scale: 1, rotation: 8 }, { y: 0, rotation: 0, duration: 0.9, ease: 'power3.out', delay: 0.1 });
   }
-  function closeContact(fast) {
+  function closeContact(fast, then) {
     if (!contact.open) return false;
     contact.open = false;
-    const done = () => { gsap.set(contactPage, { autoAlpha: 0 }); $('hpPhone').style.opacity = ''; if (!about.open) document.documentElement.classList.remove('in-about'); };
+    if (!about.open && !fast) document.documentElement.classList.remove('in-about');
+    const done = () => { gsap.set(contactPage, { autoAlpha: 0 }); $('hpPhone').style.opacity = ''; if (!about.open) document.documentElement.classList.remove('in-about'); if (then) then(); };
     if (fast) { gsap.to(contactPage, { autoAlpha: 0, duration: 0.3, onComplete: done }); return true; }
-    gsap.to('#ctPhone', { y: innerHeight * 0.7, rotation: 8, duration: 0.6, ease: 'power2.in' });
-    gsap.to('#contactPage .ctBg', { opacity: 0, duration: 0.4, delay: 0.3, onComplete: done });
+    const hp = heroState.shown && !work.open && deskPose(document.querySelector('#hpPhone image'));
+    gsap.to('#contactPage .ctBg', { opacity: 0, duration: 0.4, ease: 'sine.inOut' });
+    if (hp && hp.h) {                                                        // put back down where it lay on the desk
+      const cur = gsap.getProperty('#ctPhone', 'scale');
+      gsap.set('#ctPhone', { x: 0, y: 0, scale: 1, rotation: 0 });
+      const pr = $('ctPhone').getBoundingClientRect();
+      gsap.set('#ctPhone', { scale: cur });
+      gsap.to('#ctPhone', { x: hp.x - innerWidth / 2, y: hp.y - (pr.top + pr.height / 2), scale: hp.h / pr.height, rotation: hp.rot,
+        filter: 'drop-shadow(0px 2px 3px rgba(0,0,0,0.18))', duration: 0.55, ease: 'power3.inOut', onComplete: done });
+    } else gsap.to('#ctPhone', { y: innerHeight * 0.7, rotation: 8, duration: 0.6, ease: 'power2.in', onComplete: done });
     return true;
   }
   ctMsg.addEventListener('input', () => { ctSend.disabled = !ctMsg.value.trim(); });
@@ -2130,6 +2339,13 @@
     { hpLaptop: [-105, 530, 15, 1.5], hpCup: [1925, 280, 0, 1], hpPhone: [1940, 390, 0, 0.9], hpBook: [958, 528, 2, 2.2], ly: 97 },
     { hpLaptop: [-17, 1207, 0, 1.5], hpCup: [950, 721, 0, 1.38], hpPhone: [985, 840, 2, 1.25], hpBook: [560, -156, 2, 2], ly: -458 }
   ];
+  const DESK = {   // (kept clear of the logo, the menu and the figure in the corners)
+    paper:      [[540, 15, -12],  [1300, 10, 8],    [1150, 1060, -6], [1880, 430, 14]],
+    camera:     [[1880, 430, 18], [35, 470, -15],   [1850, 970, 10],  [1810, 1010, -10]],
+    sketchbook: [[1820, 1010, -8],[1790, 1040, 12], [620, 15, -14],   [40, 560, 8]],
+    scissors:   [[1100, 1060, 20],[380, 1065, -25], [1880, 690, 30],  [1380, 1065, -15]],
+    marker:     [[25, 400, 70],   [840, 12, -60],   [1320, 15, 100],  [1180, 15, -80]]
+  }, SPIN = { paper: 1, camera: -1, sketchbook: 1, scissors: -1, marker: 1 };
   const NOTES = [null, 'hnLaptop', 'hnBook', 'hnMug'], NS = CAM.length, SLIDE = 125;   // how far the mug slides off the phone
   /* The scroll is in the visitor's hands: the wheel / finger moves a target along the steps (about 4 notches a step),
      the canvas follows it softly and every prop trails a little behind at its own pace, tilting as it drifts, so
@@ -2146,14 +2362,34 @@
     if (i) { x += x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0; y += y < 150 ? -cam.ey : y > 930 ? cam.ey : 0; }   // peeking props stay at the real edges
     return [x, y, r, s]; };
   const between = (p, f) => { const a = Math.floor(p), u = smooth(p - a), A = f(mod(a)), B = f(mod(a + 1)); return A.map((v, j) => v + (B[j] - v) * u); };
+  // the notebook and the phone turn once round on each move (the mug, riding on the phone, turns with it round the phone)
+  const TURN = {};
   function camDraw() {
+    const P = {};
     for (const id in PROPS) {
       let [x, y, r, s] = between(cam.lag[id], i => at(i, id));
       const drift = cam.pos - cam.lag[id];                                  // how far it trails: it tilts and lifts as it floats
       r += drift * 7; y -= Math.abs(drift) * 18; y += Math.sin(cam.t * 0.9 + BOB[id]) * 2.2;
-      if (id === 'hpCup') x -= SLIDE * cam.lift;                         // slid along the table, never lifted
-      const c = PROPS[id];
+      if (id === 'hpCup') x -= SLIDE * cam.lift;                           // slid along the table, never lifted
+      P[id] = [x, y, r, s];
+    }
+    for (const id in TURN) {
+      const lg = id === 'hpCup' ? cam.lag.hpPhone : cam.lag[id], spin = TURN[id] * 360 * (lg - Math.floor(lg));
+      if (id === 'hpCup') {                                                 // round the phone's centre
+        const [px, py] = P.hpPhone, a = spin * Math.PI / 180, dx = P.hpCup[0] - px, dy = P.hpCup[1] - py;
+        P.hpCup[0] = px + dx * Math.cos(a) - dy * Math.sin(a); P.hpCup[1] = py + dx * Math.sin(a) + dy * Math.cos(a);
+      }
+      P[id][2] += spin;
+    }
+    for (const id in PROPS) {
+      const [x, y, r, s] = P[id], c = PROPS[id];
       $(id).setAttribute('transform', `translate(${x} ${y}) rotate(${r}) scale(${s}) translate(${-c[0]} ${-c[1]})`);
+    }
+    for (const n in DESK) {
+      const p = cam.lag.line, [x0, y0, r] = between(p, i => { const [x, y, rr] = DESK[n][i];
+        return [x + (x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0), y + (y < 150 ? -cam.ey : y > 930 ? cam.ey : 0), rr]; });
+      const frac = p - Math.floor(p), spin = SPIN[n] * 360 * frac;            // one full turn per move, as fast as the scroll
+      $('dk-' + n).setAttribute('transform', `translate(${x0} ${y0}) rotate(${r + spin})`);
     }
     $('heroLineMove').setAttribute('transform', `translate(0 ${between(cam.lag.line, i => [CAM[i].ly])[0]})`);
     const step = mod(Math.round(cam.pos)), near = Math.max(0, 1 - Math.abs(cam.pos - Math.round(cam.pos)) * 5);
@@ -2184,8 +2420,8 @@
     }
     if (cam.absorb && cam.absorbSeen && performance.now() - cam.lastIn > 160) cam.absorb = cam.absorbSeen = false;   // that scroll is over
     if (performance.now() - cam.lastIn > 90 && cam.vel) {
-      advance(cam.vel * f); cam.vel *= Math.pow(0.88, f);
-      if (Math.abs(cam.vel) < 0.0015) { cam.vel = 0; if (Math.abs(cam.target - Math.round(cam.target)) < 0.1) cam.target = Math.round(cam.target); }
+      advance(cam.vel * f); cam.vel *= Math.pow(0.9, f);
+      if (Math.abs(cam.vel) < 0.0015) { cam.vel = 0; if (Math.abs(cam.target - Math.round(cam.target)) < 0.015) cam.target = Math.round(cam.target); }
     }
     // quick on the way, easing off as an object comes in: the last stretch before it slows right down
     const gap = Math.abs(cam.target - cam.pos), ease = cam.catching ? 0.018 + 0.032 * Math.min(1, gap / 0.6) : 0.045;
@@ -2204,15 +2440,22 @@
     if ((d > 0 && to >= k) || (d < 0 && to <= k)) { cam.target = k; cam.vel = 0; cam.catching = true; }
     else cam.target = Math.max(cam.pos - 1, Math.min(cam.pos + 1, to));     // never runs far ahead of the canvas
   }
+  /* How big the scroll is decides how far it goes: a small nudge (a notch or two) moves the objects only a little and
+     slowly; a big, quick scroll builds up (each notch counts for more the faster they come) and carries them on further. */
+  const heat = { v: 0, t: 0 };
   const mainActive = () => heroState.shown && intro.entered && !work.open && !about.open && !contact.open && !caseOpen;
   Observer.create({ target: window, type: 'wheel,touch', tolerance: 0, onChangeY: self => {
     if (!mainActive()) return;
-    const touch = self.event && self.event.type.startsWith('touch'), d = touch ? -self.deltaY / 900 : self.deltaY / 1500;
+    const now = performance.now(), touch = self.event && self.event.type.startsWith('touch');
+    let d = touch ? -self.deltaY / 900 : self.deltaY / 1500;
+    heat.v = heat.v * Math.exp(-(now - heat.t) / 260) + Math.min(1, Math.abs(d) * 15); heat.t = now;   // ~1 per notch, fades in a quarter second
+    const gain = 0.35 + Math.min(1.9, heat.v * 0.45);                         // one notch ~0.8x, a fast run of notches up to ~2.2x
+    d *= gain;
     if (cam.catching) return;                                                  // gliding in: scrolling waits
-    if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = performance.now(); return; }   // the one scroll of rest on an object
+    if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = now; return; }       // the one scroll of rest on an object
     advance(d);
-    if (!cam.catching) cam.vel = cam.vel * 0.5 + d * 0.03;
-    cam.lastIn = performance.now();
+    if (!cam.catching) cam.vel = cam.vel * 0.5 + d * 0.03 * gain;            // the bigger the scroll, the further it carries
+    cam.lastIn = now;
   } });
   function camGo(i, instant) {
     const r0 = Math.round(cam.target); let dI = mod(i - mod(r0)); if (dI > NS / 2) dI -= NS;   // the short way round
@@ -2230,7 +2473,7 @@
   $('heroProps').addEventListener('click', e => {
     const g = e.target.closest('[data-open]'); if (!g || !mainActive()) return;
     const want = { work: 1, about: 2, contact: 3 }[g.dataset.open];
-    if (cam.shown !== want) { if (!cam.catching) camGo(want); return; }
+    if (cam.shown !== want) { camGo(want); return; }
     if (g.dataset.open === 'about') return openAbout();
     if (g.dataset.open === 'contact') return openContact(true);
     // Work grows out of the laptop's screen and fills the window
@@ -2277,10 +2520,11 @@
   function loadCaseDoc(page) {
     if (page._doc) return page._doc;
     const holder = page.querySelector('.csDocHolder');
-    page._doc = fetch(holder.dataset.src).then(r => r.text()).then(t => {
+    page._doc = Promise.all([fetch(holder.dataset.src).then(r => r.text()), document.fonts.load('40px "Gandhar Hand Thin"').catch(() => {})]).then(([t]) => {
       t = t.replace(/<image\b([^>]*?) href="([^"]+)"/g, '<image$1 data-href="$2"');   // nothing loads yet
       holder.innerHTML = t;
       const svg = holder.querySelector('svg'), imgs = {}, lazy = [];
+      handLetter(svg, page.id);
       // the design's white page behind everything goes, so the page's grain shows through round the pictures
       // (and the white cards, which are the paper too)
       svg.querySelectorAll('rect[fill="white"]').forEach(r => {
@@ -2307,9 +2551,141 @@
     }).catch(() => {});
     return page._doc;
   }
+  /* The case studies' hand-lettered headings (exported from Figma as shapes, in another hand) are rewritten in Gandhar's
+     own handwriting: each shape (by its index among the design's paths) is hidden and its words are written in its place,
+     line by line, the same colour, each line fitted to where the original line stood. */
+  const HAND_TEXT = {
+    caseMusic: { 0: 'PROJECT', 2: 'ROLE', 4: 'DURATION', 6: 'OVERVIEW', 8: 'DON’T JUST\nHEAR IT, FEEL\nTHE MUSIC !', 9: 'INTENT',
+      15: 'PICTURE THIS !', 24: '“Bas beat pe\nnaacho!” ... but\nwhich beat?', 75: 'THAT’S THE PROBLEM', 93: 'BUT WHAT IF\nYOU CAN’T ?',
+      97: '63 M+', 100: 'A SLIGHTLY UNUSUAL QUESTION', 103: 'CONVERSATIONS...', 122: 'Sneha | 21 years', 154: 'Aarav | 25 years',
+      173: 'WHAT THE RESEARCH SAID', 175: 'Rhythm wins over pitch.\nBeats are easy, melody\ngets lost.', 176: 'Hearing aids help speech,\nnot songs.',
+      177: 'One size fits nobody. Every\nhearing level needs its own\nsettings.', 178: 'Music here is culture.\nMissing it means missing\nthe room.',
+      179: 'People want to learn:\n“What is a chorus?”', 187: 'COMPETITORS', 197: 'PRETTY EXPENSIVE... OR PRETTY\nNICHE...', 222: 'SEE IT',
+      224: 'FEEL IT', 226: 'GET IT', 259: 'FEEL THROUGH !', 271: 'THE DESIGN CHALLENGE', 275: '→ TOUCH', 280: '→ WORDS ON SCREEN',
+      285: '→ COLOR', 290: '→ SETTINGS', 293: 'THE FINAL\nSHOWDOWN!', 294: 'Brace yourselves for music you can feel!',
+      305: 'HOME — EVERYTHING ON ONE TAP', 481: 'SYNCED LYRICS — EVERY WORD, RIGHT\nON TIME', 528: 'Smart haptics — feel the\nsong in your pocket',
+      691: 'Beat visualiser — see the energy', 878: 'Learn music — finally, “what\nis a chorus?”', 1079: 'Song structure map — a GPS for\nthe song',
+      1228: 'DID IT ACTUALLY WORK?', 1230: 'A/B TESTING — TWO VERSIONS\nONE WINNER', 1236: 'SUS — IS IT EASY TO USE', 1237: '{ 69.5 } /100',
+      1239: 'THE LAST NOTE !', 1304: 'FANKR', 1305: 'What it taught me', 1309: 'IDEA !', 1605: 'FANKR : MUSIC\nFOR EVERY EAR' },
+    caseHobby: { 0: 'HOBBYHOP : HOBBIES', 1: 'ARE BETTER TOGETHER', 2: 'PROJECT', 4: 'ROLE', 6: 'DURATION', 8: 'OVERVIEW',
+      10: 'ANYONE UP FOR\nPOTTERY\nTHIS WEEKEND ?', 11: 'INTENT', 195: 'Imagine\nthis !', 284: 'MEERA BUYS\nA POTTERY KIT',
+      285: 'NONE OF HER\nFRIENDS DO POTTERY', 286: 'THOUSANDS ONLINE,\nNOBODY NEARBY', 287: 'THE WORKSHOP COSTS\nMORE THAN THE KIT',
+      288: 'THE KIT STAYS\nIN THE BOX', 289: 'SATURDAY,\n4 PM', 290: '“WHO DO I EVEN\nDO THIS WITH?”', 312: '80% WANTED A HOBBY PARTNER\nAND DIDN’T HAVE ONE !!',
+      365: 'LISTEN FIRST', 380: '“SO WHY DOES THIS\nKEEP HAPPENING?”', 384: 'Check if we’d\nclick', 388: 'FIND AN ACTIVITY', 392: 'SORT OUT\nMATERIALS',
+      393: '“SIX PLACES, ZERO CONNECTION\nBETWEEN THEM”', 401: 'FIVE WHYS LATER...', 404: 'LOOKING AT THE OTHERS', 439: 'ITS STICKY NOTE TIME!',
+      442: 'PERSONALISED HOBBY &\nPARTICIPATION SETUP', 444: 'ACTIVITY — BASED MATCHING', 446: 'LOW — PRESSURE CONNECTION &\nTRUST',
+      448: 'SHARED HOBBY CHALLENGE', 450: 'ACTIVITY PLANNING &\nCOORDINATION', 452: 'RESOURCES & ACCESS', 454: 'PARTICIPATION ROLES &\nLEARNING',
+      456: 'HABIT LOOP & CONTINUED\nENGAGEMENT', 458: 'THE DESIGN SHIFT', 461: 'FROM FINDING A HOBBY PARTNER TO\nCREATING SOMETHING TOGETHER',
+      525: 'BEHIND THE\nSCREENS', 549: 'SERVICE BLUEPRINT', 615: 'THE FINAL\nDESIGNS!', 616: 'Brace yourselves for music you can feel!',
+      857: 'GETTING STARTED', 858: 'SELECT YOUR INTERESTS', 1037: 'Homepage', 1038: 'Activity details', 1039: 'Find a match', 1377: 'ITS A MATCH',
+      1378: 'Chat box', 1730: 'Plan & book', 1731: 'Activity is live', 1732: 'Habit formation loop', 1748: 'DID IT ACTUALLY WORK?',
+      1779: 'WHAT PARTICIPANTS ASKED FOR', 1792: 'TAKEAWAYS', 1818: 'WHAT’S NEXT' },
+    caseCyber: { 0: 'CYBERSMART : SHIP\nSHAPE DASHBOARDS', 1: 'PROJECT', 3: 'ROLE', 5: 'DURATION', 7: 'OVERVIEW', 9: 'WHAT IF\nCYBERSMART\nWAS A PERSON?',
+      10: 'INTENT', 288: 'PLS, PLS LET THE STATUS\nBE HERE SOMEWHERE...', 289: 'LOADING INSPECTIONS...', 298: '“Is Deck 3 done? ...Let\nme just call the\noffice.”',
+      299: 'SOUNDS FAMILIAR', 305: 'A SLIGHTLY UNUSUAL\nRESEARCH QUESTION', 314: 'CONVERSATIONS...', 329: 'FIELD ENGINEER | ON THE VESSEL',
+      366: 'INTERNAL TEAM | AT THE OFFICE', 392: '“ Two people. Two screens. One problem:\nthere were no shared rules”', 393: 'LETS MEET CYBERSMART',
+      460: 'BEHAVIOUR ANALYSIS', 470: 'KNOWS HOW IT’S GOING. NEVER SHOWS\nYOU', 477: 'TREATS EVERY DETAIL AS EQUALLY\nURGENT',
+      491: 'CHANGES THE RULES ON EVERY\nSCREEN', 498: 'GOES QUIET WHEN SOMETHING\nHAPPENS', 504: '“ Six behaviours, one root cause:\nno system — first design.”',
+      508: 'A RULEBOOK', 509: '(ALSO KNOWN AS A DESIGN SYSTEM)', 526: 'A SHARED COLOUR AND TYPE\nSYSTEM', 534: 'INDICATORS & KPI METRICS',
+      535: 'SHOW IT, DON’T WRITE IT', 551: 'NOTIFICATIONS & STATUS', 552: 'THE DASHBOARD FINALLY\nTALKS BACK', 563: 'CONTROLS & ACTION MODALS',
+      564: 'SAME ACTION, SAME LOOK', 571: 'SAME ORDER, EVERY CARD', 583: 'SAME ORDER, EVERY CARD', 588: 'Inspections don’t sail in\na straight line',
+      612: '“DEFINE ONCE, USE EVERYWHERE”', 616: 'SAME PRODUCT WITH BETTER MANNERS', 881: 'DASHBOARD OVERVIEW', 1181: 'DASHBOARD — SYSTEM FEEDBACK',
+      1598: 'PROJECT OVERVIEW', 1897: 'DASHBOARD — SYSTEM FEEDBACK', 2314: 'PROJECT OVERVIEW', 2449: 'IHM PROJECT OVERVIEW', 2687: 'VESSEL DECKS',
+      2937: 'VESSEL DECK MANAGEMENT', 3443: 'REPORTS', 3448: 'THREE ROUNDS WITH MY MANAGER', 3451: 'ROUND 1 · FULL PASS', 3455: 'ROUND 2 · SCOPE CUT',
+      3459: 'ROUND 3 · PLAIN WORDS', 3461: '“A system can be consistent in\nstructure and still fail at the\nlevel of words.”', 3462: 'TAKEAWAYS' }
+  };
+  function handLetter(svg, id) {
+    const map = HAND_TEXT[id]; if (!map) return;
+    const NS = 'http://www.w3.org/2000/svg', paths = [...svg.querySelectorAll('path')], jobs = [];
+    for (const k in map) {
+      const el = paths[k]; if (!el) continue;
+      // each subpath's box, grouped into lines (a new line where a subpath starts below the last line's bottom)
+      const subs = [];
+      el.getAttribute('d').split(/(?=M)/).forEach(sd => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', sd);
+        el.parentNode.appendChild(p); try { const b = p.getBBox(); if (b.width + b.height > 0.5) subs.push(b); } catch (e) {} p.remove(); });
+      subs.sort((a, b) => a.y - b.y);
+      const lines = [];
+      subs.forEach(b => { const L = lines[lines.length - 1];
+        if (L && b.y + b.height / 2 < L.y1 + (L.y1 - L.y0) * 0.15 && b.y < L.y1) { L.x0 = Math.min(L.x0, b.x); L.x1 = Math.max(L.x1, b.x + b.width); L.y0 = Math.min(L.y0, b.y); L.y1 = Math.max(L.y1, b.y + b.height); L.bots.push(b.y + b.height); L.tops.push(b.y); }
+        else lines.push({ x0: b.x, x1: b.x + b.width, y0: b.y, y1: b.y + b.height, bots: [b.y + b.height], tops: [b.y] }); });
+      const words = map[k].split('\n');
+      if (lines.length !== words.length) {                          // couldn't see the lines: share the box out evenly
+        const B = el.getBBox(), h = B.height / words.length; lines.length = 0;
+        words.forEach((w, i) => lines.push({ x0: B.x, x1: B.x + B.width, y0: B.y + i * h, y1: B.y + (i + 0.8) * h, bots: [B.y + (i + 0.8) * h], tops: [B.y + i * h] }));
+      }
+      // centred if the lines' middles line up while their lengths differ (a note on a card)
+      const mids = lines.map(L => (L.x0 + L.x1) / 2), lefts = lines.map(L => L.x0);
+      const spread = a => Math.max(...a) - Math.min(...a);
+      const centred = lines.length > 1 && spread(mids) < spread(lefts) * 0.5;
+      jobs.push({ el, lines, words, fill: el.getAttribute('fill'), centred });
+    }
+    const cards = [];
+    svg.querySelectorAll('rect, path').forEach(c => {
+      if (c.closest('defs, pattern, clipPath, mask') || !CARD_FILLS.includes(c.getAttribute('fill'))) return;
+      try { const b = c.getBBox(); if (b.width >= 120 && b.height >= 80 && b.width < 900) cards.push(c); } catch (e) {}
+    });
+    const cardOf = (el) => {
+      const r = el.getBoundingClientRect(), M = el.parentNode.getScreenCTM(); if (!M || !r.width) return null;
+      const c = cards.map(c => [c, c.getBoundingClientRect()]).filter(([, q]) => q.left <= r.left + 2 && q.right >= r.right - 2 && q.top <= r.top + 2 && q.bottom >= r.bottom - 2)
+        .sort((a, b) => a[1].width * a[1].height - b[1].width * b[1].height)[0];
+      if (!c) return null;
+      const inv = M.inverse(), pt = (x, y) => new DOMPoint(x, y).matrixTransform(inv), q = c[1];
+      const ps = [pt(q.left, q.top), pt(q.right, q.top), pt(q.left, q.bottom), pt(q.right, q.bottom)];
+      const x = Math.min(...ps.map(p => p.x)), y = Math.min(...ps.map(p => p.y));
+      // (the screen box of a tilted card is a little larger than the card: 8% in from each side)
+      const w = Math.max(...ps.map(p => p.x)) - x, h = Math.max(...ps.map(p => p.y)) - y;
+      return { x: x + w * 0.04, y: y + h * 0.04, width: w * 0.92, height: h * 0.92 };
+    };
+    jobs.forEach(({ el, lines, words, fill, centred }) => {
+      const card = centred && cardOf(el);
+      if (card) {
+        const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'csHand'); el.parentNode.insertBefore(g, el);
+        // re-wrapped to whichever number of lines lets the writing be largest in the card
+        const meas = document.createElementNS(NS, 'text'); meas.setAttribute('font-size', 100); g.appendChild(meas);
+        const W = s => { meas.textContent = s; return meas.getComputedTextLength() / 100; };
+        const all = words.join(' ').split(/\s+/);
+        let best = null;
+        for (let n = 1; n <= Math.min(6, all.length); n++) {
+          const target = W(all.join(' ')) / n, out = []; let cur = '';
+          all.forEach(w => { const s = cur ? cur + ' ' + w : w; if (cur && W(s) > target * 1.08 && out.length < n - 1) { out.push(cur); cur = w; } else cur = s; });
+          out.push(cur);
+          const sz = Math.min(card.width * 0.84 / Math.max(...out.map(W)), card.height * 0.72 / (out.length * 1.18));
+          if (!best || sz > best.sz) best = { sz, out };
+        }
+        meas.remove(); words = best.out;
+        const ts = words.map(w => { const tx = document.createElementNS(NS, 'text'); tx.textContent = w; tx.setAttribute('fill', fill);
+          tx.setAttribute('text-anchor', 'middle'); g.appendChild(tx); return tx; });
+        let size = best.sz;
+        const cx = card.x + card.width / 2, top = card.y + (card.height - words.length * size * 1.18) / 2;
+        ts.forEach((tx, i) => { tx.setAttribute('font-size', size); tx.setAttribute('x', cx); tx.setAttribute('y', top + (i + 0.8) * size * 1.18);
+          tx.setAttribute('stroke', fill); tx.setAttribute('stroke-width', (size * 0.045).toFixed(2)); });
+        if (!/^(#2A2A2A|#080808|#1F1D1A|#2B2925|#141414|#23272E|#4A4640|black)$/i.test(fill)) g.classList.add('csCrayon');
+        el.setAttribute('display', 'none');
+        return;
+      }
+      const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'csHand');
+      words.forEach((w, i) => {
+        const L = lines[i], med = a => a.slice().sort((p, q) => p - q)[a.length >> 1];
+        const base = med(L.bots), cap = Math.max(4, base - med(L.tops)), t = document.createElementNS(NS, 'text');
+        t.textContent = w; t.setAttribute('y', base); t.setAttribute('fill', fill);
+        if (centred) { t.setAttribute('x', (L.x0 + L.x1) / 2); t.setAttribute('text-anchor', 'middle'); } else t.setAttribute('x', L.x0);
+        let fs = cap / 0.7; t.setAttribute('font-size', fs);
+        g.appendChild(t); el.parentNode.insertBefore(g, el);
+        const len = t.getComputedTextLength(), want = L.x1 - L.x0;      // fitted to the width the line had
+        // the height the line had sets the size; it only shrinks (never grows) to keep within the width the line had
+        if (len > 0) { fs = Math.min(Math.max(fs, 22), fs * want / len); t.setAttribute('font-size', fs); }   // readable, but never wider than the line was
+        t.setAttribute('stroke', fill); t.setAttribute('stroke-width', (fs * 0.045).toFixed(2));
+      });
+      if (!/^(#2A2A2A|#080808|#1F1D1A|#2B2925|#141414|#23272E|#4A4640|black)$/i.test(fill)) g.classList.add('csCrayon');
+      el.setAttribute('display', 'none');
+    });
+  }
   // Small fixes to a design, by area (design units): every element whose box starts inside `area` (and has `fill`, if
   // given) is wrapped in a group moved by `dx` and/or scaled by `scale` (`sx` across, if different) about its top-left.
   const CASE_TWEAKS = {
+    caseMusic: [
+      { area: [700, 19570, 770, 19625], dy: -16, dx: 2 }       // "first song": the phone sat below the hand
+    ],
     caseHobby: [
       { area: [600, 6540, 1920, 6960], dx: -60 },                  // "Listen first" table ran 60 past the column
       { area: [900, 2080, 1920, 2320], dx: -10 },                  // the Intent block, 8 past it
@@ -2342,18 +2718,41 @@
   // the design, so they stand out from the grainy paper. Characters stay as line drawings: their tall, narrow outlines
   // (bodies, heads) are left alone. The fill goes in just behind the sketch's lines that overlap it.
   const SKETCH_INK = ['#2B2925', '#080808', '#1F1D1A', 'black'];
+  // phone frames (tall, ~2:1) and laptop frames (#343434 / #292B2C), a little enlarged: no paper effects inside
+  function deviceBoxes(svg) {
+    if (svg._devices) return svg._devices;
+    const out = [];
+    svg.querySelectorAll('rect, path').forEach(el => {
+      if (el.closest('defs, clipPath, mask, pattern')) return;
+      let b; try { b = el.getBBox(); } catch (e) { return; }
+      const r = b.height / b.width, f = el.getAttribute('fill');
+      if ((b.width > 240 && b.width < 480 && r > 1.75 && r < 2.4) || (/^#(343434|292B2C)$/i.test(f) && b.width > 600))
+        out.push({ x0: b.x - 20, y0: b.y - 20, x1: b.x + b.width + 20, y1: b.y + b.height + 20 });
+    });
+    return (svg._devices = out);
+  }
+  const inDevice = (svg, el) => { let b; try { b = el.getBBox(); } catch (e) { return false; }
+    return deviceBoxes(svg).some(d => b.x >= d.x0 && b.y >= d.y0 && b.x + b.width <= d.x1 && b.y + b.height <= d.y1); };
   function sketchFill(svg) {
+    svg.querySelectorAll('path').forEach(el => {
+      if (el.closest('defs, clipPath, mask, pattern') || el.getAttribute('stroke') || !['#2B2925', '#1F1D1A', '#080808', 'black'].includes(el.getAttribute('fill'))) return;
+      if (inDevice(svg, el)) return;
+      el.setAttribute('fill', '#1C1C1E'); el.classList.add('csInkFill');
+    });
     const NS = 'http://www.w3.org/2000/svg', ink = [], box = new Map();
     svg.querySelectorAll('path, rect, circle, ellipse').forEach(el => {
-      if (el.closest('defs, clipPath, mask, pattern') || !SKETCH_INK.includes(el.getAttribute('stroke'))) return;
+      if (el.closest('defs, clipPath, mask, pattern') || !SKETCH_INK.includes(el.getAttribute('stroke')) || inDevice(svg, el)) return;
       try { box.set(el, el.getBBox()); ink.push(el); } catch (e) {}
+      el.classList.add('csInk');
+      { const b = box.get(el); if (b && b.width > 3 && b.height > 3) el.classList.add('csSketch'); }   // pencil grain (CSS); not on flat lines, which a filter would hide
     });
-    svg.querySelectorAll('[fill="#FAF9F6"]').forEach(el => el.setAttribute('fill', '#FFFFFF'));   // off-white → white
+    svg.querySelectorAll('[fill="#FAF9F6"]').forEach(el => el.setAttribute('fill', '#FFFFFF'));   // off-white → the paper
     const tall = b => b.height / b.width > 2 && b.height > 40;      // a character's body or head
     ink.forEach(el => {
       const f = el.getAttribute('fill'), b = box.get(el);
       if (f && f !== 'none') {                                      // characters are never filled, even in the design
         if (tall(b) && /^(white|#FFFFFF|#FFF)$/i.test(f)) el.setAttribute('fill', 'none');
+        else if (/^(white|#FFFFFF|#FFF)$/i.test(f)) { el.setAttribute('fill', '#FFFFFF');  }   // white in the design: the paper
         return;
       }
       if (b.width < 6 || b.height < 6 || b.width > 320 || b.height > 320 || b.height / b.width > 2) return;
@@ -2369,33 +2768,57 @@
         if (c.x < b.x + b.width && c.x + c.width > b.x && c.y < b.y + b.height && c.y + c.height > b.y &&
             (o.compareDocumentPosition(first) & Node.DOCUMENT_POSITION_FOLLOWING)) first = o; });
       const w = el.cloneNode();
-      w.setAttribute('fill', '#FFFFFF'); w.setAttribute('stroke', 'none');
+      w.setAttribute('fill', '#FFFFFF'); w.setAttribute('stroke', 'none'); w.removeAttribute('class');
       if (d !== null) w.setAttribute('d', d);
       first.parentNode.insertBefore(w, first);
+      
     });
   }
   // The white studio backdrop behind the big phone shots (1400 x 675 pictures) gets the page's grain too; the phone,
   // drawn over it, stays clean. The grain is a copy of the backdrop's shape filled with the grain tile, just above it.
-  function backdropGrain(svg) {
+  // the page's grain as an SVG pattern (one per design): for what is painted over the page's own grain
+  function grainPattern(svg) {
+    if (svg._grain) return svg._grain;
     const url = getComputedStyle(document.documentElement).getPropertyValue('--grain').trim().replace(/^url\(["']?|["']?\)$/g, '');
-    if (!url) return;
+    if (!url) return null;
     const NS = 'http://www.w3.org/2000/svg', T = 250;              // tile in design units (~the page's 180px tile)
     const pat = document.createElementNS(NS, 'pattern'), im = document.createElementNS(NS, 'image');
     pat.id = 'csGrain' + Math.random().toString(36).slice(2, 7);
     pat.setAttribute('patternUnits', 'userSpaceOnUse'); pat.setAttribute('width', T); pat.setAttribute('height', T);
     im.setAttribute('href', url); im.setAttribute('width', T); im.setAttribute('height', T);
     pat.appendChild(im); svg.insertBefore(pat, svg.firstChild);
+    return (svg._grain = pat);
+  }
+  const CARD_FILLS = ['#FFF9F3', '#FEF8F2', '#F6F6F6', '#FEF8ED', '#F1F9F7', '#F7F7F7', '#FAFAFA', '#FFFFFF', 'white'];
+  function cardGrain(svg) {
+    const pat = grainPattern(svg); if (!pat) return;
+    svg.querySelectorAll('rect, path').forEach(el => {
+      if (el.closest('defs, pattern, clipPath, mask') || !CARD_FILLS.includes(el.getAttribute('fill')) || /^(white|#FFFFFF|#FAFAFA|#F7F7F7)$/i.test(el.getAttribute('fill')) || inDevice(svg, el)) return;
+      let b; try { b = el.getBBox(); } catch (e) { return; }
+      if (b.width < 200 || b.height < 120 || b.width > 1500) return;
+      const g = el.cloneNode(); g.removeAttribute('class'); g.setAttribute('stroke', 'none');
+      g.setAttribute('fill', `url(#${pat.id})`); g.setAttribute('opacity', '0.115'); el.after(g);
+    });
+  }
+  function backdropGrain(svg) {
+    const pat = grainPattern(svg); if (!pat) return;
     svg.querySelectorAll('[fill^="url(#pattern"]').forEach(el => {
       let b; try { b = el.getBBox(); } catch (e) { return; }
       if (Math.round(b.width) !== 1400 || Math.round(b.height) !== 675) return;
-      const g = el.cloneNode();
-      g.setAttribute('fill', `url(#${pat.id})`); g.setAttribute('opacity', '0.08');
-      el.after(g);
+      el.setAttribute('display', 'none');                          // the page's own paper shows instead
+    });
+    // cards: no outline (light fills with a stroke, card-sized, outside the devices)
+    svg.querySelectorAll('rect, path').forEach(el => {
+      const fl = el.getAttribute('fill'), st = el.getAttribute('stroke');
+      if (!st || st === 'none' || !fl || fl === 'none' || el.closest('defs, pattern, clipPath, mask')) return;
+      if (!/^#(F[0-9A-F]{5}|E[C-F][0-9A-F]{4}|DDEEFB|CED8F4|FFD4D4|FDE8EE)$|^white$/i.test(fl) || inDevice(svg, el)) return;
+      let b; try { b = el.getBBox(); } catch (e) { return; }
+      if (b.width >= 150 && b.height >= 70 && b.width < 1500) el.setAttribute('stroke', 'none');
     });
   }
   // (`clipY`: instead, cut the element off below that design y)
   function tweak(svg, { area: [x0, y0, x1, y1], fill, dx = 0, dy = 0, scale = 1, sx = scale, sy = scale, clipY, hide }) {
-    svg.querySelectorAll('path, rect, line, circle, ellipse').forEach(el => {
+    svg.querySelectorAll('path, rect, line, circle, ellipse, text').forEach(el => {
       if (el.closest('defs, pattern, clipPath, mask') || (fill && el.getAttribute('fill') !== fill)) return;
       let b; try { b = el.getBBox(); } catch (e) { return; }
       if (b.x < x0 || b.x > x1 || b.y < y0 || b.y > y1 || b.width > 1900) return;
