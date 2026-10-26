@@ -2318,15 +2318,16 @@
       // "Deck cards with plan previews" sat on top of the "Vessel deck management" heading: to the notes column
       { area: [330, 20815, 340, 20825], fill: '#2A2A2A', dx: 1026, dy: 110 },
       // the research question's two dotted lines ran through the text: into the gaps beside and above it
-      { area: [440, 5105, 452, 5115], fill: '#1F9C7F', dx: -152 },
+      // (the first sits in the gap between "…stays silent" and "And that got me thinking about", ending just above the latter)
+      { area: [440, 5105, 452, 5115], fill: '#1F9C7F', dx: -152, sx: 1.036, sy: 0.5 },
       { area: [440, 5580, 452, 5592], fill: '#1F9C7F', dy: -72 },
-      // the dotted line from the quote ran down through the takeaways table: redrawn (CASE_LINES) to end at the heading
+      // the dotted line from the quote down to the takeaways: removed
       { area: [360, 23490, 370, 23500], fill: '#38BAA4', hide: true }
     ]
   };
   // dotted connector lines drawn by the page (design units): a dot at each end, like the design's own
   const CASE_LINES = {
-    caseCyber: [{ d: 'M363 23498 V23654 H690', color: '#38BAA4' }]
+    caseCyber: []
   };
   function dottedLine(svg, { d, color }) {
     const NS = 'http://www.w3.org/2000/svg', g = document.createElementNS(NS, 'g'), p = document.createElementNS(NS, 'path');
