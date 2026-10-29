@@ -2545,7 +2545,7 @@
       (CASE_TWEAKS[page.id] || []).forEach(t => tweak(svg, t));
       (CASE_LINES[page.id] || []).forEach(l => dottedLine(svg, l));
       sketchFill(svg);
-      backdropGrain(svg);
+      backdropGrain(svg, page.id);
       bodyText(svg);
       docParallax(page, svg);
     }).catch(() => {});
@@ -2800,12 +2800,24 @@
       g.setAttribute('fill', `url(#${pat.id})`); g.setAttribute('opacity', '0.115'); el.after(g);
     });
   }
-  function backdropGrain(svg) {
+  // the panels behind each study's screens: a plain faint tint, no grain (Fankr cream, HobbyHop grey, Cybersmart mint)
+  const ORANGE_PANELS = { caseMusic: '#FFF9F3', caseHobby: '#F2F2F4', caseCyber: '#F1F9F7' };
+  function orangePaper(el, colour, pat) {
+    el.setAttribute('fill', colour); el.removeAttribute('fill-opacity'); el.removeAttribute('display');
+  }
+  function backdropGrain(svg, caseId) {
     const pat = grainPattern(svg); if (!pat) return;
+    const orange = ORANGE_PANELS[caseId];
     svg.querySelectorAll('[fill^="url(#pattern"]').forEach(el => {
       let b; try { b = el.getBBox(); } catch (e) { return; }
       if (Math.round(b.width) !== 1400 || Math.round(b.height) !== 675) return;
-      el.setAttribute('display', 'none');                          // the page's own paper shows instead
+      if (orange) orangePaper(el, orange, pat);
+      else el.setAttribute('display', 'none');                     // the page's own paper shows instead
+    });
+    if (caseId === 'caseMusic') svg.querySelectorAll('rect[fill="#F6F6F6"]').forEach(el => {   // the square panel behind each phone screen
+      if (el.closest('defs, pattern, clipPath, mask')) return;
+      let b; try { b = el.getBBox(); } catch (e) { return; }
+      if (b.width > 700 && b.height > 700) orangePaper(el, orange, pat);
     });
     // cards: no outline (light fills with a stroke, card-sized, outside the devices)
     svg.querySelectorAll('rect, path').forEach(el => {
