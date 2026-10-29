@@ -11,7 +11,7 @@
   :root {
     --ink: #000;
     --line: #fff;
-    --paper: #F9F7F1;
+    --paper: #F4EFE3;
     --pen: #141414;
     --muted: #8d8d8d;
     --muted-2: #a2a2a2;
@@ -62,7 +62,7 @@
   #heroSvg { display: block; width: 100%; height: 100%; }
   #heroLine .hline { font: 400 22px var(--serif); fill: var(--pen); letter-spacing: 0.01em; }
   /* the changing word, in a loose hand like the "create" sample */
-  #heroLine .hword { filter: url(#crayon); font: 400 50px "Gandhar Hand", "Indie Flower", var(--hand); fill: var(--pen); letter-spacing: 0.01em; stroke: none !important;
+  #heroLine .hword { filter: url(#pencil); font: 400 50px "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); fill: #3b3a37; letter-spacing: 0.01em; stroke: none !important;
     stroke: var(--pen); stroke-width: 0.4px; }
   #heroProps > g { pointer-events: auto; cursor: pointer; }
   #heroDecor { pointer-events: none; }
@@ -75,7 +75,7 @@
   .case { scrollbar-width: none; }
   /* in a case study the grain lies on the paper only, under the text and pictures (the app screens stay clean) */
   html.in-case #grain { display: none; }
-  .case::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.115;
+  .case::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 1;
     background-image: var(--grain); background-repeat: repeat; }
   .csInner { position: relative; z-index: 1; }
   /* "Next" at the bottom of a case study, centred: a plain label with a hand-drawn arrow; on hover the whole button
@@ -169,13 +169,18 @@
   @font-face { font-family: "Gandhar Hand Thin"; src: url(assets/fonts/gandhar-hand-thin.otf?v=5) format("opentype"); font-display: swap; }   /* the same hand, a fine pen */
   /* ---------- About: the notebook from the main page lifts off, grows and opens into a leather ring binder ---------- */
   #aboutPage { position: fixed; inset: 0; z-index: 38; overflow: hidden; visibility: hidden; color-scheme: light; }
-  .abBg { position: absolute; inset: 0; background: var(--paper); opacity: 0; }
+  .abBg { position: absolute; inset: 0; background: rgba(60, 54, 42, 0.14); opacity: 0; }   /* the page a little darker while it is up */
   /* the site's grain on the background only, under the book and the phone */
-  .abBg::before, .ctBg::before { content: ""; position: absolute; inset: 0; opacity: 0.115; background-image: var(--grain); }
+  .abBg::before, .ctBg::before { content: ""; position: absolute; inset: 0; opacity: 1; background-image: var(--grain); }
+  .abBg::after, .ctBg::after { content: ""; position: absolute; inset: 0; background-image: var(--mottle); }   /* the coarser mottle */
   .abStage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
   #abStage { filter: sepia(0.08) saturate(0.55) brightness(1.05) contrast(0.97); }
   /* the open book: a real sketchbook scan, cream pages sewn at the gutter (assets/about/book.png, 1879 x 1194 on the stage, the spine at x 841),
      split at the spine so its cover can turn; the pages are the picture's own, the writing laid on top */
+  .abShadow { position: absolute; left: 70px; top: 60px; width: 1590px; height: 1090px; border-radius: 12px; opacity: 0; pointer-events: none;
+    box-shadow: 0 34px 70px rgba(40, 32, 18, 0.42), 0 8px 16px rgba(40, 32, 18, 0.25); }
+  .abShadow { position: absolute; left: 70px; top: 60px; width: 1590px; height: 1090px; border-radius: 14px; opacity: 0; pointer-events: none;
+    box-shadow: 0 0 70px rgba(45, 38, 26, 0.36), 0 8px 14px rgba(40, 32, 18, 0.18); }
   .abBook { position: absolute; left: 0; top: 0; width: 1879px; height: 1194px; perspective: 3000px;
     perspective-origin: 841px 597px; }
   .abHalf, .abFace { position: absolute; top: 0; height: 1194px; background: url(assets/about/book.png) no-repeat;
@@ -329,7 +334,7 @@
   /* the stick figures and the case studies' sketches: one thin, dark pen line */
   #figSvg .hpen, #hero .hpen { stroke: #1C1C1E; stroke-width: 0.9px; }
   #heroFig, #heroNotes path, .csDocHolder .csSketch { filter: url(#graphite); }
-  .csDocHolder .csInkFill { stroke: #F9F7F1; stroke-width: 0.38px; vector-effect: non-scaling-stroke; filter: url(#graphite); }
+  .csDocHolder .csInkFill { stroke: #F4EFE3; stroke-width: 0.38px; vector-effect: non-scaling-stroke; filter: url(#graphite); }
   .csDocHolder .csInk { stroke: #1C1C1E; stroke-width: 0.9px; vector-effect: non-scaling-stroke; }
   .abResume { cursor: zoom-in; }
   .abResume { mix-blend-mode: multiply; } .abResume img { display: block; }   /* the page's own paper shows through: no separate sheet */
@@ -342,7 +347,8 @@
   .csTitle { filter: url(#crayon); }
   .wipPaper h2 { filter: url(#pencil); }
   /* the menu is written in a fine pen: solid ink, thin lines */
-  #menu .label { font-family: "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); font-size: 22px; }
+  #menu .label { font-family: "Gandhar Hand", "Indie Flower", var(--hand); font-size: 22px; filter: url(#crayon); }
+  #menu .pill-icon { filter: url(#crayon); }   /* written in crayon, like the headings */
   .abMess { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
   .abMess text { font-family: "Gandhar Hand", "Indie Flower", var(--hand); fill: #48484C; }
   .abMess .scrib { fill: none; stroke: #3A3A3E; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
@@ -355,7 +361,7 @@
 
   /* ---------- Contact: the old keypad phone comes up in the middle, a new mail open on its screen ---------- */
   #contactPage { position: fixed; inset: 0; z-index: 38; visibility: hidden; color-scheme: light; }
-  .ctBg { position: absolute; inset: 0; background: var(--paper); opacity: 0; }
+  .ctBg { position: absolute; inset: 0; background: rgba(60, 54, 42, 0.14); opacity: 0; }   /* the page a little darker while it is up */
   .ctPhone { position: absolute; left: 50%; top: calc(50% + 24px); width: min(calc((100vh - 120px) * 619 / 1289), 92vw);
     aspect-ratio: 619 / 1289; }   /* centred by GSAP (xPercent / yPercent -50) */
   .ctPhone > img { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-drag: none; }
@@ -409,7 +415,7 @@
   #wipCard.on { display: flex; }
   .wipPaper { position: relative; width: min(340px, 100%); box-sizing: border-box; padding: 40px 26px 26px; background: #FCFBF7;
     transform: rotate(-2deg); box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18), 0 1px 2px rgba(0, 0, 0, 0.15); text-align: center; color: #2A2A2A; }
-  .wipPaper::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.115; background-image: var(--grain); }
+  .wipPaper::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 1; background-image: var(--grain); }
   .wipPaper .abTape { left: 50%; top: -12px; margin-left: -43px; transform: rotate(-4deg); }
   .wipPaper h2 { margin: 0; font: 400 58px/1 "Gandhar Hand", "Indie Flower", var(--hand); color: #F08A2C; letter-spacing: 0.06em; }
   .wipPaper .sub { margin: 4px 0 18px; font: 400 18px/1 "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); letter-spacing: 0.08em; text-transform: lowercase; }
@@ -438,7 +444,7 @@
   #menu .label { position: relative; }
   #menu .pill-icon { width: 28px; height: 28px; flex: none; overflow: visible; }
   /* thin pen lines, like the logo and the drawings */
-  #menu .pill-icon .ink { fill: none; stroke: currentColor; stroke-width: 1.1px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  #menu .pill-icon .ink { fill: none; stroke: currentColor; stroke-width: 1.2px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
   #menu .pill-icon .dot { fill: currentColor; transition: transform 0.12s ease-out; }
   /* hover: a hand-drawn line scribbles itself in under the word, and rubs out again when the pointer leaves */
   #menu .scribble { position: absolute; left: -3px; right: -3px; top: calc(100% + 4px); width: calc(100% + 6px); height: 7px; overflow: visible; pointer-events: none; }
@@ -476,7 +482,7 @@
     position: fixed; z-index: 50; left: 36px; top: calc(env(safe-area-inset-top, 0px) + 28px);
     display: block; mix-blend-mode: difference; cursor: pointer; -webkit-tap-highlight-color: transparent;
   }
-  #logo img { display: block; height: 28px; width: auto; user-select: none; -webkit-user-drag: none; }
+  #logo img { display: block; height: 28px; width: auto; user-select: none; -webkit-user-drag: none; filter: url(#pencil) opacity(0.82); }   /* in pencil, like the word in the line */
   #logo:focus-visible { outline: 1px solid #fff; outline-offset: 4px; }
   /* the phone menu icon: three wobbly pen lines, which turn into a hand-drawn cross while the menu is open */
   #menu .menu-toggle { display: none; width: 46px; height: 46px; padding: 0; justify-content: center; }
@@ -487,6 +493,40 @@
   #menu.open .menu-toggle .cross { display: inline; }
 
   /* ---------- phones (portrait, up to ~600px wide) ---------- */
+  html.mob-main #heroLine .hline { font-size: 32.5px; }   /* 12px on a ~370px-wide phone */
+  #abSwipe { display: none; }
+  html.mob.ab-open #abSwipe { display: block; position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); z-index: 46;
+    text-align: center; font: 400 18px "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); color: var(--pen); opacity: 0.75; pointer-events: none; }
+  @media (max-width: 600px) {
+    #menu.open { mix-blend-mode: normal; color: var(--pen); }   /* open: a plain paper card with dark ink (no inverting) */
+    #menu-list { background: var(--paper); padding: 14px 20px 16px; border-radius: 10px; box-shadow: 0 8px 24px rgba(40, 30, 10, 0.18), 0 0 0 1px rgba(40, 30, 10, 0.08); }
+    #menu-list::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0.06; background-image: var(--grain); }
+  }
+  html.mob #wpFront text { font-size: 27px; }
+  /* the case study's first screen on a phone: the picture across the width, the title under it, then the story */
+  html.mob-case .csHero { height: auto; padding-bottom: 72px; }
+  html.mob-case .csPicBox { margin-top: 96px; width: calc(100% - 24px); }
+  html.mob-case .csPic { height: auto; aspect-ratio: 1250 / 720; border-radius: 6px; }
+  html.mob-case .csTitle { font-size: 20px; transform: translate(-50%, -0.9em); width: 100%; white-space: normal; text-align: center; letter-spacing: 0.08em; }
+  html.mob-doc .csHero { height: auto; padding: 88px 0 56px; }
+  html.mob-doc .csPicBox { margin-top: 0; width: calc(100% - 32px); }
+  html.mob-doc .csPic { height: auto; aspect-ratio: 1250 / 720; border-radius: 6px; }
+  html.mob-doc .csTitle { font-size: 17px; transform: translate(-50%, -1.25em); width: 100%; white-space: normal; text-align: center; }
+  html.mob-doc .csDocHolder { aspect-ratio: auto; overflow: hidden; padding: 0 16px 120px; box-sizing: border-box; }
+  html.mob-doc .csDocHolder svg.csSource { position: absolute; left: -99999px; top: 0; width: 1920px !important; height: auto; margin: 0 !important; }
+  .csStack { position: relative; }
+  .csStack .csTile { display: block; height: auto; overflow: hidden; flex: none; }
+  .csStack .csCard .csTile { margin: 0; }
+  .csStack .csReveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.8s cubic-bezier(.2,.7,.2,1); }
+  .csStack .csReveal.in { opacity: 1; transform: none; }
+  .csStack .csRow { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 14px 16px; }
+  html.mob .csDocHolder .csStack svg.csTile { margin-left: 0; margin-right: 0; }   /* (not the design's own centring) */
+  html.mob .csDocHolder .csStack svg.csTile.csRight { margin-left: auto; }
+
+  html.mob-main #heroLine .hword { font-size: 62px; }
+  html.mob-main #hero .hnote { font-size: 32.5px; }
+  html.mob-main #hnLaptop path, html.mob-main #hnBook path, html.mob-main #hnMug path { display: none; }
+  html.mob-main #hnLaptop text, html.mob-main #hnBook text, html.mob-main #hnMug text { text-anchor: middle; }
   @media (max-width: 600px) {
     :root { --hair: 1px; }                                   /* thin lines, but never under 1px */
     #menu { top: calc(env(safe-area-inset-top, 0px) + 10px); right: 14px; }
@@ -499,14 +539,26 @@
     }
     #menu.open #menu-list { display: flex; }
   }
-  #scene #figure .ln, #scene #leg0, #scene #leg1, #scene #arm { stroke-width: 1.4; }
+  #scene #figure .ln, #scene #leg0, #scene #leg1, #scene #arm { stroke-width: 0.65; }   /* a fine pencil line */
   /* noise grain over the whole site (dark specks on white, light specks on black); never catches the mouse */
   /* the click burst (made in the script next to #grain) */
   .clickfx { position: fixed; z-index: 70; width: 60px; height: 60px; margin: -30px 0 0 -30px; overflow: visible;
     pointer-events: none; mix-blend-mode: difference; color: #fff; }
   .clickfx path { fill: none; stroke: currentColor; stroke-width: 1.8px; stroke-linecap: round; vector-effect: non-scaling-stroke; }
-  #grain { position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: 0.115; background-repeat: repeat; }   /* over the menu too */
+  #grain { position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: 1; background-repeat: repeat; }   /* over the menu too */
 
+  /* phones: the menu in a row beside the logo, like the desktop (no menu button) */
+  @media (max-width: 600px) {
+    #menu .menu-toggle { display: none !important; }
+    #menu-list, #menu.open #menu-list { display: flex !important; position: static; flex-direction: row; align-items: center; gap: 14px;
+      background: none; padding: 0; box-shadow: none; border-radius: 0; }
+    #menu-list::before { display: none; }
+    #menu button { gap: 4px; min-height: 40px; }
+    #menu .label { font-size: 17px; }
+    #menu .pill-icon { width: 20px; height: 20px; }
+    #menu { right: 16px; }
+    #logo { left: 16px; }
+  }
 </style>
 </head>
 <body>
@@ -577,7 +629,7 @@
     <path id="arm" class="ln" d="M 0 0" style="visibility:hidden"></path>
 
     <!-- light: the room turns white -->
-    <rect id="whiteout" x="-2000" y="-2000" width="6000" height="6000" fill="#F9F7F1" opacity="0"></rect>
+    <rect id="whiteout" x="-2000" y="-2000" width="6000" height="6000" fill="#F4EFE3" opacity="0"></rect>
   </svg>
 </section>
 
@@ -589,30 +641,30 @@
   <svg id="heroSvg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet">
     <g id="heroCam">   <!-- the camera: moved and zoomed by the main-page scroll steps (set in JS) -->
     <g id="heroDecor" aria-hidden="true">   <!-- the rest of the desk, peeking in at the edges (placed in JS) -->
-        <g id="dk-paper" class="deskBit"><image href="assets/desk-paper.png" x="-150" y="-114" width="300" height="228"></image></g>
-        <g id="dk-marker" class="deskBit"><image href="assets/desk-marker.png" x="-52" y="-64" width="104" height="128"></image></g>
-        <g id="dk-scissors" class="deskBit"><image href="assets/desk-scissors.png" x="-105" y="-126" width="210" height="252"></image></g>
-        <g id="dk-sketchbook" class="deskBit"><image href="assets/desk-sketchbook.png" x="-125" y="-98" width="250" height="196"></image></g>
-        <g id="dk-camera" class="deskBit"><image href="assets/desk-camera.png" x="-115" y="-145.5" width="230" height="291"></image></g>
+        <g id="dk-paper" class="deskBit"><image href="assets/photo/desk-paper.png" x="-235.6" y="-183.4" width="471.1" height="366.7"></image></g>
+        <g id="dk-marker" class="deskBit"><image href="assets/exact/desk-marker.png" x="-75.4" y="-92.8" width="150.8" height="185.6"></image></g>
+        <g id="dk-scissors" class="deskBit"><image href="assets/exact/desk-scissors.png" x="-152.2" y="-182.7" width="304.5" height="365.4"></image></g>
+        <g id="dk-sketchbook" class="deskBit"><image href="assets/exact/desk-sketchbook.png" x="-181.2" y="-142.1" width="362.5" height="284.2"></image></g>
+        <g id="dk-camera" class="deskBit"><image href="assets/photo/desk-camera.png" x="-183.3" y="-227.6" width="366.8" height="455.3"></image></g>
     </g>
     <g id="heroProps">
       <!-- each prop 1.2x, spread apart and set down a little off-square (own height and tilt) so they look dropped there -->
       <!-- each prop is placed by JS (translate / rotate / scale about its own centre) for each scroll step -->
-      <g id="hpPhone" data-open="contact"><image class="hprop" href="assets/hero-phone.png?v=2" x="512" y="510" width="128" height="148"></image></g>
-      <g id="hpCup" data-open="contact"><image class="hprop" href="assets/hero-cup.png" x="470" y="432" width="163" height="144"></image></g>
+      <g id="hpPhone" data-open="contact"><image class="hprop" href="assets/photo/contact-phone.png?v=7" x="532.8" y="494" width="86.4" height="180" style="filter: drop-shadow(0 2px 4px rgba(40, 32, 18, 0.2))"></image></g>
+      <g id="hpCup" data-open="contact"><image class="hprop" href="assets/photo/hero-cup-dull.png?v=2" x="462.3" y="424.3" width="178.3" height="159.3"></image></g>
       <g id="hpLaptop" data-open="work">
-        <image class="hprop" href="assets/hero-laptop.png" x="769" y="352" width="380" height="326"></image>
+        <image class="hprop" href="assets/photo/hero-laptop.png" x="772" y="335" width="374" height="360"></image>
         <!-- on the laptop step its screen shows the Work page -->
         <clipPath id="heroScreenClip"><rect x="795" y="372" width="327" height="198" rx="2"></rect></clipPath>
-        <g id="heroScreen" clip-path="url(#heroScreenClip)">
-          <image href="assets/hero-work-screen.jpg" x="795" y="372" width="327" height="198" preserveAspectRatio="xMidYMid slice"></image>
+        <g id="heroScreen" clip-path="url(#heroScreenClip)" opacity="0">
+          <image href="assets/scan/hero-work-screen.png" x="795" y="372" width="327" height="198" preserveAspectRatio="xMidYMid slice"></image>
           <radialGradient id="heroScreenShade" cx="0.5" cy="0.45" r="0.75"><stop offset="0.6" stop-color="#000" stop-opacity="0"></stop><stop offset="1" stop-color="#000" stop-opacity="0.22"></stop></radialGradient>
           <linearGradient id="heroScreenGlare" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.16"></stop><stop offset="0.45" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
           <rect x="795" y="372" width="327" height="198" fill="url(#heroScreenShade)"></rect><rect x="795" y="372" width="327" height="198" fill="url(#heroScreenGlare)"></rect>
         </g>
       </g>
       <g id="hpBook" data-open="about">
-        <image class="hprop" href="assets/hero-notebook.png" x="1272" y="416" width="200" height="246"></image>
+        <image class="hprop" href="assets/photo/hero-notebook.png" x="1261.5" y="405.5" width="221" height="267"></image>
       </g>
     </g>
     </g>
@@ -622,7 +674,7 @@
     <g id="heroLine">
       <text id="heroLeft" class="hline" x="0" y="751">Hey, I’m Gandhar. I stopped overthinking and</text>
       <text id="heroWord" class="hword" x="0" y="754">create</text>
-      <text id="heroRight" class="hline" x="0" y="751">this portfolio</text>
+      <text id="heroRight" class="hline" x="0" y="751">this portfolio :)</text>
     </g>
     </g>
     <!-- a hand-written note beside each object once it is in the middle -->
@@ -630,13 +682,13 @@
     <filter id="charInkLight"><feMorphology operator="dilate" radius="0.12"></feMorphology></filter>   <!-- (~1.4px: the mug figure) -->   <!-- the picture characters drawn a touch heavier (~1.6px lines) -->
     <g id="heroNotes">
       <!-- step 1: the laptop; the figure stands to the right, pointing -->
-      <g id="hnLaptop" opacity="0"><text class="hnote" x="1415" y="728">tap to</text><text class="hnote" x="1415" y="756">view</text>
+      <g id="hnLaptop" opacity="0" transform="translate(-129 71)"><text class="hnote" x="1415" y="728">tap to</text><text class="hnote" x="1415" y="756">view</text>
         <path class="hpen" d="M1400 707 C 1360 714, 1310 724, 1282 722 C 1262 720, 1258 692, 1280 680 C 1302 668, 1322 690, 1310 708 C 1296 728, 1258 722, 1240 700 C 1230 686, 1225 668, 1223 652 M1219 662 L1223 650 L1228 661"></path></g>
       <!-- step 2: the notebook; a little figure sits on it reading -->
-      <g id="hnBook" opacity="0"><text class="hnote" x="527" y="403">Click to Know more</text><text class="hnote" x="527" y="431">Scroll to continue</text>
+      <g id="hnBook" opacity="0" transform="translate(85 0)"><text class="hnote" x="527" y="403">Click to Know more</text><text class="hnote" x="527" y="431">Scroll to continue</text>
         <path class="hpen" d="M744 426 C 800 426, 850 432, 872 446 C 885 456, 878 476, 858 478 C 836 480, 826 460, 840 450 C 860 438, 900 462, 922 512"></path></g>
       <!-- step 3: the mug sits on the phone and slides off it to the side; once the screen shows, the note appears -->
-      <g id="hnMug" opacity="0"><text class="hnote" x="1147" y="778">Tap to view</text><text class="hnote" x="1147" y="806">contact info</text><text class="hnote" x="1147" y="834">be quick , cup is heavy</text>
+      <g id="hnMug" opacity="0" transform="translate(-14 0)"><text class="hnote" x="1147" y="778">Tap to view</text><text class="hnote" x="1147" y="806">contact info</text><text class="hnote" x="1147" y="834">be quick , cup is heavy</text>
         <path class="hpen" d="M1131 763 C 1100 762, 1072 764, 1056 770 C 1042 776, 1046 792, 1064 792 C 1082 792, 1082 772, 1064 772 C 1050 772, 1036 790, 1022 810 M1024 798 L1021 811 L1033 806"></path></g>
     </g>
     </g>
@@ -669,11 +721,13 @@
 </section>
 
 <!-- ======================= ABOUT (opened from the menu): the main page's notebook opens up ======================= -->
+<div id="abSwipe" aria-hidden="true">swipe for the next page &rarr;</div>
 <section id="aboutPage" aria-label="About me">
 
   <div class="abBg"></div>
   <div class="abStage" id="abStage">
     <div class="abBook" id="abBook">
+      <div class="abShadow" aria-hidden="true"></div>
       <!-- the back cover with the strap and the second spread's right-hand page: my software, on an old computer -->
       <div class="abHalf abHalfR">
         <div class="abStrap" aria-hidden="true"></div>
@@ -816,7 +870,7 @@
       <feMerge><feMergeNode in="paper"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
     </filter></svg>
     <!-- cut out round its edge like a paper scrap, grained like the rest of the site, taped down -->
-    <img src="assets/contact-phone3.png" alt="" width="619" height="1289" style="filter: url(#grainFx) sepia(0.18) contrast(0.86) brightness(0.96) drop-shadow(0 10px 16px rgba(0, 0, 0, 0.22))">
+    <img src="assets/photo/contact-phone.png?v=7" alt="" width="619" height="1289" style="filter: drop-shadow(0 0 28px rgba(45, 38, 26, 0.36)) drop-shadow(0 4px 7px rgba(40, 32, 18, 0.2))">
     <!-- wear: scratches and scuffs over the body and keys (drawn in JS), kept inside the phone's own outline -->
     <svg class="ctWear" id="ctWear" viewBox="0 0 619 1289" preserveAspectRatio="none" aria-hidden="true"></svg>
     <span class="abTape" style="left: 8%; top: 3%; transform: rotate(-24deg)"></span>
@@ -1032,16 +1086,33 @@
   })();
 </script>
 <script>
-  // film-grain texture over every scene: a small tile of random grey specks, made once and repeated
+  // the paper's texture over every scene: a clear tile with what recycled paper has in it - sparse fine specks, a few
+  // short fibres (some faintly pink or blue) - made once and repeated
   (() => {
     try {
-      const c = document.createElement('canvas'), n = 180; c.width = c.height = n;
-      const g = c.getContext('2d'), img = g.createImageData(n, n), d = img.data;
-      for (let i = 0; i < d.length; i += 4) { const v = Math.random() * 255 | 0; d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255; }
-      g.putImageData(img, 0, 0);
+      const c = document.createElement('canvas'), n = 256; c.width = c.height = n;
+      const g = c.getContext('2d'), R = Math.random;
+      const tint = () => { const p = R(); return p < 0.03 ? [190, 120, 110] : p < 0.05 ? [110, 125, 160] : [125, 112, 92]; };
+      for (let k = 0; k < 400; k++) {                                  // specks
+        const [r, gg, b] = tint(), a = 0.1 + R() * 0.2, s = 1;   // (fine specks only)
+        g.fillStyle = `rgba(${r},${gg},${b},${a})`; g.fillRect(R() * n | 0, R() * n | 0, s, s);
+      }
+      for (let k = 0; k < 40; k++) {                                   // fibres
+        const [r, gg, b] = tint(), x = R() * n, y = R() * n, an = R() * Math.PI, L = 2 + R() * 4;
+        g.strokeStyle = `rgba(${r},${gg},${b},${0.15 + R() * 0.25})`; g.lineWidth = 0.7;
+        g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(an) * L, y + Math.sin(an) * L); g.stroke();
+      }
       const url = `url(${c.toDataURL('image/png')})`;
       document.getElementById('grain').style.backgroundImage = url;
-      document.documentElement.style.setProperty('--grain', url);   // the case studies' own grain, behind the pictures
+      document.documentElement.style.setProperty('--grain', url);
+      const m = document.createElement('canvas'), mn = 240; m.width = m.height = mn;
+      const mg = m.getContext('2d');
+      for (let y = 0; y < mn; y += 2) for (let x = 0; x < mn; x += 2) {
+        const v = R(); if (v < 0.45) continue;
+        mg.fillStyle = v > 0.8 ? `rgba(95,88,72,${0.035 + R() * 0.04})` : `rgba(255,252,244,${0.025 + R() * 0.035})`;
+        mg.fillRect(x, y, R() < 0.5 ? 2 : 3, R() < 0.5 ? 2 : 3);
+      }
+      document.documentElement.style.setProperty('--mottle', `url(${m.toDataURL('image/png')})`);   // the case studies' own grain, behind the pictures
     } catch (e) {}
   })();
 </script>
@@ -1091,6 +1162,22 @@
   if (document.fonts && document.fonts.load) document.fonts.load('64px "Gandhar Hand"');
   ScrollTrigger.config({ ignoreMobileResize: true });   // mobile address bar showing/hiding won't re-layout
   const $ = id => document.getElementById(id);
+  // a phone held upright: the main page gets its own portrait layout (the desktop one is untouched)
+  const isMob = () => innerWidth <= 820 && innerWidth / innerHeight < 0.85;
+  const MOB_MAIN = true;                                       // true: the main page uses its own upright phone layout
+  const isMobMain = () => MOB_MAIN && isMob();
+  const MOB_VW = 1000;                                           // how much of the 1920-wide stage a phone shows across
+  const mobBox = () => { const vh = MOB_VW * innerHeight / innerWidth; return { x: 960 - MOB_VW / 2, y: 540 - vh / 2, w: MOB_VW, h: vh }; };
+  document.documentElement.classList.toggle('mob', isMob());
+  document.documentElement.classList.toggle('mob-main', isMobMain());
+  document.documentElement.classList.toggle('mob-doc', isMob());   // case studies: their words re-set for a phone
+  addEventListener('resize', () => document.documentElement.classList.toggle('mob-main', isMobMain()));
+  // (the case studies' heights on a phone, where their design is drawn 1920/1440 of the width instead of 1250/1400)
+  addEventListener('DOMContentLoaded', () => document.querySelectorAll('.csDocHolder').forEach(h => {
+    const m = /1920\s*\/\s*([\d.]+)/.exec(h.style.getPropertyValue('--doc-ratio')); if (!m) return;
+    h.style.setProperty('--doc-ratio-mob', `1920 / ${(+m[1] * (1920 / 1440) / (1250 / 1400)).toFixed(2)}`);
+  }));
+  addEventListener('resize', () => document.documentElement.classList.toggle('mob', isMob()));
   const Q = Math.PI / 2;
   const WHEEL = 1.0;   // Lenis wheelMultiplier: one wheel notch moves the page 100px (1.2 felt too fast)
   // NOTCH = timeline steps per 120px of scroll on the desktop window these were tuned on (791px tall: 245px per
@@ -1288,10 +1375,10 @@
     const a = innerWidth / innerHeight;
     if (a >= 1) return;                                        // landscape: the whole 1920 x 1080 stage (frame())
     const p = Math.min(1, Math.max(0, S.u / STOP)), e = p * p * (3 - 2 * p), mix = (x, y) => x + (y - x) * e;
-    let w = mix(250, 380), h = w / a;
+    let w = mix(330, 380), h = w / a;
     const hMin = mix(560, 660);                               // squarer screens: keep the subject's full height
     if (h < hMin) { h = hMin; w = h * a; }
-    const cx = mix(918, 872), cy = mix(540, 632);
+    const cx = mix(955, 872), cy = mix(540, 632);
     svg.setAttribute('viewBox', `${cx - w / 2} ${cy - h / 2} ${w} ${h}`);
   }
 
@@ -1434,6 +1521,7 @@
   // phones (narrow or touch-only small screens): once the intro is over, the "work in progress" card, once per visit
   let wipDone = false;
   function wipShow() {
+    if (true) return;                                    // (phones have their own layout now: the "work in progress" card stays away)
     if (wipDone || !matchMedia('(max-width: 820px), (pointer: coarse) and (max-width: 1024px)').matches) return;
     wipDone = true;
     const c = document.getElementById('wipCard');
@@ -1460,11 +1548,18 @@
     let w = 0;
     function layout() {
       const L = left.getComputedTextLength(), R = right.getComputedTextLength(), W = heroWord.getComputedTextLength();
+      if (isMobMain()) {
+        left.setAttribute('x', CX - L / 2); left.setAttribute('y', 751);
+        const x1 = CX - (W + GAP + R) / 2;
+        heroWord.setAttribute('x', x1); heroWord.setAttribute('y', 754 + 58); right.setAttribute('x', x1 + W + GAP); right.setAttribute('y', 751 + 58);
+        return;
+      }
+      left.setAttribute('y', 751); heroWord.setAttribute('y', 754); right.setAttribute('y', 751);
       const x0 = CX - (L + GAP + W + GAP + R) / 2;
       left.setAttribute('x', x0); heroWord.setAttribute('x', x0 + L + GAP); right.setAttribute('x', x0 + L + GAP + W + GAP);
     }
     (document.fonts ? document.fonts.ready : Promise.resolve()).then(layout);
-    layout();
+    layout(); addEventListener('resize', layout);
     setInterval(() => {                                   // a straight swap, no fade
       if (!heroState.shown || hero.style.visibility === 'hidden') return;
       w = (w + 1) % WORDS.length; heroWord.textContent = WORDS[w]; layout();
@@ -1544,6 +1639,12 @@
     // windows wider than 16:9 leave a margin beside the 1920 stage: the figure keeps to the window's real left edge
     const fig = $('heroFig');
     const hugLeft = () => {
+      const fs = $('figSvg');
+      if (isMobMain()) {                                          // its own camera: the figure big enough, bottom left
+        const vw = 720, vh = vw * innerHeight / innerWidth;          // (the figure with its bubble: x 138-350, y 737-1047)
+        fs.setAttribute('viewBox', `108 ${1062 - vh} ${vw} ${vh}`); fig.setAttribute('transform', 'translate(0 0)'); return;
+      }
+      fs.setAttribute('viewBox', '0 0 1920 1080');
       const r = hero.getBoundingClientRect(), k = r.height / 1080;
       fig.setAttribute('transform', `translate(${-Math.max(0, (r.width / k - 1920) / 2)} 0)`);
     };
@@ -1716,18 +1817,21 @@
      a dark blurred copy of the picture with the sharp picture in the middle. */
   const WORK = [
     // kind: the kind of project; role: what I did; open: the colour of "Click to open project"
-    { img: 'assets/work-music.png', name: 'Music App', desc: 'For people who never needed sound to feel a song.',
+    { img: 'assets/work-music.png', fx: 0.72, name: 'Music App', desc: 'For people who never needed sound to feel a song.',
       kind: 'Inclusive Design', role: 'Role: Almost everything', open: '#F08A2C' },
-    { img: 'assets/work-hobby.png', name: 'P2P Hobby Sharing App', desc: 'Most hobbies die as ideas, with no one to start them with.',
+    { img: 'assets/work-hobby.png', fx: 0.5, name: 'P2P Hobby Sharing App', desc: 'Most hobbies die as ideas, with no one to start them with.',
       kind: 'Service Design', role: 'Role: Almost everything', open: '#1A1A3E' },
-    { img: 'assets/work-cybersmart.png', name: 'Cybersmart', desc: 'The dashboard that notices what people miss.',
+    { img: 'assets/work-cybersmart.png', fx: 0.56, name: 'Cybersmart', desc: 'The dashboard that notices what people miss.',
       kind: 'Industry Project', role: 'Role: Sole designer', open: '#1F9C7F' }
   ];
   const workPage = $('workPage'), wpStage = $('wpStage'), wpBody = $('wpBody'), wpCanvas = $('wpCanvas'), wpCtx = wpCanvas.getContext('2d');
-  const FR = { x: 532, y: 272, w: 856, h: 534, r: 16 };           // the frame round the picture, on the 1920x1080 stage
+  const FR = isMob() ? { x: 710, y: 190, w: 500, h: 700, r: 16 }   // a phone: narrower and taller (each picture cropped round its subject)
+    : { x: 532, y: 272, w: 856, h: 534, r: 16 };                   // the frame round the picture, on the 1920x1080 stage
   const PAD = 90;                                                  // room round it on the canvas for the swelling
   const CV = { x: FR.x - PAD, y: FR.y - PAD, w: FR.w + 2 * PAD, h: FR.h + 2 * PAD };
   const MW = CV.w / 2, MH = CV.h / 2;                              // grunge masks are worked out at half size
+  wpCanvas.width = CV.w; wpCanvas.height = CV.h;
+  Object.assign(wpCanvas.style, { left: CV.x + 'px', top: CV.y + 'px', width: CV.w + 'px', height: CV.h + 'px' });
   const work = { open: false, shown: -1, v: 0, ready: false };
   // a hand-drawn rounded outline: the rounded rectangle traced in many small steps with an uneven wobble; `bulge`
   // pushes the middle of every side outward (the frame swelling up while it scrolls)
@@ -1853,16 +1957,17 @@
   const maskCtx = maskCv.getContext('2d'), maskData = maskCtx.createImageData(MW, MH);
   const layerCv = document.createElement('canvas'); layerCv.width = CV.w; layerCv.height = CV.h;
   const layerCtx = layerCv.getContext('2d');
-  function cover(ctx, img, x, y, w, h) {                         // the picture filling a box, cropped to fit
+  function cover(ctx, img, x, y, w, h, fx = 0.5) {               // the picture filling a box, cropped to fit (round fx across)
     const k = Math.max(w / img.naturalWidth, h / img.naturalHeight), sw = w / k, sh = h / k;
-    ctx.drawImage(img, (img.naturalWidth - sw) / 2, (img.naturalHeight - sh) / 2, sw, sh, x, y, w, h);
+    const sx = Math.max(0, Math.min(img.naturalWidth - sw, img.naturalWidth * fx - sw / 2));
+    ctx.drawImage(img, sx, (img.naturalHeight - sh) / 2, sw, sh, x, y, w, h);
   }
   // each project's picture as sand: filling the frame (and the room it swells into), every pixel taken from a
   // neighbour a pixel or two away and lightened or darkened a touch, so it reads as coloured grains
   function buildProject(p, i) {
     const cv = document.createElement('canvas'); cv.width = CV.w; cv.height = CV.h;
     const c = cv.getContext('2d'), m = 44;
-    cover(c, p.image, PAD - m, PAD - m, FR.w + 2 * m, FR.h + 2 * m);
+    cover(c, p.image, PAD - m, PAD - m, FR.w + 2 * m, FR.h + 2 * m, p.fx);
     const src = c.getImageData(0, 0, CV.w, CV.h), out = c.createImageData(CV.w, CV.h), s = src.data, o = out.data;
     for (let y = 0; y < CV.h; y++) for (let x = 0; x < CV.w; x++) {
       const r1 = hash(x, y, 300 + i), r2 = hash(x, y, 400 + i), r3 = hash(x, y, 500 + i);
@@ -2066,7 +2171,13 @@
     if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); pushWork(-CHARGE * 0.35); }
   });
   function workLayout() {
-    const vw = innerWidth, vh = innerHeight, k = Math.min(vw / 1920, vh / 1080);
+    const vw = innerWidth, vh = innerHeight;
+    if (isMob()) {                                                // a phone: the upright frame and its writing fill the width
+      const k = Math.min((vw - 32) / 600, (vh - 300) / 760);
+      wpStage.style.transform = `translate(${vw / 2 - 975 * k}px, ${vh * 0.44 - 540 * k}px) scale(${k})`;
+      return;
+    }
+    const k = Math.min(vw / 1920, vh / 1080);
     wpStage.style.transform = `translate(${(vw - 1920 * k) / 2}px, ${(vh - 1080 * k) / 2}px) scale(${k})`;
   }
   function loadWork() {
@@ -2178,13 +2289,36 @@
   }
   // the open book (the planner picture, 1879 x 1194 at stage 0,0, the strap overhanging) fits between the menu bar and the bottom edge
   const AB_TOP = 96, AB_BOTTOM = 34;
+  // on a phone the open book is shown a page at a time, big enough to read: swipe sideways for the other page
+  let abSide = 0;
   function aboutLayout() {
+    if (isMob()) {
+      const vw = innerWidth, vh = innerHeight, k = Math.min((vw - 20) / 940, (vh - 150) / 1194);
+      const ox = (vw - 940 * k) / 2 - abSide * 940 * k, oy = Math.max(70, (vh - 1194 * k) / 2);
+      abStage.style.transform = `translate(${ox}px, ${oy}px) scale(${k})`;
+      return { k, ox, oy };
+    }
     const vw = innerWidth, vh = innerHeight, k = Math.min((vh - AB_TOP - AB_BOTTOM) / 1194, (vw - 60) / 1879) * 0.98;
     const ox = (vw - 1879 * k) / 2, oy = AB_TOP + (vh - AB_TOP - AB_BOTTOM - 1194 * k) / 2;
     abStage.style.transform = `translate(${ox}px, ${oy}px) scale(${k})`;
     return { k, ox, oy };
   }
+  function abTurnSide(s) {
+    if (!isMob() || s === abSide) return;
+    abSide = s; $('abSwipe').innerHTML = s ? '&larr; swipe back' : 'swipe for the next page &rarr;'; abStage.style.transition = 'transform 0.55s cubic-bezier(.4,0,.2,1)'; aboutLayout();
+    setTimeout(() => { abStage.style.transition = ''; }, 600);
+  }
+  {
+    let sx = null, sy = 0;
+    $('aboutPage').addEventListener('touchstart', e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+    $('aboutPage').addEventListener('touchend', e => {
+      if (sx === null) return; const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy; sx = null;
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) abTurnSide(dx < 0 ? 1 : 0);
+    }, { passive: true });
+  }
   function openAbout() {
+    document.documentElement.classList.add('ab-open');
+    abSide = 0; $('abSwipe').innerHTML = 'swipe for the next page &rarr;';
     if (about.open) return;
     if (!intro.entered) skipToMain();
     closeCase(); closeWork();
@@ -2213,6 +2347,7 @@
       .to('#abCover', { rotationY: -180, duration: 1, ease: 'power2.inOut' }, 0.15)                           // ...opening as it comes
       .set('#abLeaf', { zIndex: 2 }, 0.65)
       .to('#abRings, #abArrow', { opacity: 1, duration: 0.25, ease: 'none' }, 1)
+      .fromTo('#abBook .abShadow', { opacity: 0 }, { opacity: 1, duration: 0.5, ease: 'sine.out' }, 0.6)
       .call(() => flat(true));
   }
   const flat = on => { abBook.classList.toggle('flat', on); abBook.classList.toggle('p2', on && about.page === 1); };
@@ -2230,7 +2365,7 @@
   // fast: put it away at once (another page is opening); otherwise it closes and goes back onto the main page
   function closeAbout(fast, then) {
     if (!about.open) return false;
-    about.open = false; flat(false);
+    about.open = false; flat(false); document.documentElement.classList.remove('ab-open');
     if (!contact.open && !fast) document.documentElement.classList.remove('in-about');   // the site's grain comes back as the backdrop goes
     const tl = about.tl, done = () => {
       gsap.set(aboutPage, { autoAlpha: 0 }); if (!contact.open) document.documentElement.classList.remove('in-about');
@@ -2240,9 +2375,9 @@
     if (fast || !tl) { if (tl) tl.kill(); gsap.to(aboutPage, { autoAlpha: 0, duration: 0.35, ease: 'sine.inOut', onComplete: done }); return true; }
     tl.eventCallback('onReverseComplete', done);
     // on the second spread the page turns back first, then the cover closes
-    const back = about.page ? 0.4 : 0;
+    const back = about.page ? 0.75 : 0;
     if (about.page) { about.page = 0; gsap.to('#abLeaf', { rotationY: 0, duration: back, ease: 'power2.inOut', overwrite: true }); gsap.to('#abArrow', { opacity: 0, duration: 0.2 }); }
-    gsap.delayedCall(back, () => tl.timeScale(1.6).reverse());
+    gsap.delayedCall(back, () => tl.timeScale(1).reverse());   // closes at the same pace it opened
     return true;
   }
   aboutPage.addEventListener('click', e => {
@@ -2309,14 +2444,14 @@
     const done = () => { gsap.set(contactPage, { autoAlpha: 0 }); $('hpPhone').style.opacity = ''; if (!about.open) document.documentElement.classList.remove('in-about'); if (then) then(); };
     if (fast) { gsap.to(contactPage, { autoAlpha: 0, duration: 0.3, onComplete: done }); return true; }
     const hp = heroState.shown && !work.open && deskPose(document.querySelector('#hpPhone image'));
-    gsap.to('#contactPage .ctBg', { opacity: 0, duration: 0.4, ease: 'sine.inOut' });
+    gsap.to('#contactPage .ctBg', { opacity: 0, duration: 0.6, delay: 0.3, ease: 'sine.inOut' });
     if (hp && hp.h) {                                                        // put back down where it lay on the desk
       const cur = gsap.getProperty('#ctPhone', 'scale');
       gsap.set('#ctPhone', { x: 0, y: 0, scale: 1, rotation: 0 });
       const pr = $('ctPhone').getBoundingClientRect();
       gsap.set('#ctPhone', { scale: cur });
       gsap.to('#ctPhone', { x: hp.x - innerWidth / 2, y: hp.y - (pr.top + pr.height / 2), scale: hp.h / pr.height, rotation: hp.rot,
-        filter: 'drop-shadow(0px 2px 3px rgba(0,0,0,0.18))', duration: 0.55, ease: 'power3.inOut', onComplete: done });
+        filter: 'drop-shadow(0px 2px 3px rgba(0,0,0,0.18))', duration: 1.05, ease: 'power3.inOut', onComplete: done });   // the same pace as it came up
     } else gsap.to('#ctPhone', { y: innerHeight * 0.7, rotation: 8, duration: 0.6, ease: 'power2.in', onComplete: done });
     return true;
   }
@@ -2331,21 +2466,48 @@
   /* ---------- main page as a camera over one big canvas: each scroll step glides (about 1 s, eased) to the next
      object and snaps it into the middle, zoomed in; the other objects peek in at the edges. Overview -> laptop ->
      mug & phone -> notebook -> back to the overview. Clicking an object opens its page. ---------- */
+  // (a phone's layout = the desktop's, pulled in across (x0.62) and spread up and down (x1.3) about the middle)
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const MX = x => clamp(960 + (x - 960) * 0.66, 470, 1450), MY = y => clamp(540 + (y - 540) * 1.45, -300, 1380);   // (kept on the screen, at least half showing)
+  const CAM_MOB = [];
+  const NOTE_MOB = [null, [960, 0], [960, 0], [960, 0]];
+  const DESK_MOB = {};
   const PROPS = { hpLaptop: [959, 515], hpCup: [551.5, 504], hpPhone: [576, 584], hpBook: [1372, 539] };   // each image's own centre
   // per step, each prop's [x, y, rotation, scale] (of its centre, on the 1920 x 1080 page), the line's offset and the note
-  const CAM = [
-    { hpLaptop: [950, 482, -2, 1.2], hpCup: [420.3, 494, 4, 1.2], hpPhone: [442.9, 591.8, 4, 1.2], hpBook: [1490, 505, -7, 1.2], ly: 0 },
-    { hpLaptop: [960, 689, 0, 1.88], hpCup: [556, 3, 0, 1], hpPhone: [575, 95, 0, 0.9], hpBook: [1895, 645, 8, 1.3], ly: -423 },
-    { hpLaptop: [-105, 530, 15, 1.5], hpCup: [1925, 280, 0, 1], hpPhone: [1940, 390, 0, 0.9], hpBook: [958, 528, 2, 2.2], ly: 97 },
-    { hpLaptop: [-17, 1207, 0, 1.5], hpCup: [950, 721, 0, 1.38], hpPhone: [985, 840, 2, 1.25], hpBook: [560, -156, 2, 2], ly: -458 }
+  const CAM_DESK = [   // (each object keeps one size at every step)
+    { hpLaptop: [950, 482, -2, 1.2], hpCup: [423.5, 447.9, 4, 1.03], hpPhone: [442.9, 531.8, 4, 1.03], hpBook: [1490, 505, -7, 1.35], ly: 0 },
+    { hpLaptop: [960, 760, 0, 1.2], hpCup: [555.6, 11.1, 0, 1.03], hpPhone: [575, 95, 0, 1.03], hpBook: [1895, 645, 8, 1.35], ly: -440 },
+    { hpLaptop: [-105, 530, 15, 1.2], hpCup: [1920.6, 306.1, 0, 1.03], hpPhone: [1940, 390, 0, 1.03], hpBook: [958, 528, 2, 1.35], ly: 60 },
+    { hpLaptop: [-17, 1207, 0, 1.2], hpCup: [965.6, 756.1, 2, 1.03], hpPhone: [985, 840, 2, 1.03], hpBook: [560, -10, 2, 1.35], ly: -220 }
   ];
-  const DESK = {   // (kept clear of the logo, the menu and the figure in the corners)
-    paper:      [[540, 15, -12],  [1300, 10, 8],    [1150, 1060, -6], [1880, 430, 14]],
+  const DESK_DESK = {   // (kept clear of the logo, the menu and the figure in the corners)
+    paper:      [[540, 55, -12],  [1130, 55, 8],    [1150, 1060, -6], [1880, 430, 14]],
     camera:     [[1880, 430, 18], [35, 470, -15],   [1850, 970, 10],  [1810, 1010, -10]],
-    sketchbook: [[1820, 1010, -8],[1790, 1040, 12], [620, 15, -14],   [40, 560, 8]],
+    sketchbook: [[1820, 1010, -8],[1790, 1040, 12], [620, 55, -14],   [40, 560, 8]],
     scissors:   [[1100, 1060, 20],[380, 1065, -25], [1880, 690, 30],  [1380, 1065, -15]],
-    marker:     [[25, 400, 70],   [840, 12, -60],   [1320, 15, 100],  [1180, 15, -80]]
+    marker:     [[25, 400, 70],   [840, 55, -60],   [1320, 55, 100],  [1180, 55, -80]]
   }, SPIN = { paper: 1, camera: -1, sketchbook: 1, scissors: -1, marker: 1 };
+  // the side objects sit on the page's edges, half on and half off (each centred on its nearest edge)
+  for (const n in DESK_DESK) DESK_DESK[n] = DESK_DESK[n].map(([x, y, r], step) => {
+    if (step !== 0) return [x, y, r];                                        // (only the first view; the other steps as they were)
+    const d = [x, 1920 - x, y, 1080 - y], e = d.indexOf(Math.min(...d));
+    const im = document.querySelector(`#dk-${n} image`), h = +(im && im.getAttribute('height')) || 0, w = +(im && im.getAttribute('width')) || 0;
+    const top = step === 0 ? -0.1 * h : -0.2 * h;                            // along the top: 60% off on the first view, 70% after
+    return e === 0 ? [0, y, r] : e === 1 ? [1920, y, r] : e === 2 ? [x, top, r] : [x, 1080, r];   // sides and bottom: half off
+  });
+  let CAM = CAM_DESK, DESK = DESK_DESK;
+  CAM_DESK.forEach((c, i) => {
+    const m = {};
+    for (const k of ['hpLaptop', 'hpBook', 'hpPhone', 'hpCup']) m[k] = [MX(c[k][0]), MY(c[k][1]), c[k][2], c[k][3] * 0.85];
+    const cup = [c.hpCup[0] - c.hpPhone[0], c.hpCup[1] - c.hpPhone[1]];          // the mug keeps its place on the phone
+    m.hpCup[0] = m.hpPhone[0] + cup[0] * 0.85; m.hpCup[1] = m.hpPhone[1] + cup[1] * 0.85;
+    m.ly = 540 + (751 + c.ly - 540) * 1.45 - 751;
+    // each note under its object (the object in the middle of that step)
+    const focus = [null, 'hpLaptop', 'hpBook', 'hpPhone'][i], half = { hpLaptop: 163, hpBook: 123, hpPhone: 74 }[focus];
+    if (focus) m.note = [960, m[focus][1] + half * m[focus][3] + 40];
+    CAM_MOB.push(m);
+  });
+  for (const n in DESK_DESK) DESK_MOB[n] = DESK_DESK[n].map(([x, y, r]) => [MX(x), MY(y), r]);
   const NOTES = [null, 'hnLaptop', 'hnBook', 'hnMug'], NS = CAM.length, SLIDE = 125;   // how far the mug slides off the phone
   /* The scroll is in the visitor's hands: the wheel / finger moves a target along the steps (about 4 notches a step),
      the canvas follows it softly and every prop trails a little behind at its own pace, tilting as it drifts, so
@@ -2353,11 +2515,26 @@
      going), and that step's note and figure appear. */
   const cam = { pos: 0, target: 0, vel: 0, lastIn: 0, catching: false, absorb: false, absorbSeen: false, lag: {}, lift: 0, shown: null, ex: 0, ey: 0, t: 0 };
   // the mug and the phone travel together (same pace, same bob)
-  const LAG = { hpLaptop: 0.075, hpBook: 0.062, hpCup: 0.07, hpPhone: 0.07, line: 0.07 }, BOB = { hpLaptop: 0, hpBook: 2.1, hpCup: 4.2, hpPhone: 4.2 };
+  const LAG = { hpLaptop: 0.075, hpBook: 0.062, hpCup: 0.07, hpPhone: 0.07, line: 0.07, desk: 0.06 }, BOB = { hpLaptop: 0, hpBook: 2.1, hpCup: 4.2, hpPhone: 4.2 };
   for (const k in LAG) cam.lag[k] = 0;
   const mod = a => ((a % NS) + NS) % NS, smooth = x => x * x * (3 - 2 * x);
-  const edges = () => { const hb = hero.getBoundingClientRect(), k = Math.min(hb.width / 1920, hb.height / 1080) || 1;
-    cam.ex = Math.max(0, (hb.width / k - 1920) / 2); cam.ey = Math.max(0, (hb.height / k - 1080) / 2); };
+  const edges = () => {
+    const mob = isMobMain();
+    CAM = mob ? CAM_MOB : CAM_DESK; DESK = mob ? DESK_MOB : DESK_DESK;
+    if (mob) {                                                    // the phone's window on the stage
+      const b = mobBox(); $('heroSvg').setAttribute('viewBox', `${b.x} ${b.y} ${b.w} ${b.h}`);
+      cam.ex = 0; cam.ey = 0;                                     // (the phone layout already reaches its edges)
+      // the notes sit under the object in the middle (their arrows were drawn for the desktop layout)
+      [1, 2, 3].forEach(i => { const g = $(NOTES[i]), n = CAM[i].note; if (!g || !n) return;
+        g.removeAttribute('transform'); const bb = g.getBBox(); g.setAttribute('transform', `translate(${n[0] - bb.x - bb.width / 2} ${n[1] - bb.y})`); });
+    } else {
+      $('heroSvg').setAttribute('viewBox', '0 0 1920 1080');
+      const desk = { hnLaptop: 'translate(-129 71)', hnBook: 'translate(85 0)', hnMug: 'translate(-14 0)' };
+      for (const k in desk) $(k).setAttribute('transform', desk[k]);
+      const hb = hero.getBoundingClientRect(), k = Math.min(hb.width / 1920, hb.height / 1080) || 1;
+      cam.ex = Math.max(0, (hb.width / k - 1920) / 2); cam.ey = Math.max(0, (hb.height / k - 1080) / 2);
+    }
+  };
   const at = (i, id) => { let [x, y, r, s] = CAM[i][id];
     if (i) { x += x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0; y += y < 150 ? -cam.ey : y > 930 ? cam.ey : 0; }   // peeking props stay at the real edges
     return [x, y, r, s]; };
@@ -2386,10 +2563,10 @@
       $(id).setAttribute('transform', `translate(${x} ${y}) rotate(${r}) scale(${s}) translate(${-c[0]} ${-c[1]})`);
     }
     for (const n in DESK) {
-      const p = cam.lag.line, [x0, y0, r] = between(p, i => { const [x, y, rr] = DESK[n][i];
+      const p = cam.lag.desk, [x0, y0, r] = between(p, i => { const [x, y, rr] = DESK[n][i];
         return [x + (x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0), y + (y < 150 ? -cam.ey : y > 930 ? cam.ey : 0), rr]; });
-      const frac = p - Math.floor(p), spin = SPIN[n] * 360 * frac;            // one full turn per move, as fast as the scroll
-      $('dk-' + n).setAttribute('transform', `translate(${x0} ${y0}) rotate(${r + spin})`);
+      const frac = p - Math.floor(p), spin = SPIN[n] * 360 * smooth(frac);   // one whole turn per move (so it lands at the same angle), slow at the start and the end
+      $('dk-' + n).setAttribute('transform', `translate(${x0} ${y0}) rotate(${r + spin})${isMobMain() ? ' scale(0.85)' : ''}`);
     }
     $('heroLineMove').setAttribute('transform', `translate(0 ${between(cam.lag.line, i => [CAM[i].ly])[0]})`);
     const step = mod(Math.round(cam.pos)), near = Math.max(0, 1 - Math.abs(cam.pos - Math.round(cam.pos)) * 5);
@@ -2414,17 +2591,17 @@
     if (!heroState.shown) return;
     const f = Math.min(3, dt / 16.67);                                      // frame-rate independent easing
     cam.t = time;
-    const arrived = Math.abs(cam.target - cam.pos) < 0.04 && Object.values(cam.lag).every(v => Math.abs(cam.target - v) < 0.06);
+    const arrived = Math.abs(cam.target - cam.pos) < 0.04 && Object.entries(cam.lag).every(([k, v]) => k === 'desk' || Math.abs(cam.target - v) < 0.06);   // (the notes don't wait for the side objects)
     if (cam.catching && arrived) {
       cam.catching = false; cam.absorb = true; cam.absorbSeen = false;       // the next scroll is spent here (the note shows)
     }
     if (cam.absorb && cam.absorbSeen && performance.now() - cam.lastIn > 160) cam.absorb = cam.absorbSeen = false;   // that scroll is over
     if (performance.now() - cam.lastIn > 90 && cam.vel) {
-      advance(cam.vel * f); cam.vel *= Math.pow(0.9, f);
+      advance(cam.vel * f); cam.vel *= Math.pow(0.94, f);   // carries on a little longer (a glide)
       if (Math.abs(cam.vel) < 0.0015) { cam.vel = 0; if (Math.abs(cam.target - Math.round(cam.target)) < 0.015) cam.target = Math.round(cam.target); }
     }
     // quick on the way, easing off as an object comes in: the last stretch before it slows right down
-    const gap = Math.abs(cam.target - cam.pos), ease = cam.catching ? 0.018 + 0.032 * Math.min(1, gap / 0.6) : 0.045;
+    const gap = Math.abs(cam.target - cam.pos), ease = cam.catching ? 0.018 + 0.032 * Math.min(1, gap / 0.6) : 0.06;   // arriving: as it always was; on the way: keeps up with the scroll's own speed
     cam.pos += (cam.target - cam.pos) * (1 - Math.pow(1 - ease, f));
     const lagK = cam.catching ? 0.6 + 0.4 * Math.min(1, gap / 0.6) : 1;      // the props settle in with it, not after it
     for (const k in LAG) cam.lag[k] += (cam.pos - cam.lag[k]) * (1 - Math.pow(1 - LAG[k] * (cam.catching ? Math.max(lagK, 1.4 - lagK) : 1), f));
@@ -2454,7 +2631,7 @@
     if (cam.catching) return;                                                  // gliding in: scrolling waits
     if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = now; return; }       // the one scroll of rest on an object
     advance(d);
-    if (!cam.catching) cam.vel = cam.vel * 0.5 + d * 0.03 * gain;            // the bigger the scroll, the further it carries
+    if (!cam.catching) cam.vel = cam.vel * 0.6 + d * 0.04 * gain;            // the bigger the scroll, the further it carries
     cam.lastIn = now;
   } });
   function camGo(i, instant) {
@@ -2473,18 +2650,13 @@
   $('heroProps').addEventListener('click', e => {
     const g = e.target.closest('[data-open]'); if (!g || !mainActive()) return;
     const want = { work: 1, about: 2, contact: 3 }[g.dataset.open];
-    if (cam.shown !== want) { camGo(want); return; }
+    hideNotes();
     if (g.dataset.open === 'about') return openAbout();
     if (g.dataset.open === 'contact') return openContact(true);
-    // Work grows out of the laptop's screen and fills the window
-    const r = document.querySelector('#heroScreen image').getBoundingClientRect();
-    openWork();
-    gsap.killTweensOf(workPage);
-    gsap.fromTo(workPage, { autoAlpha: 0.4, x: r.left, y: r.top, scaleX: r.width / innerWidth, scaleY: r.height / innerHeight, transformOrigin: '0 0' },
-      { autoAlpha: 1, x: 0, y: 0, scaleX: 1, scaleY: 1, duration: 1, ease: 'power3.inOut', clearProps: 'transform' });
+    openWork();                                                     // (the same smooth fade as the menu's "work")
   });
   camDraw();
-  edges(); addEventListener('resize', edges);
+  edges(); addEventListener('resize', () => { edges(); camDraw(); });
 
   /* ---------- case studies: a click on a project's picture (or its "Click to open project") opens its page ----
      Only the Music App has one so far. It opens over the Work page; Escape (or the browser's back) returns to it. */
@@ -2517,6 +2689,515 @@
   // hero, which the page draws itself), put in the page inline and scaled to the page's width. Its pictures load
   // only as they come near the screen (lazy): each <image> keeps its file in data-href until then.
   const CUT = 1100;
+  /* ---------- the case studies on a phone ----------
+     The design is one big drawing (its words are drawn shapes, not text), so on a phone it is cut into its blocks -
+     rows, then the columns in each row, then rows in those, ... - and the blocks are stacked in one column, in reading
+     order. A block of pictures or drawings is shown at the phone's width (or a little less, if it is small); a block
+     that is only words is re-set: its letter shapes are taken word by word and wrapped again to the phone's width, at
+     12px. Everything is drawn from the one design (each block is a window onto it). */
+  const MOB_TEXT_PX = 12, MOB_HEAD_PX = 15, MOB_PAD = 16, MOB_CASE = true;            // MOB_CASE: re-lay the case studies for phones
+  function pathSubs(d) {                                          // a path's outlines, each with its box (absolute)
+    const tok = d.match(/[MmLlHhVvCcSsQqTtAaZz]|-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/g) || [];
+    const subs = []; let i = 0, cmd = '', x = 0, y = 0, sx = 0, sy = 0, cur = null;
+    const num = () => +tok[i++];
+    const grow = (px, py) => { if (!cur) return; if (px < cur.x0) cur.x0 = px; if (px > cur.x1) cur.x1 = px; if (py < cur.y0) cur.y0 = py; if (py > cur.y1) cur.y1 = py; };
+    while (i < tok.length) {
+      if (/[A-Za-z]/.test(tok[i])) cmd = tok[i++];
+      else if (!cmd) { i++; continue; }
+      const rel = cmd === cmd.toLowerCase(), C = cmd.toUpperCase();
+      if (C === 'Z') { x = sx; y = sy; if (cur) cur.out.push('Z'); cmd = ''; continue; }
+      if (C === 'M') {
+        const nx = num() + (rel ? x : 0), ny = num() + (rel ? y : 0);
+        x = sx = nx; y = sy = ny;
+        cur = { x0: x, y0: y, x1: x, y1: y, out: [`M${+x.toFixed(2)} ${+y.toFixed(2)}`] }; subs.push(cur);
+        cmd = rel ? 'l' : 'L'; continue;
+      }
+      const n = { L: 2, H: 1, V: 1, C: 6, S: 4, Q: 4, T: 2, A: 7 }[C]; if (!n) { i++; continue; }
+      const a = []; for (let k = 0; k < n; k++) a.push(num());
+      if (a.some(isNaN)) break;
+      if (cur) cur.out.push(cmd + a.join(' '));
+      if (C === 'H') { x = a[0] + (rel ? x : 0); grow(x, y); continue; }
+      if (C === 'V') { y = a[0] + (rel ? y : 0); grow(x, y); continue; }
+      if (C === 'A') { x = a[5] + (rel ? x : 0); y = a[6] + (rel ? y : 0); grow(x, y); continue; }
+      for (let k = 0; k < n; k += 2) grow(a[k] + (rel ? x : 0), a[k + 1] + (rel ? y : 0));
+      x = a[n - 2] + (rel ? x : 0); y = a[n - 1] + (rel ? y : 0);
+    }
+    return subs.map(s => ({ x0: s.x0, y0: s.y0, x1: s.x1, y1: s.y1, d: s.out.join('') }));
+  }
+  const median = a => { if (!a.length) return 0; const s = [...a].sort((p, q) => p - q); return s[s.length >> 1]; };
+  // a block of words: lines (by height), words (by gaps), paragraphs (by bigger line gaps)
+  function readWords(paths) {
+    const glyphs = [];
+    paths.forEach(p => pathSubs(p.el.getAttribute('d')).forEach(s => {
+      const m = p.m, X = [s.x0 * m.a + m.e, s.x1 * m.a + m.e], Y = [s.y0 * m.d + m.f, s.y1 * m.d + m.f];
+      glyphs.push({ ...s, p, x0: Math.min(...X), x1: Math.max(...X), y0: Math.min(...Y), y1: Math.max(...Y) });
+    }));
+    if (glyphs.length < 3) return null;
+    glyphs.sort((a, b) => a.x0 - b.x0);
+    for (let i = 0; i < glyphs.length; i++) {
+      const a = glyphs[i]; if (a.gone) continue;
+      for (let j = i + 1; j < glyphs.length && glyphs[j].x0 <= a.x1 + 0.4; j++) {
+        const b = glyphs[j]; if (b.gone || b.p !== a.p) continue;
+        if (b.y0 <= a.y1 + 0.4 && b.y1 >= a.y0 - 0.4) {
+          a.x0 = Math.min(a.x0, b.x0); a.x1 = Math.max(a.x1, b.x1); a.y0 = Math.min(a.y0, b.y0); a.y1 = Math.max(a.y1, b.y1);
+          a.d += b.d; b.gone = true; j = i;                                    // (the letter grew: look again)
+        }
+      }
+    }
+    for (let i = glyphs.length - 1; i >= 0; i--) if (glyphs[i].gone) glyphs.splice(i, 1);
+    const hmed = median(glyphs.map(g => g.y1 - g.y0)) || 1;
+    const mains = glyphs.filter(g => g.y1 - g.y0 >= hmed * 0.55).sort((a, b) => (a.y0 + a.y1) - (b.y0 + b.y1));
+    // lines: glyphs whose heights overlap well belong together (capitals and small letters share most of their height)
+    const lines = [];
+    mains.forEach(g => {
+      const h = g.y1 - g.y0;
+      const L = lines.find(L => Math.min(g.y1, L.bot) - Math.max(g.y0, L.top) > Math.min(h, L.bot - L.top) * 0.5);
+      if (L) { L.g.push(g); L.top = Math.min(L.top, g.y0); L.bot = Math.max(L.bot, g.y1); } else lines.push({ g: [g], top: g.y0, bot: g.y1 });
+    });
+    lines.forEach(L => { L.c = median(L.g.map(g => g.y1)); });
+    glyphs.filter(g => g.y1 - g.y0 < hmed * 0.55).forEach(g => {           // dots, commas, dashes: to the nearest line
+      const c = (g.y0 + g.y1) / 2; let best = null, bd = Infinity;
+      lines.forEach(L => { const dd = c < L.top ? L.top - c : c > L.bot ? c - L.bot : 0; if (dd < bd) { bd = dd; best = L; } });
+      if (best && bd < hmed * 1.2) best.g.push(g);
+    });
+    lines.sort((a, b) => a.c - b.c);
+    const lineH = median(lines.map(L => L.bot - L.top));
+    let pitch = median(lines.slice(1).map((L, k) => L.c - lines[k].c));
+    if (!pitch || pitch < lineH * 0.9) pitch = lineH * 1.45;
+    // not words at all (dashes, dots, filled drawings): tiny pieces, or few to a line
+    if (hmed < 4.5 || lineH < 6 || glyphs.length / lines.length < 3) return null;
+    const spread = pitch > lineH * 2.6;                                    // lines far apart: separate items, not a paragraph
+    if (spread) pitch = lineH * 1.45;
+    const fsz = Math.min(hmed / 0.42, Math.max(hmed / 0.75, pitch / 1.42, lineH / 1.25));   // the type size, in the design's units
+    const gapW = Math.max(fsz * 0.17, 1.6);
+    // words per line; a wide gap in a line means a second column beside it: each column is read on its own, left first
+    const cols = [];                                                       // each: its left edge, and its lines' words
+    lines.forEach(L => {
+      const gs = L.g.sort((a, b) => a.x0 - b.x0), segs = []; let w = null, seg = null;
+      gs.forEach(g => {
+        if (w && g.x0 - w.x1 <= gapW) { w.g.push(g); w.x1 = Math.max(w.x1, g.x1); return; }
+        if (!seg || (w && g.x0 - w.x1 > Math.max(fsz * 2.4, 36))) { seg = { x0: g.x0, words: [], c: L.c }; segs.push(seg); }
+        w = { g: [g], x0: g.x0, x1: g.x1, top: L.top, bot: L.bot }; seg.words.push(w);
+      });
+      segs.forEach(s => {
+        let col = cols.find(c => Math.abs(c.x0 - s.x0) < fsz * 6);
+        if (!col) { col = { x0: s.x0, lines: [] }; cols.push(col); }
+        col.lines.push(s);
+      });
+    });
+    cols.sort((p, q) => p.x0 - q.x0);
+    const out = [];
+    cols.forEach(col => { let para = null, last = null;
+      col.lines.forEach(s => {
+        if (!para || s.c - last > pitch * 1.6) { para = []; out.push(para); }
+        para.push(...s.words); last = s.c;
+      });
+    });
+    return { paras: out, fsz, pitch };
+  }
+  function mobileCase(page, svg) {
+    const holder = page.querySelector('.csDocHolder'), NSV = 'http://www.w3.org/2000/svg';
+    const all = document.createElementNS(NSV, 'g'); all.id = 'csAll-' + page.id;
+    const rootPaint = ['fill', 'stroke', 'stroke-width', 'fill-rule'].map(a => svg.getAttribute(a) ? ` ${a}="${svg.getAttribute(a)}"` : '').join('');
+    [...svg.childNodes].filter(n => !(n.tagName === 'defs')).forEach(n => all.appendChild(n)); svg.appendChild(all);
+    const toRoot = svg.getScreenCTM().inverse();
+    const ends = [];
+    svg.querySelectorAll('path, line, polyline').forEach(el => {
+      if (el.closest('defs, clipPath, mask, pattern')) return;
+      const da = el.getAttribute('stroke-dasharray') || getComputedStyle(el).strokeDasharray;
+      if (!da || da === 'none') return;
+      try { const m = toRoot.multiply(el.getScreenCTM()), L = el.getTotalLength();
+        [0, L].forEach(at => { const p = el.getPointAtLength(at); ends.push([p.x * m.a + p.e * 0 + m.e, p.y * m.d + m.f]); }); } catch (e) {}
+      el._conn = true;
+    });
+    // connectors drawn as shapes (each dash its own little piece): long, thin and made only of small bits
+    const conn = [];
+    svg.querySelectorAll('path').forEach(el => {
+      if (el.closest('defs, clipPath, mask, pattern') || el._conn) return;
+      const fl = el.getAttribute('fill'); if (!fl || fl === 'none' || /url/.test(fl)) return;
+      const s = pathSubs(el.getAttribute('d') || ''); if (s.length < 6) return;
+      const big = s.filter(q => Math.max(q.x1 - q.x0, q.y1 - q.y0) > 14).length;
+      if (big > 2) return;                                                   // (an arrowhead or two at most)
+      let b; try { b = el.getBBox(); } catch (e) { return; }
+      if (Math.max(b.width, b.height) < 40) return;
+      const dashes = s.filter(q => { const w = q.x1 - q.x0, h = q.y1 - q.y0; return Math.max(w, h) <= 10 && (w > h * 1.8 || h > w * 1.8); }).length;
+      if (dashes < s.length * 0.6) return;
+      const m = toRoot.multiply(el.getScreenCTM());
+      conn.push({ x0: b.x * m.a + m.e, y0: b.y * m.d + m.f, x1: (b.x + b.width) * m.a + m.e, y1: (b.y + b.height) * m.d + m.f });
+      el._conn = true;
+    });
+    const items = [];
+    svg.querySelectorAll('path, rect, circle, ellipse, line, polyline, polygon, image, text').forEach(el => {
+      if (el.closest('defs, clipPath, mask, pattern, symbol, marker')) return;
+      if (el.closest('[display="none"]') || el.getAttribute('opacity') === '0') return;
+      if (el.getAttribute('display') === 'none') return;
+      const fl = el.getAttribute('fill'), st = el.getAttribute('stroke');
+      if (el.tagName !== 'text' && el.tagName !== 'image') { const cs = getComputedStyle(el); if ((cs.fill === 'none' || +cs.fillOpacity === 0) && (cs.stroke === 'none' || +cs.strokeOpacity === 0)) return; }   // nothing drawn (frames)
+      let b; try { b = el.getBBox(); } catch (e) { return; }
+      if (!b.width && !b.height) return;
+      const m = toRoot.multiply(el.getScreenCTM());
+      const X = [b.x * m.a + m.e, (b.x + b.width) * m.a + m.e], Y = [b.y * m.d + m.f, (b.y + b.height) * m.d + m.f];
+      const it = { el, m, x0: Math.min(...X), x1: Math.max(...X), y0: Math.min(...Y), y1: Math.max(...Y) };
+      if (it.x1 - it.x0 > 1500 && it.y1 - it.y0 > 1500) return;              // the page itself
+      if (it.y1 < CUT || it.x1 < 0 || it.x0 > 1920) return;
+      // a dot or an arrowhead at the end of a connector (gone with it)
+      const cx = (it.x0 + it.x1) / 2, cy = (it.y0 + it.y1) / 2;
+      if (Math.max(it.x1 - it.x0, it.y1 - it.y0) < 26 && (ends.some(([x, y]) => Math.abs(x - cx) < 24 && Math.abs(y - cy) < 24) ||
+        conn.some(c => cx > c.x0 - 18 && cx < c.x1 + 18 && cy > c.y0 - 18 && cy < c.y1 + 18 &&
+          Math.min(Math.abs(cx - c.x0), Math.abs(cx - c.x1), Math.abs(cy - c.y0), Math.abs(cy - c.y1)) < 18))) el._conn = true;
+      if (el._conn) it.conn = true;
+      items.push(it);
+    });
+    // cut into blocks: rows by the empty bands across, then columns by the empty bands down, and so on
+    const box = its => ({ x0: Math.min(...its.map(i => i.x0)), x1: Math.max(...its.map(i => i.x1)), y0: Math.min(...its.map(i => i.y0)), y1: Math.max(...its.map(i => i.y1)) });
+    function split(its, ax, gap) {
+      const a0 = ax ? 'x0' : 'y0', a1 = ax ? 'x1' : 'y1', s = [...its].sort((p, q) => p[a0] - q[a0]), groups = [];
+      let g = null, end = -Infinity;
+      s.forEach(i => { if (!g || i[a0] - end > gap) { g = []; groups.push(g); end = i[a1]; } else end = Math.max(end, i[a1]); g.push(i); });
+      return groups;
+    }
+    // character sketches side by side stay side by side (with the little labels under them): that part is kept whole
+    // and only scaled down; everything else is cut and stacked
+    const DEV = deviceBoxes(svg);
+    // a character: a tall, narrow line drawing (a body), drawn in ink
+    const drawing = i => {
+      if (!/^(path|line|ellipse|polyline)$/.test(i.el.tagName) || isGlyphs(i)) return false;
+      const w = i.x1 - i.x0, h = i.y1 - i.y0, st = i.el.getAttribute('stroke'), fl = i.el.getAttribute('fill');
+      const ink = (st && st !== 'none') || /csInk/.test(i.el.getAttribute('class') || '') || /^#(1C1C1E|080808|1F1D1A|2B2925)$|^black$/i.test(fl || '');
+      return ink && h > 60 && h > w * 1.6;
+    };
+    const hasSk = its => {                                                // line drawings (no photos, no phone/laptop screens)
+      if (its.some(i => i.el.tagName === 'image' || /url\(#pattern/.test(i.el.getAttribute('fill') || ''))) return false;
+      const b = box(its); if (DEV.some(d => d.x0 < b.x1 && d.x1 > b.x0 && d.y0 < b.y1 && d.y1 > b.y0)) return false;
+      return its.some(drawing);
+    };
+    const keep = its => { its.keep = true; return its; };
+    const figures = its => { const xs = its.filter(drawing).map(i => (i.x0 + i.x1) / 2).sort((a, b) => a - b); let n = 0, last = -1e9;
+      xs.forEach(x => { if (x - last > 120) n++; last = x; }); return n; };   // characters standing apart, side by side
+    function grid(its, gy, gx) {
+      its = its.filter(i => !(i.y1 - i.y0 < 4 && i.x1 - i.x0 > 300));             // (rules across are left out)
+      const rows = split(its, 0, gy).filter(r => box(r).y1 - box(r).y0 > 6);
+      if (rows.length < 2 || rows.length > 4) return null;
+      const cs = rows.map(r => split(r, 1, gx));
+      const n = cs[0].length; if (n < 3 || cs.some(c => c.length !== n)) return null;
+      for (let k = 0; k < n; k++) if (cs.some(c => Math.abs(box(c[k]).x0 - box(cs[0][k]).x0) > 60)) return null;
+      return cs[0].map((_, k) => cs.flatMap(c => c[k]));
+    }
+    function cut(its, depth, gy = 26, gx = 34) {
+      const gr = !its.keep && grid(its, gy, gx);
+      if (gr) return gr.flatMap(c => cut(c, depth + 1, gy, gx));
+      const rows = split(its, 0, gy);
+      if (rows.length > 1) {
+        const out = [];
+        for (let i = 0; i < rows.length; i++) {
+          // two or three rows that together make a grid
+          let g = null;
+          for (let n = 3; n >= 2 && !g; n--) if (i + n <= rows.length) { const span = rows.slice(i, i + n).flat(); if (box(span).y1 - box(span).y0 < 420) { g = grid(span, gy, gx); if (g) { out.push(...g.flatMap(c => cut(c, depth + 1, gy, gx))); i += n - 1; } } }
+          if (g) continue;
+          if (split(rows[i], 1, gx).filter(hasSk).length < 2 || !rows[i].some(drawing)) { out.push(...cut(rows[i], depth + 1, gy, gx)); continue; }
+          const merged = [...rows[i]];
+          while (i + 1 < rows.length) {                                  // the labels just under the figures come too
+            const nb = box(rows[i + 1]), mb = box(merged);
+            if (hasSk(rows[i + 1]) || nb.y0 - mb.y1 > 140 || nb.y1 - nb.y0 > 90 || nb.x0 < mb.x0 - 80 || nb.x1 > mb.x1 + 80) break;
+            merged.push(...rows[++i]);
+          }
+          out.push(keep(merged));
+        }
+        return out;
+      }
+      const cols = split(its, 1, gx);
+      if (cols.length > 1 && depth < 60) {
+        const sk = cols.map((c, k) => hasSk(c) ? k : -1).filter(k => k >= 0);
+        if (sk.length >= 2) {
+          const a = sk[0], z = sk[sk.length - 1];
+          return [...cols.slice(0, a).flatMap(c => cut(c, depth + 1, gy, gx)), keep(cols.slice(a, z + 1).flat()),
+            ...cols.slice(z + 1).flatMap(c => cut(c, depth + 1, gy, gx))];
+        }
+        return cols.flatMap(c => cut(c, depth + 1, gy, gx));
+      }
+      if (figures(its) >= 2) {
+        if (gy > 12 && split(its, 0, 12).length > 1) return cut(its, depth + 1, 12, gx);
+        if (box(its).y1 - box(its).y0 < 700) return [keep(its)];
+      }
+      return [its];
+    }
+    const W = holder.clientWidth - 2 * MOB_PAD, base = W / 1400;
+    const textLike = el => {
+      if (el._tl !== undefined) return el._tl;
+      const s = pathSubs(el.getAttribute('d') || ''); if (s.length < 4) return (el._tl = false);
+      const hs = s.map(q => q.y1 - q.y0), ws = s.map(q => q.x1 - q.x0), h = median(hs), w = median(ws);
+      return (el._tl = h >= 4 && h <= 60 && w <= h * 2.2 && w >= h * 0.12);
+    };
+    const isGlyphs = i => i.el.tagName === 'path' && i.el.getAttribute('fill') && i.el.getAttribute('fill') !== 'none' && textLike(i.el) &&
+      (!i.el.getAttribute('stroke') || i.el.getAttribute('stroke') === 'none') && !i.el.classList.contains('csInkFill') &&
+      ((i.el.getAttribute('d') || '').match(/M/gi) || []).length >= 3 && i.y1 - i.y0 < 600;
+    const textSize = its => { const g = its.filter(isGlyphs); if (!g.length) return 0; const r = readWords(g); return r ? r.fsz : 0; };
+    const small = its => { const b = box(its), fz = textSize(its); return fz && !its.every(isGlyphs) && fz * Math.min(W / (b.x1 - b.x0), 12 / fz) < 11; };
+    /* Laid out at one scale - the design's body text at 12px - and shown just as it is drawn wherever it fits the
+       phone's width; only what is too wide is taken apart: into its rows, then the things side by side in a row
+       (which wrap onto the next line), and last a paragraph's words are re-set. Headings and words sit on the left. */
+    const stack = document.createElement('div'); stack.className = 'csStack';
+    holder.appendChild(stack); svg.classList.add('csSource');
+    const devs = deviceBoxes(svg);                                   // (already in the design's own units)
+    const hasDevice = b => devs.some(d => d.x0 < b.x1 && d.x1 > b.x0 && d.y0 < b.y1 && d.y1 > b.y0);
+    const k0 = MOB_TEXT_PX / BODY_DESIGN, maxW = W / k0;
+    const textOnly = its => its.every(i => isGlyphs(i) || i.el.tagName === 'text');
+    const gapOf = (p, n) => Math.max(8, Math.min(48, (box(n).y0 - box(p).y1) * k0)) + 'px';
+    function group(nodes, row) { const d = document.createElement('div'); d.className = row ? 'csRow' : 'csCol'; nodes.forEach(n => d.appendChild(n)); return d; }
+    function leaf(its, k) {
+      const b = box(its), el = makeTile({ ...b, its }, k, 0);
+      el.style.marginLeft = '';
+      if (!textOnly(its) && (b.x0 + b.x1) / 2 > 1150 && (b.x1 - b.x0) * k < W * 0.75) el.classList.add('csRight');   // (as drawn: on the right)
+      return el;
+    }
+    /* The words are taken out of the design and set for the phone - headings, paragraphs, and the cards, bubbles and
+       notes that hold them - in reading order; everything else (drawings with their own little labels, characters,
+       pictures, screens) stays as on the desktop, at its scale and place, in the bands between the words. */
+    const kd = W / 1400;                                               // the desktop design's scale on this phone
+    const inside = (p, q, m = 2) => p.x0 >= q.x0 - m && p.x1 <= q.x1 + m && p.y0 >= q.y0 - m && p.y1 <= q.y1 + m;
+    const near = (p, q, m) => p.x0 < q.x1 + m && p.x1 > q.x0 - m && p.y0 < q.y1 + m && p.y1 > q.y0 - m;
+    const isPicEl = i => i.el.tagName === 'image' || /url\(#pattern/.test(i.el.getAttribute('fill') || '');
+    const scenes = [];
+    {
+      const figs = items.filter(i => !i.conn && drawing(i));
+      split(figs, 0, 60).forEach(g => { if (figures(g) >= 2) { const b = box(g); scenes.push({ x0: b.x0 - 300, x1: b.x1 + 500, y0: b.y0 - 300, y1: b.y1 + 110 }); } });
+    }
+    {
+      const dots = items.filter(i => !i.conn && i.x1 - i.x0 <= 12 && i.y1 - i.y0 <= 12 && i.x1 - i.x0 >= 4 &&
+        /^(circle|path|ellipse)$/.test(i.el.tagName) && i.el.getAttribute('fill') && i.el.getAttribute('fill') !== 'none');
+      split(dots, 0, 6).forEach(r => { const b = box(r);
+        if (r.length >= 4 && b.x1 - b.x0 > 800) scenes.push({ x0: 200, x1: 1720, y0: b.y0 - 12, y1: b.y1 + 170, whole: true }); });
+    }
+    const chats = [];
+    {
+      const glyphsIn = c => items.some(g => isGlyphs(g) && g.x0 >= c.x0 && g.x1 <= c.x1 && g.y0 >= c.y0 && g.y1 <= c.y1);
+      const bubbles = items.filter(c => !c.conn && /^(rect|path)$/.test(c.el.tagName) && c.y1 - c.y0 >= 34 && c.y1 - c.y0 <= 90 &&
+        c.x1 - c.x0 >= 120 && c.x1 - c.x0 <= 760 && c.el.getAttribute('fill') && !/^(none|url)/.test(c.el.getAttribute('fill')) && glyphsIn(c));
+      split(bubbles, 0, 50).forEach(r => { if (split(r, 0, 4).length >= 3) { const b = box(r); const s = { x0: b.x0 - 110, x1: 1720, y0: b.y0 - 30, y1: b.y1 + 40, whole: true, chat: true }; scenes.push(s); chats.push(s); } });
+    }
+    {
+      const rules = items.filter(i => !i.conn && i.y1 - i.y0 < 4 && i.x1 - i.x0 > 150);
+      split(rules, 0, 220).forEach(g => { const b = box(g);
+        if (g.length >= 2 && b.x1 - b.x0 > 700) scenes.push({ x0: 200, x1: 1720, y0: b.y0 - 95, y1: b.y1 + (split(g, 0, 4).length > 1 ? 12 : 150), whole: true }); });
+    }
+    {                                                                  // a list in a row with dots between (competitors)
+      const seps = items.filter(i => !i.conn && !isGlyphs(i) && i.x1 - i.x0 < 5 && i.y1 - i.y0 < 5);
+      split(seps, 0, 3).forEach(r => { const b = box(r); if (r.length >= 3 && b.x1 - b.x0 > 450) scenes.push({ x0: 200, x1: 1720, y0: b.y0 - 120, y1: b.y1 + 70, whole: true }); });
+    }
+    const inScene = i => scenes.some(s => i.x0 >= s.x0 && i.x1 <= s.x1 && i.y0 >= s.y0 && i.y1 <= s.y1);
+    for (let n = items.length - 1; n >= 0; n--) if (items[n].conn && !inScene(items[n])) { items[n].el.setAttribute('display', 'none'); items.splice(n, 1); }
+    const sketchEls = items.filter(i => /csInk|csSketch/.test(i.el.getAttribute('class') || '') || drawing(i));
+    const hand = i => i.el.tagName === 'text';
+    const rounds = items.filter(c => !isGlyphs(c) && c.x1 - c.x0 >= 28 && c.x1 - c.x0 <= 120 && Math.abs((c.x1 - c.x0) - (c.y1 - c.y0)) < 6);
+    const isWordEl = i => {
+      if (!(isGlyphs(i) || hand(i))) return false;
+      if (isGlyphs(i) && rounds.some(c => inside(i, c, 1))) return false;   // (an avatar's letter)
+      if (scenes.some(s => s.whole && i.x0 >= s.x0 && i.x1 <= s.x1 && i.y0 >= s.y0 && i.y1 <= s.y1)) return false;   // (a ruled list / table, a timeline)
+      if (chats.some(s => i.x0 >= s.x0 && i.x1 <= s.x1 && i.y0 >= s.y0 && i.y1 <= s.y1)) return false;
+      if (inScene(i) && !(BODY_FILLS.includes(i.el.getAttribute('fill')) && i.x1 - i.x0 > 300) &&
+        !(hand(i) && parseFloat(getComputedStyle(i.el).fontSize) > 26)) return false;   // (a heading beside it still comes out)   // a scene's own words: stay in it
+      if (devs.some(d => inside(i, d, 20))) return false;              // (on a phone / laptop screen)
+      if (items.some(p => isPicEl(p) && inside(i, p))) return false;   // (on a picture)
+      const body = BODY_FILLS.includes((i.el.getAttribute('fill') || '').toUpperCase()) || BODY_FILLS.includes(i.el.getAttribute('fill'));
+      if (!body && !hand(i) && sketchEls.some(s => near(i, s, 70))) return false;   // a sketch's own label: stays with it
+      return true;
+    };
+    const wordEls = items.filter(isWordEl), wordSet = new Set(wordEls);
+    // cards: a filled or outlined shape round some of the words (not a big panel, not part of a sketch)
+    const cardOf = new Map(), cards = [];
+    items.forEach(c => {
+      if (wordSet.has(c) || isPicEl(c) || !/^(rect|path)$/.test(c.el.tagName) || /csInk|csSketch/.test(c.el.getAttribute('class') || '')) return;
+      const w = c.x1 - c.x0, h = c.y1 - c.y0; if (w < 40 || h < 24 || w > 1300 || h > 700) return;
+      const fl = c.el.getAttribute('fill'), st = c.el.getAttribute('stroke');
+      if ((!fl || fl === 'none') && (!st || st === 'none')) return;
+      if (((c.el.getAttribute('d') || '').match(/M/gi) || []).length > 2) return;   // (one outline only)
+      const ws = wordEls.filter(i => inside(i, c, 1)); if (!ws.length) return;
+      if (devs.some(d => inside(c, d, 20))) return;
+      cards.push({ c, ws });
+    });
+    cards.sort((p, q) => (p.c.x1 - p.c.x0) * (p.c.y1 - p.c.y0) - (q.c.x1 - q.c.x0) * (q.c.y1 - q.c.y0));   // the tightest card wins
+    cards.forEach(k => k.ws.forEach(i => { if (!cardOf.has(i)) cardOf.set(i, k); }));
+    // units: a card with its words; otherwise each heading, and each paragraph (its runs of style together)
+    const units = [], seen = new Set();
+    cards.forEach(k => { const ws = k.ws.filter(i => cardOf.get(i) === k); if (!ws.length || seen.has(k)) return; seen.add(k); units.push({ ws, card: k.c }); });
+    const free = wordEls.filter(i => !cardOf.has(i)).sort((p, q) => p.y0 - q.y0 || p.x0 - q.x0);
+    free.forEach(i => {
+      const u = units.find(u => !u.card && hand(i) === u.ws.some(hand) && (hand(i)
+        ? u.ws.some(o => i.y0 - o.y1 < 24 && i.y0 >= o.y0 && i.x0 < o.x1 && i.x1 > o.x0)                    // the lines of one heading
+        : u.ws.some(o => o.y0 < i.y1 + 14 && o.y1 > i.y0 - 14 && o.x0 < i.x1 + 40 && o.x1 > i.x0 - 40)));
+      if (u) u.ws.push(i); else units.push({ ws: [i] });
+    });
+    units.forEach(u => { Object.assign(u, box(u.card ? [...u.ws, u.card] : u.ws)); u.center = !u.card && Math.abs((u.x0 + u.x1) / 2 - 960) < 60 && u.x1 - u.x0 < 1000; });
+    // the words (and their cards) are hidden inside the drawings' bands
+    [...wordEls, ...cards.map(k => k.c)].forEach(i => { i.el.style.opacity = 'var(--words, 1)'; });
+    const visual = items.filter(i => !wordSet.has(i) && !cards.some(k => k.c === i));
+    // render a unit
+    function setWords(u, Wc = W) {
+      const parts = [], ws = [...u.ws].sort((p, q) => p.y0 - q.y0 || p.x0 - q.x0);
+      // in reading order: headings (hand-lettered) as they are, at a phone size; glyph runs re-set
+      const gh = i => { if (hand(i)) return 0; if (i._gh === undefined) { const s = pathSubs(i.el.getAttribute('d') || ''); i._gh = median(s.map(q => (q.y1 - q.y0) * Math.abs(i.m.d))); } return i._gh; };
+      const sameSize = (i, L) => hand(i) || !L.its.length || (() => { const a = gh(i), b = gh(L.its[L.its.length - 1]); return a && b && Math.max(a, b) / Math.min(a, b) < 1.6; })();
+      const runs = []; ws.forEach(i => { const L = runs[runs.length - 1]; if (L && hand(i) === L.hand && (hand(i) ? i.y0 - L.y1 < 10 : sameSize(i, L))) { L.its.push(i); L.y1 = Math.max(L.y1, i.y1); } else runs.push({ hand: hand(i), its: [i], y1: i.y1 }); });
+      const innerW = u.card ? Wc - 32 : Wc;
+      runs.forEach(R => {
+        if (R.hand) {
+          const fs = Math.max(...R.its.map(i => parseFloat(getComputedStyle(i.el).fontSize) || 40));
+          const b = box(R.its), bw = b.x1 - b.x0, el = makeTile({ ...b, its: R.its }, Math.min(innerW / bw, (fs > 60 ? 30 : MOB_HEAD_PX) / fs), 0);   // (a big drawn number stays big)
+          el.style.marginLeft = u.center ? 'auto' : '0px'; if (u.center) el.style.marginRight = 'auto'; el.style.setProperty('--words', '1'); parts.push(el); return;
+        }
+        const byColour = []; R.its.forEach(i => byColour.push(i));
+        const r = readWords(byColour);
+        if (!r) { const b = box(R.its), bw = b.x1 - b.x0, el = makeTile({ ...b, its: R.its }, Math.min(innerW / bw, k0), 0); el.style.marginLeft = '0px'; el.style.setProperty('--words', '1'); parts.push(el); return; }
+        const px = r.fsz > 30 ? Math.max(MOB_HEAD_PX, Math.min(30, r.fsz * k0)) : MOB_TEXT_PX;   // (big drawn type, e.g. "63 M+", stays big)
+        parts.push(reflow(r, innerW, 0, { px, center: u.center }));
+      });
+      parts.forEach((p, i) => { if (i) p.style.marginTop = '8px'; });
+      if (!u.card) return parts.length === 1 ? parts[0] : group(parts, false);
+      const d = document.createElement('div'), fl = u.card.el.getAttribute('fill'), st = u.card.el.getAttribute('stroke');
+      d.className = 'csCard';
+      Object.assign(d.style, { background: fl && fl !== 'none' ? fl : 'transparent', border: st && st !== 'none' ? `1px solid ${st}` : 'none',
+        borderRadius: '10px', padding: '14px 16px', width: 'fit-content', maxWidth: '100%', boxSizing: 'border-box' });
+      parts.forEach(p => d.appendChild(p));
+      return d;
+    }
+    function drawn(its) {
+      const ch = chats.find(c => its.some(i => i.x0 >= c.x0 && i.x1 <= c.x1 && i.y0 >= c.y0 && i.y1 <= c.y1));
+      if (ch) {
+        const inC = its.filter(i => i.x0 >= ch.x0 - 2 && i.x1 <= ch.x1 + 2 && i.y0 >= ch.y0 - 2 && i.y1 <= ch.y1 + 2), rest = its.filter(i => !inC.includes(i));
+        const out = [];
+        inC.forEach(i => { if (!i.el.style.opacity) i.el.style.opacity = 'var(--chat, 1)'; });   // (not seen in the rest's tile)
+        if (rest.length) { const r0 = drawn0(rest); r0.style.setProperty('--chat', '0'); out.push(r0); }
+        const b = box(inC), el = makeTile({ ...b, its: inC }, Math.min(W / (b.x1 - b.x0), 0.6), 0);
+        el.style.marginLeft = '0px'; el.style.setProperty('--words', '1'); el.style.marginTop = rest.length ? '14px' : '0px'; out.push(el);
+        return out.length === 1 ? out[0] : group(out, false);
+      }
+      return drawn0(its);
+    }
+    function drawn0(its) {                                             // as on the desktop, words hidden
+      const b = box(its), whole = scenes.some(s => s.whole && !s.chat && b.x0 >= s.x0 && b.x1 <= s.x1 && b.y0 >= s.y0 - 2 && b.y1 <= s.y1 + 2);
+      const el = makeTile({ ...b, its }, whole ? W / (b.x1 - b.x0) : kd, 0);   // (a ruled list / table / timeline: as drawn, across the width)
+      el.style.marginLeft = whole ? '0px' : Math.max(0, (b.x0 - 260) * kd) + 'px'; el.style.setProperty('--words', '0');
+      return el;
+    }
+    // reading order: the drawings' bands and the word units, by where they start down the page
+    const bands = split(visual, 0, 40).map(its => ({ its, ...box(its) }));
+    const seq = [...units.map(u => ({ y0: u.y0, y1: u.y1, x0: u.x0, u })), ...bands.map(bd => ({ y0: bd.y0, y1: bd.y1, x0: bd.x0, bd }))]
+      .sort((p, q) => p.y0 - q.y0 || p.x0 - q.x0);
+    for (let i = 0; i < seq.length; i++) {                             // avatar + name
+      const e = seq[i]; if (!e.u || !e.u.ws.every(hand)) continue;
+      const j = [i - 1, i + 1].find(j => { const s = seq[j]; if (!s || !s.bd) return false; const w = s.bd.x1 - s.bd.x0, h = s.bd.y1 - s.bd.y0;
+        return w <= 130 && Math.abs(w - h) < 14 && s.bd.x1 <= e.u.x0 + 4 && e.u.x0 - s.bd.x1 < 60 && s.y1 > e.y0 - 20 && s.y0 < e.y1 + 20; });
+      if (j === undefined) continue;
+      const s = seq[j]; e.avatar = s.bd; e.y0 = Math.min(e.y0, s.y0); seq.splice(j, 1); if (j < i) i--;
+    }
+    for (let i = 0; i < seq.length; i++) {                             // words, then a card beside them
+      const c = seq[i]; if (!c.u || !c.u.card || c.side || c.u.y1 - c.u.y0 < 120) continue;
+      const left = seq.filter(o => o !== c && o.u && !o.u.card && !o.side && o.u.x1 < c.u.x0 && o.y1 > c.u.y0 - 60 && o.y0 < c.u.y0 + (c.u.y1 - c.u.y0) * 0.5);
+      if (!left.length) continue;
+      c.side = left.sort((p, q) => p.y0 - q.y0); left.forEach(o => { const k = seq.indexOf(o); seq.splice(k, 1); });
+      c.y0 = Math.min(c.y0, ...left.map(o => o.y0)); c.y1 = Math.max(c.y1, ...left.map(o => o.y1));
+      i = -1; seq.sort((p, q) => p.y0 - q.y0 || p.x0 - q.x0);
+    }
+    for (let i = 1; i < seq.length; i++) {
+      const e = seq[i];
+      if (!(e.u && e.u.ws.every(hand))) continue;
+      for (let k = i - 1; k >= Math.max(0, i - 4); k--) { const q = seq[k];
+        if (q.bd && e.y0 < q.y1 && e.y0 - q.y0 < 260) { seq.splice(i, 1); seq.splice(k, 0, e); break; } }
+    }
+    for (let i = 0; i < seq.length; i++) {
+      const c = seq[i]; if (!c.u || !c.u.card || c.side) continue;
+      const row = seq.filter(o => o.u && o.u.card && !o.side && o.u.y0 < c.u.y1 && o.u.y1 > c.u.y0);
+      if (row.length < 3) continue;
+      row.sort((p, q) => p.u.x0 - q.u.x0);
+      row.slice(1).forEach(o => seq.splice(seq.indexOf(o), 1));
+      c.cardRow = row.map(o => o.u); c.y0 = Math.min(...row.map(o => o.y0)); c.y1 = Math.max(...row.map(o => o.y1)); i = seq.indexOf(c);
+    }
+    // (a heading and a small sketch level with it go on one line)
+    for (let i = 0; i < seq.length; i++) {
+      const e = seq[i]; if (!e.u || !e.u.ws.every(hand)) continue;
+      const j = [i - 1, i + 1].find(j => { const s = seq[j]; return s && s.bd && s.y1 > e.y0 - 140 && s.y0 < e.y1 + 80 && (s.bd.x1 - s.bd.x0) * kd < W * 0.4 && s.bd.x0 > e.u.x1; });
+      if (j === undefined) continue;
+      const s = seq[j]; e.pair = s.bd; e.y0 = Math.min(e.y0, s.y0); e.y1 = Math.max(e.y1, s.y1); seq.splice(j, 1); if (j < i) i--;
+    }
+    {
+      let prev = null;
+      seq.forEach(e => {
+        let n;
+        if (e.cardRow) {                                                // cards, three to a line
+          const gap = 10, cw = Math.floor((W - 2 * gap) / 3);
+          n = document.createElement('div'); Object.assign(n.style, { display: 'flex', flexWrap: 'wrap', gap: gap + 'px' });
+          e.cardRow.forEach(u => { const c = setWords(u, cw); Object.assign(c.style, { width: cw + 'px', maxWidth: cw + 'px', padding: '12px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }); n.appendChild(c); });
+        } else if (e.side) {                                                   // words left, the card right
+          const Wl = Math.floor((W - 14) * 0.47), Wr = W - 14 - Wl, col = document.createElement('div');
+          col.style.width = Wl + 'px'; e.side.forEach((o, k) => { const m = setWords(o.u, Wl); if (k) m.style.marginTop = '12px'; col.appendChild(m); });
+          const card = setWords(e.u, Wr); card.style.maxWidth = Wr + 'px';
+          n = document.createElement('div'); Object.assign(n.style, { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '14px' });
+          n.appendChild(col); n.appendChild(card);
+        } else n = e.u ? setWords(e.u) : drawn(e.bd.its);
+        if (e.avatar) { const b = e.avatar, av = makeTile({ ...b, its: b.its }, 34 / (b.y1 - b.y0), 0); av.style.marginLeft = '0px'; av.style.setProperty('--words', '1');
+          const row = document.createElement('div'); Object.assign(row.style, { display: 'flex', alignItems: 'center', gap: '10px' }); row.appendChild(av); row.appendChild(n); n = row; }
+        if (e.pair) { const sk = drawn(e.pair.its); sk.style.marginLeft = '0px'; const row = document.createElement('div');
+          Object.assign(row.style, { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '12px' });
+          row.appendChild(n); row.appendChild(sk); n = row; }
+        n.style.marginTop = prev ? Math.max(16, Math.min(80, (e.y0 - prev.y1) * k0 * 1.25)) + 'px' : '0px';
+        n.classList.add('csReveal');
+        stack.appendChild(n); prev = e;
+      });
+    }
+    function makeTile(b, k, gapPx) {
+      const bw = b.x1 - b.x0, bh = b.y1 - b.y0, pad = 3,   /* (a small margin: more would show the neighbours' edges) */ el = document.createElementNS(NSV, 'svg');
+      el.setAttribute('viewBox', `${b.x0 - pad} ${b.y0 - pad} ${bw + 2 * pad} ${bh + 2 * pad}`);
+      el.setAttribute('class', 'csTile'); el.style.width = (bw + 2 * pad) * k + 'px'; el.style.marginTop = gapPx + 'px';
+      const words = b.its.filter(isGlyphs).length >= b.its.length * 0.7;
+      el.style.marginLeft = (words ? 0 : Math.max(0, (W - (bw + 2 * pad) * k) / 2)) + 'px';
+      el.innerHTML = `<use href="#${all.id}"${rootPaint}></use>`;   // (the design's own top-level paint, e.g. fill="none", carried over)
+      el._y = [b.y0, b.y1]; el.dataset.at = `${Math.round(b.x0)},${Math.round(b.y0)},${Math.round(bw)}x${Math.round(bh)} k${k.toFixed(2)}${b.keep ? " KEEP" : ""}`;
+      return el;
+    }
+    function light(c) { const m = /^#([0-9a-f]{6})$/i.exec(c || ''); if (!m) return c === 'white'; const n = parseInt(m[1], 16); return ((n >> 16) * 0.3 + ((n >> 8) & 255) * 0.59 + (n & 255) * 0.11) > 180; }
+    function reflow(r, W, gapPx, o = {}) {
+      const s = (o.px || MOB_TEXT_PX) / r.fsz, P = o.bg ? 18 / s : 0, Wt = W / s - 2 * P, sp = r.fsz * 0.27, lh = r.pitch || r.fsz * 1.42;
+      const el = document.createElementNS(NSV, 'svg'); let html = '', y = P;
+      r.paras.forEach((words, pi) => {
+        if (pi) y += lh * 0.55;
+        let x = P, lineY = y, lineStart = html.length;
+        const centre = () => { if (!o.center) return; const off = (Wt + P - (x - sp)) / 2; if (off <= 0) return;
+          html = html.slice(0, lineStart) + html.slice(lineStart).replace(/translate\(([-\d.]+) /g, (m, v) => `translate(${(+v + off).toFixed(2)} `); };
+        words.forEach(w => {
+          const ww = w.x1 - w.x0;
+          if (x > P && x + ww > Wt + P) { centre(); x = P; lineY += lh; lineStart = html.length; }
+          const dx = x - w.x0, dy = lineY - w.top, byP = new Map();
+          w.g.forEach(g => (byP.get(g.p) || byP.set(g.p, []).get(g.p)).push(g.d));
+          byP.forEach((ds, p) => {
+            const m = p.m, at = ['fill', 'fill-opacity', 'fill-rule'].map(a => { let v = p.el.getAttribute(a); if (a === 'fill' && o.recolor && light(v)) v = '#2A2A2A'; return v ? ` ${a}="${v}"` : ''; }).join('');
+            html += `<path d="${ds.join('')}"${at} transform="translate(${dx.toFixed(2)} ${dy.toFixed(2)}) matrix(${m.a} ${m.b} ${m.c} ${m.d} ${m.e} ${m.f})"></path>`;
+          });
+          x += ww + sp;
+        });
+        centre();
+        y = lineY + lh;
+      });
+      const h = y - lh + r.fsz * 1.25 + P;
+      if (o.bg) html = `<rect x="0" y="0" width="${Wt + 2 * P}" height="${h}" rx="${o.rx / s * 0.5}" fill="${o.bg}"></rect>` + html;
+      el.setAttribute('viewBox', `-2 -2 ${Wt + 2 * P + 4} ${h + 4}`); el.dataset.at = `reflow fsz${r.fsz.toFixed(1)} s${s.toFixed(2)}`; el.setAttribute('class', 'csTile csText');
+      el.style.width = W + 'px'; el.style.marginTop = gapPx + 'px'; el.style.marginLeft = '0px';
+      el.innerHTML = html;
+      return el;
+    }
+    const rv = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); rv.unobserve(e.target); } }), { root: page, rootMargin: '0px 0px -8% 0px' });
+    stack.querySelectorAll('.csReveal').forEach(el => rv.observe(el));
+    // the pictures load as their blocks come near
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (!e.isIntersecting || !e.target._y) return; io.unobserve(e.target);
+      const [y0, y1] = e.target._y;
+      page._lazy = (page._lazy || []).filter(L => {
+        if (L.y1 < y0 - 200 || L.y0 > y1 + 200) return true;
+        const href = L.im.getAttribute('data-href'); if (href) { L.im.removeAttribute('data-href'); L.im.setAttribute('href', href); }
+        return false;
+      });
+    }), { root: page, rootMargin: '1600px 0px' });
+    stack.querySelectorAll('.csTile').forEach(el => io.observe(el));
+  }
   function loadCaseDoc(page) {
     if (page._doc) return page._doc;
     const holder = page.querySelector('.csDocHolder');
@@ -2546,9 +3227,9 @@
       (CASE_LINES[page.id] || []).forEach(l => dottedLine(svg, l));
       sketchFill(svg);
       backdropGrain(svg, page.id);
-      bodyText(svg);
-      docParallax(page, svg);
-    }).catch(() => {});
+      if (MOB_CASE && isMob()) mobileCase(page, svg);              // (off: phones show the design exactly as on desktop, scaled)
+      else { bodyText(svg); docParallax(page, svg); }
+    }).catch(e => console.error(e));
     return page._doc;
   }
   /* The case studies' hand-lettered headings (exported from Figma as shapes, in another hand) are rewritten in Gandhar's
@@ -2797,7 +3478,7 @@
       let b; try { b = el.getBBox(); } catch (e) { return; }
       if (b.width < 200 || b.height < 120 || b.width > 1500) return;
       const g = el.cloneNode(); g.removeAttribute('class'); g.setAttribute('stroke', 'none');
-      g.setAttribute('fill', `url(#${pat.id})`); g.setAttribute('opacity', '0.115'); el.after(g);
+      g.setAttribute('fill', `url(#${pat.id})`); g.setAttribute('opacity', '1'); el.after(g);
     });
   }
   // the panels behind each study's screens: a plain faint tint, no grain (Fankr cream, HobbyHop grey, Cybersmart mint)
@@ -2976,7 +3657,7 @@
   // Smooth scrolling inside the case study: each case page has its own Lenis (the page is its wrapper, .csInner its
   // content), driven by the GSAP ticker and telling ScrollTrigger on every scroll, so the parallax below stays in step.
   // Touch and keys scroll natively; Lenis picks up from there.
-  const CASE_LERP = 0.028, CASE_WHEEL = 1.3;                    // lower lerp = longer, softer glide
+  const CASE_LERP = 0.022, CASE_WHEEL = 2;                    // lower lerp = longer, softer glide
   const SMOOTH = window.Lenis && !matchMedia('(prefers-reduced-motion: reduce)').matches;
   Object.values(CASES).forEach(page => {
     page.addEventListener('scroll', () => lazyLoad(page), { passive: true });
