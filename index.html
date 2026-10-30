@@ -1374,11 +1374,10 @@
   function introView() {
     const a = innerWidth / innerHeight;
     if (a >= 1) return;                                        // landscape: the whole 1920 x 1080 stage (frame())
-    const p = Math.min(1, Math.max(0, S.u / STOP)), e = p * p * (3 - 2 * p), mix = (x, y) => x + (y - x) * e;
-    let w = mix(330, 380), h = w / a;
-    const hMin = mix(560, 660);                               // squarer screens: keep the subject's full height
-    if (h < hMin) { h = hMin; w = h * a; }
-    const cx = mix(955, 872), cy = mix(540, 632);
+    // one steady frame across the width: the lamp on the left, the figure, the door on the right (as in the phone mock-up)
+    let w = 426, h = w / a;
+    if (h < 600) { h = 600; w = h * a; }                       // squarer screens: keep it all in, top to bottom
+    const cx = 891, cy = 526;
     svg.setAttribute('viewBox', `${cx - w / 2} ${cy - h / 2} ${w} ${h}`);
   }
 
