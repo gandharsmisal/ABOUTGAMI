@@ -549,6 +549,8 @@
   .csStrip { position: absolute; left: 0; right: 0; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; }
   .csStrip::-webkit-scrollbar { display: none; }
   .csDocHolder .csStrip svg { display: block; margin: 0; height: 100%; }
+  /* on phones the sketches drawn as filled outlines are thinned to the main page figure's line */
+  html.mob-doc .csDocHolder .csInkFill { stroke-width: 0.75px; }
   .csStack { position: relative; }
   .csStack .csTile { display: block; height: auto; overflow: hidden; flex: none; }
   .csStack .csCard .csTile { margin: 0; }
@@ -3301,13 +3303,33 @@
       if (areas.some(([x0, y0, x1, y1]) => b.x >= x0 && b.y >= y0 && b.x + b.width <= x1 && b.y + b.height <= y1)) el.setAttribute('display', 'none');
     });
   }
+  // a sketch's labels (outlined, #2A2A2A): each one (its letters close together) as its own path, with its capital height
+  function labelGroups(svg) {
+    const NS = 'http://www.w3.org/2000/svg', out = [];
+    svg.querySelectorAll('path[fill="#2A2A2A"]').forEach(el => {
+      const subs = el.getAttribute('d').split(/(?=M)/).map(d => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); el.parentNode.appendChild(p);
+        const b = p.getBBox(); p.remove(); return { d, x0: b.x, y0: b.y, x1: b.x + b.width, y1: b.y + b.height }; }).filter(s => s.x1 > s.x0 || s.y1 > s.y0);
+      const groups = [];
+      subs.forEach(s => { const near = groups.filter(g => s.x0 < g.x1 + 8 && s.x1 > g.x0 - 8 && s.y0 < g.y1 + 8 && s.y1 > g.y0 - 8);
+        const g = near.length ? near.reduce((a, b) => { a.s.push(...b.s); a.x0 = Math.min(a.x0, b.x0); a.y0 = Math.min(a.y0, b.y0); a.x1 = Math.max(a.x1, b.x1); a.y1 = Math.max(a.y1, b.y1); groups.splice(groups.indexOf(b), 1); return a; }) : (groups.push({ s: [], x0: s.x0, y0: s.y0, x1: s.x1, y1: s.y1 }), groups[groups.length - 1]);
+        g.s.push(s); g.x0 = Math.min(g.x0, s.x0); g.y0 = Math.min(g.y0, s.y0); g.x1 = Math.max(g.x1, s.x1); g.y1 = Math.max(g.y1, s.y1); });
+      groups.forEach(g => { const p = el.cloneNode(); p.setAttribute('d', g.s.map(s => s.d).join(''));
+        const hs = g.s.map(s => s.y1 - s.y0).sort((a, b) => a - b), cap = hs[Math.floor(hs.length * 0.75)];
+        el.parentNode.insertBefore(p, el); out.push({ el: p, cap, cx: (g.x0 + g.x1) / 2, cy: g.y0 }); });
+      el.remove();
+    });
+    return out;
+  }
   function mobStrips(page, holder, mob) {
     const place = () => { const k = holder.clientWidth / mob.w;
       holder.querySelectorAll('.csStrip').forEach(s => { const o = s._o; s.style.top = (o.y - mob.cut) * k + 'px'; s.style.height = o.h * k + 'px';
-        const svg = s.querySelector('svg'); if (svg) { const vb = svg.viewBox.baseVal; svg.style.width = vb.width * o.h * k / vb.height + 'px'; } }); };
+        const svg = s.querySelector('svg'); if (!svg) return;
+        const vb = svg.viewBox.baseVal, u = o.h * k / vb.height; svg.style.width = vb.width * u + 'px';
+        (svg._labels || []).forEach(L => { const f = MOB_TEXT_PX / (L.cap / 0.7 * u);   // the labels written at 12px
+          L.el.setAttribute('transform', `translate(${L.cx} ${L.cy}) scale(${f}) translate(${-L.cx} ${-L.cy})`); }); }); };
     mob.strips.forEach(o => {
       const s = document.createElement('div'); s.className = 'csStrip'; s._o = o; holder.appendChild(s);
-      fetch(o.src).then(r => r.text()).then(x => { s.innerHTML = x; sketchFill(s.querySelector('svg')); place(); });
+      fetch(o.src).then(r => r.text()).then(x => { s.innerHTML = x; const svg = s.querySelector('svg'); sketchFill(svg); svg._labels = labelGroups(svg); place(); });
     });
     place(); addEventListener('resize', place);
   }
