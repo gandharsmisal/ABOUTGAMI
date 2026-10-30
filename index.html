@@ -2601,10 +2601,11 @@
       if (Math.abs(cam.vel) < 0.0015) { cam.vel = 0; if (Math.abs(cam.target - Math.round(cam.target)) < 0.015) cam.target = Math.round(cam.target); }
     }
     // quick on the way, easing off as an object comes in: the last stretch before it slows right down
-    const gap = Math.abs(cam.target - cam.pos), ease = cam.catching ? 0.018 + 0.032 * Math.min(1, gap / 0.6) : 0.06;   // arriving: as it always was; on the way: keeps up with the scroll's own speed
+    const gap = Math.abs(cam.target - cam.pos), mid = cam.catching ? (cam.cTotal = cam.cTotal || Math.max(gap, 0.01), Math.sin(Math.PI * Math.min(1, Math.max(0, 1 - gap / cam.cTotal)))) : (cam.cTotal = 0, 0),
+      ease = cam.catching ? (0.018 + 0.032 * Math.min(1, gap / 0.6)) * (1 + 0.7 * mid) : 0.06;   // (a little quicker mid-way; start and end as they were)   // arriving: as it always was; on the way: keeps up with the scroll's own speed
     cam.pos += (cam.target - cam.pos) * (1 - Math.pow(1 - ease, f));
     const lagK = cam.catching ? 0.6 + 0.4 * Math.min(1, gap / 0.6) : 1;      // the props settle in with it, not after it
-    for (const k in LAG) cam.lag[k] += (cam.pos - cam.lag[k]) * (1 - Math.pow(1 - LAG[k] * (cam.catching ? Math.max(lagK, 1.4 - lagK) : 1), f));
+    for (const k in LAG) cam.lag[k] += (cam.pos - cam.lag[k]) * (1 - Math.pow(1 - LAG[k] * (cam.catching ? Math.max(lagK, 1.4 - lagK) * (1 + 0.7 * mid) : 1), f));
     const settled = arrived && cam.target === Math.round(cam.target);
     if (settled && cam.shown !== mod(cam.target)) showNote(mod(cam.target));
     else if (!settled && cam.shown !== null && Math.abs(cam.target - cam.pos) > 0.06) hideNotes();
