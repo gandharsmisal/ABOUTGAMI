@@ -99,7 +99,8 @@
   /* (Previous / Next / back: a heavier texture over the hover pill - blotches and grain, darkening it in patches) */
   .csNext::before { background-image: var(--mottle), var(--grain), var(--mottle); background-size: 90px, 140px, 210px; mix-blend-mode: multiply; }
   .csNext:hover::before, .csNext:focus-visible::before { opacity: 0.55; }
-  #caseClose:hover .badge::before, #caseClose:focus-visible .badge::before { opacity: 0.12; }
+  #caseClose .badge::before { background-image: var(--mottle), var(--grain), var(--mottle); background-size: 90px, 140px, 210px; mix-blend-mode: multiply; }
+  #caseClose:hover .badge::before, #caseClose:focus-visible .badge::before { opacity: 0.55; }
   .csNextArrow { display: inline-flex; align-items: center; margin-left: 14px; width: 33px; }   /* the long arrow overhangs */
   .csNextArrow svg { display: block; flex: none; overflow: visible; }
   .csNextArrow path { fill: none; stroke: var(--pen); stroke-width: 2.2px; stroke-linecap: round; stroke-linejoin: round;
@@ -139,7 +140,7 @@
   /* a dark title (HobbyHop) would vanish on its dark picture: it sits just under the picture instead */
   /* HobbyHop's title as its design has it: left-aligned a fifth of the way in, large, the first line just inside the
      picture's bottom edge and the second just below it (1 design px = the picture's width / 1400) */
-  .csTitle.csTitleLeft { left: calc(100% * var(--title-x, 293) / 1400); transform: translateY(-1.45em); align-items: flex-start; gap: 0;
+  .csTitle.csTitleLeft { left: 50%; transform: translate(-50%, -1.45em); align-items: center; gap: 0;   /* (centred, like Fankr's) */
     font-size: clamp(18px, 2vw, 40px); line-height: 1.25; letter-spacing: 0.12em; }   /* (the size of Fankr's) */
   /* the rest of the design (1920 x 20799) at the page's width from y 1100 on, its scale and margins as drawn */
   /* its 1400 wide text column narrowed to 1250: the design is drawn at 1250/1400 of the page width, centred */
@@ -150,7 +151,7 @@
     font: 400 22px "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); color: var(--pen); text-transform: lowercase; letter-spacing: 0.04em; }
   #caseClose .badge { width: 42px; height: 42px; border-radius: 50%; background: transparent; display: grid; place-items: center;
     transition: transform 0.25s ease, background-color 0.3s ease; }
-  #caseClose:hover .badge, #caseClose:focus-visible .badge { background: #D6D6D6; }
+  #caseClose:hover .badge, #caseClose:focus-visible .badge { background-color: #C2B287; background-image: var(--mottle), var(--grain); background-size: 120px, 180px; }   /* (the same khaki paper as Previous / Next) */
   #caseClose svg { width: 20px; height: 20px; }
   #caseClose path { fill: none; stroke: #1F1D1A; stroke-width: 2.2px; stroke-linecap: round; }
   #caseClose:hover .badge { transform: rotate(90deg); }
