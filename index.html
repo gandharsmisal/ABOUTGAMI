@@ -96,7 +96,9 @@
   .csNext, #caseClose .badge { position: relative; isolation: isolate; }
   .csNext::before, #caseClose .badge::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
     background-image: var(--grain); background-repeat: repeat; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
-  .csNext:hover::before, .csNext:focus-visible::before,
+  /* (Previous / Next / back: a heavier texture over the hover pill - blotches and grain, darkening it in patches) */
+  .csNext::before { background-image: var(--mottle), var(--grain), var(--mottle); background-size: 90px, 140px, 210px; mix-blend-mode: multiply; }
+  .csNext:hover::before, .csNext:focus-visible::before { opacity: 0.55; }
   #caseClose:hover .badge::before, #caseClose:focus-visible .badge::before { opacity: 0.12; }
   .csNextArrow { display: inline-flex; align-items: center; margin-left: 14px; width: 33px; }   /* the long arrow overhangs */
   .csNextArrow svg { display: block; flex: none; overflow: visible; }
