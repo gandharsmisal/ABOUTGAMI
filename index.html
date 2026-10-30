@@ -549,8 +549,6 @@
   /* its wide sketches, whole, across the width */
   .csStrip { position: absolute; left: 0; right: 0; }
   .csDocHolder .csStrip svg { display: block; margin: 0; width: 100%; height: 100%; }
-  /* sketches drawn as filled outlines are thinned to the line of the others (0.9px) */
-  html.mob-doc .csDocHolder svg.csDoc .csInkFill { stroke-width: 0.75px; }
   /* the whole sketches, drawn small: their filled outlines are thin already (the usual thinning would eat them) */
   html.mob-doc .csDocHolder .csStrip .csInkFill { stroke-width: 0; }
   .csStack { position: relative; }
@@ -3428,6 +3426,77 @@
     const vb = svg.viewBox.baseVal; svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.width} ${(vb.height - shiftAt(vb.height)).toFixed(1)}`);
     return shiftAt;
   }
+  // Phones: every sketch's figures come out the same height (FIG_PX on screen). A sketch is a figure with the drawn
+  // pieces around it; it is scaled about its middle, only as far as the room round it allows, and kept on the page.
+  const FIG_PX = 105;
+  function mobFigures(svg, mob, k) {
+    const toRoot = svg.getScreenCTM().inverse();
+    const boxOf = el => { const r = el.getBoundingClientRect(); if (!r.width && !r.height) return null;
+      const a = new DOMPoint(r.left, r.top).matrixTransform(toRoot), b = new DOMPoint(r.right, r.bottom).matrixTransform(toRoot);
+      return { x0: a.x, y0: a.y, x1: b.x, y1: b.y }; };
+    const leaves = [...svg.querySelectorAll('path, rect, circle, ellipse, line, polyline, polygon, image, text')].filter(el =>
+      !el.closest('defs, clipPath, mask, pattern, [display="none"]') && !(el.parentNode.closest && el.parentNode.closest('text')));
+    const all = []; leaves.forEach(el => { const b = boxOf(el); if (b && b.x1 - b.x0 < 340 && b.y1 - b.y0 < 400) all.push({ el, b }); });
+    const ink = o => o.el.classList.contains('csInk') || o.el.classList.contains('csInkFill') ||
+      (/^(#FFFFFF|white)$/i.test(o.el.getAttribute('fill') || '') && !o.el.getAttribute('class') && o.b.x1 - o.b.x0 < 200);
+    const pieces = all.filter(o => ink(o) && !inDevice(svg, o.el));
+    const tall = pieces.filter(o => { const w = o.b.x1 - o.b.x0, h = o.b.y1 - o.b.y0; return h > 18 && h / Math.max(w, 1) > 2.2; });
+    const figs = [];
+    tall.sort((p, q) => p.b.y0 - q.b.y0).forEach(o => { const cx = (o.b.x0 + o.b.x1) / 2;
+      const f = figs.find(f => Math.abs(f.cx - cx) < 14 && o.b.y0 < f.y1 + 6 && o.b.y1 > f.y0 - 6);
+      if (f) { f.y0 = Math.min(f.y0, o.b.y0); f.y1 = Math.max(f.y1, o.b.y1); f.n++; } else figs.push({ cx, y0: o.b.y0, y1: o.b.y1, n: 1 }); });
+    const people = figs.filter(f => f.n >= 2 && f.y1 - f.y0 > 45);
+    // the sketches: drawn pieces within a few units of each other, grown out from the figures
+    const used = new Set(), sketches = [];
+    people.forEach(f => {
+      if (sketches.some(s => f.cx > s.x0 && f.cx < s.x1 && f.y0 >= s.y0 - 1 && f.y1 <= s.y1 + 1)) { sketches.find(s => f.cx > s.x0 && f.cx < s.x1 && f.y0 >= s.y0 - 1 && f.y1 <= s.y1 + 1).h.push(f.y1 - f.y0); return; }
+      const s = { els: [], x0: f.cx - 4, x1: f.cx + 4, y0: f.y0, y1: f.y1, h: [f.y1 - f.y0] };
+      for (let grew = true; grew;) { grew = false;
+        pieces.forEach(o => { if (used.has(o)) return; const b = o.b;
+          if (b.x0 < s.x1 + 10 && b.x1 > s.x0 - 10 && b.y0 < s.y1 + 10 && b.y1 > s.y0 - 10) {
+            used.add(o); s.els.push(o); s.x0 = Math.min(s.x0, b.x0); s.x1 = Math.max(s.x1, b.x1); s.y0 = Math.min(s.y0, b.y0); s.y1 = Math.max(s.y1, b.y1); grew = true; } }); }
+      sketches.push(s);
+    });
+    sketches.forEach(s => {
+      if (!s.els.length) return;
+      const own = new Set(s.els.map(o => o.el)), hm = s.h.sort((a, b) => a - b)[s.h.length >> 1];
+      let f = FIG_PX / k / hm; if (Math.abs(f - 1) < 0.04) return;
+      const cx = (s.x0 + s.x1) / 2, cy = (s.y0 + s.y1) / 2, w = s.x1 - s.x0, h = s.y1 - s.y0;
+      if (f > 1) {                                                    // room above and below it, and across the page
+        let up = Infinity, down = Infinity;
+        all.forEach(o => { if (own.has(o.el)) return; const b = o.b; if (b.x1 < s.x0 - 6 || b.x0 > s.x1 + 6) return;
+          if (b.y1 <= s.y0 + 1) up = Math.min(up, s.y0 - b.y1); else if (b.y0 >= s.y1 - 1) down = Math.min(down, b.y0 - s.y1); });
+        const room = Math.max(0, Math.min(up, down) - 8);
+        f = Math.min(f, 1 + 2 * room / h, (mob.w - 16) / w);
+        if (f < 1.04) return;
+      }
+      let dx = 0; const nx0 = cx - w * f / 2, nx1 = cx + w * f / 2;
+      if (nx0 < 8) dx = 8 - nx0; else if (nx1 > mob.w - 8) dx = mob.w - 8 - nx1;
+      const S = new DOMMatrix().translate(cx + dx, cy).scale(f).translate(-cx, -cy);
+      s.els.forEach(({ el }) => { const M = DOMMatrix.fromMatrix(toRoot.multiply(el.parentNode.getScreenCTM())), t0 = el.transform.baseVal.consolidate();
+        const T = M.inverse().multiply(S).multiply(M).multiply(t0 ? DOMMatrix.fromMatrix(t0.matrix) : new DOMMatrix());
+        el.setAttribute('transform', `matrix(${T.a} ${T.b} ${T.c} ${T.d} ${T.e} ${T.f})`); });
+    });
+  }
+  // Every sketch line the same: strokes are drawn at 0.9px already; lines drawn as filled outlines are thickened or
+  // thinned to 0.9px on screen (their thickness: twice their area over their outline's length). Solid shapes stay.
+  const INK_PX = 0.9;
+  function inkLines(svg) {
+    const cv = document.createElement('canvas'), g = cv.getContext('2d');
+    svg.querySelectorAll('.csInkFill').forEach(el => {
+      if (el.closest('[display="none"]')) return;
+      let b, L; try { b = el.getBBox(); L = el.getTotalLength(); } catch (e) { return; }
+      if (!L || b.width * b.height === 0) return;
+      const S = Math.min(6, 600 / Math.max(b.width, b.height)), W = Math.ceil(b.width * S) + 2, H = Math.ceil(b.height * S) + 2;
+      cv.width = W; cv.height = H; g.setTransform(S, 0, 0, S, -b.x * S + 1, -b.y * S + 1); g.fillStyle = '#000';
+      g.fill(new Path2D(el.getAttribute('d')), el.getAttribute('fill-rule') === 'evenodd' ? 'evenodd' : 'nonzero');
+      const px = g.getImageData(0, 0, W, H).data; let n = 0; for (let i = 3; i < px.length; i += 4) if (px[i] > 127) n++;
+      const m = el.getScreenCTM(), t = 2 * (n / (S * S)) / L * Math.hypot(m.a, m.b);
+      if (t > 2.6) return;                                          // a solid shape, not a line
+      if (t < INK_PX) { el.style.stroke = '#1C1C1E'; el.style.strokeWidth = (INK_PX - t).toFixed(2) + 'px'; }
+      else { el.style.stroke = '#F4EFE3'; el.style.strokeWidth = (t - INK_PX).toFixed(2) + 'px'; }
+    });
+  }
   function mobStrips(page, holder, mob, shiftAt) {
     const place = () => { const k = holder.clientWidth / mob.w;
       holder.querySelectorAll('.csStrip').forEach(s => { const o = s._o; s.style.top = (o.y - shiftAt(o.y) - mob.cut) * k + 'px'; s.style.height = mob.w * o.h / o.w * k + 'px'; }); };
@@ -3435,7 +3504,7 @@
       const s = document.createElement('div'); s.className = 'csStrip'; s._o = o; holder.appendChild(s);
       fetch(o.src).then(r => r.text()).then(x => { s.innerHTML = x; const svg = s.querySelector('svg');
         if (!svg.querySelector('.csInk, .csInkFill')) sketchFill(svg);   // (the ones cut from the desktop design are drawn already)
-        place(); });
+        place(); inkLines(svg); });
     });
     place(); addEventListener('resize', place);
   }
@@ -3474,6 +3543,7 @@
         mobHide(svg, mob);
         const shiftAt = mobText(svg, mob, holder.clientWidth / mob.w);
         (page._lazy || []).forEach(L => { L.y0 -= shiftAt(L.y0); L.y1 -= shiftAt(L.y1); });   // (the pictures moved up with the text)
+        mobFigures(svg, mob, holder.clientWidth / mob.w); inkLines(svg);
         mobStrips(page, holder, mob, shiftAt); docParallax(page, svg);
       }
       else if (MOB_CASE && isMob()) mobileCase(page, svg);              // (off: phones show the design exactly as on desktop, scaled)
