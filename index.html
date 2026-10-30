@@ -3341,16 +3341,27 @@
     });
     const text = [];
     // (words inside a sketch, among its lines, are part of the drawing: they stay as drawn and go with it)
-    const inkB = [...svg.querySelectorAll('.csInk, .csInkFill')].filter(el => !hidden(el)).map(boxOf).filter(b => b && b.x1 - b.x0 < 150 && b.y1 - b.y0 < 150);
+    const inkB = [...svg.querySelectorAll('.csInk, .csInkFill')].filter(el => !hidden(el) && !swatch(el)).map(boxOf).filter(b => b && b.x1 - b.x0 < 150 && b.y1 - b.y0 < 150);
+    const labels = svg._labels = [];                                 // words beside a sketch that stay drawn: its labels
     blocks.forEach(B => {
+      const nearInk = inkB.some(b => b.x0 < B.x1 + 50 && b.x1 > B.x0 - 50 && b.y0 < B.y1 + 50 && b.y1 > B.y0 - 50);
+      if (nearInk) labels.push(B);
       if (inkB.some(b => b.x0 < B.x1 && b.x1 > B.x0 && b.y0 < B.y1 && b.y1 > B.y0)) return;
       const r = readWords(B.ps.map(c => ({ el: c.el, m: c.b.m })));
       if (!r || !r.paras.length || r.fsz * k > 30 || r.fsz * k < 6) return;   // (drawings read as huge "letters")
+      // a drawing's labels stay drawn: narrow, beside it, a few words a line (or one line right beside it)
+      if (nearInk && B.x1 - B.x0 < mob.w * 0.45) {
+        const ls = new Map(); r.paras.flat().forEach(w => { const q = Math.round(w.bot / (r.fsz * 0.5)); ls.set(q, (ls.get(q) || 0) + 1); });
+        const beside = inkB.some(b => b.y0 < B.y1 && b.y1 > B.y0 && Math.max(b.x0 - B.x1, B.x0 - b.x1) < 50);
+        if ((ls.size >= 2 && Math.max(...ls.values()) <= 3) || (ls.size === 1 && beside)) return;
+      }
       const words = r.paras.flat(), hs = words.flatMap(w => w.g.map(g => g.y1 - g.y0)).sort((a, b) => a - b);
       // the serif's small letters stand at about 0.7 of its tall ones (small capitals nearer 0.8); capitals-only labels have (almost) none there
-      const p90 = hs[Math.floor(hs.length * 0.9)], band = hs.filter(h => h >= p90 * 0.55 && h <= p90 * 0.745);
-      const tall = hs.filter(h => h > p90 * 0.9);                     // (a label's bullet or ring alone is not a tall letter)
-      if (band.length < hs.length * 0.25 || tall.length < Math.max(2, hs.length * 0.12)) return;
+      const p90 = hs.length < 24 ? hs[hs.length - 1] : hs[Math.floor(hs.length * 0.9)],   // (a short word: its tallest letter)
+        band = hs.filter(h => h >= p90 * 0.55 && h <= p90 * 0.745);
+      // tall letters: narrow (a label's bullet or ring is as wide as it is tall); one is enough in a word of small letters
+      const tall = words.flatMap(w => w.g).filter(g => g.y1 - g.y0 > p90 * 0.9 && g.x1 - g.x0 < (g.y1 - g.y0) * 0.85).length;
+      if (band.length < hs.length * 0.25 || (tall < Math.max(2, hs.length * 0.12) && !(tall && band.length >= hs.length * 0.5))) return;
       // its size from its small letters' height (the serif's x-height is about 0.52 of its size); one line alone keeps a usual spacing
       const fsz = median(band) / 0.52, multi = new Set(words.map(w => Math.round(w.bot))).size > 1;
       const s = MOB_TEXT_PX / k / fsz, lh = multi ? r.pitch : fsz * 1.6, Wt = (B.x1 - B.x0) / s + 0.5, sp = fsz * 0.27;
@@ -3383,6 +3394,7 @@
       });
       const top0 = Math.min(...words.map(w => w.top)), newH = (y - lh + fsz * 1.05) * s;
       const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'csMobText'); g.innerHTML = html;
+      if (labels[labels.length - 1] === B) labels.pop();             // (re-set as text after all)
       text.push({ B, g, x0: B.x0, top: top0, y0: B.y0, y1: B.y1, d: (B.y1 - top0) - newH, s });
       B.ps.forEach(c => c.el.setAttribute('display', 'none'));
     });
@@ -3521,6 +3533,36 @@
         el.setAttribute('transform', `matrix(${T.a} ${T.b} ${T.c} ${T.d} ${T.e} ${T.f})`); });
     });
   }
+  // Phones: a sketch's labels (words drawn beside it) come out LABEL_PX tall on screen - in proportion to the figures,
+  // not the size of the page's text. Each is scaled about its side toward the drawing, so it stays by what it names.
+  const LABEL_PX = 10;
+  // a plain filled rectangle (a colour swatch), not a drawing
+  const swatch = el => el.tagName === 'rect' ? !el.getAttribute('stroke') : el.classList.contains('csInkFill') && (el.getAttribute('d') || '').length < 70 && pathSubs(el.getAttribute('d') || '').length === 1;
+  function sketchLabels(svg, k) {
+    const toRoot = svg.getScreenCTM().inverse();
+    const boxOf = el => { const r = el.getBoundingClientRect(); if (!r.width && !r.height) return null;
+      const a = new DOMPoint(r.left, r.top).matrixTransform(toRoot), b = new DOMPoint(r.right, r.bottom).matrixTransform(toRoot);
+      return { x0: a.x, y0: a.y, x1: b.x, y1: b.y }; };
+    const ink = [...svg.querySelectorAll('.csInk, .csInkFill')].filter(el => !el.closest('[display="none"]') && !swatch(el)).map(boxOf)
+      .filter(b => b && b.x1 - b.x0 < 150 && b.y1 - b.y0 < 150);
+    (svg._labels || []).forEach(B => {
+      const els = B.ps.map(c => c.el).filter(el => !el.closest('[display="none"]')); if (!els.length) return;
+      const hs = []; els.forEach(el => { const m = toRoot.multiply(el.getScreenCTM()), sy = Math.hypot(m.b, m.d);
+        pathSubs(el.getAttribute('d') || '').forEach(s => { if (s.y1 - s.y0 > 0.5) hs.push((s.y1 - s.y0) * sy); }); });
+      if (hs.length < 3) return;
+      hs.sort((a, b) => a - b);
+      const px = hs[hs.length - 1 - Math.floor(hs.length * 0.03)] / 0.7 * k, f = LABEL_PX / px;   // (its tall letters: a few stray marks aside) if (f > 0.97 || px > 18) return;   // (only ever smaller; big type is not a label)
+      const bs = els.map(boxOf).filter(Boolean), b = { x0: Math.min(...bs.map(q => q.x0)), x1: Math.max(...bs.map(q => q.x1)), y0: Math.min(...bs.map(q => q.y0)), y1: Math.max(...bs.map(q => q.y1)) };
+      const cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2, gap = q => Math.hypot(Math.max(0, q.x0 - b.x1, b.x0 - q.x1), Math.max(0, q.y0 - b.y1, b.y0 - q.y1));
+      const near = ink.reduce((p, q) => !p || gap(q) < gap(p) ? q : p, null); if (!near) return;
+      const nx = (near.x0 + near.x1) / 2, ny = (near.y0 + near.y1) / 2;
+      const ax = Math.abs(nx - cx) < (b.x1 - b.x0) / 2 ? cx : nx < cx ? b.x0 : b.x1, ay = Math.abs(ny - cy) < (b.y1 - b.y0) / 2 ? cy : ny < cy ? b.y0 : b.y1;
+      const S = new DOMMatrix().translate(ax, ay).scale(f).translate(-ax, -ay);
+      els.forEach(el => { const M = DOMMatrix.fromMatrix(toRoot.multiply(el.parentNode.getScreenCTM())), t0 = el.transform.baseVal.consolidate();
+        const T = M.inverse().multiply(S).multiply(M).multiply(t0 ? DOMMatrix.fromMatrix(t0.matrix) : new DOMMatrix());
+        el.setAttribute('transform', `matrix(${T.a} ${T.b} ${T.c} ${T.d} ${T.e} ${T.f})`); });
+    });
+  }
   // Every sketch line the same: strokes are drawn at 0.9px already; lines drawn as filled outlines are thickened or
   // thinned to 0.9px on screen (their thickness: twice their area over their outline's length). Solid shapes stay.
   const INK_PX = 0.9;
@@ -3530,6 +3572,7 @@
       if (el.closest('[display="none"]')) return;
       let b, L; try { b = el.getBBox(); L = el.getTotalLength(); } catch (e) { return; }
       if (!L || b.width * b.height === 0) return;
+      if (b.height < 25 && b.width > b.height && pathSubs(el.getAttribute('d') || '').length > 2) return;   // (lettering, e.g. a type sample: not a line)
       const S = Math.min(6, 600 / Math.max(b.width, b.height)), W = Math.ceil(b.width * S) + 2, H = Math.ceil(b.height * S) + 2;
       cv.width = W; cv.height = H; g.setTransform(S, 0, 0, S, -b.x * S + 1, -b.y * S + 1); g.fillStyle = '#000';
       g.fill(new Path2D(el.getAttribute('d')), el.getAttribute('fill-rule') === 'evenodd' ? 'evenodd' : 'nonzero');
@@ -3586,7 +3629,7 @@
         mobHide(svg, mob);
         const shiftAt = mobText(svg, mob, holder.clientWidth / mob.w);
         (page._lazy || []).forEach(L => { L.y0 -= shiftAt(L.y0); L.y1 -= shiftAt(L.y1); });   // (the pictures moved up with the text)
-        mobFigures(svg, mob, holder.clientWidth / mob.w); mobMargins(svg, mob, holder.clientWidth / mob.w); inkLines(svg);
+        mobFigures(svg, mob, holder.clientWidth / mob.w); mobMargins(svg, mob, holder.clientWidth / mob.w); sketchLabels(svg, holder.clientWidth / mob.w); inkLines(svg);
         mobStrips(page, holder, mob, shiftAt); docParallax(page, svg);
       }
       else if (MOB_CASE && isMob()) mobileCase(page, svg);              // (off: phones show the design exactly as on desktop, scaled)
