@@ -206,7 +206,7 @@
   .abBg::after, .ctBg::after { content: ""; position: absolute; inset: 0; background-image: var(--mottle); }   /* the coarser mottle */
   .abStage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
   #abStage { filter: sepia(0.08) saturate(0.55) brightness(1.05) contrast(0.97); }
-  /* the open book: a real sketchbook scan, cream pages sewn at the gutter (assets/about/book.png, 1879 x 1194 on the stage, the spine at x 841),
+  /* the open book: a real sketchbook scan, cream pages sewn at the gutter (assets/about/book.webp, 1879 x 1194 on the stage, the spine at x 841),
      split at the spine so its cover can turn; the pages are the picture's own, the writing laid on top */
   .abShadow { position: absolute; left: 70px; top: 60px; width: 1590px; height: 1090px; border-radius: 12px; opacity: 0; pointer-events: none;
     box-shadow: 0 34px 70px rgba(40, 32, 18, 0.42), 0 8px 16px rgba(40, 32, 18, 0.25); }
@@ -214,7 +214,7 @@
     box-shadow: 0 0 70px rgba(45, 38, 26, 0.36), 0 8px 14px rgba(40, 32, 18, 0.18); }
   .abBook { position: absolute; left: 0; top: 0; width: 1879px; height: 1194px; perspective: 3000px;
     perspective-origin: 841px 597px; }
-  .abHalf, .abFace { position: absolute; top: 0; height: 1194px; background: url(assets/about/book.png) no-repeat;
+  .abHalf, .abFace { position: absolute; top: 0; height: 1194px; background: url(assets/about/book.webp) no-repeat;
     background-size: 1879px 1194px; }
   .abHalfR, .abCover { left: 841px; width: 1038px; }
   .abHalfR { background-position: -841px 0; filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.22)); }
@@ -222,7 +222,7 @@
   .abFace { left: 0; width: 1038px; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
   /* outside of the cover: the leather, its stitching on the outer edge */
   .abFront { width: 829px; top: 6px; height: 1182px; border-radius: 16px; transform: scaleX(-1); transform-origin: 414.5px 50%;
-    background: #262524 url(assets/about/leather.jpg) 0 0 / 100% 100% no-repeat; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28); }
+    background: #262524 url(assets/about/leather.webp) 0 0 / 100% 100% no-repeat; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28); }
   /* inside of the cover: the picture's left half (the face is 1038 wide, the picture's left half 841) */
   .abBack { transform: rotateY(180deg); background-position: 197px 0; }
   .abStrap { display: none; }
@@ -236,8 +236,8 @@
   .abCopy { position: absolute; margin: 0; filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.22)); }
   .abCopy .tear { padding: 9px; background: linear-gradient(rgba(150, 140, 148, 0.24), rgba(150, 140, 148, 0.24)), url(assets/about/paper-white.jpg) center / cover; }
   .abCopy img { display: block; object-fit: cover; }
-  .abHalfR::before { -webkit-mask: url(assets/about/book.png) -841px 0 / 1879px 1194px no-repeat; mask: url(assets/about/book.png) -841px 0 / 1879px 1194px no-repeat; }
-  .abBack::before { -webkit-mask: url(assets/about/book.png) 197px 0 / 1879px 1194px no-repeat; mask: url(assets/about/book.png) 197px 0 / 1879px 1194px no-repeat; }
+  .abHalfR::before { -webkit-mask: url(assets/about/book.webp) -841px 0 / 1879px 1194px no-repeat; mask: url(assets/about/book.webp) -841px 0 / 1879px 1194px no-repeat; }
+  .abBack::before { -webkit-mask: url(assets/about/book.webp) 197px 0 / 1879px 1194px no-repeat; mask: url(assets/about/book.webp) 197px 0 / 1879px 1194px no-repeat; }
   /* the pages: the picture's paper; the writing sits in a 712 x 900 block, centred down the page */
   .abPage { position: absolute; top: 71px; width: 712px; height: 1061px; overflow: hidden;
     font: 400 26px/1.28 "Gandhar Hand", "Indie Flower", var(--hand); color: #2A2A2A; }
@@ -260,7 +260,7 @@
   .abBook.flat .abBack { transform: translateX(-1038px); }
   .abBook.flat.p2 .abLeafFront { display: none; }
   .abBook.flat.p2 .abLeafBack { display: block; transform: translateX(-786px); }
-  .abLeaf .abPage { top: 0; left: 0; width: 706px; background: url(assets/about/book.png) no-repeat; background-size: 1879px 1194px; }
+  .abLeaf .abPage { top: 0; left: 0; width: 706px; background: url(assets/about/book.webp) no-repeat; background-size: 1879px 1194px; }
   .abLeafFront .abPage { background-position: -881px -71px; }   /* the same paper as the page it lies on */
   .abLeafBack .abPage { background-position: -95px -71px; }
   .abArrow { position: absolute; left: 1606px; top: 520px; width: 112px; height: 86px; overflow: visible; opacity: 0;
@@ -401,7 +401,7 @@
   .ctPhone > img { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-drag: none; }
   /* the screen: 63,152 - 521,639 of the 619 x 1289 picture; sizes in cqw so it all scales with the phone */
   .ctWear { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
-    -webkit-mask: url(assets/contact-phone3.png) 0 0 / 100% 100% no-repeat; mask: url(assets/contact-phone3.png) 0 0 / 100% 100% no-repeat; }
+    -webkit-mask: url(assets/contact-phone3.webp) 0 0 / 100% 100% no-repeat; mask: url(assets/contact-phone3.webp) 0 0 / 100% 100% no-repeat; }
   .ctWear path { fill: none; stroke-linecap: round; }
   /* an old, dull screen: greyed, a faint green tint, darker towards the edges, a little smudged */
   .ctScreen::after { content: ""; position: absolute; inset: 0; pointer-events: none;
@@ -424,7 +424,7 @@
       radial-gradient(ellipse 60% 40% at 50% 100%, rgba(70, 70, 55, 0.25), transparent 70%); }
   .ctGrime { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: var(--grain); background-size: 160px; opacity: 0.16; mix-blend-mode: multiply; }
   .ctPhone::after { content: ""; position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply;
-    -webkit-mask: url(assets/contact-phone3.png) 0 0 / 100% 100% no-repeat; mask: url(assets/contact-phone3.png) 0 0 / 100% 100% no-repeat;
+    -webkit-mask: url(assets/contact-phone3.webp) 0 0 / 100% 100% no-repeat; mask: url(assets/contact-phone3.webp) 0 0 / 100% 100% no-repeat;
     background: radial-gradient(ellipse 30% 20% at 20% 75%, rgba(60, 55, 40, 0.45), transparent 70%),
       radial-gradient(ellipse 25% 15% at 85% 60%, rgba(70, 60, 40, 0.4), transparent 70%),
       radial-gradient(ellipse 50% 12% at 50% 98%, rgba(40, 38, 30, 0.5), transparent 70%),
@@ -697,19 +697,19 @@
 
     <!-- door panel (in front of the figure) -->
     <g id="doorFront">
-      <!-- the closed door (assets/door-closed.png): doorway 911-1009 x 416-663, the figure behind it; swapped out as it opens -->
-      <image id="doorClosedImg" filter="url(#grainFx)" href="assets/door-closed.png" x="880.8" y="386.1" width="158.2" height="295.6" preserveAspectRatio="none"></image>
+      <!-- the closed door (assets/door-closed.webp): doorway 911-1009 x 416-663, the figure behind it; swapped out as it opens -->
+      <image id="doorClosedImg" filter="url(#grainFx)" href="assets/door-closed.webp" x="880.8" y="386.1" width="158.2" height="295.6" preserveAspectRatio="none"></image>
       <polygon id="panel" class="ln solid" points="1020,416 900,416 900,663 1020,663" style="display:none"></polygon>
       <circle id="knob" cx="911" cy="541" r="3.5" fill="#fff" style="display:none"></circle>
     </g>
 
-    <!-- lamp: the cord (assets/lamp-cord.png) and the shade (assets/lamp-shade.png), placed in render() -->
+    <!-- lamp: the cord (assets/lamp-cord.png) and the shade (assets/lamp-shade.webp), placed in render() -->
     <g id="lamp">
       <line id="cord" class="ln" x1="686" y1="-40" x2="686" y2="-120" style="display:none"></line>
       <ellipse id="bulb" class="ln" cx="686" cy="-73" rx="11.5" ry="5.5" style="display:none"></ellipse>
       <polygon id="shade" class="ln solid" points="687,-120 653,-61 721,-61" style="display:none"></polygon>
       <image id="cordImg" filter="url(#grainFx)" href="assets/lamp-cord.png?v=2" x="0" y="0" width="1" height="1" preserveAspectRatio="none"></image>
-      <image id="shadeImg" filter="url(#grainFx)" href="assets/lamp-shade.png" x="0" y="-200" width="1" height="1" preserveAspectRatio="none"></image>
+      <image id="shadeImg" filter="url(#grainFx)" href="assets/lamp-shade.webp" x="0" y="-200" width="1" height="1" preserveAspectRatio="none"></image>
     </g>
 
     <!-- arm -->
@@ -728,30 +728,30 @@
   <svg id="heroSvg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet">
     <g id="heroCam">   <!-- the camera: moved and zoomed by the main-page scroll steps (set in JS) -->
     <g id="heroDecor" aria-hidden="true">   <!-- the rest of the desk, peeking in at the edges (placed in JS) -->
-        <g id="dk-paper" class="deskBit"><image href="assets/photo/desk-paper.png" x="-235.6" y="-183.4" width="471.1" height="366.7"></image></g>
+        <g id="dk-paper" class="deskBit"><image href="assets/photo/desk-paper.webp" x="-235.6" y="-183.4" width="471.1" height="366.7"></image></g>
         <g id="dk-marker" class="deskBit"><image href="assets/exact/desk-marker.png" x="-75.4" y="-92.8" width="150.8" height="185.6"></image></g>
-        <g id="dk-scissors" class="deskBit"><image href="assets/exact/desk-scissors.png" x="-152.2" y="-182.7" width="304.5" height="365.4"></image></g>
-        <g id="dk-sketchbook" class="deskBit"><image href="assets/exact/desk-sketchbook.png" x="-181.2" y="-142.1" width="362.5" height="284.2"></image></g>
-        <g id="dk-camera" class="deskBit"><image href="assets/photo/desk-camera.png" x="-183.3" y="-227.6" width="366.8" height="455.3"></image></g>
+        <g id="dk-scissors" class="deskBit"><image href="assets/exact/desk-scissors.webp" x="-152.2" y="-182.7" width="304.5" height="365.4"></image></g>
+        <g id="dk-sketchbook" class="deskBit"><image href="assets/exact/desk-sketchbook.webp" x="-181.2" y="-142.1" width="362.5" height="284.2"></image></g>
+        <g id="dk-camera" class="deskBit"><image href="assets/photo/desk-camera.webp" x="-183.3" y="-227.6" width="366.8" height="455.3"></image></g>
     </g>
     <g id="heroProps">
       <!-- each prop 1.2x, spread apart and set down a little off-square (own height and tilt) so they look dropped there -->
       <!-- each prop is placed by JS (translate / rotate / scale about its own centre) for each scroll step -->
-      <g id="hpPhone" data-open="contact"><image class="hprop" href="assets/photo/contact-phone.png?v=7" x="532.8" y="494" width="86.4" height="180" style="filter: drop-shadow(0 2px 4px rgba(40, 32, 18, 0.2))"></image></g>
-      <g id="hpCup" data-open="contact"><image class="hprop" href="assets/photo/hero-cup-dull.png?v=2" x="462.3" y="424.3" width="178.3" height="159.3"></image></g>
+      <g id="hpPhone" data-open="contact"><image class="hprop" href="assets/photo/contact-phone.webp?v=7" x="532.8" y="494" width="86.4" height="180" style="filter: drop-shadow(0 2px 4px rgba(40, 32, 18, 0.2))"></image></g>
+      <g id="hpCup" data-open="contact"><image class="hprop" href="assets/photo/hero-cup-dull.webp?v=2" x="462.3" y="424.3" width="178.3" height="159.3"></image></g>
       <g id="hpLaptop" data-open="work">
-        <image class="hprop" href="assets/photo/hero-laptop.png" x="772" y="335" width="374" height="360"></image>
+        <image class="hprop" href="assets/photo/hero-laptop.webp" x="772" y="335" width="374" height="360"></image>
         <!-- on the laptop step its screen shows the Work page -->
         <clipPath id="heroScreenClip"><rect x="795" y="372" width="327" height="198" rx="2"></rect></clipPath>
         <g id="heroScreen" clip-path="url(#heroScreenClip)" opacity="0">
-          <image href="assets/scan/hero-work-screen.png" x="795" y="372" width="327" height="198" preserveAspectRatio="xMidYMid slice"></image>
+          <image href="assets/scan/hero-work-screen.webp" x="795" y="372" width="327" height="198" preserveAspectRatio="xMidYMid slice"></image>
           <radialGradient id="heroScreenShade" cx="0.5" cy="0.45" r="0.75"><stop offset="0.6" stop-color="#000" stop-opacity="0"></stop><stop offset="1" stop-color="#000" stop-opacity="0.22"></stop></radialGradient>
           <linearGradient id="heroScreenGlare" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.16"></stop><stop offset="0.45" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
           <rect x="795" y="372" width="327" height="198" fill="url(#heroScreenShade)"></rect><rect x="795" y="372" width="327" height="198" fill="url(#heroScreenGlare)"></rect>
         </g>
       </g>
       <g id="hpBook" data-open="about">
-        <image class="hprop" href="assets/photo/hero-notebook.png" x="1261.5" y="405.5" width="221" height="267"></image>
+        <image class="hprop" href="assets/photo/hero-notebook.webp" x="1261.5" y="405.5" width="221" height="267"></image>
       </g>
     </g>
     </g>
@@ -820,7 +820,7 @@
         <div class="abStrap" aria-hidden="true"></div>
         <div class="abPage">
           <div class="abSoft">
-            <img src="assets/about/software2.png" alt="My software: an old computer with Claude Code, Figma, Notion, Canva, Framer and Figma Make on its desktop" width="440" height="697">
+            <img src="assets/about/software2.webp" alt="My software: an old computer with Claude Code, Figma, Notion, Canva, Framer and Figma Make on its desktop" width="440" height="697">
             <svg viewBox="0 0 40 40" style="left: 76.7%; top: 41.03%" aria-hidden="true"><rect width="40" height="40" rx="8" fill="#1F1E1C"/><g stroke="#D97757" stroke-width="2.4" stroke-linecap="round"><path d="M14 7v12M8 13h12M9.8 8.8l8.4 8.4M18.2 8.8l-8.4 8.4"/><path d="M11 24l5 3.5-5 3.5" fill="none" stroke-linejoin="round"/><path d="M19 31h10"/></g></svg>
             <svg viewBox="0 0 40 40" style="left: 76.7%; top: 45.05%" aria-hidden="true"><rect width="40" height="40" rx="8" fill="#1E1E1E"/><g transform="translate(20 20) scale(1.25) translate(-20 -16.5)"><path d="M20 6h-3.5a3.5 3.5 0 0 0 0 7H20z" fill="#F24E1E"/><path d="M20 6h3.5a3.5 3.5 0 0 1 0 7H20z" fill="#FF7262"/><path d="M20 13h-3.5a3.5 3.5 0 0 0 0 7H20z" fill="#A259FF"/><circle cx="23.5" cy="16.5" r="3.5" fill="#1ABCFE"/><path d="M20 20h-3.5a3.5 3.5 0 1 0 3.5 3.5z" fill="#0ACF83"/></g></svg>
             <svg viewBox="0 0 40 40" style="left: 76.7%; top: 59.18%" aria-hidden="true"><rect width="40" height="40" rx="8" fill="#0A0A0A"/><path d="M13 8H27V15H20Z M13 15H20L27 22H13Z M13 22H20V29Z" fill="#fff"/></svg>
@@ -833,7 +833,7 @@
         <div class="abLeafFace abLeafFront">
         <div class="abPage">
           <svg class="abMess" viewBox="0 0 706 1061" aria-hidden="true">
-      <image href="assets/about/ink-2.png" x="510" y="710" width="420" height="420" transform="rotate(165 602 899)"></image>
+      <image href="assets/about/ink-2.webp" x="510" y="710" width="420" height="420" transform="rotate(165 602 899)"></image>
       <g transform="translate(70 930) rotate(4)" filter="url(#pencil)"><text x="0" y="0" font-size="30">too many tabs</text>
         <path class="scrib" d="M-6 -7.68 C 39.312 -10.08, 78.624 -4.800000000000001, 139.04 -8.64 M-4 -4.800000000000001 C 45.864 -2.88, 91.728 -8.16, 137.04 -4.32 M13.104 -1.2000000000000002 C 52.416 -12, 78.624 -2.4000000000000004, 124.48799999999999 -10.8"></path></g>
       <g class="ghost" transform="translate(300 880) rotate(3)"><text x="0" y="0" font-size="20">notice the small</text><text x="14" y="24" font-size="20">things</text></g>
@@ -871,7 +871,7 @@
           <div class="abPage">
             <h2 style="left: 40px; top: 30px; transform: rotate(-2deg)">my resume</h2>
             <figure class="abResume" style="position: absolute; margin: 0; left: 46px; top: 96px; transform: rotate(-1.5deg)" title="click to read">
-              <div><img src="assets/about/copy-resume.jpg?v=3" alt="Resume of Gandhar Misal, UI/UX Designer" width="560" height="792"></div>
+              <div><img src="assets/about/copy-resume.webp?v=3" alt="Resume of Gandhar Misal, UI/UX Designer" width="560" height="792"></div>
             </figure>
                         <a class="abDownload" href="assets/about/Gandhar-Misal-Resume.pdf?v=3" download="Gandhar-Misal-Resume.pdf">download resume
               <svg viewBox="0 0 26 32" aria-hidden="true"><path d="M13 3 C 12 11, 14 18, 13 26 M 6 19 C 9 22, 11 24, 13 27 C 15 24, 18 21, 21 18"></path></svg>
@@ -929,7 +929,7 @@
           </linearGradient>
         </defs>
         <rect x="800" y="6" width="83" height="1182" fill="#2B2A28"></rect>
-        <image href="assets/about/spine.png" style="filter: brightness(0.84) sepia(0.2) contrast(0.92)" x="752" y="72" width="178" height="1060" preserveAspectRatio="none"></image>
+        <image href="assets/about/spine.webp" style="filter: brightness(0.84) sepia(0.2) contrast(0.92)" x="752" y="72" width="178" height="1060" preserveAspectRatio="none"></image>
         <g id="abRingSet"></g>
       </svg>
       <!-- a thick marker arrow pointing at the strap (a darker edge under the orange, like a felt pen): turns the page;
@@ -957,7 +957,7 @@
       <feMerge><feMergeNode in="paper"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
     </filter></svg>
     <!-- cut out round its edge like a paper scrap, grained like the rest of the site, taped down -->
-    <img src="assets/photo/contact-phone.png?v=7" alt="" width="619" height="1289" style="filter: drop-shadow(0 0 28px rgba(45, 38, 26, 0.36)) drop-shadow(0 4px 7px rgba(40, 32, 18, 0.2))">
+    <img src="assets/photo/contact-phone.webp?v=7" alt="" width="619" height="1289" style="filter: drop-shadow(0 0 28px rgba(45, 38, 26, 0.36)) drop-shadow(0 4px 7px rgba(40, 32, 18, 0.2))">
     <!-- wear: scratches and scuffs over the body and keys (drawn in JS), kept inside the phone's own outline -->
     <svg class="ctWear" id="ctWear" viewBox="0 0 619 1289" preserveAspectRatio="none" aria-hidden="true"></svg>
     <span class="abTape" style="left: 8%; top: 3%; transform: rotate(-24deg)"></span>
@@ -983,7 +983,7 @@
   <div class="csHero">
     <div class="csPicBox">
       <div class="csPic">
-        <img class="csHeroImg" crossorigin="anonymous" src="assets/work-music.png" alt="An ear, with sound drawn as rings and waves round it" width="860" height="535">
+        <img class="csHeroImg" crossorigin="anonymous" src="assets/work-music.webp" alt="An ear, with sound drawn as rings and waves round it" width="860" height="535">
         <canvas class="csSand" aria-hidden="true"></canvas>
       </div>
       <h1 class="csTitle" style="--cs: #F08A2C"><span>Fankr : Music</span><span>for every ear</span></h1>
@@ -1017,7 +1017,7 @@
   <div class="csHero">
     <div class="csPicBox">
       <div class="csPic">
-        <img class="csHeroImg" crossorigin="anonymous" src="assets/work-cybersmart.png" alt="A laptop showing the Cybersmart inspection dashboard with a container ship" width="1076" height="585">
+        <img class="csHeroImg" crossorigin="anonymous" src="assets/work-cybersmart.webp" alt="A laptop showing the Cybersmart inspection dashboard with a container ship" width="1076" height="585">
         <canvas class="csSand" aria-hidden="true"></canvas>
       </div>
       <h1 class="csTitle csTitleLeft" style="--cs: #1F9C7F; --title-x: 326; --title-fs: 69"><span>Cybersmart : Ship</span><span>shape dashboards</span></h1>
@@ -1049,7 +1049,7 @@
   <div class="csHero">
     <div class="csPicBox">
       <div class="csPic">
-        <img class="csHeroImg" crossorigin="anonymous" src="assets/work-hobby.png" alt="Two people shaping clay together on a potter's wheel" width="1076" height="584">
+        <img class="csHeroImg" crossorigin="anonymous" src="assets/work-hobby.webp" alt="Two people shaping clay together on a potter's wheel" width="1076" height="584">
         <canvas class="csSand" aria-hidden="true"></canvas>
       </div>
       <h1 class="csTitle csTitleLeft" style="--cs: #141414"><span>HobbyHop : Hobbies</span><span style="color: #1A1A3E">are better together</span></h1>
@@ -1155,7 +1155,7 @@
       <feDisplacementMap in="c" in2="n" scale="2.4" xChannelSelector="G" yChannelSelector="B"></feDisplacementMap>
     </filter>
   </svg>
-<div id="abZoom" role="dialog" aria-label="Resume"><img src="assets/about/copy-resume.jpg?v=3" alt="Resume of Gandhar Misal, UI/UX Designer"></div>
+<div id="abZoom" role="dialog" aria-label="Resume"><img src="assets/about/copy-resume.webp?v=3" alt="Resume of Gandhar Misal, UI/UX Designer"></div>
 <div id="grain" aria-hidden="true"></div>
 <script>
   // a click anywhere: a little burst of hand-drawn dashes springs out around the pointer and fades (white on black,
@@ -1389,7 +1389,7 @@
     });
   }
   function drawLeg(node, st, hipX, hipY, side, L, f) { setPts(node, legPts(st, hipX, hipY, side, L, f)); }
-  // The pendant lamp from its two pictures: the shade (assets/lamp-shade.png, 810x564) hangs with the top of its
+  // The pendant lamp from its two pictures: the shade (assets/lamp-shade.webp, 810x564) hangs with the top of its
   // stem at (x, y) - the same point as the old drawn shade's tip, and its bulb ends where that shade ended
   // (y + 48 s), so the hand still holds it in the same place; the cord (assets/lamp-cord.png) runs from cordTop
   // down into the stem. s = the lamp's scale (LS / ls).
@@ -1959,11 +1959,11 @@
      a dark blurred copy of the picture with the sharp picture in the middle. */
   const WORK = [
     // kind: the kind of project; role: what I did; open: the colour of "Click to open project"
-    { img: 'assets/work-music.png', fx: 0.72, name: 'Music App', desc: 'For people who never needed sound to feel a song.',
+    { img: 'assets/work-music.webp', fx: 0.72, name: 'Music App', desc: 'For people who never needed sound to feel a song.',
       kind: 'Inclusive Design', role: 'Role: Almost everything', open: '#F08A2C' },
-    { img: 'assets/work-hobby.png', fx: 0.5, name: 'P2P Hobby Sharing App', desc: 'Most hobbies die as ideas, with no one to start them with.',
+    { img: 'assets/work-hobby.webp', fx: 0.5, name: 'P2P Hobby Sharing App', desc: 'Most hobbies die as ideas, with no one to start them with.',
       kind: 'Service Design', role: 'Role: Almost everything', open: '#1A1A3E' },
-    { img: 'assets/work-cybersmart.png', fx: 0.56, name: 'Cybersmart', desc: 'The dashboard that notices what people miss.',
+    { img: 'assets/work-cybersmart.webp', fx: 0.56, name: 'Cybersmart', desc: 'The dashboard that notices what people miss.',
       kind: 'Industry Project', role: 'Role: Sole designer', open: '#1F9C7F' }
   ];
   const workPage = $('workPage'), wpStage = $('wpStage'), wpBody = $('wpBody'), wpCanvas = $('wpCanvas'), wpCtx = wpCanvas.getContext('2d');

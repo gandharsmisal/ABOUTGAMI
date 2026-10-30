@@ -6001,10 +6001,10 @@
 <clipPath id="clip79_csm">
 <rect width="350" height="408" fill="white" transform="translate(20 15101.9)"/>
 </clipPath>
-<image id="image0_csm" width="401" height="250" preserveAspectRatio="none" href="assets/cybersmart/img0.png"/>
-<image id="image1_csm" width="736" height="416" preserveAspectRatio="none" href="assets/cybersmart/img1.png"/>
-<image id="image2_csm" width="1920" height="1080" preserveAspectRatio="none" href="assets/cybersmart/img2.jpg"/>
-<image id="image3_csm" width="832" height="764" preserveAspectRatio="none" href="assets/cybersmart/img3.png"/>
+<image id="image0_csm" width="401" height="250" preserveAspectRatio="none" href="assets/cybersmart/img0.webp"/>
+<image id="image1_csm" width="736" height="416" preserveAspectRatio="none" href="assets/cybersmart/img1.webp"/>
+<image id="image2_csm" width="1920" height="1080" preserveAspectRatio="none" href="assets/cybersmart/img2.webp"/>
+<image id="image3_csm" width="832" height="764" preserveAspectRatio="none" href="assets/cybersmart/img3.webp"/>
 <image id="image4_csm" width="832" height="524" preserveAspectRatio="none" href="assets/cybersmart/img4.png"/>
 <image id="image5_csm" width="449" height="86" preserveAspectRatio="none" href="assets/cybersmart/img5.png"/>
 <image id="image6_csm" width="317" height="78" preserveAspectRatio="none" href="assets/cybersmart/img6.png"/>
@@ -6012,6 +6012,6 @@
 <image id="image8_csm" width="439" height="386" preserveAspectRatio="none" href="assets/cybersmart/img8.png"/>
 <image id="image9_csm" width="439" height="386" preserveAspectRatio="none" href="assets/cybersmart/img9.png"/>
 <image id="image10_csm" width="736" height="736" preserveAspectRatio="none" href="assets/cybersmart/img10.jpg"/>
-<image id="image11_csm" width="388" height="502" preserveAspectRatio="none" href="assets/cybersmart/img11.png"/>
+<image id="image11_csm" width="388" height="502" preserveAspectRatio="none" href="assets/cybersmart/img11.webp"/>
 </defs>
 </svg>

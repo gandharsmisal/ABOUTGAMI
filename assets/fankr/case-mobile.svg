@@ -3796,21 +3796,21 @@
 <clipPath id="clip106_fkm">
 <rect width="390" height="117" fill="white" transform="translate(0 16519)"/>
 </clipPath>
-<image id="image0_fkm" width="401" height="250" preserveAspectRatio="none" href="assets/fankr/img0.png"/>
-<image id="image1_fkm" width="401" height="250" preserveAspectRatio="none" href="assets/fankr/img1.png"/>
-<image id="image2_fkm" width="736" height="416" preserveAspectRatio="none" href="assets/fankr/img2.png"/>
-<image id="image3_fkm" width="300" height="300" preserveAspectRatio="none" href="assets/fankr/img15.png"/>
-<image id="image4_fkm" width="623" height="717" preserveAspectRatio="none" href="assets/fankr/img3.png"/>
-<image id="image5_fkm" width="300" height="300" preserveAspectRatio="none" href="assets/fankr/img4.png"/>
-<image id="image6_fkm" width="1000" height="674" preserveAspectRatio="none" href="assets/fankr/img5.png"/>
-<image id="image7_fkm" width="500" height="500" preserveAspectRatio="none" href="assets/fankr/img6.png"/>
-<image id="image8_fkm" width="1080" height="1080" preserveAspectRatio="none" href="assets/fankr/img7.jpg"/>
-<image id="image9_fkm" width="1024" height="576" preserveAspectRatio="none" href="assets/fankr/img8.png"/>
-<image id="image10_fkm" width="1280" height="720" preserveAspectRatio="none" href="assets/fankr/img9.jpg"/>
+<image id="image0_fkm" width="401" height="250" preserveAspectRatio="none" href="assets/fankr/img0.webp"/>
+<image id="image1_fkm" width="401" height="250" preserveAspectRatio="none" href="assets/fankr/img1.webp"/>
+<image id="image2_fkm" width="736" height="416" preserveAspectRatio="none" href="assets/fankr/img2.webp"/>
+<image id="image3_fkm" width="300" height="300" preserveAspectRatio="none" href="assets/fankr/img15.webp"/>
+<image id="image4_fkm" width="623" height="717" preserveAspectRatio="none" href="assets/fankr/img3.webp"/>
+<image id="image5_fkm" width="300" height="300" preserveAspectRatio="none" href="assets/fankr/img4.webp"/>
+<image id="image6_fkm" width="1000" height="674" preserveAspectRatio="none" href="assets/fankr/img5.webp"/>
+<image id="image7_fkm" width="500" height="500" preserveAspectRatio="none" href="assets/fankr/img6.webp"/>
+<image id="image8_fkm" width="1080" height="1080" preserveAspectRatio="none" href="assets/fankr/img7.webp"/>
+<image id="image9_fkm" width="1024" height="576" preserveAspectRatio="none" href="assets/fankr/img8.webp"/>
+<image id="image10_fkm" width="1280" height="720" preserveAspectRatio="none" href="assets/fankr/img9.webp"/>
 <image id="image11_fkm" width="200" height="200" preserveAspectRatio="none" href="assets/fankr/img10.png"/>
-<image id="image12_fkm" width="339" height="160" preserveAspectRatio="none" href="assets/fankr/img11.png"/>
-<image id="image13_fkm" width="339" height="160" preserveAspectRatio="none" href="assets/fankr/img12.png"/>
-<image id="image14_fkm" width="1000" height="1000" preserveAspectRatio="none" href="assets/fankr/img13.png"/>
+<image id="image12_fkm" width="339" height="160" preserveAspectRatio="none" href="assets/fankr/img11.webp"/>
+<image id="image13_fkm" width="339" height="160" preserveAspectRatio="none" href="assets/fankr/img12.webp"/>
+<image id="image14_fkm" width="1000" height="1000" preserveAspectRatio="none" href="assets/fankr/img13.webp"/>
 <image id="image15_fkm" width="300" height="300" preserveAspectRatio="none" href="assets/fankr/img14.png"/>
 </defs>
 </svg>
