@@ -91,7 +91,7 @@
     cursor: pointer; font: 400 26px "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); color: var(--pen);
     transition: background-color 0.3s ease; }
   /* the hover: a warm, mottled paper pill (Previous, Next and back) */
-  .csNext:hover, .csNext:focus-visible { background-color: #D3C69E; background-image: var(--mottle), var(--grain); background-size: 120px, 180px; }
+  .csNext:hover, .csNext:focus-visible { background-color: #C2B287; background-image: var(--mottle), var(--grain); background-size: 120px, 180px; }
   /* the hover fills carry the page's grain too (a grain layer inside the shape, shown with the fill) */
   .csNext, #caseClose .badge { position: relative; isolation: isolate; }
   .csNext::before, #caseClose .badge::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
@@ -532,6 +532,19 @@
   #menu [data-go="contact"] .pill-icon { transform-origin: 50% 52%; }
   #menu [data-go="contact"]:hover .pill-icon { animation: heartpop 0.9s ease-out infinite; }
   @keyframes heartpop { 0% { transform: scale(1); } 14% { transform: scale(1.28); } 28% { transform: scale(0.94); } 42% { transform: scale(1.14); } 58%, 100% { transform: scale(1); } }
+  /* phones: the drawer's items play the same on a tap */
+  #drawerList .label { position: relative; display: inline-block; }
+  #drawerList .scribble { position: absolute; left: -3px; right: -3px; top: calc(100% + 4px); width: calc(100% + 6px); height: 7px; overflow: visible; pointer-events: none; }
+  #drawerList .scribble path { fill: none; stroke: currentColor; stroke-width: 1.4px; stroke-linecap: round; vector-effect: non-scaling-stroke; stroke-dasharray: 1 2; stroke-dashoffset: 1; opacity: 0; }
+  #drawerList .tapped .scribble path { stroke-dashoffset: 0; opacity: 1; transition: stroke-dashoffset 0.42s ease-out, opacity 0s; }
+  #drawerList [data-go="work"] .pill-icon { transform-origin: 50% 88%; }
+  #drawerList [data-go="work"].tapped .pill-icon { animation: hammer 0.8s; }
+  #drawerList [data-go="work"] .label { transform-origin: 50% 100%; }
+  #drawerList [data-go="work"].tapped .label { animation: hammered 0.8s; }
+  #drawerList [data-go="contact"] .pill-icon { transform-origin: 50% 52%; }
+  #drawerList [data-go="contact"].tapped .pill-icon { animation: heartpop 0.9s ease-out; }
+  #drawerList [data-go="about"].tapped .dot { animation: glance 0.7s ease-in-out; }
+  @keyframes glance { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(-1.8px, -1.6px); } 55% { transform: translate(1.8px, -1.2px); } 80% { transform: translate(0.6px, 1.4px); } }
   @media (prefers-reduced-motion: reduce) { #menu .pill-icon, #menu .label { animation: none !important; } }
   /* the logo, top left, level with the menu */
   #logo {
@@ -1896,9 +1909,11 @@
     const list = $('drawerList'), open = on => { document.documentElement.classList.toggle('drawer-open', on);
       $('menuBtn').setAttribute('aria-expanded', on); $('drawer').setAttribute('aria-hidden', !on); };
     document.querySelectorAll('#menu-list > button[data-go]').forEach(b => {
-      const d = document.createElement('button'); d.type = 'button'; d.className = 'mPill';
-      d.innerHTML = b.querySelector('.pill-icon').outerHTML + `<span class="label">${b.querySelector('.label').childNodes[0].textContent.trim()}</span>`;
-      d.addEventListener('click', () => { open(false); setTimeout(() => b.click(), 250); });
+      const d = document.createElement('button'); d.type = 'button'; d.className = 'mPill'; d.dataset.go = b.dataset.go;
+      d.innerHTML = b.querySelector('.pill-icon').outerHTML + b.querySelector('.label').outerHTML;   // (with its scribble)
+      // a tap plays the desktop hover once (hammer, eyes, heartbeat, the line scribbled in), then goes
+      d.addEventListener('click', () => { if (d.classList.contains('tapped')) return; d.classList.add('tapped');
+        setTimeout(() => { open(false); setTimeout(() => { b.click(); d.classList.remove('tapped'); }, 250); }, 700); });
       list.appendChild(d);
     });
     $('menuBtn').addEventListener('click', () => open(true));
