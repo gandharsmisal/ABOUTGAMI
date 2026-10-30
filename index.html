@@ -105,6 +105,13 @@
   .csNextHead { width: 12px; height: 15px; margin-left: -9px; }
   .csNext:hover .csNextLine, .csNext:focus-visible .csNextLine { width: 110px; }
   .csNext:focus-visible { outline: none; }
+  /* "back" on the book and the phone: like Previous, in the menu's thicker hand */
+  #pageBack { position: fixed; z-index: 60; display: none; font-family: "Gandhar Hand", "Indie Flower", var(--hand); font-size: 22px;
+    padding: 8px 16px; transform: translateY(-50%); }   /* placed beside the menu (left of "work", or of "menu" on a phone) by pageBackAt() */
+  #pageBack .csNextPill { filter: url(#crayon); }
+  #pageBack .csNextArrow path { stroke-width: 2.6px; }
+  html.ab-open #pageBack, html.ct-open #pageBack { display: inline-flex; }
+  @media (max-width: 600px) { #pageBack { font-size: 20px; padding: 8px 10px; } }
   .case::-webkit-scrollbar { display: none; }
   /* first screen: the picture as wide as the design has it (1400 of 1920), shortened to fit the screen with the title
      (first line just inside its bottom edge, second just below) */
@@ -143,7 +150,8 @@
   #csLoader { position: fixed; inset: 0; z-index: 45; display: none; place-items: center; background: var(--paper); }
   #csLoader::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: var(--grain); opacity: 0.6; }
   #csLoader svg { width: min(56vw, 340px); overflow: visible; }
-  #csLoader path { fill: none; stroke: #2B2925; stroke-width: 1.3px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; filter: url(#graphite); }
+  /* the scribble in crayon: a thick waxy line with a broken, grainy edge */
+  #csLoader path { fill: none; stroke: #2B2925; stroke-width: 3px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; filter: url(#crayon); }
   #csLoadPct { position: absolute; font: 400 20px "Gandhar Hand Thin", "Gandhar Hand", var(--hand); color: #2B2925; }
   html.cs-loading #csLoader { display: grid; }
   /* on the intro's black screen: the loader is black, its scribble and number white */
@@ -1053,6 +1061,14 @@
   <svg viewBox="0 0 340 220"><path id="csLoadPath" d="M120 150 C 40 140, 20 90, 70 70 C 130 45, 250 40, 290 80 C 320 115, 290 160, 220 168 C 150 176, 95 150, 100 105 C 105 60, 190 45, 240 70 C 285 92, 280 150, 230 165 C 175 182, 120 160, 125 120 C 130 80, 200 70, 245 95 C 280 115, 265 160, 215 165"/></svg>
   <span id="csLoadPct">0</span>
 </div>
+<!-- on the book (About) and the phone (Contact): back to the desk -->
+<button type="button" id="pageBack" class="csNext csPrev" aria-label="Back">
+  <span class="csNextArrow" aria-hidden="true">
+    <svg class="csNextLine" viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M1 7 C 14 4, 26 9, 40 6 S 66 4, 80 7 S 94 6, 99 6"/></svg>
+    <svg class="csNextHead" viewBox="0 0 14 16"><path d="M2 2 C 6 5, 9 7, 12.5 8.2 C 9 9.6, 6 11.5, 2.5 14.5"/></svg>
+  </span>
+  <span class="csNextPill">back</span>
+</button>
 <button type="button" id="caseClose" aria-label="Close the case study">
   <span class="badge"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.6 4.2 C 8.2 7.9, 11.6 11.6, 15.6 15.4 M 15.4 4.5 C 11.8 8.1, 8.4 11.7, 4.4 15.6"></path></svg></span>
   <span>close</span>
@@ -2423,6 +2439,16 @@
       if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) abTurnSide(dx < 0 ? 1 : 0);
     }, { passive: true });
   }
+  $('pageBack').addEventListener('click', () => { if (contact.open) closeContact(); else closeAbout(); });
+  // beside the menu: just left of its first item ("work"), or of the "menu" button on a phone
+  function pageBackAt() {
+    const btn = $('menuBtn'), useBtn = btn && getComputedStyle(btn).display !== 'none', ref = useBtn ? btn : document.querySelector('#menu-list > button');
+    if (!ref) return; const r = ref.getBoundingClientRect(); if (!r.width) return;
+    const b = $('pageBack'); b.style.right = (innerWidth - r.left + (useBtn ? 2 : 10)) + 'px'; b.style.top = (r.top + r.height / 2) + 'px';
+  }
+  new MutationObserver(() => { if (/ab-open|ct-open/.test(document.documentElement.className)) requestAnimationFrame(pageBackAt); })
+    .observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  addEventListener('resize', pageBackAt);
   function openAbout() {
     document.documentElement.classList.add('ab-open');
     abSide = 0; $('abSwipe').innerHTML = 'swipe for the next page &rarr;';
@@ -2531,7 +2557,7 @@
     if (contact.open) return;
     if (!intro.entered) skipToMain();
     closeCase(); closeWork(); closeAbout(true);
-    contact.open = true;
+    contact.open = true; document.documentElement.classList.add('ct-open');
     gsap.set(contactPage, { autoAlpha: 1 });
     document.documentElement.classList.add('in-about');          // no grain over the phone either
     gsap.fromTo('#contactPage .ctBg', { opacity: 0 }, { opacity: 1, duration: 0.6, delay: from ? 0.1 : 0, ease: 'sine.inOut' });
@@ -2546,7 +2572,7 @@
   }
   function closeContact(fast, then) {
     if (!contact.open) return false;
-    contact.open = false;
+    contact.open = false; document.documentElement.classList.remove('ct-open');
     if (!about.open && !fast) document.documentElement.classList.remove('in-about');
     const done = () => { gsap.set(contactPage, { autoAlpha: 0 }); $('hpPhone').style.opacity = ''; if (!about.open) document.documentElement.classList.remove('in-about'); if (then) then(); };
     if (fast) { gsap.to(contactPage, { autoAlpha: 0, duration: 0.3, onComplete: done }); return true; }
