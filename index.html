@@ -335,7 +335,7 @@
   .abPage p { margin: 0 0 10px; }
   .abText { position: absolute; }
   .abPage svg.doodle { position: absolute; overflow: visible; }
-  .abPage .doodle path { fill: none; stroke: #000; stroke-width: 1.2px; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; }
+  .abPage .doodle path { fill: none; stroke: #000; stroke-width: 1.3px; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; }
   .abPage .doodle.red path { stroke: #2E2E30; }
   /* photos: a white border (a wide bottom on the polaroids, where a caption is written), a soft shadow */
   .abPhoto { position: absolute; margin: 0; padding: 9px; background: url(assets/about/paper-white.jpg) center / cover;
@@ -365,13 +365,13 @@
   .csHand text { font-family: "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); stroke-linejoin: round; stroke-linecap: round; paint-order: stroke; }
   /* the stick figures and the case studies' sketches drawn by hand */
   /* the stick figures and the case studies' sketches: one thin, dark pen line */
-  #figSvg .hpen, #hero .hpen { stroke: #000; stroke-width: 1.2px; }
+  #figSvg .hpen, #hero .hpen { stroke: #000; stroke-width: 1.3px; }
   @media (max-width: 600px) { #figSvg .hpen, #hero .hpen, .abPage .doodle path { stroke-width: 1px; } }   /* (phones: 1px) */
   /* every sketch line in crayon (same thickness as before) */
   #heroFig, #heroNotes path, .hnMobArrow, #hnLaptop path, #hnBook path, #hnMug path, .csDocHolder .csSketch, .abPage .doodle { filter: url(#crayonLine); }
   .csDocHolder { --sketch: #000; }   /* the case studies' sketches: a soft grey pencil */
   .csDocHolder .csInkFill { fill: var(--sketch); stroke: #F4EFE3; stroke-width: 0.38px; vector-effect: non-scaling-stroke; filter: url(#crayonLine); }
-  .csDocHolder .csInk { stroke: var(--sketch); stroke-width: 1.2px; vector-effect: non-scaling-stroke; }
+  .csDocHolder .csInk { stroke: var(--sketch); stroke-width: 1.3px; vector-effect: non-scaling-stroke; }
   html.mob-doc .csDocHolder .csInk { stroke-width: 1px; }   /* phones: every sketch line a little thinner, all the same */
   .abResume { cursor: zoom-in; }
   .abResume { mix-blend-mode: multiply; } .abResume img { display: block; }   /* the page's own paper shows through: no separate sheet */
