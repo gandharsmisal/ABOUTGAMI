@@ -137,6 +137,12 @@
   #caseClose path { fill: none; stroke: #1F1D1A; stroke-width: 2.2px; stroke-linecap: round; }
   #caseClose:hover .badge { transform: rotate(90deg); }
   html.in-case #menu, html.in-case #menuBtn { display: none !important; }
+  #csLoader { position: fixed; inset: 0; z-index: 45; display: none; place-items: center; background: var(--paper); }
+  #csLoader::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: var(--grain); opacity: 0.6; }
+  #csLoader svg { width: min(56vw, 340px); overflow: visible; }
+  #csLoader path { fill: none; stroke: #2B2925; stroke-width: 1.3px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; filter: url(#graphite); }
+  #csLoadPct { position: absolute; font: 400 20px "Gandhar Hand Thin", "Gandhar Hand", var(--hand); color: #2B2925; }
+  html.cs-loading #csLoader { display: grid; }
   html.in-case #caseClose { display: inline-flex; }
   @media (max-width: 600px) { #caseClose { right: 14px; top: calc(env(safe-area-inset-top, 0px) + 10px); } }
   .csDocHolder svg { display: block; width: calc(100% * 1250 / 1400); height: auto;
@@ -1028,6 +1034,11 @@
 </section>
 
 <!-- in a case study, in place of the menu: back to the Work page -->
+<!-- while a case study loads: a scribble drawn round and round, and how much has come in -->
+<div id="csLoader" aria-hidden="true">
+  <svg viewBox="0 0 340 220"><path id="csLoadPath" d="M120 150 C 40 140, 20 90, 70 70 C 130 45, 250 40, 290 80 C 320 115, 290 160, 220 168 C 150 176, 95 150, 100 105 C 105 60, 190 45, 240 70 C 285 92, 280 150, 230 165 C 175 182, 120 160, 125 120 C 130 80, 200 70, 245 95 C 280 115, 265 160, 215 165"/></svg>
+  <span id="csLoadPct">0</span>
+</div>
 <button type="button" id="caseClose" aria-label="Close the case study">
   <span class="badge"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.6 4.2 C 8.2 7.9, 11.6 11.6, 15.6 15.4 M 15.4 4.5 C 11.8 8.1, 8.4 11.7, 4.4 15.6"></path></svg></span>
   <span>close</span>
@@ -2772,10 +2783,13 @@
     page.focus({ preventScroll: true });
     page.classList.add('sand');                                   // no plain picture before the sand starts
     const cv = page.querySelector('.csSand'); cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
-    sandSpread(page);                                             // the picture pours out as sand
-    gsap.fromTo(page.querySelectorAll('.csTitle span'), { autoAlpha: 0, y: 14 },
-      { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out', stagger: 0.12, delay: 0.5 });
+    gsap.set(page.querySelectorAll('.csTitle span'), { autoAlpha: 0 });
     loadCaseDoc(page);                                            // the rest of the case study, below
+    caseLoading(page, () => {                                     // once it has all come in: the reveal
+      sandSpread(page);                                           // the picture pours out as sand
+      gsap.fromTo(page.querySelectorAll('.csTitle span'), { autoAlpha: 0, y: 14 },
+        { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out', stagger: 0.12, delay: 0.5 });
+    });
   }
   // The rest of the case study is the Figma design (assets/fankr/case.svg, 1920 wide) from y CUT on (above it was the
   // hero, which the page draws itself), put in the page inline and scaled to the page's width. Its pictures load
@@ -3605,11 +3619,41 @@
     });
     place(); addEventListener('resize', place);
   }
+  // a file read in pieces, telling how much of it has come in (0..1)
+  function fetchCounted(url, on) {
+    return fetch(url).then(r => {
+      const n = +r.headers.get('content-length'); if (!n || !r.body) return r.text();
+      const rd = r.body.getReader(), parts = []; let got = 0;
+      const pump = () => rd.read().then(({ done, value }) => { if (done) return; parts.push(value); got += value.length; on(Math.min(1, got / n)); return pump(); });
+      return pump().then(() => { const all = new Uint8Array(got); let o = 0; parts.forEach(p => { all.set(p, o); o += p.length; }); return new TextDecoder().decode(all); });
+    });
+  }
+  // the loading screen: shown until the case study is ready; the scribble draws itself round and round, the number counts up
+  function caseLoading(page, done) {
+    const html = document.documentElement, path = $('csLoadPath'), pct = $('csLoadPct'), L = path.getTotalLength();
+    let shown = 0, ready = false;
+    const img = page.querySelector('.csHeroImg'), imgOk = img.complete ? Promise.resolve() : new Promise(r => { img.onload = img.onerror = r; });
+    Promise.all([page._doc, imgOk]).then(() => { ready = true; });
+    if (page._ready) { done(); return; }
+    html.classList.add('cs-loading'); path.style.strokeDasharray = L;
+    const t0 = performance.now();
+    const tick = now => {
+      if (caseOpen !== page) { html.classList.remove('cs-loading'); return; }
+      const want = ready ? 100 : Math.min(95, Math.max(8 + (page._got || 0) * 80, 92 * (1 - Math.exp(-(now - t0) / 4000))));   // (by the file, or by time when its size is not told)
+      shown += (want - shown) * 0.12; pct.textContent = Math.round(shown);
+      path.style.strokeDashoffset = L * (1 - ((now - t0) / 1600 % 1));     // draws round and round
+      if (ready && shown > 99) { page._ready = true; pct.textContent = 100;
+        gsap.to('#csLoader', { autoAlpha: 0, duration: 0.35, onComplete: () => { html.classList.remove('cs-loading'); gsap.set('#csLoader', { clearProps: 'all' }); } });
+        done(); return; }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
   function loadCaseDoc(page) {
     if (page._doc) return page._doc;
     const holder = page.querySelector('.csDocHolder');
     const mob = isMob() && holder.dataset.srcMob && MOB_DOCS[page.id]; page._mob = mob || null;
-    page._doc = Promise.all([fetch(mob ? holder.dataset.srcMob : holder.dataset.src).then(r => r.text()), document.fonts.load('40px "Gandhar Hand Thin"').catch(() => {})]).then(([t]) => {
+    page._doc = Promise.all([fetchCounted(mob ? holder.dataset.srcMob : holder.dataset.src, p => page._got = p), document.fonts.load('40px "Gandhar Hand Thin"').catch(() => {})]).then(([t]) => {
       t = t.replace(/<image\b([^>]*?) href="([^"]+)"/g, '<image$1 data-href="$2"');   // nothing loads yet
       holder.innerHTML = t;
       if (mob) { holder.classList.add('csMobDoc'); holder.style.setProperty('--cut', mob.cut); }
