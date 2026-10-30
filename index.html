@@ -547,7 +547,7 @@
   html.mob-doc .csDocHolder.csMobDoc { padding: 0 0 80px; }
   .csDocHolder.csMobDoc svg.csDoc { width: 100%; margin: calc(-100% * var(--cut) / 390) 0 0; }
   /* its wide sketches, whole, across the width */
-  .csStrip { position: absolute; left: 0; right: 0; }
+  .csStrip { position: absolute; left: 16px; right: 16px; }   /* (16px clear of the screen's edges) */
   .csDocHolder .csStrip svg { display: block; margin: 0; width: 100%; height: 100%; }
   /* the whole sketches, drawn small: their filled outlines are thin already (the usual thinning would eat them) */
   html.mob-doc .csDocHolder .csStrip .csInkFill { stroke-width: 0; }
@@ -3383,7 +3383,7 @@
       B.ps.forEach(c => c.el.setAttribute('display', 'none'));
     });
     // the sketches shown whole take the room they need instead of the squeezed one's
-    mob.strips.forEach(o => text.push({ strip: o, y0: o.y, y1: o.y + o.h0, d: o.h0 - mob.w * o.h / o.w }));
+    mob.strips.forEach(o => text.push({ strip: o, y0: o.y, y1: o.y + o.h0, d: o.h0 - (mob.w - 2 * MOB_EDGE / k) * o.h / o.w }));
     // everything else, where it was
     const own = new Set(text.flatMap(t => t.B ? t.B.ps.map(c => c.el) : []));
     const all = [...svg.querySelectorAll('g, path, rect, circle, ellipse, line, image, use')].filter(el =>
@@ -3478,6 +3478,37 @@
         el.setAttribute('transform', `matrix(${T.a} ${T.b} ${T.c} ${T.d} ${T.e} ${T.f})`); });
     });
   }
+  // Phones: no sketch comes nearer the screen's edge than MOB_EDGE px. Each sketch (drawn pieces within a few units of
+  // each other) that does is moved in, or, if it is wider than the room, scaled down about its middle to fit.
+  const MOB_EDGE = 16;
+  function mobMargins(svg, mob, k) {
+    const toRoot = svg.getScreenCTM().inverse(), m = MOB_EDGE / k;
+    const boxOf = el => { const r = el.getBoundingClientRect(); if (!r.width && !r.height) return null;
+      const a = new DOMPoint(r.left, r.top).matrixTransform(toRoot), b = new DOMPoint(r.right, r.bottom).matrixTransform(toRoot);
+      return { x0: a.x, y0: a.y, x1: b.x, y1: b.y }; };
+    const pieces = [];
+    svg.querySelectorAll('path, rect, circle, ellipse, line, polyline, polygon').forEach(el => {
+      if (el.closest('defs, clipPath, mask, pattern, [display="none"]') || inDevice(svg, el)) return;
+      const ink = el.classList.contains('csInk') || el.classList.contains('csInkFill') || (/^(#FFFFFF|white)$/i.test(el.getAttribute('fill') || '') && !el.getAttribute('class'));
+      if (!ink) return; const b = boxOf(el); if (b && b.x1 - b.x0 < 380) pieces.push({ el, b });
+    });
+    const used = new Set();
+    pieces.forEach(p => { if (used.has(p)) return;
+      const s = { els: [p], x0: p.b.x0, x1: p.b.x1, y0: p.b.y0, y1: p.b.y1 }; used.add(p);
+      for (let grew = true; grew;) { grew = false;
+        pieces.forEach(o => { if (used.has(o)) return; const b = o.b;
+          if (b.x0 < s.x1 + 10 && b.x1 > s.x0 - 10 && b.y0 < s.y1 + 10 && b.y1 > s.y0 - 10) {
+            used.add(o); s.els.push(o); s.x0 = Math.min(s.x0, b.x0); s.x1 = Math.max(s.x1, b.x1); s.y0 = Math.min(s.y0, b.y0); s.y1 = Math.max(s.y1, b.y1); grew = true; } }); }
+      if (s.x0 >= m - 0.5 && s.x1 <= mob.w - m + 0.5) return;
+      const w = s.x1 - s.x0, f = Math.min(1, (mob.w - 2 * m) / w), cx = (s.x0 + s.x1) / 2, cy = (s.y0 + s.y1) / 2;
+      let dx = 0; const nx0 = cx - w * f / 2, nx1 = cx + w * f / 2;
+      if (nx0 < m) dx = m - nx0; else if (nx1 > mob.w - m) dx = mob.w - m - nx1;
+      const S = new DOMMatrix().translate(cx + dx, cy).scale(f).translate(-cx, -cy);
+      s.els.forEach(({ el }) => { const M = DOMMatrix.fromMatrix(toRoot.multiply(el.parentNode.getScreenCTM())), t0 = el.transform.baseVal.consolidate();
+        const T = M.inverse().multiply(S).multiply(M).multiply(t0 ? DOMMatrix.fromMatrix(t0.matrix) : new DOMMatrix());
+        el.setAttribute('transform', `matrix(${T.a} ${T.b} ${T.c} ${T.d} ${T.e} ${T.f})`); });
+    });
+  }
   // Every sketch line the same: strokes are drawn at 0.9px already; lines drawn as filled outlines are thickened or
   // thinned to 0.9px on screen (their thickness: twice their area over their outline's length). Solid shapes stay.
   const INK_PX = 0.9;
@@ -3499,7 +3530,7 @@
   }
   function mobStrips(page, holder, mob, shiftAt) {
     const place = () => { const k = holder.clientWidth / mob.w;
-      holder.querySelectorAll('.csStrip').forEach(s => { const o = s._o; s.style.top = (o.y - shiftAt(o.y) - mob.cut) * k + 'px'; s.style.height = mob.w * o.h / o.w * k + 'px'; }); };
+      holder.querySelectorAll('.csStrip').forEach(s => { const o = s._o; s.style.top = (o.y - shiftAt(o.y) - mob.cut) * k + 'px'; s.style.height = (holder.clientWidth - 2 * MOB_EDGE) * o.h / o.w + 'px'; }); };
     mob.strips.forEach(o => {
       const s = document.createElement('div'); s.className = 'csStrip'; s._o = o; holder.appendChild(s);
       fetch(o.src).then(r => r.text()).then(x => { s.innerHTML = x; const svg = s.querySelector('svg');
@@ -3543,7 +3574,7 @@
         mobHide(svg, mob);
         const shiftAt = mobText(svg, mob, holder.clientWidth / mob.w);
         (page._lazy || []).forEach(L => { L.y0 -= shiftAt(L.y0); L.y1 -= shiftAt(L.y1); });   // (the pictures moved up with the text)
-        mobFigures(svg, mob, holder.clientWidth / mob.w); inkLines(svg);
+        mobFigures(svg, mob, holder.clientWidth / mob.w); mobMargins(svg, mob, holder.clientWidth / mob.w); inkLines(svg);
         mobStrips(page, holder, mob, shiftAt); docParallax(page, svg);
       }
       else if (MOB_CASE && isMob()) mobileCase(page, svg);              // (off: phones show the design exactly as on desktop, scaled)
