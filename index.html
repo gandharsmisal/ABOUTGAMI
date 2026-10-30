@@ -540,7 +540,7 @@
   html.mob-doc .csPicBox { margin-top: 0; width: calc(100% - 32px); }
   html.mob-doc .csPic { height: auto; aspect-ratio: 1250 / 720; border-radius: 6px; }
   html.mob-doc .csTitle { font-size: 17px; transform: translate(-50%, -1.25em); width: 100%; white-space: normal; text-align: center; }
-  html.mob-doc #caseHobby .csTitle.csTitleLeft { left: 50%; align-items: center; }   /* (centred under the picture, as Fankr's) */
+  html.mob-doc #caseHobby .csTitle.csTitleLeft, html.mob-doc #caseCyber .csTitle.csTitleLeft { left: 50%; align-items: center; }   /* (centred under the picture, as Fankr's) */
   html.mob-doc .csDocHolder { aspect-ratio: auto; overflow: hidden; padding: 0 16px 120px; box-sizing: border-box; }
   html.mob-doc .csDocHolder svg.csSource { position: absolute; left: -99999px; top: 0; width: 1920px !important; height: auto; margin: 0 !important; }
   /* a case study drawn for phones (its own design, 390 wide): the whole width, from y --cut on */
@@ -974,7 +974,7 @@
       <h1 class="csTitle csTitleLeft" style="--cs: #1F9C7F; --title-x: 326; --title-fs: 69"><span>Cybersmart : Ship</span><span>shape dashboards</span></h1>
     </div>
   </div>
-  <div class="csDocHolder" data-src="assets/cybersmart/case.svg" style="--doc-ratio: 1920 / 20642.86"></div>   <!-- (24220 - 1100) * 1250 / 1400: the empty foot is left off -->
+  <div class="csDocHolder" data-src="assets/cybersmart/case.svg" data-src-mob="assets/cybersmart/case-mobile.svg" style="--doc-ratio: 1920 / 20642.86"></div>   <!-- (24220 - 1100) * 1250 / 1400: the empty foot is left off -->
   <div class="csNextRow">
     <button class="csNext csPrev" type="button" aria-label="Previous project">
       <span class="csNextArrow" aria-hidden="true">
@@ -3298,7 +3298,8 @@
       strips: [{ src: 'assets/fankr/sketch-picture.svg', y: 2484, h0: 133, w: 1390, h: 370 }, { src: 'assets/fankr/sketch-journey.svg', y: 16518, h0: 112, w: 1412, h: 404 }] },
     caseHobby: { w: 390, cut: 400, hand: { small: true },
       strips: [{ src: 'assets/p2p/sketch-imagine.svg', y: 2172, h0: 206, w: 1380, h: 380 }, { src: 'assets/p2p/sketch-journey.svg', y: 6870, h0: 270, w: 1320, h: 550 },
-        { src: 'assets/p2p/sketch-blueprint.svg', y: 7756, h0: 2884, w: 1420, h: 580 }] }
+        { src: 'assets/p2p/sketch-blueprint.svg', y: 7756, h0: 2884, w: 1420, h: 580 }] },
+    caseCyber: { w: 390, cut: 360, strips: [], hand: { small: true } }
   };
   function mobHide(svg, mob) {                                     // the squeezed sketches: everything wholly inside their areas
     const areas = mob.strips.map(o => [0, o.y - 4, mob.w, o.y + o.h0 + 4]);
@@ -3339,7 +3340,10 @@
       B.ps.push(c); grow(B, c.b);
     });
     const text = [];
+    // (words inside a sketch, among its lines, are part of the drawing: they stay as drawn and go with it)
+    const inkB = [...svg.querySelectorAll('.csInk, .csInkFill')].filter(el => !hidden(el)).map(boxOf).filter(b => b && b.x1 - b.x0 < 150 && b.y1 - b.y0 < 150);
     blocks.forEach(B => {
+      if (inkB.some(b => b.x0 < B.x1 && b.x1 > B.x0 && b.y0 < B.y1 && b.y1 > B.y0)) return;
       const r = readWords(B.ps.map(c => ({ el: c.el, m: c.b.m })));
       if (!r || !r.paras.length || r.fsz * k > 30 || r.fsz * k < 6) return;   // (drawings read as huge "letters")
       const words = r.paras.flat(), hs = words.flatMap(w => w.g.map(g => g.y1 - g.y0)).sort((a, b) => a - b);
@@ -3429,6 +3433,11 @@
   // Phones: every sketch's figures come out the same height (FIG_PX on screen). A sketch is a figure with the drawn
   // pieces around it; it is scaled about its middle, only as far as the room round it allows, and kept on the page.
   const FIG_PX = 105;
+  // what lies wholly inside a sketch (its words and small bits) joins it
+  function inside(all, s, used) {
+    all.forEach(o => { if (used.has(o) || s.els.some(e => e.el === o.el)) return; const b = o.b;
+      if (b.x0 >= s.x0 - 2 && b.x1 <= s.x1 + 2 && b.y0 >= s.y0 - 2 && b.y1 <= s.y1 + 2) { s.els.push(o); used.add(o); } });
+  }
   function mobFigures(svg, mob, k) {
     const toRoot = svg.getScreenCTM().inverse();
     const boxOf = el => { const r = el.getBoundingClientRect(); if (!r.width && !r.height) return null;
@@ -3455,6 +3464,7 @@
         pieces.forEach(o => { if (used.has(o)) return; const b = o.b;
           if (b.x0 < s.x1 + 10 && b.x1 > s.x0 - 10 && b.y0 < s.y1 + 10 && b.y1 > s.y0 - 10) {
             used.add(o); s.els.push(o); s.x0 = Math.min(s.x0, b.x0); s.x1 = Math.max(s.x1, b.x1); s.y0 = Math.min(s.y0, b.y0); s.y1 = Math.max(s.y1, b.y1); grew = true; } }); }
+      inside(all, s, used);
       sketches.push(s);
     });
     sketches.forEach(s => {
@@ -3486,7 +3496,8 @@
     const boxOf = el => { const r = el.getBoundingClientRect(); if (!r.width && !r.height) return null;
       const a = new DOMPoint(r.left, r.top).matrixTransform(toRoot), b = new DOMPoint(r.right, r.bottom).matrixTransform(toRoot);
       return { x0: a.x, y0: a.y, x1: b.x, y1: b.y }; };
-    const pieces = [];
+    const pieces = [], words = [];
+    svg.querySelectorAll('text, .csMobText path, path[fill]:not(.csInkFill)').forEach(el => { if (el.closest('defs, clipPath, mask, pattern, [display="none"]')) return; const b = boxOf(el); if (b) words.push({ el, b }); });
     svg.querySelectorAll('path, rect, circle, ellipse, line, polyline, polygon').forEach(el => {
       if (el.closest('defs, clipPath, mask, pattern, [display="none"]') || inDevice(svg, el)) return;
       const ink = el.classList.contains('csInk') || el.classList.contains('csInkFill') || (/^(#FFFFFF|white)$/i.test(el.getAttribute('fill') || '') && !el.getAttribute('class'));
@@ -3500,6 +3511,7 @@
           if (b.x0 < s.x1 + 10 && b.x1 > s.x0 - 10 && b.y0 < s.y1 + 10 && b.y1 > s.y0 - 10) {
             used.add(o); s.els.push(o); s.x0 = Math.min(s.x0, b.x0); s.x1 = Math.max(s.x1, b.x1); s.y0 = Math.min(s.y0, b.y0); s.y1 = Math.max(s.y1, b.y1); grew = true; } }); }
       if (s.x0 >= m - 0.5 && s.x1 <= mob.w - m + 0.5) return;
+      inside(words, s, new Set(s.els));
       const w = s.x1 - s.x0, f = Math.min(1, (mob.w - 2 * m) / w), cx = (s.x0 + s.x1) / 2, cy = (s.y0 + s.y1) / 2;
       let dx = 0; const nx0 = cx - w * f / 2, nx1 = cx + w * f / 2;
       if (nx0 < m) dx = m - nx0; else if (nx1 > mob.w - m) dx = mob.w - m - nx1;
@@ -3655,6 +3667,23 @@
       872: 'Homepage', 1051: 'Activity details', 1168: 'Find a match', 1386: 'ITS A MATCH', 1493: 'Chat box', 1608: 'Plan & book',
       1735: 'Activity is live', 1866: 'Habit formation loop', 2003: 'DID IT\nACTUALLY\nWORK?', 2034: 'WHAT PARTICIPANTS ASKED FOR',
       2047: 'TAKEAWAYS' };
+  HAND_TEXT.caseCyberMob = {
+      1: 'PROJECT', 3: 'ROLE', 5: 'DURATION', 7: 'OVERVIEW', 9: 'WHAT IF\nCYBERSMART\nWAS A PERSON?', 10: 'INTENT',
+      276: 'LOADING INSPECTIONS...', 289: 'PLS, PLS LET THE\nSTATUS BE HERE\nSOMEWHERE..',
+      298: '“Is Deck 3 done? ...Let\nme just call the\noffice.”', 299: 'SOUNDS FAMILIAR', 305: 'A SLIGHTLY UNUSUAL\nRESEARCH QUESTION',
+      312: 'CONVERSATIONS...', 327: 'FIELD ENGINEER | ON THE VESSEL', 364: 'INTERNAL TEAM | AT THE OFFICE',
+      390: '“ Two people. Two screens. One\nproblem: there were no\nshared rules”.', 391: 'LETS MEET\nCYBERSMART', 458: 'BEHAVIOUR ANALYSIS',
+      461: 'MAKES YOU FIND YOUR OWN WAY', 468: 'KNOWS HOW IT’S GOING. NEVER SHOWS YOU', 475: 'TREATS EVERY DETAIL AS EQUALLY URGENT',
+      482: 'ANSWERS IN PARAGRAPHS', 489: 'CHANGES THE RULES ON EVERY SCREEN', 496: 'GOES QUIET WHEN SOMETHING HAPPENS',
+      502: '“ Six behaviours, one root\ncause: no system—first\ndesign.”.', 505: 'A RULEBOOK', 506: '(ALSO KNOWN AS A DESIGN\nSYSTEM)',
+      521: 'FOUNDATIONS', 522: 'A SHARED COLOUR AND TYPE SYSTEM', 530: 'INDICATORS & KPI METRICS', 531: 'SHOW IT, DON’T WRITE IT',
+      547: 'NOTIFICATIONS & STATUS', 548: 'THE DASHBOARD FINALLY TALKS BACK', 559: 'CONTROLS & ACTION MODALS', 560: 'SAME ACTION, SAME LOOK',
+      566: 'CONTENT CARDS', 567: 'SAME ORDER, EVERY CARD', 577: 'CONTENT CARDS', 578: 'SAME ORDER, EVERY CARD',
+      583: 'Inspections don’t\nsail in a straight\nline', 607: '“DEFINE ONCE, USE EVERYWHERE”', 610: 'SAME PRODUCT WITH\nBETTER MANNERS',
+      612: 'DASHBOARD OVERVIEW', 876: 'DASHBOARD — SYSTEM FEEDBACK', 1172: 'PROJECT OVERVIEW', 1587: 'DASHBOARD — SYSTEM FEEDBACK',
+      1883: 'PROJECT OVERVIEW', 2298: 'IHM PROJECT OVERVIEW', 2431: 'VESSEL DECKS', 2668: 'VESSEL DECK MANAGEMENT', 2915: 'REPORTS',
+      3419: 'THREE ROUNDS WITH\nMY MANAGER', 3422: 'ROUND 1 · FULL PASS', 3426: 'ROUND 2 · SCOPE CUT', 3430: 'ROUND 3 · PLAIN WORDS',
+      3432: '“A system can be consistent in\nstructure and still fail at\nthe level of words.”', 3433: 'TAKEAWAYS' };
   function handLetter(svg, id, opts) {
     const map = HAND_TEXT[id]; if (!map) return;
     const small = !!(opts && opts.small);                           // (HobbyHop's phone design: its own sizes, no re-wrapping into cards)
