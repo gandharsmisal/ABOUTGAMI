@@ -3484,7 +3484,7 @@
     sketches.forEach(s => {
       if (!s.els.length) return;
       const own = new Set(s.els.map(o => o.el)), hm = s.h.sort((a, b) => a - b)[s.h.length >> 1];
-      let f = FIG_PX / k / hm; if (Math.abs(f - 1) < 0.04) return;
+      let f = FIG_PX / k / hm; if (Math.abs(f - 1) < 0.04 || f < 0.5) return;   // (never shrunk to nothing by a mis-read figure)
       const cx = (s.x0 + s.x1) / 2, cy = (s.y0 + s.y1) / 2, w = s.x1 - s.x0, h = s.y1 - s.y0;
       if (f > 1) {                                                    // room above and below it, and across the page
         let up = Infinity, down = Infinity;
@@ -3497,6 +3497,7 @@
       let dx = 0; const nx0 = cx - w * f / 2, nx1 = cx + w * f / 2;
       if (nx0 < 8) dx = 8 - nx0; else if (nx1 > mob.w - 8) dx = mob.w - 8 - nx1;
       const S = new DOMMatrix().translate(cx + dx, cy).scale(f).translate(-cx, -cy);
+      if (f > 1) s.els.forEach(({ el }) => { const c = el.parentNode.closest && el.parentNode.closest('[clip-path]'); if (c && c !== svg) c.removeAttribute('clip-path'); });   // (a grown sketch is not cut off by its frame)
       s.els.forEach(({ el }) => { const M = DOMMatrix.fromMatrix(toRoot.multiply(el.parentNode.getScreenCTM())), t0 = el.transform.baseVal.consolidate();
         const T = M.inverse().multiply(S).multiply(M).multiply(t0 ? DOMMatrix.fromMatrix(t0.matrix) : new DOMMatrix());
         el.setAttribute('transform', `matrix(${T.a} ${T.b} ${T.c} ${T.d} ${T.e} ${T.f})`); });
@@ -3526,7 +3527,7 @@
             used.add(o); s.els.push(o); s.x0 = Math.min(s.x0, b.x0); s.x1 = Math.max(s.x1, b.x1); s.y0 = Math.min(s.y0, b.y0); s.y1 = Math.max(s.y1, b.y1); grew = true; } }); }
       if (s.x0 >= m - 0.5 && s.x1 <= mob.w - m + 0.5) return;
       inside(words, s, new Set(s.els));
-      const w = s.x1 - s.x0, f = Math.min(1, (mob.w - 2 * m) / w), cx = (s.x0 + s.x1) / 2, cy = (s.y0 + s.y1) / 2;
+      const w = s.x1 - s.x0, f = Math.max(0.5, Math.min(1, (mob.w - 2 * m) / w)), cx = (s.x0 + s.x1) / 2, cy = (s.y0 + s.y1) / 2;
       let dx = 0; const nx0 = cx - w * f / 2, nx1 = cx + w * f / 2;
       if (nx0 < m) dx = m - nx0; else if (nx1 > mob.w - m) dx = mob.w - m - nx1;
       const S = new DOMMatrix().translate(cx + dx, cy).scale(f).translate(-cx, -cy);
@@ -3553,7 +3554,8 @@
         pathSubs(el.getAttribute('d') || '').forEach(s => { if (s.y1 - s.y0 > 0.5) hs.push((s.y1 - s.y0) * sy); }); });
       if (hs.length < 3) return;
       hs.sort((a, b) => a - b);
-      const px = hs[hs.length - 1 - Math.floor(hs.length * 0.03)] / 0.7 * k, f = LABEL_PX / px;   // (its tall letters: a few stray marks aside) if (f > 0.97 || px > 26 || hs.length < 6) return;   // (big type, or a lone sample like "Aa", is not a label)   // (only ever smaller; big type is not a label)
+      const px = hs[hs.length - 1 - Math.floor(hs.length * 0.03)] / 0.7 * k, f = LABEL_PX / px;   // (its tall letters: a few stray marks aside)
+      if (f > 0.97 || px > 26 || hs.length < 6) return;   // (only ever smaller; big type, or a lone sample like "Aa", is not a label)
       const bs = els.map(boxOf).filter(Boolean), b = { x0: Math.min(...bs.map(q => q.x0)), x1: Math.max(...bs.map(q => q.x1)), y0: Math.min(...bs.map(q => q.y0)), y1: Math.max(...bs.map(q => q.y1)) };
       const cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2, gap = q => Math.hypot(Math.max(0, q.x0 - b.x1, b.x0 - q.x1), Math.max(0, q.y0 - b.y1, b.y0 - q.y1));
       const near = ink.reduce((p, q) => !p || gap(q) < gap(p) ? q : p, null); if (!near) return;
@@ -3577,6 +3579,11 @@
       if (el.closest('[display="none"]')) return;
       let b, L; try { b = el.getBBox(); L = el.getTotalLength(); } catch (e) { return; }
       if (!L || b.width * b.height === 0) return;
+      const subs = pathSubs(el.getAttribute('d') || '').length;
+      if ((b.height < 25 && b.width > b.height && subs > 2) || (subs > 12 && b.width > 20)) {   // lettering: not a line
+        if (el.closest('.csStrip')) el.style.fillOpacity = '0.45';   // (in the whole sketches it is the light grey it is on desktop)
+        return;
+      }
       const S = Math.min(6, 600 / Math.max(b.width, b.height)), W = Math.ceil(b.width * S) + 2, H = Math.ceil(b.height * S) + 2;
       cv.width = W; cv.height = H; g.setTransform(S, 0, 0, S, -b.x * S + 1, -b.y * S + 1); g.fillStyle = '#000';
       g.fill(new Path2D(el.getAttribute('d')), el.getAttribute('fill-rule') === 'evenodd' ? 'evenodd' : 'nonzero');
@@ -3584,7 +3591,7 @@
       const m = el.getScreenCTM(), t = 2 * (n / (S * S)) / L * Math.hypot(m.a, m.b);
       if (t > 2.6) return;                                          // a solid shape, not a line
       if (t < INK_PX) { el.style.stroke = '#1C1C1E'; el.style.strokeWidth = (INK_PX - t).toFixed(2) + 'px'; }
-      else { el.style.stroke = '#F4EFE3'; el.style.strokeWidth = (t - INK_PX).toFixed(2) + 'px'; }
+      // (never thinned: thinning ate the thin rings - heads, gears - and outlines)
     });
   }
   function mobStrips(page, holder, mob, shiftAt) {
