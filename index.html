@@ -114,6 +114,11 @@
   #pageBack .csNextPill { filter: url(#crayon); }
   #pageBack .csNextArrow path { stroke-width: 2.6px; }
   html.ab-open #pageBack, html.ct-open #pageBack { display: inline-flex; }
+  /* phones: on the book and the phone, "close" stands where the menu was (as in a case study); no menu, no back */
+  @media (max-width: 600px) {
+    html.ab-open #pageBack, html.ct-open #pageBack, html.ab-open #menuBtn, html.ct-open #menuBtn { display: none !important; }
+    html.ab-open #caseClose, html.ct-open #caseClose { display: inline-flex; }
+  }
   @media (max-width: 600px) { #pageBack { font-size: 20px; padding: 8px 10px; } }
   .case::-webkit-scrollbar { display: none; }
   /* first screen: the picture as wide as the design has it (1400 of 1920), shortened to fit the screen with the title
@@ -567,7 +572,7 @@
   html.mob-main #heroLine .hline { font-size: 32.5px; }   /* 12px on a ~370px-wide phone */
   #abSwipe { display: none; }
   html.mob.ab-open #abSwipe { display: block; position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); z-index: 46;
-    text-align: center; font: 400 18px "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); color: var(--pen); opacity: 0.75; pointer-events: none; }
+    text-align: center; font: 400 20px "Gandhar Hand", "Indie Flower", var(--hand); color: #1F1F22; opacity: 1; pointer-events: none; }   /* (dark, so it reads) */
   @media (max-width: 600px) {
     #menu.open { mix-blend-mode: normal; color: var(--pen); }   /* open: a plain paper card with dark ink (no inverting) */
     #menu-list { background: var(--paper); padding: 14px 20px 16px; border-radius: 10px; box-shadow: 0 8px 24px rgba(40, 30, 10, 0.18), 0 0 0 1px rgba(40, 30, 10, 0.08); }
@@ -2711,8 +2716,15 @@
         // its own arrow on a phone: from beside the words, a loop, then up to the object above
         const ts = [...g.querySelectorAll('text')].map(e => e.getBBox()), u = ts[0].height, x = ts[0].x + ts[0].width + u * 0.15, y = ts[0].y + u * 0.5;   // (straight on from the end of the first line)
         a = document.createElementNS('http://www.w3.org/2000/svg', 'path'); a.setAttribute('class', 'hpen hnMobArrow');
-        a.setAttribute('d', `M${x} ${y} C ${x + u * 1.4} ${y + u * 0.2}, ${x + u * 2.2} ${y - u * 0.6}, ${x + u * 1.6} ${y - u * 1.2} C ${x + u * 1.1} ${y - u * 1.7}, ${x + u * 0.3} ${y - u * 1.1}, ${x + u * 0.9} ${y - u * 0.7} C ${x + u * 1.6} ${y - u * 0.3}, ${x + u * 1.5} ${y - u * 2.2}, ${x + u * 1.1} ${y - u * 3}` +
-          ` M${x + u * 0.85} ${y - u * 2.6} L${x + u * 1.1} ${y - u * 3.05} L${x + u * 1.4} ${y - u * 2.65}`);
+        // out from the end of the first line, one small loop, then curving back up toward the object above the note
+        const cx = bb.x + bb.width / 2, tx = cx + (x - cx) * 0.3, ty = ts[0].y - u * 1.9;
+        const hx = tx + u * 0.55, hy = ty + u * 0.55, d = Math.hypot(hx - tx, hy - ty), ux = (hx - tx) / d, uy = (hy - ty) / d;
+        const head = s => [tx + (ux * Math.cos(s) - uy * Math.sin(s)) * u * 0.42, ty + (ux * Math.sin(s) + uy * Math.cos(s)) * u * 0.42];
+        const [ax, ay] = head(0.5), [bx, by] = head(-0.5);
+        a.setAttribute('d', `M${x} ${y} C ${x + u * 1.3} ${y + u * 0.1}, ${x + u * 1.8} ${y - u * 0.9}, ${x + u * 1.2} ${y - u * 1.2}` +
+          ` C ${x + u * 0.7} ${y - u * 1.45}, ${x + u * 0.4} ${y - u * 0.8}, ${x + u * 0.9} ${y - u * 0.65}` +
+          ` C ${x + u * 1.5} ${y - u * 0.5}, ${hx + u * 0.5} ${hy + u * 0.4}, ${tx} ${ty}` +
+          ` M${ax} ${ay} L${tx} ${ty} L${bx} ${by}`);
         g.appendChild(a); });
     } else {
       $('heroSvg').setAttribute('viewBox', '0 0 1920 1080');
@@ -4434,7 +4446,8 @@
     document.documentElement.classList.remove('in-case');
     return true;
   }
-  $('caseClose').addEventListener('click', () => closeCase());    // back to the Work page
+  $('caseClose').addEventListener('click', () => {               // back to the Work page (or, on a phone, off the book / the phone)
+    if (caseOpen) closeCase(); else if (contact.open) closeContact(); else if (about.open) closeAbout(); });
   // "Next" / "Previous" at the end of a case study: straight into that project's case study when it has one (the Work
   // page behind is moved to it too); otherwise back on the Work page, which then moves on to that project
   document.querySelectorAll('.csNext').forEach(b => b.addEventListener('click', () => {
