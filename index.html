@@ -549,6 +549,8 @@
   /* its wide sketches, whole, across the width */
   .csStrip { position: absolute; left: 0; right: 0; }
   .csDocHolder .csStrip svg { display: block; margin: 0; width: 100%; height: 100%; }
+  /* sketches drawn as filled outlines are thinned to the line of the others (0.9px) */
+  html.mob-doc .csDocHolder svg.csDoc .csInkFill { stroke-width: 0.75px; }
   /* the whole sketches, drawn small: their filled outlines are thin already (the usual thinning would eat them) */
   html.mob-doc .csDocHolder .csStrip .csInkFill { stroke-width: 0; }
   .csStack { position: relative; }
@@ -3295,12 +3297,14 @@
   // their own files (w x h)
   const MOB_DOCS = {
     caseMusic: { w: 390, cut: 350,
-      strips: [{ src: 'assets/fankr/sketch-picture.svg', y: 2484, h0: 133, w: 801, h: 223 }, { src: 'assets/fankr/sketch-journey.svg', y: 16518, h0: 112, w: 1412, h: 404 }] },
-    caseHobby: { w: 390, cut: 400, strips: [], hand: { small: true } }
+      strips: [{ src: 'assets/fankr/sketch-picture.svg', y: 2484, h0: 133, w: 1390, h: 370 }, { src: 'assets/fankr/sketch-journey.svg', y: 16518, h0: 112, w: 1412, h: 404 }] },
+    caseHobby: { w: 390, cut: 400, hand: { small: true },
+      strips: [{ src: 'assets/p2p/sketch-imagine.svg', y: 2172, h0: 206, w: 1380, h: 380 }, { src: 'assets/p2p/sketch-journey.svg', y: 6870, h0: 270, w: 1320, h: 550 },
+        { src: 'assets/p2p/sketch-blueprint.svg', y: 7756, h0: 2884, w: 1420, h: 580 }] }
   };
   function mobHide(svg, mob) {                                     // the squeezed sketches: everything wholly inside their areas
     const areas = mob.strips.map(o => [0, o.y - 4, mob.w, o.y + o.h0 + 4]);
-    svg.querySelectorAll('path, rect, circle, ellipse, line').forEach(el => {
+    svg.querySelectorAll('path, rect, circle, ellipse, line, text').forEach(el => {
       if (el.closest('defs, pattern, clipPath, mask')) return;
       let b; try { b = el.getBBox(); } catch (e) { return; }
       if (areas.some(([x0, y0, x1, y1]) => b.x >= x0 && b.y >= y0 && b.x + b.width <= x1 && b.y + b.height <= y1)) el.setAttribute('display', 'none');
@@ -3429,7 +3433,9 @@
       holder.querySelectorAll('.csStrip').forEach(s => { const o = s._o; s.style.top = (o.y - shiftAt(o.y) - mob.cut) * k + 'px'; s.style.height = mob.w * o.h / o.w * k + 'px'; }); };
     mob.strips.forEach(o => {
       const s = document.createElement('div'); s.className = 'csStrip'; s._o = o; holder.appendChild(s);
-      fetch(o.src).then(r => r.text()).then(x => { s.innerHTML = x; sketchFill(s.querySelector('svg')); place(); });
+      fetch(o.src).then(r => r.text()).then(x => { s.innerHTML = x; const svg = s.querySelector('svg');
+        if (!svg.querySelector('.csInk, .csInkFill')) sketchFill(svg);   // (the ones cut from the desktop design are drawn already)
+        place(); });
     });
     place(); addEventListener('resize', place);
   }
