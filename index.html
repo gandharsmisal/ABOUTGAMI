@@ -540,17 +540,17 @@
   html.mob-doc .csPicBox { margin-top: 0; width: calc(100% - 32px); }
   html.mob-doc .csPic { height: auto; aspect-ratio: 1250 / 720; border-radius: 6px; }
   html.mob-doc .csTitle { font-size: 17px; transform: translate(-50%, -1.25em); width: 100%; white-space: normal; text-align: center; }
+  html.mob-doc #caseHobby .csTitle.csTitleLeft { left: 50%; align-items: center; }   /* (centred under the picture, as Fankr's) */
   html.mob-doc .csDocHolder { aspect-ratio: auto; overflow: hidden; padding: 0 16px 120px; box-sizing: border-box; }
   html.mob-doc .csDocHolder svg.csSource { position: absolute; left: -99999px; top: 0; width: 1920px !important; height: auto; margin: 0 !important; }
   /* a case study drawn for phones (its own design, 390 wide): the whole width, from y --cut on */
   html.mob-doc .csDocHolder.csMobDoc { padding: 0 0 80px; }
   .csDocHolder.csMobDoc svg.csDoc { width: 100%; margin: calc(-100% * var(--cut) / 390) 0 0; }
-  /* its wide sketches, whole: swiped sideways */
-  .csStrip { position: absolute; left: 0; right: 0; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; }
-  .csStrip::-webkit-scrollbar { display: none; }
-  .csDocHolder .csStrip svg { display: block; margin: 0; height: 100%; }
-  /* on phones the sketches drawn as filled outlines are thinned to the main page figure's line */
-  html.mob-doc .csDocHolder .csInkFill { stroke-width: 0.75px; }
+  /* its wide sketches, whole, across the width */
+  .csStrip { position: absolute; left: 0; right: 0; }
+  .csDocHolder .csStrip svg { display: block; margin: 0; width: 100%; height: 100%; }
+  /* the whole sketches, drawn small: their filled outlines are thin already (the usual thinning would eat them) */
+  html.mob-doc .csDocHolder .csStrip .csInkFill { stroke-width: 0; }
   .csStack { position: relative; }
   .csStack .csTile { display: block; height: auto; overflow: hidden; flex: none; }
   .csStack .csCard .csTile { margin: 0; }
@@ -1006,7 +1006,7 @@
       <h1 class="csTitle csTitleLeft" style="--cs: #141414"><span>HobbyHop : Hobbies</span><span style="color: #1A1A3E">are better together</span></h1>
     </div>
   </div>
-  <div class="csDocHolder" data-src="assets/p2p/case.svg" style="--doc-ratio: 1920 / 18125"></div>   <!-- (21400 - 1100) * 1250 / 1400: the empty foot is left off -->
+  <div class="csDocHolder" data-src="assets/p2p/case.svg" data-src-mob="assets/p2p/case-mobile.svg" style="--doc-ratio: 1920 / 18125"></div>   <!-- (21400 - 1100) * 1250 / 1400: the empty foot is left off -->
   <!-- at the very end: on to the next project -->
   <div class="csNextRow">
     <button class="csNext csPrev" type="button" aria-label="Previous project">
@@ -3290,46 +3290,146 @@
     }), { root: page, rootMargin: '1600px 0px' });
     stack.querySelectorAll('.csTile').forEach(el => io.observe(el));
   }
-  // Case studies drawn for phones (390 wide): shown from y `cut` (above it is the first screen's picture and title);
-  // `hide` areas hold sketches squeezed to fit, which are shown whole instead in strips (`strips`) swiped sideways
+  // Case studies drawn for phones (390 wide): shown from y `cut` (above it is the first screen's picture and title).
+  // `strips`: sketches squeezed to fit in the design (the area y..y+h0), shown instead whole, across the width, from
+  // their own files (w x h)
   const MOB_DOCS = {
-    caseMusic: { w: 390, cut: 350, hide: [[0, 2470, 390, 2640], [0, 16505, 390, 16640]],
-      strips: [{ src: 'assets/fankr/sketch-picture.svg', y: 2445, h: 223 }, { src: 'assets/fankr/sketch-journey.svg', y: 16465, h: 230 }] }
+    caseMusic: { w: 390, cut: 350,
+      strips: [{ src: 'assets/fankr/sketch-picture.svg', y: 2484, h0: 133, w: 801, h: 223 }, { src: 'assets/fankr/sketch-journey.svg', y: 16518, h0: 112, w: 1412, h: 404 }] },
+    caseHobby: { w: 390, cut: 400, strips: [], hand: { small: true } }
   };
-  function mobHide(svg, areas) {                                   // everything lying wholly inside an area
+  function mobHide(svg, mob) {                                     // the squeezed sketches: everything wholly inside their areas
+    const areas = mob.strips.map(o => [0, o.y - 4, mob.w, o.y + o.h0 + 4]);
     svg.querySelectorAll('path, rect, circle, ellipse, line').forEach(el => {
       if (el.closest('defs, pattern, clipPath, mask')) return;
       let b; try { b = el.getBBox(); } catch (e) { return; }
       if (areas.some(([x0, y0, x1, y1]) => b.x >= x0 && b.y >= y0 && b.x + b.width <= x1 && b.y + b.height <= y1)) el.setAttribute('display', 'none');
     });
   }
-  // a sketch's labels (outlined, #2A2A2A): each one (its letters close together) as its own path, with its capital height
-  function labelGroups(svg) {
-    const NS = 'http://www.w3.org/2000/svg', out = [];
-    svg.querySelectorAll('path[fill="#2A2A2A"]').forEach(el => {
-      const subs = el.getAttribute('d').split(/(?=M)/).map(d => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); el.parentNode.appendChild(p);
-        const b = p.getBBox(); p.remove(); return { d, x0: b.x, y0: b.y, x1: b.x + b.width, y1: b.y + b.height }; }).filter(s => s.x1 > s.x0 || s.y1 > s.y0);
-      const groups = [];
-      subs.forEach(s => { const near = groups.filter(g => s.x0 < g.x1 + 8 && s.x1 > g.x0 - 8 && s.y0 < g.y1 + 8 && s.y1 > g.y0 - 8);
-        const g = near.length ? near.reduce((a, b) => { a.s.push(...b.s); a.x0 = Math.min(a.x0, b.x0); a.y0 = Math.min(a.y0, b.y0); a.x1 = Math.max(a.x1, b.x1); a.y1 = Math.max(a.y1, b.y1); groups.splice(groups.indexOf(b), 1); return a; }) : (groups.push({ s: [], x0: s.x0, y0: s.y0, x1: s.x1, y1: s.y1 }), groups[groups.length - 1]);
-        g.s.push(s); g.x0 = Math.min(g.x0, s.x0); g.y0 = Math.min(g.y0, s.y0); g.x1 = Math.max(g.x1, s.x1); g.y1 = Math.max(g.y1, s.y1); });
-      groups.forEach(g => { const p = el.cloneNode(); p.setAttribute('d', g.s.map(s => s.d).join(''));
-        const hs = g.s.map(s => s.y1 - s.y0).sort((a, b) => a - b), cap = hs[Math.floor(hs.length * 0.75)];
-        el.parentNode.insertBefore(p, el); out.push({ el: p, cap, cx: (g.x0 + g.x1) / 2, cy: g.y0 }); });
-      el.remove();
+  // The phone design's running text (Noto Serif JP, outlined) re-set at 12px: each paragraph's letter shapes are wrapped
+  // again to its own width, and everything below moves up (or down) by what that saved (or cost); a card round a
+  // paragraph shrinks with it. Returns shiftAt(y): how far a point of the design at y has moved up.
+  function mobText(svg, mob, k) {
+    const NS = 'http://www.w3.org/2000/svg', toRoot = svg.getScreenCTM().inverse();
+    const boxOf = el => { let b; try { b = el.getBBox(); } catch (e) { return null; } const m = toRoot.multiply(el.getScreenCTM());
+      const X = [b.x * m.a + m.e, (b.x + b.width) * m.a + m.e], Y = [b.y * m.d + m.f, (b.y + b.height) * m.d + m.f];
+      const pm = toRoot.multiply(el.parentNode.getScreenCTM());
+      return { x0: Math.min(...X), x1: Math.max(...X), y0: Math.min(...Y), y1: Math.max(...Y), m, py: (Math.min(...Y) - pm.f) / pm.d }; };   // (py: its top in its parent's units)
+    const hidden = el => el.closest('[display="none"]');
+    const devs = deviceBoxes(svg).map(d => ({ x0: d.x0 + 20, y0: d.y0 + 20, x1: d.x1 - 20, y1: d.y1 - 20 }));   // the phones, as drawn
+    // the text: outlined paths outside the phones (which are pictures of the app)
+    const cand = [];
+    svg.querySelectorAll('path').forEach(el => {
+      if (el.closest('defs, pattern, clipPath, mask, .csHand') || hidden(el) || !el.getAttribute('fill') || /url|none/.test(el.getAttribute('fill'))) return;
+      if ((el.dataset.fill || '').toUpperCase() === '#2B2925') return;          // the sketches' ink, not text
+      if ((el.getAttribute('d') || '').length < 80 || inDevice(svg, el)) return;
+      const b = boxOf(el); if (!b || b.y1 < mob.cut || devs.some(d => b.x0 < d.x1 && b.x1 > d.x0 && b.y0 < d.y1 && b.y1 > d.y0)) return;   // (a phone's hidden overflow too)
+      cand.push({ el, b });
     });
-    return out;
+    // paths that overlap read as one block (a paragraph with its bold or coloured words)
+    const blocks = [];
+    const grow = (B, o) => Object.assign(B, { x0: Math.min(B.x0, o.x0), y0: Math.min(B.y0, o.y0), x1: Math.max(B.x1, o.x1), y1: Math.max(B.y1, o.y1) });
+    cand.forEach(c => {
+      const near = blocks.filter(B => c.b.x0 < B.x1 + 1 && c.b.x1 > B.x0 - 1 && c.b.y0 < B.y1 + 1 && c.b.y1 > B.y0 - 1);
+      let B = near[0];
+      if (!B) { B = { ps: [], x0: c.b.x0, y0: c.b.y0, x1: c.b.x1, y1: c.b.y1 }; blocks.push(B); }
+      near.slice(1).forEach(o => { B.ps.push(...o.ps); grow(B, o); blocks.splice(blocks.indexOf(o), 1); });
+      B.ps.push(c); grow(B, c.b);
+    });
+    const text = [];
+    blocks.forEach(B => {
+      const r = readWords(B.ps.map(c => ({ el: c.el, m: c.b.m })));
+      if (!r || !r.paras.length || r.fsz * k > 30 || r.fsz * k < 6) return;   // (drawings read as huge "letters")
+      const words = r.paras.flat(), hs = words.flatMap(w => w.g.map(g => g.y1 - g.y0)).sort((a, b) => a - b);
+      // the serif's small letters stand at about 0.7 of its tall ones (small capitals nearer 0.8); capitals-only labels have (almost) none there
+      const p90 = hs[Math.floor(hs.length * 0.9)], band = hs.filter(h => h >= p90 * 0.55 && h <= p90 * 0.745);
+      const tall = hs.filter(h => h > p90 * 0.9);                     // (a label's bullet or ring alone is not a tall letter)
+      if (band.length < hs.length * 0.25 || tall.length < Math.max(2, hs.length * 0.12)) return;
+      // its size from its small letters' height (the serif's x-height is about 0.52 of its size); one line alone keeps a usual spacing
+      const fsz = median(band) / 0.52, multi = new Set(words.map(w => Math.round(w.bot))).size > 1;
+      const s = MOB_TEXT_PX / k / fsz, lh = multi ? r.pitch : fsz * 1.6, Wt = (B.x1 - B.x0) / s + 0.5, sp = fsz * 0.27;
+      // its lines as drawn: each word's line, the line's baseline, and whether it stops short (a break the writer made)
+      const lines = [];
+      words.forEach(w => { let L = lines.find(L => Math.abs(L.c - w.bot) < r.fsz * 0.5);
+        if (!L) { L = { c: w.bot, x0: w.x0, x1: w.x1, ys: [] }; lines.push(L); }
+        L.x0 = Math.min(L.x0, w.x0); L.x1 = Math.max(L.x1, w.x1); L.ys.push(...w.g.map(g => g.y1)); w.L = L; });
+      lines.forEach(L => { L.base = median(L.ys); L.short = L.x1 < B.x1 - (B.x1 - B.x0) * 0.22; });
+      const spread = a => Math.max(...a) - Math.min(...a);
+      // centred if its lines' middles line up while their left ends don't
+      const center = lines.length > 1 && spread(lines.map(L => L.x0)) > 4 && spread(lines.map(L => (L.x0 + L.x1) / 2)) < spread(lines.map(L => L.x0)) * 0.5;
+      const base0 = fsz * 0.8;
+      let html = '', y = 0;
+      r.paras.forEach((ws, pi) => {
+        if (pi) y += lh * 0.55;
+        let x = 0, lineStart = html.length, prev = null;
+        const fin = () => { if (!center) return; const off = (Wt - (x - sp)) / 2; if (off <= 0) return;
+          html = html.slice(0, lineStart) + html.slice(lineStart).replace(/translate\(([-\d.]+) /g, (m, v) => `translate(${(+v + off).toFixed(2)} `); };
+        ws.forEach(w => {
+          const ww = w.x1 - w.x0;
+          if (x > 0 && (x + ww > Wt || (prev && prev !== w.L && prev.short))) { fin(); x = 0; y += lh; lineStart = html.length; }
+          prev = w.L;
+          const byP = new Map(); w.g.forEach(g => (byP.get(g.p) || byP.set(g.p, []).get(g.p)).push(g.d));
+          byP.forEach((ds, p) => { const at = ['fill', 'fill-opacity'].map(a => p.el.getAttribute(a) ? ` ${a}="${p.el.getAttribute(a)}"` : '').join('');
+            html += `<path d="${ds.join('')}"${at} transform="translate(${(x - w.x0).toFixed(2)} ${(y + base0 - w.L.base).toFixed(2)}) matrix(${p.m.a} ${p.m.b} ${p.m.c} ${p.m.d} ${p.m.e} ${p.m.f})"></path>`; });
+          x += ww + sp;
+        });
+        fin(); y += lh;
+      });
+      const top0 = Math.min(...words.map(w => w.top)), newH = (y - lh + fsz * 1.05) * s;
+      const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'csMobText'); g.innerHTML = html;
+      text.push({ B, g, x0: B.x0, top: top0, y0: B.y0, y1: B.y1, d: (B.y1 - top0) - newH, s });
+      B.ps.forEach(c => c.el.setAttribute('display', 'none'));
+    });
+    // the sketches shown whole take the room they need instead of the squeezed one's
+    mob.strips.forEach(o => text.push({ strip: o, y0: o.y, y1: o.y + o.h0, d: o.h0 - mob.w * o.h / o.w }));
+    // everything else, where it was
+    const own = new Set(text.flatMap(t => t.B ? t.B.ps.map(c => c.el) : []));
+    const all = [...svg.querySelectorAll('g, path, rect, circle, ellipse, line, image, use')].filter(el =>
+      !el.closest('defs, pattern, clipPath, mask') && !hidden(el) && !(el.parentNode.closest && el.parentNode.closest('.csHand')) && !own.has(el));
+    const box = new Map(); all.forEach(el => { const b = boxOf(el); if (b) box.set(el, b); });
+    // what can't be saved: something beside a paragraph reaching below it keeps the room it needs
+    text.forEach(t => { if (t.d <= 0 || !t.B) return;
+      let low = -Infinity;
+      box.forEach((b, el) => { if (el.tagName === 'g' || b.y1 - b.y0 > 1500) return;
+        const around = b.x0 <= t.B.x0 + 1 && b.x1 >= t.B.x1 - 1 && b.y0 <= t.y0 + 1 && b.y1 >= t.y1 - 1;
+        if (!around && b.y0 < t.y1 && b.y1 > t.y1 && (b.x1 <= t.B.x0 + 2 || b.x0 >= t.B.x1 - 2)) low = Math.max(low, b.y1); });
+      if (low > -Infinity) t.d = Math.max(0, Math.min(t.d, t.y1 - low)); });
+    const shiftAt = y => text.reduce((a, t) => a + (t.y1 <= y + 0.5 ? t.d : 0), 0);
+    // move everything: a group holding no paragraph moves whole (its clip with it); one holding some, only by what is
+    // above it, then its children each by what is above them inside it
+    const holds = new Set(); own.forEach(el => { for (let a = el.parentNode; a && a !== svg; a = a.parentNode) holds.add(a); });
+    const move = (el, dy, sy, top) => {
+      if (Math.abs(dy) < 0.01 && !sy) return; const t0 = el.getAttribute('transform') || '';
+      el.setAttribute('transform', `translate(0 ${(-dy).toFixed(2)})` + (sy ? ` translate(0 ${top}) scale(1 ${sy.toFixed(4)}) translate(0 ${-top})` : '') + (t0 ? ' ' + t0 : '')); };
+    const walk = (node, done) => [...node.children].forEach(c => {
+      if (!box.has(c)) return;
+      const b = box.get(c), s = shiftAt(b.y0) - done;
+      if (holds.has(c)) {
+        // its frame's clip grows by whatever its text grew, so nothing inside is cut off at the bottom
+        const grew = -text.filter(t => t.B && t.y0 >= b.y0 - 1 && t.y1 <= b.y1 + 1).reduce((a, t) => a + t.d, 0);
+        const cp = (c.getAttribute('clip-path') || '').match(/#([^)]+)/), r = cp && svg.getElementById(cp[1]);
+        const rr = r && r.children.length === 1 && r.firstElementChild.tagName === 'rect' && r.firstElementChild;
+        if (grew > 0 && rr) rr.setAttribute('height', (+rr.getAttribute('height') + grew + 4).toFixed(1));
+        move(c, s); walk(c, s + done); return;
+      }
+      // a card round paragraphs shrinks (or grows) by what they saved
+      const inner = text.filter(t => t.B && t.B.x0 >= b.x0 - 1 && t.B.x1 <= b.x1 + 1 && t.y0 >= b.y0 - 1 && t.y1 <= b.y1 + 1).reduce((a, t) => a + t.d, 0);
+      const h = b.y1 - b.y0;
+      if (inner && c.tagName !== 'g' && h < 1500 && h > inner) move(c, s, (h - inner) / h, b.py);
+      else move(c, s);
+    });
+    walk(svg, 0);
+    text.forEach(t => { if (!t.B) return;
+      t.g.setAttribute('transform', `translate(${t.x0.toFixed(2)} ${(t.top - shiftAt(t.y0)).toFixed(2)}) scale(${t.s.toFixed(4)})`); svg.appendChild(t.g); });
+    const vb = svg.viewBox.baseVal; svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.width} ${(vb.height - shiftAt(vb.height)).toFixed(1)}`);
+    return shiftAt;
   }
-  function mobStrips(page, holder, mob) {
+  function mobStrips(page, holder, mob, shiftAt) {
     const place = () => { const k = holder.clientWidth / mob.w;
-      holder.querySelectorAll('.csStrip').forEach(s => { const o = s._o; s.style.top = (o.y - mob.cut) * k + 'px'; s.style.height = o.h * k + 'px';
-        const svg = s.querySelector('svg'); if (!svg) return;
-        const vb = svg.viewBox.baseVal, u = o.h * k / vb.height; svg.style.width = vb.width * u + 'px';
-        (svg._labels || []).forEach(L => { const f = MOB_TEXT_PX / (L.cap / 0.7 * u);   // the labels written at 12px
-          L.el.setAttribute('transform', `translate(${L.cx} ${L.cy}) scale(${f}) translate(${-L.cx} ${-L.cy})`); }); }); };
+      holder.querySelectorAll('.csStrip').forEach(s => { const o = s._o; s.style.top = (o.y - shiftAt(o.y) - mob.cut) * k + 'px'; s.style.height = mob.w * o.h / o.w * k + 'px'; }); };
     mob.strips.forEach(o => {
       const s = document.createElement('div'); s.className = 'csStrip'; s._o = o; holder.appendChild(s);
-      fetch(o.src).then(r => r.text()).then(x => { s.innerHTML = x; const svg = s.querySelector('svg'); sketchFill(svg); svg._labels = labelGroups(svg); place(); });
+      fetch(o.src).then(r => r.text()).then(x => { s.innerHTML = x; sketchFill(s.querySelector('svg')); place(); });
     });
     place(); addEventListener('resize', place);
   }
@@ -3342,7 +3442,7 @@
       holder.innerHTML = t;
       if (mob) { holder.classList.add('csMobDoc'); holder.style.setProperty('--cut', mob.cut); }
       const svg = holder.querySelector('svg'), imgs = {}, lazy = [];
-      handLetter(svg, mob ? page.id + 'Mob' : page.id);
+      handLetter(svg, mob ? page.id + 'Mob' : page.id, mob && mob.hand);
       // the design's white page behind everything goes, so the page's grain shows through round the pictures
       // (and the white cards, which are the paper too)
       svg.querySelectorAll('rect[fill="white"]').forEach(r => {
@@ -3364,7 +3464,12 @@
       if (!mob) (CASE_LINES[page.id] || []).forEach(l => dottedLine(svg, l));
       sketchFill(svg);
       backdropGrain(svg, page.id);
-      if (mob) { mobHide(svg, mob.hide); mobStrips(page, holder, mob); docParallax(page, svg); }
+      if (mob) {
+        mobHide(svg, mob);
+        const shiftAt = mobText(svg, mob, holder.clientWidth / mob.w);
+        (page._lazy || []).forEach(L => { L.y0 -= shiftAt(L.y0); L.y1 -= shiftAt(L.y1); });   // (the pictures moved up with the text)
+        mobStrips(page, holder, mob, shiftAt); docParallax(page, svg);
+      }
       else if (MOB_CASE && isMob()) mobileCase(page, svg);              // (off: phones show the design exactly as on desktop, scaled)
       else { bodyText(svg); docParallax(page, svg); }
     }).catch(e => console.error(e));
@@ -3428,8 +3533,24 @@
       1165: 'Beat visualiser — see the energy', 1367: 'Learn music — finally, “what\nis a chorus?”',
       1508: 'Song structure map — a GPS for\nthe song', 1512: 'DID IT\nACTUALLY\nWORK?', 1522: 'A/B TESTING — TWO VERSIONS\nONE WINNER',
       1528: 'SUS — IS IT EASY TO USE', 1529: '{ 69.5 } /100', 1531: 'THE LAST NOTE !', 1596: 'What it taught me' };
-  function handLetter(svg, id) {
+  HAND_TEXT.caseHobbyMob = {
+      3: 'PROJECT', 5: 'ROLE', 7: 'DURATION', 9: 'OVERVIEW', 11: 'ANYONE UP FOR\nPOTTERY\nTHIS WEEKEND ?', 12: 'INTENT',
+      196: 'Imagine this !', 285: 'MEERA BUYS\nA POTTERY KIT', 286: 'NONE OF HER\nFRIENDS DO\nPOTTERY',
+      287: 'THOUSANDS\nONLINE,\nNOBODY NEARBY', 288: 'THE WORKSHOP\nCOSTS MORE\nTHAN THE KIT', 289: 'THE KIT STAYS\nIN THE BOX',
+      290: 'SATURDAY,\n4 PM', 291: '“WHO DO I EVEN\nDO THIS WITH?”', 312: '80% WANTED A\nHOBBY PARTNER\nAND DIDN’T HAVE ONE\n!!',
+      364: 'LISTEN FIRST', 386: '“SO WHY DOES THIS\nKEEP HAPPENING?”', 387: 'FIVE WHYS\nLATER...',
+      400: '“SIX PLACES, ZERO CONNECTION\nBETWEEN THEM”', 403: 'LOOKING AT THE\nOTHERS', 438: 'ITS STICKY\nNOTE TIME!',
+      441: 'PERSONALISED\nHOBBY &\nPARTICIPATION\nSETUP', 443: 'ACTIVITY — BASED\nMATCHING', 445: 'LOW — PRESSURE\nCONNECTION &\nTRUST',
+      447: 'SHARED HOBBY\nCHALLENGE', 449: 'ACTIVITY PLANNING\n& COORDINATION', 451: 'RESOURCES &\nACCESS',
+      453: 'PARTICIPATION\nROLES & LEARNING', 455: 'HABIT LOOP &\nCONTINUED\nENGAGEMENT', 457: 'THE DESIGN SHIFT',
+      460: 'FROM FINDING A HOBBY PARTNER\nTO\nCREATING SOMETHING TOGETHER', 524: 'BEHIND THE SCREENS', 547: 'SERVICE BLUEPRINT',
+      632: 'THE FINAL\nDESIGNS!', 633: 'Brace yourselves for\nmusic you can feel!', 643: 'GETTING STARTED', 734: 'SELECT YOUR INTERESTS',
+      872: 'Homepage', 1051: 'Activity details', 1168: 'Find a match', 1386: 'ITS A MATCH', 1493: 'Chat box', 1608: 'Plan & book',
+      1735: 'Activity is live', 1866: 'Habit formation loop', 2003: 'DID IT\nACTUALLY\nWORK?', 2034: 'WHAT PARTICIPANTS ASKED FOR',
+      2047: 'TAKEAWAYS' };
+  function handLetter(svg, id, opts) {
     const map = HAND_TEXT[id]; if (!map) return;
+    const small = !!(opts && opts.small);                           // (HobbyHop's phone design: its own sizes, no re-wrapping into cards)
     const NS = 'http://www.w3.org/2000/svg', paths = [...svg.querySelectorAll('path')], jobs = [];
     for (const k in map) {
       const el = paths[k]; if (!el) continue;
@@ -3471,7 +3592,7 @@
       return { x: x + w * 0.04, y: y + h * 0.04, width: w * 0.92, height: h * 0.92 };
     };
     jobs.forEach(({ el, lines, words, fill, centred }) => {
-      const card = centred && cardOf(el);
+      const card = centred && !small && cardOf(el);
       if (card) {
         const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'csHand'); el.parentNode.insertBefore(g, el);
         // re-wrapped to whichever number of lines lets the writing be largest in the card
@@ -3507,7 +3628,7 @@
         g.appendChild(t); el.parentNode.insertBefore(g, el);
         const len = t.getComputedTextLength(), want = L.x1 - L.x0;      // fitted to the width the line had
         // the height the line had sets the size; it only shrinks (never grows) to keep within the width the line had
-        if (len > 0) { fs = Math.min(Math.max(fs, 22), fs * want / len); t.setAttribute('font-size', fs); }   // readable, but never wider than the line was
+        if (len > 0) { fs = Math.min(Math.max(fs, small ? 11 : 22), fs * want / len); t.setAttribute('font-size', fs); }   // readable, but never wider than the line was
         t.setAttribute('stroke', fill); t.setAttribute('stroke-width', (fs * 0.045).toFixed(2));
       });
       if (!/^(#2A2A2A|#080808|#1F1D1A|#2B2925|#141414|#23272E|#4A4640|black)$/i.test(fill)) g.classList.add('csCrayon');
@@ -3571,7 +3692,7 @@
     svg.querySelectorAll('path').forEach(el => {
       if (el.closest('defs, clipPath, mask, pattern') || el.getAttribute('stroke') || !['#2B2925', '#1F1D1A', '#080808', 'black'].includes(el.getAttribute('fill'))) return;
       if (inDevice(svg, el)) return;
-      el.setAttribute('fill', '#1C1C1E'); el.classList.add('csInkFill');
+      el.dataset.fill = el.getAttribute('fill'); el.setAttribute('fill', '#1C1C1E'); el.classList.add('csInkFill');
     });
     const NS = 'http://www.w3.org/2000/svg', ink = [], box = new Map();
     svg.querySelectorAll('path, rect, circle, ellipse').forEach(el => {
@@ -3601,6 +3722,7 @@
       ink.forEach(o => { const c = box.get(o);
         if (c.x < b.x + b.width && c.x + c.width > b.x && c.y < b.y + b.height && c.y + c.height > b.y &&
             (o.compareDocumentPosition(first) & Node.DOCUMENT_POSITION_FOLLOWING)) first = o; });
+      if (first.closest('[clip-path]') !== el.closest('[clip-path]')) first = el;   // (kept inside its own clip: a hidden part stays hidden)
       const w = el.cloneNode();
       w.setAttribute('fill', '#FFFFFF'); w.setAttribute('stroke', 'none'); w.removeAttribute('class');
       if (d !== null) w.setAttribute('d', d);
