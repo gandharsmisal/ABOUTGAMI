@@ -366,9 +366,10 @@
   /* the stick figures and the case studies' sketches drawn by hand */
   /* the stick figures and the case studies' sketches: one thin, dark pen line */
   #figSvg .hpen, #hero .hpen { stroke: #1C1C1E; stroke-width: 0.9px; }
-  #heroFig, #heroNotes path, .csDocHolder .csSketch { filter: url(#graphite); }
+  /* every sketch line in crayon (same thickness as before) */
+  #heroFig, #heroNotes path, .hnMobArrow, #hnLaptop path, #hnBook path, #hnMug path, .csDocHolder .csSketch, .abPage .doodle { filter: url(#crayonLine); }
   .csDocHolder { --sketch: #7A7A74; }   /* the case studies' sketches: a soft grey pencil */
-  .csDocHolder .csInkFill { fill: var(--sketch); stroke: #F4EFE3; stroke-width: 0.38px; vector-effect: non-scaling-stroke; filter: url(#graphite); }
+  .csDocHolder .csInkFill { fill: var(--sketch); stroke: #F4EFE3; stroke-width: 0.38px; vector-effect: non-scaling-stroke; filter: url(#crayonLine); }
   .csDocHolder .csInk { stroke: var(--sketch); stroke-width: 0.9px; vector-effect: non-scaling-stroke; }
   html.mob-doc .csDocHolder .csInk { stroke-width: 0.65px; }   /* phones: every sketch line a little thinner, all the same */
   .abResume { cursor: zoom-in; }
@@ -1147,6 +1148,13 @@
       <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2.7 0 0 0 2.15" result="tooth"></feColorMatrix>
       <feComposite in="SourceGraphic" in2="tooth" operator="in" result="graphite"></feComposite>
       <feDisplacementMap in="graphite" in2="n" scale="1.6" xChannelSelector="G" yChannelSelector="B"></feDisplacementMap>
+    </filter>
+    <!-- crayon for thin lines: the same waxy, grainy edge, but it only thins the line in patches (never breaks it) -->
+    <filter id="crayonLine" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.32" numOctaves="3" seed="8" result="n"></feTurbulence>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -0.9 0 0 0 1.45" result="wax"></feColorMatrix>
+      <feComposite in="SourceGraphic" in2="wax" operator="in" result="c"></feComposite>
+      <feDisplacementMap in="c" in2="n" scale="1.4" xChannelSelector="G" yChannelSelector="B"></feDisplacementMap>
     </filter>
     <!-- crayon: coarser, waxier gaps -->
     <filter id="crayon" x="-5%" y="-5%" width="110%" height="110%">
