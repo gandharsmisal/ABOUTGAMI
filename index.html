@@ -152,7 +152,7 @@
   #csLoader::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: var(--grain); opacity: 0.6; }
   #csLoader svg { width: min(56vw, 340px); overflow: visible; }
   /* the scribble in crayon: a thick waxy line with a broken, grainy edge */
-  #csLoader path { fill: none; stroke: #2B2925; stroke-width: 1.8px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; filter: url(#crayon); }
+  #csLoader path { fill: none; stroke: #2B2925; stroke-width: 1px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; filter: url(#crayon); }
   #csLoadPct { position: absolute; font: 400 20px "Gandhar Hand Thin", "Gandhar Hand", var(--hand); color: #2B2925; }
   html.cs-loading #csLoader { display: grid; }
   /* on the intro's black screen: the loader is black, its scribble and number white */
