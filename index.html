@@ -3319,7 +3319,7 @@
       const pm = toRoot.multiply(el.parentNode.getScreenCTM());
       return { x0: Math.min(...X), x1: Math.max(...X), y0: Math.min(...Y), y1: Math.max(...Y), m, py: (Math.min(...Y) - pm.f) / pm.d }; };   // (py: its top in its parent's units)
     const hidden = el => el.closest('[display="none"]');
-    const devs = deviceBoxes(svg).map(d => ({ x0: d.x0 + 20, y0: d.y0 + 20, x1: d.x1 - 20, y1: d.y1 - 20 }));   // the phones, as drawn
+    const devs = deviceBoxes(svg).map(d => ({ x0: d.x0 + d.p, y0: d.y0 + d.p, x1: d.x1 - d.p, y1: d.y1 - d.p }));   // the phones, as drawn
     // the text: outlined paths outside the phones (which are pictures of the app)
     const cand = [];
     svg.querySelectorAll('path').forEach(el => {
@@ -3344,26 +3344,28 @@
     const inkB = [...svg.querySelectorAll('.csInk, .csInkFill')].filter(el => !hidden(el) && !swatch(el)).map(boxOf).filter(b => b && b.x1 - b.x0 < 150 && b.y1 - b.y0 < 150);
     const labels = svg._labels = [];                                 // words beside a sketch that stay drawn: its labels
     blocks.forEach(B => {
-      const nearInk = inkB.some(b => b.x0 < B.x1 + 50 && b.x1 > B.x0 - 50 && b.y0 < B.y1 + 50 && b.y1 > B.y0 - 50);
+      // (labels go with a figure: a tall piece of a drawing - not an arrow or bullet drawn in ink)
+      const nearInk = inkB.some(b => b.y1 - b.y0 > 30 && b.x0 < B.x1 + 60 && b.x1 > B.x0 - 60 && b.y0 < B.y1 + 40 && b.y1 > B.y0 - 40);
       if (nearInk) labels.push(B);
-      if (inkB.some(b => b.x0 < B.x1 && b.x1 > B.x0 && b.y0 < B.y1 && b.y1 > B.y0)) return;
+      if (inkB.some(b => b.y1 - b.y0 > 30 && b.x0 < B.x1 && b.x1 > B.x0 && b.y0 < B.y1 && b.y1 > B.y0)) return;   // (inside a drawing; an arrow drawn into a line of text does not count)
       const r = readWords(B.ps.map(c => ({ el: c.el, m: c.b.m })));
       if (!r || !r.paras.length || r.fsz * k > 30 || r.fsz * k < 6) return;   // (drawings read as huge "letters")
       // a drawing's labels stay drawn: narrow, beside it, a few words a line (or one line right beside it)
       if (nearInk && B.x1 - B.x0 < mob.w * 0.45) {
         const ls = new Map(); r.paras.flat().forEach(w => { const q = Math.round(w.bot / (r.fsz * 0.5)); ls.set(q, (ls.get(q) || 0) + 1); });
-        const beside = inkB.some(b => b.y0 < B.y1 && b.y1 > B.y0 && Math.max(b.x0 - B.x1, B.x0 - b.x1) < 50);
+        const beside = inkB.some(b => b.y1 - b.y0 > 30 && b.y0 < B.y1 && b.y1 > B.y0 && Math.max(b.x0 - B.x1, B.x0 - b.x1) < 50);
         if ((ls.size >= 2 && Math.max(...ls.values()) <= 3) || (ls.size === 1 && beside)) return;
       }
       const words = r.paras.flat(), hs = words.flatMap(w => w.g.map(g => g.y1 - g.y0)).sort((a, b) => a - b);
       // the serif's small letters stand at about 0.7 of its tall ones (small capitals nearer 0.8); capitals-only labels have (almost) none there
-      const p90 = hs.length < 24 ? hs[hs.length - 1] : hs[Math.floor(hs.length * 0.9)],   // (a short word: its tallest letter)
+      const p90 = hs.length < 15 ? hs[hs.length - 1] : hs[Math.floor(hs.length * 0.9)],   // (a short word: its tallest letter)
         band = hs.filter(h => h >= p90 * 0.55 && h <= p90 * 0.745);
       // tall letters: narrow (a label's bullet or ring is as wide as it is tall); one is enough in a word of small letters
       const tall = words.flatMap(w => w.g).filter(g => g.y1 - g.y0 > p90 * 0.9 && g.x1 - g.x0 < (g.y1 - g.y0) * 0.85).length;
       if (band.length < hs.length * 0.25 || (tall < Math.max(2, hs.length * 0.12) && !(tall && band.length >= hs.length * 0.5))) return;
       // its size from its small letters' height (the serif's x-height is about 0.52 of its size); one line alone keeps a usual spacing
-      const fsz = median(band) / 0.52, multi = new Set(words.map(w => Math.round(w.bot))).size > 1;
+      const fsz = hs.length < 30 ? p90 / 0.72 : median(band) / 0.52,   // (a short line: from its tall letters)
+        multi = new Set(words.map(w => Math.round(w.bot))).size > 1;
       const s = MOB_TEXT_PX / k / fsz, lh = multi ? r.pitch : fsz * 1.6, Wt = (B.x1 - B.x0) / s + 0.5, sp = fsz * 0.27;
       // its lines as drawn: each word's line, the line's baseline, and whether it stops short (a break the writer made)
       const lines = [];
@@ -3551,10 +3553,13 @@
         pathSubs(el.getAttribute('d') || '').forEach(s => { if (s.y1 - s.y0 > 0.5) hs.push((s.y1 - s.y0) * sy); }); });
       if (hs.length < 3) return;
       hs.sort((a, b) => a - b);
-      const px = hs[hs.length - 1 - Math.floor(hs.length * 0.03)] / 0.7 * k, f = LABEL_PX / px;   // (its tall letters: a few stray marks aside) if (f > 0.97 || px > 18) return;   // (only ever smaller; big type is not a label)
+      const px = hs[hs.length - 1 - Math.floor(hs.length * 0.03)] / 0.7 * k, f = LABEL_PX / px;   // (its tall letters: a few stray marks aside) if (f > 0.97 || px > 26 || hs.length < 6) return;   // (big type, or a lone sample like "Aa", is not a label)   // (only ever smaller; big type is not a label)
       const bs = els.map(boxOf).filter(Boolean), b = { x0: Math.min(...bs.map(q => q.x0)), x1: Math.max(...bs.map(q => q.x1)), y0: Math.min(...bs.map(q => q.y0)), y1: Math.max(...bs.map(q => q.y1)) };
       const cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2, gap = q => Math.hypot(Math.max(0, q.x0 - b.x1, b.x0 - q.x1), Math.max(0, q.y0 - b.y1, b.y0 - q.y1));
       const near = ink.reduce((p, q) => !p || gap(q) < gap(p) ? q : p, null); if (!near) return;
+      // only words beside the drawing, or just under/over a piece of it - not a line of text above or below the sketch
+      // only words beside the drawing, or just under/over a piece of it - not a line of text above or below the sketch
+      if (!ink.some(q => (q.y0 < b.y1 && q.y1 > b.y0 && gap(q) < 50) || (q.x0 < b.x1 && q.x1 > b.x0 && gap(q) < 12))) return;
       const nx = (near.x0 + near.x1) / 2, ny = (near.y0 + near.y1) / 2;
       const ax = Math.abs(nx - cx) < (b.x1 - b.x0) / 2 ? cx : nx < cx ? b.x0 : b.x1, ay = Math.abs(ny - cy) < (b.y1 - b.y0) / 2 ? cy : ny < cy ? b.y0 : b.y1;
       const S = new DOMMatrix().translate(ax, ay).scale(f).translate(-ax, -ay);
@@ -3572,7 +3577,6 @@
       if (el.closest('[display="none"]')) return;
       let b, L; try { b = el.getBBox(); L = el.getTotalLength(); } catch (e) { return; }
       if (!L || b.width * b.height === 0) return;
-      if (b.height < 25 && b.width > b.height && pathSubs(el.getAttribute('d') || '').length > 2) return;   // (lettering, e.g. a type sample: not a line)
       const S = Math.min(6, 600 / Math.max(b.width, b.height)), W = Math.ceil(b.width * S) + 2, H = Math.ceil(b.height * S) + 2;
       cv.width = W; cv.height = H; g.setTransform(S, 0, 0, S, -b.x * S + 1, -b.y * S + 1); g.fillStyle = '#000';
       g.fill(new Path2D(el.getAttribute('d')), el.getAttribute('fill-rule') === 'evenodd' ? 'evenodd' : 'nonzero');
@@ -3855,13 +3859,14 @@
   // phone frames (tall, ~2:1) and laptop frames (#343434 / #292B2C), a little enlarged: no paper effects inside
   function deviceBoxes(svg) {
     if (svg._devices) return svg._devices;
-    const out = [], lo = svg.viewBox.baseVal && svg.viewBox.baseVal.width < 1000 ? 180 : 240;   // (the phone design's phones are narrower)
+    const small = svg.viewBox.baseVal && svg.viewBox.baseVal.width < 1000;   // a phone design: its phones and laptops are drawn smaller
+    const out = [], lo = small ? 100 : 240, hi = small ? 260 : 480, lap = small ? 180 : 600, P = small ? 6 : 20;   // (P: a little room round each)
     svg.querySelectorAll('rect, path').forEach(el => {
       if (el.closest('defs, clipPath, mask, pattern')) return;
       let b; try { b = el.getBBox(); } catch (e) { return; }
       const r = b.height / b.width, f = el.getAttribute('fill');
-      if ((b.width > lo && b.width < 480 && r > 1.75 && r < 2.4) || (/^#(343434|292B2C)$/i.test(f) && b.width > 600))
-        out.push({ x0: b.x - 20, y0: b.y - 20, x1: b.x + b.width + 20, y1: b.y + b.height + 20 });
+      if ((b.width > lo && b.width < hi && r > 1.75 && r < 2.4 && !(small && SKETCH_INK.includes(el.getAttribute('stroke')))) || (/^#(343434|292B2C)$/i.test(f) && b.width > lap))   // (not a phone drawn in the sketches' ink)
+        out.push({ x0: b.x - P, y0: b.y - P, x1: b.x + b.width + P, y1: b.y + b.height + P, p: P });
     });
     return (svg._devices = out);
   }
