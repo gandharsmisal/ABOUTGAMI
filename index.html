@@ -579,7 +579,8 @@
   html.mob-main #heroLine .hword { font-size: 62px; }
   html.mob-main #hero .hnote { font-size: 42px; }
   @media (max-width: 600px) { .ctPhone { width: min(calc((100vh - 230px) * 619 / 1289), 64vw) !important; } }   /* the phone a little smaller on a phone */
-  html.mob-main #hnLaptop path, html.mob-main #hnBook path, html.mob-main #hnMug path { display: none; }
+  html.mob-main #hnLaptop path:not(.hnMobArrow), html.mob-main #hnBook path:not(.hnMobArrow), html.mob-main #hnMug path:not(.hnMobArrow) { display: none; }   /* (the desktop arrows; a phone draws its own) */
+  html:not(.mob-main) .hnMobArrow { display: none; }
   html.mob-main #hnLaptop text, html.mob-main #hnBook text, html.mob-main #hnMug text { text-anchor: middle; }
   @media (max-width: 600px) {
     :root { --hair: 1px; }                                   /* thin lines, but never under 1px */
@@ -2656,7 +2657,14 @@
       cam.ex = 0; cam.ey = 0;                                     // (the phone layout already reaches its edges)
       // the notes sit under the object in the middle (their arrows were drawn for the desktop layout)
       [1, 2, 3].forEach(i => { const g = $(NOTES[i]), n = CAM[i].note; if (!g || !n) return;
-        g.removeAttribute('transform'); const bb = g.getBBox(); g.setAttribute('transform', `translate(${n[0] - bb.x - bb.width / 2} ${n[1] - bb.y})`); });
+        let a = g.querySelector('.hnMobArrow'); if (a) a.remove();
+        g.removeAttribute('transform'); const bb = g.getBBox(); g.setAttribute('transform', `translate(${n[0] - bb.x - bb.width / 2} ${n[1] - bb.y})`);
+        // its own arrow on a phone: from beside the words, a loop, then up to the object above
+        const ts = [...g.querySelectorAll('text')], first = ts[0].getBBox(), u = first.height, x = first.x + first.width + u * 0.25, y = first.y + u * 0.45;   // (beside the first line)
+        a = document.createElementNS('http://www.w3.org/2000/svg', 'path'); a.setAttribute('class', 'hpen hnMobArrow');
+        a.setAttribute('d', `M${x} ${y} C ${x + u * 1.4} ${y + u * 0.2}, ${x + u * 2.2} ${y - u * 0.6}, ${x + u * 1.6} ${y - u * 1.2} C ${x + u * 1.1} ${y - u * 1.7}, ${x + u * 0.3} ${y - u * 1.1}, ${x + u * 0.9} ${y - u * 0.7} C ${x + u * 1.6} ${y - u * 0.3}, ${x + u * 1.5} ${y - u * 2.2}, ${x + u * 1.1} ${y - u * 3}` +
+          ` M${x + u * 0.85} ${y - u * 2.6} L${x + u * 1.1} ${y - u * 3.05} L${x + u * 1.4} ${y - u * 2.65}`);
+        g.appendChild(a); });
     } else {
       $('heroSvg').setAttribute('viewBox', '0 0 1920 1080');
       const desk = { hnLaptop: 'translate(-129 71)', hnBook: 'translate(85 0)', hnMug: 'translate(-14 0)' };
