@@ -335,7 +335,7 @@
   .abPage p { margin: 0 0 10px; }
   .abText { position: absolute; }
   .abPage svg.doodle { position: absolute; overflow: visible; }
-  .abPage .doodle path { fill: none; stroke: #000; stroke-width: 1.3px; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; }
+  .abPage .doodle path { fill: none; stroke: #000; stroke-width: 1.2px; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; }
   .abPage .doodle.red path { stroke: #2E2E30; }
   /* photos: a white border (a wide bottom on the polaroids, where a caption is written), a soft shadow */
   .abPhoto { position: absolute; margin: 0; padding: 9px; background: url(assets/about/paper-white.jpg) center / cover;
@@ -365,14 +365,14 @@
   .csHand text { font-family: "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); stroke-linejoin: round; stroke-linecap: round; paint-order: stroke; }
   /* the stick figures and the case studies' sketches drawn by hand */
   /* the stick figures and the case studies' sketches: one thin, dark pen line */
-  #figSvg .hpen, #hero .hpen { stroke: #000; stroke-width: 1.3px; }
-  @media (max-width: 600px) { #figSvg .hpen, #hero .hpen, .abPage .doodle path { stroke-width: 1px; } }   /* (phones: 1px) */
+  #figSvg .hpen, #hero .hpen { stroke: #000; stroke-width: 1.2px; }
+  @media (max-width: 600px) { #figSvg .hpen, #hero .hpen, .abPage .doodle path { stroke-width: 0.9px; } }   /* (phones: 0.9px) */
   /* every sketch line in crayon (same thickness as before) */
   #heroFig, #heroNotes path, .hnMobArrow, #hnLaptop path, #hnBook path, #hnMug path, .csDocHolder .csSketch, .abPage .doodle { filter: url(#crayonLine); }
   .csDocHolder { --sketch: #000; }   /* the case studies' sketches: a soft grey pencil */
   .csDocHolder .csInkFill { fill: var(--sketch); stroke: #F4EFE3; stroke-width: 0.38px; vector-effect: non-scaling-stroke; filter: url(#crayonLine); }
-  .csDocHolder .csInk { stroke: var(--sketch); stroke-width: 1.3px; vector-effect: non-scaling-stroke; }
-  html.mob-doc .csDocHolder .csInk { stroke-width: 1px; }   /* phones: every sketch line a little thinner, all the same */
+  .csDocHolder .csInk { stroke: var(--sketch); stroke-width: 1.2px; vector-effect: non-scaling-stroke; }
+  html.mob-doc .csDocHolder .csInk { stroke-width: 0.9px; }   /* phones: every sketch line a little thinner, all the same */
   .abResume { cursor: zoom-in; }
   .abResume { mix-blend-mode: multiply; } .abResume img { display: block; }   /* the page's own paper shows through: no separate sheet */
   /* the resume, held up close to read */
@@ -630,6 +630,7 @@
     #menu.open #menu-list { display: flex; }
   }
   #scene #figure .ln, #scene #leg0, #scene #leg1, #scene #arm { stroke-width: 0.65; }   /* a fine pencil line */
+  #scene .ln { filter: url(#crayonLine); }   /* the intro's lines (the figure, its arm and legs, the door's drawn lines) in crayon too */
   /* noise grain over the whole site (dark specks on white, light specks on black); never catches the mouse */
   /* the click burst (made in the script next to #grain) */
   .clickfx { position: fixed; z-index: 70; width: 60px; height: 60px; margin: -30px 0 0 -30px; overflow: visible;
@@ -3694,7 +3695,7 @@
   }
   // Every sketch line the same: strokes are drawn at 0.9px already; lines drawn as filled outlines are thickened or
   // thinned to 0.9px on screen (their thickness: twice their area over their outline's length). Solid shapes stay.
-  const INK_PX = 1;
+  const INK_PX = 0.9;
   function inkLines(svg) {
     const cv = document.createElement('canvas'), g = cv.getContext('2d');
     svg.querySelectorAll('.csInkFill').forEach(el => {
