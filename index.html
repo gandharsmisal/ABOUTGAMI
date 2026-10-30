@@ -341,6 +341,7 @@
   .abSticky, .abLined, .abNote, .abText, .abPage p { color: #48484C; filter: url(#pencil); }
   .abPage h2, .abDownload { filter: url(#pencil); }
   .abWord { display: inline-block; }
+  @media (max-width: 600px) { #aboutPage .abSticky, #aboutPage .abLined, #aboutPage .abNote, #aboutPage .abText, #aboutPage .abPage p { color: #1F1F22; -webkit-text-stroke: 0.35px currentColor; } }   /* phones: readable at the small size */
   /* the clean, even pen version of his hand, thickened evenly to heading weight (stroke in its own colour) */
   .csHand.csCrayon { filter: url(#crayon); }
   .csHand.csCrayon text { font-family: "Gandhar Hand", "Indie Flower", var(--hand); }
@@ -456,6 +457,7 @@
     font: 400 20px/1 "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); text-transform: lowercase; letter-spacing: 0.04em;
     background-color: #EAE0C5; background-image: var(--mottle), var(--grain); background-size: 120px, 180px; -webkit-tap-highlight-color: transparent; }
   .mPill .pill-icon { width: 22px; height: 22px; flex: none; overflow: visible; }
+  @media (max-width: 600px) { .mPill { font-family: "Gandhar Hand", "Indie Flower", var(--hand); } .mPill .pill-icon .ink { stroke-width: 1.8px; } }   /* phones: the thicker hand */
   .mPill .pill-icon .ink { fill: none; stroke: currentColor; stroke-width: 1.4px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
   .mPill .pill-icon .dot { fill: currentColor; }
   @media (max-width: 600px) {
@@ -2658,9 +2660,11 @@
       // the notes sit under the object in the middle (their arrows were drawn for the desktop layout)
       [1, 2, 3].forEach(i => { const g = $(NOTES[i]), n = CAM[i].note; if (!g || !n) return;
         let a = g.querySelector('.hnMobArrow'); if (a) a.remove();
+        // the lines spaced for the phone's bigger writing (the design's spacing was for the desktop size)
+        g.querySelectorAll('text').forEach((tx, j, all) => { if (tx._y0 === undefined) tx._y0 = +tx.getAttribute('y'); tx.setAttribute('y', all[0]._y0 + j * 46); });
         g.removeAttribute('transform'); const bb = g.getBBox(); g.setAttribute('transform', `translate(${n[0] - bb.x - bb.width / 2} ${n[1] - bb.y})`);
         // its own arrow on a phone: from beside the words, a loop, then up to the object above
-        const ts = [...g.querySelectorAll('text')], first = ts[0].getBBox(), u = first.height, x = first.x + first.width + u * 0.25, y = first.y + u * 0.45;   // (beside the first line)
+        const ts = [...g.querySelectorAll('text')].map(e => e.getBBox()), u = ts[0].height, x = ts[0].x + ts[0].width + u * 0.15, y = ts[0].y + u * 0.5;   // (straight on from the end of the first line)
         a = document.createElementNS('http://www.w3.org/2000/svg', 'path'); a.setAttribute('class', 'hpen hnMobArrow');
         a.setAttribute('d', `M${x} ${y} C ${x + u * 1.4} ${y + u * 0.2}, ${x + u * 2.2} ${y - u * 0.6}, ${x + u * 1.6} ${y - u * 1.2} C ${x + u * 1.1} ${y - u * 1.7}, ${x + u * 0.3} ${y - u * 1.1}, ${x + u * 0.9} ${y - u * 0.7} C ${x + u * 1.6} ${y - u * 0.3}, ${x + u * 1.5} ${y - u * 2.2}, ${x + u * 1.1} ${y - u * 3}` +
           ` M${x + u * 0.85} ${y - u * 2.6} L${x + u * 1.1} ${y - u * 3.05} L${x + u * 1.4} ${y - u * 2.65}`);
@@ -2669,6 +2673,7 @@
       $('heroSvg').setAttribute('viewBox', '0 0 1920 1080');
       const desk = { hnLaptop: 'translate(-129 71)', hnBook: 'translate(85 0)', hnMug: 'translate(-14 0)' };
       for (const k in desk) $(k).setAttribute('transform', desk[k]);
+      document.querySelectorAll('#hnLaptop text, #hnBook text, #hnMug text').forEach(tx => { if (tx._y0 !== undefined) tx.setAttribute('y', tx._y0); });
       const hb = hero.getBoundingClientRect(), k = Math.min(hb.width / 1920, hb.height / 1080) || 1;
       cam.ex = Math.max(0, (hb.width / k - 1920) / 2); cam.ey = Math.max(0, (hb.height / k - 1080) / 2);
     }
@@ -4203,14 +4208,16 @@
   }
   // Smooth scrolling inside the case study: each case page has its own Lenis (the page is its wrapper, .csInner its
   // content), driven by the GSAP ticker and telling ScrollTrigger on every scroll, so the parallax below stays in step.
-  // Touch and keys scroll natively; Lenis picks up from there.
+  // Keys scroll natively; Lenis picks up from there. Touch glides like the wheel does.
   const CASE_LERP = 0.022, CASE_WHEEL = 2;                    // lower lerp = longer, softer glide
   const SMOOTH = window.Lenis && !matchMedia('(prefers-reduced-motion: reduce)').matches;
   Object.values(CASES).forEach(page => {
     page.addEventListener('scroll', () => lazyLoad(page), { passive: true });
     if (!SMOOTH) return;
     const l = page._lenis = new Lenis({ wrapper: page, content: page.querySelector('.csInner'),
-      lerp: CASE_LERP, smoothWheel: true, wheelMultiplier: CASE_WHEEL });
+      lerp: CASE_LERP, smoothWheel: true, wheelMultiplier: CASE_WHEEL,
+      // a finger gets the same soft glide: the swipe sets where to go, the page eases there and keeps drifting after
+      syncTouch: true, syncTouchLerp: 0.06, touchInertiaMultiplier: 28, touchMultiplier: 1.2 });
     l.stop();                                                     // runs only while the page is open
     l.on('scroll', ScrollTrigger.update);
     gsap.ticker.add(time => l.raf(time * 1000));
