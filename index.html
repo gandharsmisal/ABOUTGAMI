@@ -146,6 +146,11 @@
   #csLoader path { fill: none; stroke: #2B2925; stroke-width: 1.3px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; filter: url(#graphite); }
   #csLoadPct { position: absolute; font: 400 20px "Gandhar Hand Thin", "Gandhar Hand", var(--hand); color: #2B2925; }
   html.cs-loading #csLoader { display: grid; }
+  /* on the intro's black screen: the loader is black, its scribble and number white */
+  html.intro-locked #csLoader { background: #000; }
+  html.intro-locked #csLoader::before { opacity: 0.12; }
+  html.intro-locked #csLoader path { stroke: #fff; }
+  html.intro-locked #csLoadPct { color: #fff; }
   html.cs-loading.intro-locked #menuBtn, html.cs-loading.intro-locked #menu { visibility: hidden; }   /* (the first visit's loading: nothing over it) */
   html.in-case #caseClose { display: inline-flex; }
   @media (max-width: 600px) { #caseClose { right: 14px; top: calc(env(safe-area-inset-top, 0px) + 10px); } }
