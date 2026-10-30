@@ -136,7 +136,7 @@
   #caseClose svg { width: 20px; height: 20px; }
   #caseClose path { fill: none; stroke: #1F1D1A; stroke-width: 2.2px; stroke-linecap: round; }
   #caseClose:hover .badge { transform: rotate(90deg); }
-  html.in-case #menu { display: none; }
+  html.in-case #menu, html.in-case #menuBtn { display: none !important; }
   html.in-case #caseClose { display: inline-flex; }
   @media (max-width: 600px) { #caseClose { right: 14px; top: calc(env(safe-area-inset-top, 0px) + 10px); } }
   .csDocHolder svg { display: block; width: calc(100% * 1250 / 1400); height: auto;
@@ -165,8 +165,8 @@
   #wpDots .wpDot.on { stroke: var(--pen); }
   #wpDots .wpX { fill: none; stroke: var(--pen); stroke-width: 1.4px; stroke-linecap: round; vector-effect: non-scaling-stroke; }
 
-  @font-face { font-family: "Gandhar Hand"; src: url(assets/fonts/gandhar-hand.otf) format("opentype"); font-display: swap; }
-  @font-face { font-family: "Gandhar Hand Thin"; src: url(assets/fonts/gandhar-hand-thin.otf?v=5) format("opentype"); font-display: swap; }   /* the same hand, a fine pen */
+  @font-face { font-family: "Gandhar Hand"; src: url(assets/fonts/gandhar-hand.otf?v=6) format("opentype"); font-display: swap; }
+  @font-face { font-family: "Gandhar Hand Thin"; src: url(assets/fonts/gandhar-hand-thin.otf?v=6) format("opentype"); font-display: swap; }   /* the same hand, a fine pen */
   /* ---------- About: the notebook from the main page lifts off, grows and opens into a leather ring binder ---------- */
   #aboutPage { position: fixed; inset: 0; z-index: 38; overflow: hidden; visibility: hidden; color-scheme: light; }
   .abBg { position: absolute; inset: 0; background: rgba(60, 54, 42, 0.14); opacity: 0; }   /* the page a little darker while it is up */
@@ -434,6 +434,34 @@
     color: #fff; mix-blend-mode: difference;
   }
   #menu-list { display: flex; align-items: center; gap: 26px; }
+  /* phones: the menu button and its drawer (the row of words is not shown there) */
+  #menuBtn, #drawer, #drawerShade { display: none; }
+  .mPill { display: inline-flex; align-items: center; gap: 10px; border: 0; border-radius: 999px; cursor: pointer; color: #141210;
+    font: 400 20px/1 "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); text-transform: lowercase; letter-spacing: 0.04em;
+    background-color: #EAE0C5; background-image: var(--mottle), var(--grain); background-size: 120px, 180px; -webkit-tap-highlight-color: transparent; }
+  .mPill .pill-icon { width: 22px; height: 22px; flex: none; overflow: visible; }
+  .mPill .pill-icon .ink { fill: none; stroke: currentColor; stroke-width: 1.4px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  .mPill .pill-icon .dot { fill: currentColor; }
+  @media (max-width: 600px) {
+    #menu { display: none !important; }
+    #menuBtn { display: inline-flex; position: fixed; z-index: 70; top: calc(env(safe-area-inset-top, 0px) + 16px); right: 16px; padding: 9px 10px; background: none !important; }
+    html.intro-locked #menuBtn { color: #fff; }
+    #drawerShade { display: block; position: fixed; inset: 0; z-index: 71; background: rgba(40, 32, 18, 0.18); opacity: 0; pointer-events: none; transition: opacity 0.35s ease; }
+    #drawer { display: flex; flex-direction: column; position: fixed; z-index: 72; top: 0; right: 0; bottom: 0; width: 78vw; max-width: 360px;
+      padding: calc(env(safe-area-inset-top, 0px) + 16px) 18px 24px 26px; box-sizing: border-box; background: var(--paper);
+      box-shadow: -10px 0 30px rgba(40, 32, 18, 0.22); transform: translateX(105%); transition: transform 0.45s cubic-bezier(.2, .8, .2, 1); }
+    #drawer::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: var(--grain); }
+    #drawerClose { align-self: flex-end; position: relative; display: inline-flex; align-items: center; gap: 10px; height: 46px; padding: 0; border: 0; background: none; cursor: pointer;
+      font: 400 22px "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); color: var(--pen); text-transform: lowercase; letter-spacing: 0.04em; }
+    #drawerClose .badge { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; }
+    #drawerClose svg { width: 20px; height: 20px; }
+    #drawerClose path { fill: none; stroke: #1F1D1A; stroke-width: 2.2px; stroke-linecap: round; }
+    #drawerList { display: flex; flex-direction: column; gap: 12px; margin-top: 26px; position: relative; }
+    #drawerList .mPill { width: 100%; padding: 12px 4px; font-size: 24px; background: none; }
+    #drawerList .mPill .pill-icon { width: 26px; height: 26px; }
+    html.drawer-open #drawer { transform: none; }
+    html.drawer-open #drawerShade { opacity: 1; pointer-events: auto; }
+  }
   #menu button {
     position: relative; display: inline-flex; align-items: center; gap: 8px;
     min-height: 44px; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer;
@@ -514,6 +542,13 @@
   html.mob-doc .csTitle { font-size: 17px; transform: translate(-50%, -1.25em); width: 100%; white-space: normal; text-align: center; }
   html.mob-doc .csDocHolder { aspect-ratio: auto; overflow: hidden; padding: 0 16px 120px; box-sizing: border-box; }
   html.mob-doc .csDocHolder svg.csSource { position: absolute; left: -99999px; top: 0; width: 1920px !important; height: auto; margin: 0 !important; }
+  /* a case study drawn for phones (its own design, 390 wide): the whole width, from y --cut on */
+  html.mob-doc .csDocHolder.csMobDoc { padding: 0 0 80px; }
+  .csDocHolder.csMobDoc svg.csDoc { width: 100%; margin: calc(-100% * var(--cut) / 390) 0 0; }
+  /* its wide sketches, whole: swiped sideways */
+  .csStrip { position: absolute; left: 0; right: 0; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; }
+  .csStrip::-webkit-scrollbar { display: none; }
+  .csDocHolder .csStrip svg { display: block; margin: 0; height: 100%; }
   .csStack { position: relative; }
   .csStack .csTile { display: block; height: auto; overflow: hidden; flex: none; }
   .csStack .csCard .csTile { margin: 0; }
@@ -524,7 +559,8 @@
   html.mob .csDocHolder .csStack svg.csTile.csRight { margin-left: auto; }
 
   html.mob-main #heroLine .hword { font-size: 62px; }
-  html.mob-main #hero .hnote { font-size: 32.5px; }
+  html.mob-main #hero .hnote { font-size: 42px; }
+  @media (max-width: 600px) { .ctPhone { width: min(calc((100vh - 230px) * 619 / 1289), 64vw) !important; } }   /* the phone a little smaller on a phone */
   html.mob-main #hnLaptop path, html.mob-main #hnBook path, html.mob-main #hnMug path { display: none; }
   html.mob-main #hnLaptop text, html.mob-main #hnBook text, html.mob-main #hnMug text { text-anchor: middle; }
   @media (max-width: 600px) {
@@ -903,7 +939,7 @@
     </div>
   </div>
   <!-- the rest of the case study, as designed (1920 wide, from y 1100), inserted from data-src on first opening -->
-  <div class="csDocHolder" data-src="assets/fankr/case.svg" style="--doc-ratio: 1920 / 17053.57"></div>   <!-- (20200 - 1100) * 1250 / 1400 -->
+  <div class="csDocHolder" data-src="assets/fankr/case.svg" data-src-mob="assets/fankr/case-mobile.svg" style="--doc-ratio: 1920 / 17053.57"></div>   <!-- (20200 - 1100) * 1250 / 1400 -->
   <!-- at the very end: on to the next project -->
   <div class="csNextRow">
     <button class="csNext csPrev" type="button" aria-label="Previous project">
@@ -1005,6 +1041,7 @@
     <path id="hfBody" class="hpen hsolid" d="M 0 0"></path>
     <path id="hfArm" class="hpen" d="M 0 0" style="visibility:hidden"></path>
     <g id="hfBubble" style="opacity:0" transform="translate(67.5 -22)">   <!-- its tail just above the raised hand (moves with HX) -->
+      <path id="hfBubbleFill" class="hsolid" style="opacity:0" d="M 166 796 C 158 777, 181 760, 216 759 C 255 758, 284 770, 282 790 C 280 809, 251 820, 213 820 C 196 820, 183 817, 174 812 C 168 818, 160 823, 151 826 C 158 820, 163 813, 165 808 C 162 804, 163 800, 166 796"></path>   <!-- paper inside the cloud, so nothing shows through -->
       <path id="hfBubblePath" class="hpen" d="M 166 796 C 158 777, 181 760, 216 759 C 255 758, 284 770, 282 790 C 280 809, 251 820, 213 820 C 196 820, 183 817, 174 812 C 168 818, 160 823, 151 826 C 158 820, 163 813, 165 808 C 162 804, 163 800, 166 796"></path>
       <text id="heroScroll" x="219" y="799" text-anchor="middle">scroll</text>
     </g>
@@ -1142,6 +1179,13 @@
     </button>
   </div>
 </nav>
+<!-- phones: a "menu" button, top right; it opens a drawer from the right with the sections in it -->
+<button type="button" id="menuBtn" class="mPill" aria-label="Menu" aria-expanded="false" aria-controls="drawer"><svg class="pill-icon" viewBox="0 0 24 24" aria-hidden="true"><path class="ink" d="M12.2 3.6 C 12 8.4, 12.3 15.2, 11.8 20.4 M 4.3 7.9 C 8.6 10.3, 15.1 13.6, 19.6 16.2 M 19.4 7.6 C 15.2 10.4, 8.9 13.8, 4.6 16.6 M 3.6 12.1 C 9 11.8, 15.2 12.3, 20.3 11.9"></path></svg><span class="label">menu</span></button>
+<div id="drawerShade" aria-hidden="true"></div>
+<aside id="drawer" aria-label="Sections" aria-hidden="true">
+  <button type="button" id="drawerClose" aria-label="Close the menu"><span class="badge"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.6 4.2 C 8.2 7.9, 11.6 11.6, 15.6 15.4 M 15.4 4.5 C 11.8 8.1, 8.4 11.7, 4.4 15.6"></path></svg></span><span>close</span></button>
+  <div id="drawerList"></div>
+</aside>
 <!-- the GA.MI logo, top left (white ink, flipped dark on the white scenes like the menu) -->
 <a id="logo" href="#" aria-label="GA.MI - back to the start"><img src="assets/logo.png" alt="GA.MI" width="312" height="106"></a>
 
@@ -1628,6 +1672,7 @@
       drawOn(arm, F.arm);
       bubble.style.opacity = F.bubble > 0 ? 1 - d : 0;              // the bubble fades as the arm comes down
       drawOn(bubblePath, F.bubble);
+      $('hfBubbleFill').style.opacity = F.bubble;                   // the cloud's paper comes in with its outline
       $('heroScroll').style.opacity = Math.max(0, (F.bubble - 0.6) / 0.4);
     }
     const walkIn = gsap.timeline({ paused: true, onUpdate: figFrame })
@@ -1640,8 +1685,8 @@
     const hugLeft = () => {
       const fs = $('figSvg');
       if (isMobMain()) {                                          // its own camera: the figure big enough, bottom left
-        const vw = 720, vh = vw * innerHeight / innerWidth;          // (the figure with its bubble: x 138-350, y 737-1047)
-        fs.setAttribute('viewBox', `108 ${1062 - vh} ${vw} ${vh}`); fig.setAttribute('transform', 'translate(0 0)'); return;
+        const vw = 820, vh = vw * innerHeight / innerWidth;          // (the figure with its bubble: x 138-350, y 737-1047)
+        fs.setAttribute('viewBox', `46 ${1062 - vh} ${vw} ${vh}`); fig.setAttribute('transform', 'translate(0 0)'); return;
       }
       fs.setAttribute('viewBox', '0 0 1920 1080');
       const r = hero.getBoundingClientRect(), k = r.height / 1080;
@@ -1785,6 +1830,20 @@
       if (b.dataset.go === 'contact' && !contact.open) { if (about.open) closeAbout(false, () => openContact(onDesk())); else openContact(onDesk()); }   // the book goes back, the phone is picked up
     });
   });
+  {
+    const list = $('drawerList'), open = on => { document.documentElement.classList.toggle('drawer-open', on);
+      $('menuBtn').setAttribute('aria-expanded', on); $('drawer').setAttribute('aria-hidden', !on); };
+    document.querySelectorAll('#menu-list > button[data-go]').forEach(b => {
+      const d = document.createElement('button'); d.type = 'button'; d.className = 'mPill';
+      d.innerHTML = b.querySelector('.pill-icon').outerHTML + `<span class="label">${b.querySelector('.label').childNodes[0].textContent.trim()}</span>`;
+      d.addEventListener('click', () => { open(false); setTimeout(() => b.click(), 250); });
+      list.appendChild(d);
+    });
+    $('menuBtn').addEventListener('click', () => open(true));
+    $('drawerClose').addEventListener('click', () => open(false));
+    $('drawerShade').addEventListener('click', () => open(false));
+    addEventListener('keydown', e => { if (e.key === 'Escape') open(false); });
+  }
   // About: while the pointer is over it, the pupils look toward the pointer; they settle back when it leaves
   {
     const btn = menuNav.querySelector('[data-go="about"]'), eyes = [...btn.querySelectorAll('.ink')], pupils = [...btn.querySelectorAll('.dot')];
@@ -1914,7 +1973,7 @@
     $('wpBottom').setAttribute('startOffset', (textAt.bottom * stretch).toFixed(1));
   }
   // page dots: a little row of hand-drawn rings
-  const DOT_X = FR.x + 20, DOT_Y = FR.y + FR.h + 42, DOT_GAP = 36;   // in a row under the frame's left end
+  const DOT_X = FR.x + 20, DOT_Y = FR.y + FR.h + 42, DOT_GAP = 36;   // in a row under the frame's left end (a phone: moved to the screen's corner, see workLayout)
   $('wpDots').innerHTML = WORK.map((_, k) => {
     const cx = DOT_X + k * DOT_GAP, cy = DOT_Y;
     return `<path class="wpDot" d="M ${cx - 11} ${cy} C ${cx - 12} ${cy - 15}, ${cx + 12} ${cy - 15}, ${cx + 11} ${cy} C ${cx + 12} ${cy + 14}, ${cx - 11} ${cy + 16}, ${cx - 10} ${cy - 3}"></path>`;
@@ -2173,7 +2232,11 @@
     const vw = innerWidth, vh = innerHeight;
     if (isMob()) {                                                // a phone: the upright frame and its writing fill the width
       const k = Math.min((vw - 32) / 600, (vh - 300) / 760);
-      wpStage.style.transform = `translate(${vw / 2 - 975 * k}px, ${vh * 0.44 - 540 * k}px) scale(${k})`;
+      const tx = vw / 2 - 975 * k, ty = vh * 0.5 - 540 * k;
+      wpStage.style.transform = `translate(${tx}px, ${ty}px) scale(${k})`;
+      // the page dots go to the screen's bottom-right corner
+      const ex = (vw - 22 - tx) / k - (DOT_X + 2 * DOT_GAP + 12), ey = (vh - 36 - ty) / k - DOT_Y;
+      $('wpDots').setAttribute('transform', `translate(${ex.toFixed(1)} ${ey.toFixed(1)})`);
       return;
     }
     const k = Math.min(vw / 1920, vh / 1080);
@@ -2292,7 +2355,7 @@
   let abSide = 0;
   function aboutLayout() {
     if (isMob()) {
-      const vw = innerWidth, vh = innerHeight, k = Math.min((vw - 20) / 940, (vh - 150) / 1194);
+      const vw = innerWidth, vh = innerHeight, k = Math.min((vw - 20) / 940, (vh - 150) / 1194) * 0.86;   // (a little smaller on a phone)
       const ox = (vw - 940 * k) / 2 - abSide * 940 * k, oy = Math.max(70, (vh - 1194 * k) / 2);
       abStage.style.transform = `translate(${ox}px, ${oy}px) scale(${k})`;
       return { k, ox, oy };
@@ -2507,6 +2570,33 @@
     CAM_MOB.push(m);
   });
   for (const n in DESK_DESK) DESK_MOB[n] = DESK_DESK[n].map(([x, y, r]) => [MX(x), MY(y), r]);
+  {
+    const at = (rx, ry) => [460 + 1000 * rx, -365 + 1810 * ry], c = CAM_MOB[0];
+    const [lx, ly] = at(0.5, 0.67), [bx, by] = at(0.22, 0.21), [px, py] = at(0.68, 0.24);
+    c.hpLaptop = [lx, ly, -3, c.hpLaptop[3] * 1.45];
+    c.hpBook = [bx, by, -8, c.hpBook[3] * 1.3];
+    const cup = [c.hpCup[0] - c.hpPhone[0], c.hpCup[1] - c.hpPhone[1]];
+    const pk = 1.3; c.hpPhone = [px, py, 8, c.hpPhone[3] * pk]; c.hpCup = [px + cup[0] * pk, py + cup[1] * pk, 6, c.hpCup[3] * pk];
+    c.ly = (-365 + 1810 * 0.46) - 751;
+    const D = { paper: [0.48, 0.05, -8], sketchbook: [0.06, 0.5, 14], camera: [0.95, 0.42, -18], scissors: [0.92, 0.62, 28], marker: [0.1, 0.36, 70] };
+    for (const n in D) { const [x, y] = at(D[n][0], D[n][1]); DESK_MOB[n][0] = [x, y, D[n][2]]; }
+    CAM_MOB.forEach(s => { for (const k of ['hpLaptop', 'hpBook', 'hpPhone', 'hpCup']) s[k][3] = c[k][3]; });   // (no growing or shrinking as it scrolls)
+    // the other steps, laid out for the upright screen: the one in focus in the middle under the words, the rest off at the edges
+    const place = (s, k, rx, ry, r) => { const [x, y] = at(rx, ry);
+      if (k === 'hpPhone') { s.hpPhone = [x, y, r, c.hpPhone[3]]; s.hpCup = [x + cup[0] * pk, y + cup[1] * pk, r, c.hpCup[3]]; }
+      else s[k] = [x, y, r, c[k][3]]; };
+    const L = [null,
+      { focus: 'hpLaptop', text: 0.27, hpLaptop: [0.5, 0.6, 0], hpBook: [0.06, 0.95, 14], hpPhone: [0.93, 0.16, -10] },
+      { focus: 'hpBook', text: 0.25, hpBook: [0.5, 0.58, 2], hpLaptop: [0.1, 0.97, 16], hpPhone: [0.94, 0.17, 8] },
+      { focus: 'hpPhone', text: 0.27, hpPhone: [0.5, 0.6, 2], hpLaptop: [0.88, 0.98, -12], hpBook: [0.07, 0.1, 12] }];
+    const HALF = { hpLaptop: 163, hpBook: 123, hpPhone: 90 };
+    for (let i = 1; i <= 3; i++) {
+      const s = CAM_MOB[i], l = L[i];
+      for (const k of ['hpLaptop', 'hpBook', 'hpPhone']) place(s, k, ...l[k]);
+      s.ly = (-365 + 1810 * l.text) - 751;
+      s.note = [960, s[l.focus][1] + HALF[l.focus] * s[l.focus][3] + 40];
+    }
+  }
   const NOTES = [null, 'hnLaptop', 'hnBook', 'hnMug'], NS = CAM.length, SLIDE = 125;   // how far the mug slides off the phone
   /* The scroll is in the visitor's hands: the wheel / finger moves a target along the steps (about 4 notches a step),
      the canvas follows it softly and every prop trails a little behind at its own pace, tilting as it drifts, so
@@ -2565,7 +2655,7 @@
       const p = cam.lag.desk, [x0, y0, r] = between(p, i => { const [x, y, rr] = DESK[n][i];
         return [x + (x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0), y + (y < 150 ? -cam.ey : y > 930 ? cam.ey : 0), rr]; });
       const frac = p - Math.floor(p), spin = SPIN[n] * 360 * smooth(frac);   // one whole turn per move (so it lands at the same angle), slow at the start and the end
-      $('dk-' + n).setAttribute('transform', `translate(${x0} ${y0}) rotate(${r + spin})${isMobMain() ? ' scale(0.85)' : ''}`);
+      $('dk-' + n).setAttribute('transform', `translate(${x0} ${y0}) rotate(${r + spin})${isMobMain() ? ' scale(1.1)' : ''}`);
     }
     $('heroLineMove').setAttribute('transform', `translate(0 ${between(cam.lag.line, i => [CAM[i].ly])[0]})`);
     const step = mod(Math.round(cam.pos)), near = Math.max(0, 1 - Math.abs(cam.pos - Math.round(cam.pos)) * 5);
@@ -3198,14 +3288,39 @@
     }), { root: page, rootMargin: '1600px 0px' });
     stack.querySelectorAll('.csTile').forEach(el => io.observe(el));
   }
+  // Case studies drawn for phones (390 wide): shown from y `cut` (above it is the first screen's picture and title);
+  // `hide` areas hold sketches squeezed to fit, which are shown whole instead in strips (`strips`) swiped sideways
+  const MOB_DOCS = {
+    caseMusic: { w: 390, cut: 350, hide: [[0, 2470, 390, 2640], [0, 16505, 390, 16640]],
+      strips: [{ src: 'assets/fankr/sketch-picture.svg', y: 2445, h: 223 }, { src: 'assets/fankr/sketch-journey.svg', y: 16465, h: 230 }] }
+  };
+  function mobHide(svg, areas) {                                   // everything lying wholly inside an area
+    svg.querySelectorAll('path, rect, circle, ellipse, line').forEach(el => {
+      if (el.closest('defs, pattern, clipPath, mask')) return;
+      let b; try { b = el.getBBox(); } catch (e) { return; }
+      if (areas.some(([x0, y0, x1, y1]) => b.x >= x0 && b.y >= y0 && b.x + b.width <= x1 && b.y + b.height <= y1)) el.setAttribute('display', 'none');
+    });
+  }
+  function mobStrips(page, holder, mob) {
+    const place = () => { const k = holder.clientWidth / mob.w;
+      holder.querySelectorAll('.csStrip').forEach(s => { const o = s._o; s.style.top = (o.y - mob.cut) * k + 'px'; s.style.height = o.h * k + 'px';
+        const svg = s.querySelector('svg'); if (svg) { const vb = svg.viewBox.baseVal; svg.style.width = vb.width * o.h * k / vb.height + 'px'; } }); };
+    mob.strips.forEach(o => {
+      const s = document.createElement('div'); s.className = 'csStrip'; s._o = o; holder.appendChild(s);
+      fetch(o.src).then(r => r.text()).then(x => { s.innerHTML = x; sketchFill(s.querySelector('svg')); place(); });
+    });
+    place(); addEventListener('resize', place);
+  }
   function loadCaseDoc(page) {
     if (page._doc) return page._doc;
     const holder = page.querySelector('.csDocHolder');
-    page._doc = Promise.all([fetch(holder.dataset.src).then(r => r.text()), document.fonts.load('40px "Gandhar Hand Thin"').catch(() => {})]).then(([t]) => {
+    const mob = isMob() && holder.dataset.srcMob && MOB_DOCS[page.id]; page._mob = mob || null;
+    page._doc = Promise.all([fetch(mob ? holder.dataset.srcMob : holder.dataset.src).then(r => r.text()), document.fonts.load('40px "Gandhar Hand Thin"').catch(() => {})]).then(([t]) => {
       t = t.replace(/<image\b([^>]*?) href="([^"]+)"/g, '<image$1 data-href="$2"');   // nothing loads yet
       holder.innerHTML = t;
+      if (mob) { holder.classList.add('csMobDoc'); holder.style.setProperty('--cut', mob.cut); }
       const svg = holder.querySelector('svg'), imgs = {}, lazy = [];
-      handLetter(svg, page.id);
+      handLetter(svg, mob ? page.id + 'Mob' : page.id);
       // the design's white page behind everything goes, so the page's grain shows through round the pictures
       // (and the white cards, which are the paper too)
       svg.querySelectorAll('rect[fill="white"]').forEach(r => {
@@ -3223,11 +3338,12 @@
       });
       page._lazy = lazy;
       lazyLoad(page);
-      (CASE_TWEAKS[page.id] || []).forEach(t => tweak(svg, t));
-      (CASE_LINES[page.id] || []).forEach(l => dottedLine(svg, l));
+      if (!mob) (CASE_TWEAKS[page.id] || []).forEach(t => tweak(svg, t));
+      if (!mob) (CASE_LINES[page.id] || []).forEach(l => dottedLine(svg, l));
       sketchFill(svg);
       backdropGrain(svg, page.id);
-      if (MOB_CASE && isMob()) mobileCase(page, svg);              // (off: phones show the design exactly as on desktop, scaled)
+      if (mob) { mobHide(svg, mob.hide); mobStrips(page, holder, mob); docParallax(page, svg); }
+      else if (MOB_CASE && isMob()) mobileCase(page, svg);              // (off: phones show the design exactly as on desktop, scaled)
       else { bodyText(svg); docParallax(page, svg); }
     }).catch(e => console.error(e));
     return page._doc;
@@ -3275,6 +3391,21 @@
       2937: 'VESSEL DECK MANAGEMENT', 3443: 'REPORTS', 3448: 'THREE ROUNDS WITH MY MANAGER', 3451: 'ROUND 1 · FULL PASS', 3455: 'ROUND 2 · SCOPE CUT',
       3459: 'ROUND 3 · PLAIN WORDS', 3461: '“A system can be consistent in\nstructure and still fail at the\nlevel of words.”', 3462: 'TAKEAWAYS' }
   };
+  // (the phone design's headings, by their index there)
+  HAND_TEXT.caseMusicMob = {
+      1: 'PROJECT', 3: 'ROLE', 5: 'DURATION', 7: 'OVERVIEW', 9: 'DON’T JUST HEAR\nIT, FEEL THE MUSIC !', 10: 'INTENT', 189: 'PICTURE THIS !',
+      198: '“Bas beat pe\nnaacho!” ... but\nwhich beat?', 254: 'THAT’S THE\nPROBLEM', 267: 'BUT WHAT IF\nYOU CAN’T ?', 271: '63 M+',
+      274: 'A SLIGHTLY UNUSUAL QUESTION', 276: 'CONVERSATIONS...', 299: 'Sneha | 21 years', 334: 'Aarav | 25 years',
+      350: 'WHAT THE RESEARCH SAID', 352: 'Rhythm wins over pitch.\nBeats are easy, melody\ngets lost.',
+      353: 'Hearing aids help\nspeech, not songs.', 354: 'One size fits nobody.\nEvery hearing level\nneeds its own settings.',
+      355: 'Music here is culture.\nMissing it means missing\nthe room.', 356: 'People want to learn:\n“What is a chorus?”',
+      357: 'COMPETITORS', 367: 'PRETTY EXPENSIVE... OR PRETTY\nNICHE...', 388: 'IDEA !', 403: 'SEE IT', 413: 'FEEL IT', 434: 'GET IT',
+      436: 'FEEL THROUGH !', 448: 'THE DESIGN CHALLENGE', 452: '→ TOUCH', 457: '→ WORDS ON SCREEN', 462: '→ COLOR', 467: '→ SETTINGS',
+      470: 'THE FINAL\nSHOWDOWN!', 471: 'Brace yourselves for\nmusic you can feel!', 653: 'HOME — EVERYTHING ON ONE TAP',
+      816: 'SYNCED LYRICS — EVERY WORD, RIGHT\nON TIME', 979: 'Smart haptics — feel the\nsong in your pocket',
+      1165: 'Beat visualiser — see the energy', 1367: 'Learn music — finally, “what\nis a chorus?”',
+      1508: 'Song structure map — a GPS for\nthe song', 1512: 'DID IT\nACTUALLY\nWORK?', 1522: 'A/B TESTING — TWO VERSIONS\nONE WINNER',
+      1528: 'SUS — IS IT EASY TO USE', 1529: '{ 69.5 } /100', 1531: 'THE LAST NOTE !', 1596: 'What it taught me' };
   function handLetter(svg, id) {
     const map = HAND_TEXT[id]; if (!map) return;
     const NS = 'http://www.w3.org/2000/svg', paths = [...svg.querySelectorAll('path')], jobs = [];
@@ -3402,12 +3533,12 @@
   // phone frames (tall, ~2:1) and laptop frames (#343434 / #292B2C), a little enlarged: no paper effects inside
   function deviceBoxes(svg) {
     if (svg._devices) return svg._devices;
-    const out = [];
+    const out = [], lo = svg.viewBox.baseVal && svg.viewBox.baseVal.width < 1000 ? 180 : 240;   // (the phone design's phones are narrower)
     svg.querySelectorAll('rect, path').forEach(el => {
       if (el.closest('defs, clipPath, mask, pattern')) return;
       let b; try { b = el.getBBox(); } catch (e) { return; }
       const r = b.height / b.width, f = el.getAttribute('fill');
-      if ((b.width > 240 && b.width < 480 && r > 1.75 && r < 2.4) || (/^#(343434|292B2C)$/i.test(f) && b.width > 600))
+      if ((b.width > lo && b.width < 480 && r > 1.75 && r < 2.4) || (/^#(343434|292B2C)$/i.test(f) && b.width > 600))
         out.push({ x0: b.x - 20, y0: b.y - 20, x1: b.x + b.width + 20, y1: b.y + b.height + 20 });
     });
     return (svg._devices = out);
@@ -3498,7 +3629,7 @@
     if (caseId === 'caseMusic') svg.querySelectorAll('rect[fill="#F6F6F6"]').forEach(el => {   // the square panel behind each phone screen
       if (el.closest('defs, pattern, clipPath, mask')) return;
       let b; try { b = el.getBBox(); } catch (e) { return; }
-      if (b.width > 700 && b.height > 700) orangePaper(el, orange, pat);
+      if (b.width > 500 && b.height > 500) orangePaper(el, orange, pat);
     });
     // cards: no outline (light fills with a stroke, card-sized, outside the devices)
     svg.querySelectorAll('rect, path').forEach(el => {
@@ -3642,8 +3773,8 @@
   // the page, so a picture arriving mid-glide never stalls the scroll
   function lazyLoad(page) {
     if (!page._lazy || !page._lazy.length) return;
-    const holder = page.querySelector('.csDocHolder'), k = holder.clientWidth * 1250 / 1400 / 1920;
-    const top = (page.scrollTop - holder.offsetTop) / k + CUT, h = page.clientHeight / k;
+    const holder = page.querySelector('.csDocHolder'), m = page._mob, k = m ? holder.clientWidth / m.w : holder.clientWidth * 1250 / 1400 / 1920;
+    const top = (page.scrollTop - holder.offsetTop) / k + (m ? m.cut : CUT), h = page.clientHeight / k;
     page._lazy = page._lazy.filter(L => {
       if (L.y1 < top - 2 * h || L.y0 > top + 4 * h) return true;   // not yet
       const href = L.im.getAttribute('data-href');
