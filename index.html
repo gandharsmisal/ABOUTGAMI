@@ -932,7 +932,7 @@
   <div class="csHero">
     <div class="csPicBox">
       <div class="csPic">
-        <img class="csHeroImg" src="assets/work-music.png" alt="An ear, with sound drawn as rings and waves round it" width="860" height="535">
+        <img class="csHeroImg" crossorigin="anonymous" src="assets/work-music.png" alt="An ear, with sound drawn as rings and waves round it" width="860" height="535">
         <canvas class="csSand" aria-hidden="true"></canvas>
       </div>
       <h1 class="csTitle" style="--cs: #F08A2C"><span>Fankr : Music</span><span>for every ear</span></h1>
@@ -966,7 +966,7 @@
   <div class="csHero">
     <div class="csPicBox">
       <div class="csPic">
-        <img class="csHeroImg" src="assets/work-cybersmart.png" alt="A laptop showing the Cybersmart inspection dashboard with a container ship" width="1076" height="585">
+        <img class="csHeroImg" crossorigin="anonymous" src="assets/work-cybersmart.png" alt="A laptop showing the Cybersmart inspection dashboard with a container ship" width="1076" height="585">
         <canvas class="csSand" aria-hidden="true"></canvas>
       </div>
       <h1 class="csTitle csTitleLeft" style="--cs: #1F9C7F; --title-x: 326; --title-fs: 69"><span>Cybersmart : Ship</span><span>shape dashboards</span></h1>
@@ -998,7 +998,7 @@
   <div class="csHero">
     <div class="csPicBox">
       <div class="csPic">
-        <img class="csHeroImg" src="assets/work-hobby.png" alt="Two people shaping clay together on a potter's wheel" width="1076" height="584">
+        <img class="csHeroImg" crossorigin="anonymous" src="assets/work-hobby.png" alt="Two people shaping clay together on a potter's wheel" width="1076" height="584">
         <canvas class="csSand" aria-hidden="true"></canvas>
       </div>
       <h1 class="csTitle csTitleLeft" style="--cs: #141414"><span>HobbyHop : Hobbies</span><span style="color: #1A1A3E">are better together</span></h1>
@@ -2245,7 +2245,7 @@
   function loadWork() {
     if (work.loading) return work.loading;
     work.loading = Promise.all(WORK.map((p, i) => new Promise(res => {
-      const img = new Image();
+      const img = new Image(); img.crossOrigin = 'anonymous';   // (read back for the sand: hosts that serve pictures from another address allow it)
       img.onload = () => { p.image = img; buildProject(p, i); res(); };
       img.onerror = res;
       img.src = p.img;
