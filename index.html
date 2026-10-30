@@ -125,7 +125,7 @@
   /* HobbyHop's title as its design has it: left-aligned a fifth of the way in, large, the first line just inside the
      picture's bottom edge and the second just below it (1 design px = the picture's width / 1400) */
   .csTitle.csTitleLeft { left: calc(100% * var(--title-x, 293) / 1400); transform: translateY(-1.45em); align-items: flex-start; gap: 0;
-    font-size: calc(100vw * 1250 / 1920 * var(--title-fs, 66) / 1400); line-height: calc(88 / 66); letter-spacing: 0.005em; }
+    font-size: clamp(18px, 2vw, 40px); line-height: 1.25; letter-spacing: 0.12em; }   /* (the size of Fankr's) */
   /* the rest of the design (1920 x 20799) at the page's width from y 1100 on, its scale and margins as drawn */
   /* its 1400 wide text column narrowed to 1250: the design is drawn at 1250/1400 of the page width, centred */
   .csDocHolder { position: relative; width: 100%; aspect-ratio: var(--doc-ratio); overflow: hidden; }   /* per case: (shown design height - 1100) * 1250 / 1400; an empty foot is left off */
@@ -350,8 +350,9 @@
   /* the stick figures and the case studies' sketches: one thin, dark pen line */
   #figSvg .hpen, #hero .hpen { stroke: #1C1C1E; stroke-width: 0.9px; }
   #heroFig, #heroNotes path, .csDocHolder .csSketch { filter: url(#graphite); }
-  .csDocHolder .csInkFill { stroke: #F4EFE3; stroke-width: 0.38px; vector-effect: non-scaling-stroke; filter: url(#graphite); }
-  .csDocHolder .csInk { stroke: #1C1C1E; stroke-width: 0.9px; vector-effect: non-scaling-stroke; }
+  .csDocHolder { --sketch: #7A7A74; }   /* the case studies' sketches: a soft grey pencil */
+  .csDocHolder .csInkFill { fill: var(--sketch); stroke: #F4EFE3; stroke-width: 0.38px; vector-effect: non-scaling-stroke; filter: url(#graphite); }
+  .csDocHolder .csInk { stroke: var(--sketch); stroke-width: 0.9px; vector-effect: non-scaling-stroke; }
   html.mob-doc .csDocHolder .csInk { stroke-width: 0.65px; }   /* phones: every sketch line a little thinner, all the same */
   .abResume { cursor: zoom-in; }
   .abResume { mix-blend-mode: multiply; } .abResume img { display: block; }   /* the page's own paper shows through: no separate sheet */
@@ -3352,7 +3353,7 @@
     caseMusic: { w: 390, cut: 350,
       strips: [{ src: 'assets/fankr/sketch-picture.svg', y: 2484, h0: 133, w: 1390, h: 370 }, { src: 'assets/fankr/sketch-journey.svg', y: 16518, h0: 112, w: 1412, h: 404 }] },
     caseHobby: { w: 390, cut: 400, hand: { small: true },
-      strips: [{ src: 'assets/p2p/sketch-imagine.svg', y: 2172, h0: 206, w: 1380, h: 380 }, { src: 'assets/p2p/sketch-journey.svg', y: 6870, h0: 270, w: 1320, h: 550 },
+      strips: [{ src: 'assets/p2p/sketch-imagine.svg', y: 2172, h0: 206, w: 1380, h: 380 }, { src: 'assets/p2p/sketch-journey.svg', y: 6870, h0: 270, w: 1320, h: 600 },
         { src: 'assets/p2p/sketch-blueprint.svg', y: 7756, h0: 2884, w: 1420, h: 580 }] },
     caseCyber: { w: 390, cut: 360, strips: [], hand: { small: true } }
   };
@@ -3645,7 +3646,7 @@
       const px = g.getImageData(0, 0, W, H).data; let n = 0; for (let i = 3; i < px.length; i += 4) if (px[i] > 127) n++;
       const m = el.getScreenCTM(), t = 2 * (n / (S * S)) / L * Math.hypot(m.a, m.b);
       if (t > 2.6) return;                                          // a solid shape, not a line
-      if (t < INK_PX) { el.style.stroke = '#1C1C1E'; el.style.strokeWidth = (INK_PX - t).toFixed(2) + 'px'; }
+      if (t < INK_PX) { el.style.stroke = 'var(--sketch)'; el.style.strokeWidth = (INK_PX - t).toFixed(2) + 'px'; }
       // thicker ones are thinned, but only big shapes (thinning erased small rings: heads, gears)
       else if (t > INK_PX + 0.15 && Math.min(b.width, b.height) * Math.hypot(m.a, m.b) > 30) { el.style.stroke = '#F4EFE3'; el.style.strokeWidth = Math.min(t - INK_PX, t * 0.4).toFixed(2) + 'px'; }
     });
@@ -3920,6 +3921,9 @@
     caseHobby: [
       { area: [600, 6540, 1920, 6960], dx: -60 },                  // "Listen first" table ran 60 past the column
       { area: [900, 2080, 1920, 2320], dx: -10 },                  // the Intent block, 8 past it
+      // journey: the last figure stood with its head under "made something together": it and its label move down
+      { area: [1385, 11285, 1445, 11515], dy: 48 },
+      { area: [1310, 11515, 1345, 11560], dy: 48 },
     ],
     caseCyber: [
       // "Deck cards with plan previews" sat on top of the "Vessel deck management" heading: to the notes column
