@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="intro-locked">
+<html lang="en" class="cs-loading intro-locked">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -24,6 +24,9 @@
   }
   html, body { margin: 0; background: var(--ink); }
   body { overflow-x: hidden; }
+  /* no blue flash on taps (phones): every button, link and tappable thing */
+  * { -webkit-tap-highlight-color: transparent; }
+  button:focus:not(:focus-visible), a:focus:not(:focus-visible), [tabindex]:focus:not(:focus-visible) { outline: none; }
   html.lenis, html.lenis body { height: auto; }
   .lenis.lenis-smooth { scroll-behavior: auto !important; }
 
@@ -143,6 +146,7 @@
   #csLoader path { fill: none; stroke: #2B2925; stroke-width: 1.3px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; filter: url(#graphite); }
   #csLoadPct { position: absolute; font: 400 20px "Gandhar Hand Thin", "Gandhar Hand", var(--hand); color: #2B2925; }
   html.cs-loading #csLoader { display: grid; }
+  html.cs-loading.intro-locked #menuBtn, html.cs-loading.intro-locked #menu { visibility: hidden; }   /* (the first visit's loading: nothing over it) */
   html.in-case #caseClose { display: inline-flex; }
   @media (max-width: 600px) { #caseClose { right: 14px; top: calc(env(safe-area-inset-top, 0px) + 10px); } }
   .csDocHolder svg { display: block; width: calc(100% * 1250 / 1400); height: auto;
@@ -342,6 +346,7 @@
   #heroFig, #heroNotes path, .csDocHolder .csSketch { filter: url(#graphite); }
   .csDocHolder .csInkFill { stroke: #F4EFE3; stroke-width: 0.38px; vector-effect: non-scaling-stroke; filter: url(#graphite); }
   .csDocHolder .csInk { stroke: #1C1C1E; stroke-width: 0.9px; vector-effect: non-scaling-stroke; }
+  html.mob-doc .csDocHolder .csInk { stroke-width: 0.65px; }   /* phones: every sketch line a little thinner, all the same */
   .abResume { cursor: zoom-in; }
   .abResume { mix-blend-mode: multiply; } .abResume img { display: block; }   /* the page's own paper shows through: no separate sheet */
   /* the resume, held up close to read */
@@ -1813,6 +1818,24 @@
   lockIntro();
   atDoor();
   addEventListener('load', () => setTimeout(atDoor, 30));
+  // the first visit's loading screen (the case studies' scribble): until the door, the figure and the rest have come in
+  {
+    const html = document.documentElement, path = $('csLoadPath'), pct = $('csLoadPct'), L = path.getTotalLength(), t0 = performance.now();
+    let shown = 0, ready = document.readyState === 'complete';
+    addEventListener('load', () => { ready = true; });
+    path.style.strokeDasharray = L;
+    const tick = now => {
+      const imgs = [...document.images], got = imgs.length ? imgs.filter(i => i.complete).length / imgs.length : 0;
+      const want = ready ? 100 : Math.min(95, Math.max(got * 95, 92 * (1 - Math.exp(-(now - t0) / 3000))));
+      shown += (want - shown) * 0.12; pct.textContent = Math.round(shown);
+      path.style.strokeDashoffset = L * (1 - ((now - t0) / 1600 % 1));
+      if (ready && shown > 99) { pct.textContent = 100;
+        gsap.to('#csLoader', { autoAlpha: 0, duration: 0.35, onComplete: () => { html.classList.remove('cs-loading'); gsap.set('#csLoader', { clearProps: 'all' }); } });
+        return; }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
 
   /* ---------- a silent jump to a point of the intro timeline (unlocks the intro) ---------- */
   function goTo(t) {
@@ -3586,7 +3609,7 @@
   }
   // Every sketch line the same: strokes are drawn at 0.9px already; lines drawn as filled outlines are thickened or
   // thinned to 0.9px on screen (their thickness: twice their area over their outline's length). Solid shapes stay.
-  const INK_PX = 0.9;
+  const INK_PX = 0.65;
   function inkLines(svg) {
     const cv = document.createElement('canvas'), g = cv.getContext('2d');
     svg.querySelectorAll('.csInkFill').forEach(el => {
@@ -3605,7 +3628,8 @@
       const m = el.getScreenCTM(), t = 2 * (n / (S * S)) / L * Math.hypot(m.a, m.b);
       if (t > 2.6) return;                                          // a solid shape, not a line
       if (t < INK_PX) { el.style.stroke = '#1C1C1E'; el.style.strokeWidth = (INK_PX - t).toFixed(2) + 'px'; }
-      // (never thinned: thinning ate the thin rings - heads, gears - and outlines)
+      // thicker ones are thinned, but only big shapes (thinning erased small rings: heads, gears)
+      else if (t > INK_PX + 0.15 && Math.min(b.width, b.height) * Math.hypot(m.a, m.b) > 30) { el.style.stroke = '#F4EFE3'; el.style.strokeWidth = Math.min(t - INK_PX, t * 0.4).toFixed(2) + 'px'; }
     });
   }
   function mobStrips(page, holder, mob, shiftAt) {
