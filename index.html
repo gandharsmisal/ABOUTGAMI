@@ -1154,14 +1154,14 @@
     </filter>
     <!-- crayon for thin lines: the same waxy, grainy edge, but it only thins the line in patches (never breaks it) -->
     <filter id="crayonLine" x="-10%" y="-10%" width="120%" height="120%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" seed="8" result="n"></feTurbulence>
+      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="2" seed="8" result="n"></feTurbulence>
       <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2.2 0 0 0 1.75" result="wax"></feColorMatrix>
       <feComposite in="SourceGraphic" in2="wax" operator="in" result="c"></feComposite>
       <feDisplacementMap in="c" in2="n" scale="2.2" xChannelSelector="G" yChannelSelector="B"></feDisplacementMap>
     </filter>
     <!-- crayon: coarser, waxier gaps -->
     <filter id="crayon" x="-5%" y="-5%" width="110%" height="110%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.32" numOctaves="3" seed="8" result="n"></feTurbulence>
+      <feTurbulence type="fractalNoise" baseFrequency="0.32" numOctaves="2" seed="8" result="n"></feTurbulence>
       <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -1.5 0 0 0 1.85" result="wax"></feColorMatrix>
       <feComposite in="SourceGraphic" in2="wax" operator="in" result="c"></feComposite>
       <feDisplacementMap in="c" in2="n" scale="2.4" xChannelSelector="G" yChannelSelector="B"></feDisplacementMap>
@@ -1793,7 +1793,7 @@
     addEventListener('touchmove', lowerHand, { passive: true });
     addEventListener('keydown', e => { if (/^(Arrow(Up|Down)|Page(Up|Down))$/.test(e.key)) lowerHand(); });
     gsap.ticker.add((time, dt) => {                                // the fidget runs on the clock
-      if (F.idle <= 0 && F.down <= 0) return;
+      if ((F.idle <= 0 && F.down <= 0) || caseOpen) return;            // (paused under a case study)
       F.t += dt / 1000;
       figFrame();
     });
@@ -2298,7 +2298,7 @@
     spreadTw = gsap.fromTo(W, { spreadIn: 0 }, { spreadIn: SAND_FULL, duration: 1.8, ease: 'power1.out' });
   }
   gsap.ticker.add((time, dt) => {
-    if (!work.open) return;
+    if (!work.open || caseOpen) return;                         // (paused under a case study)
     clock.t += dt / 1000;
     if ((clock.t * 20 | 0) % 2 === 0) clock.spray = ((Math.random() * MW * MH) | 0);   // new flecks land ~10x a second
     if (!W.trans) {
@@ -2800,7 +2800,7 @@
     gsap.to(cam, { lift: 0, duration: 0.8, ease: 'power2.inOut', overwrite: true });
   }
   gsap.ticker.add((time, dt) => {
-    if (!heroState.shown) return;
+    if (!heroState.shown || caseOpen || work.open || about.open || contact.open) return;   // (covered by another page: nothing to redraw)
     const f = Math.min(3, dt / 16.67);                                      // frame-rate independent easing
     cam.t = time;
     const arrived = Math.abs(cam.target - cam.pos) < 0.04 && Object.entries(cam.lag).every(([k, v]) => k === 'desk' || Math.abs(cam.target - v) < 0.06);   // (the notes don't wait for the side objects)
