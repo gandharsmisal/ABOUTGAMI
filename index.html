@@ -477,8 +477,9 @@
     font: 400 20px/1 "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); text-transform: lowercase; letter-spacing: 0.04em;
     background-color: #EAE0C5; background-image: var(--mottle), var(--grain); background-size: 120px, 180px; -webkit-tap-highlight-color: transparent; }
   .mPill .pill-icon { width: 22px; height: 22px; flex: none; overflow: visible; }
-  @media (max-width: 600px) { .mPill { font-family: "Gandhar Hand", "Indie Flower", var(--hand); -webkit-text-stroke: 0.5px currentColor; } .mPill .pill-icon .ink { stroke-width: 2.3px; }   /* phones: the thicker hand, heavier */
-    #caseClose, #drawerClose { font-family: "Gandhar Hand", "Indie Flower", var(--hand); -webkit-text-stroke: 0.5px currentColor; } #caseClose path, #drawerClose path { stroke-width: 2.9px; } }
+  @media (max-width: 600px) { .mPill { font-family: "Gandhar Hand", "Indie Flower", var(--hand); -webkit-text-stroke: 0.85px currentColor; } .mPill .pill-icon .ink { stroke-width: 2.8px; }   /* phones: the thicker hand, heavier */
+    .mPill .label, .mPill .pill-icon { filter: url(#crayon); }   /* (the menu in crayon) */
+    html #caseClose, html #drawerClose { font-family: "Gandhar Hand", "Indie Flower", var(--hand); -webkit-text-stroke: 0.5px currentColor; } html #caseClose path, html #drawerClose path { stroke-width: 2.9px; } }
   .mPill .pill-icon .ink { fill: none; stroke: currentColor; stroke-width: 1.4px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
   .mPill .pill-icon .dot { fill: currentColor; }
   @media (max-width: 600px) {
@@ -2773,13 +2774,13 @@
     }
     for (const id in PROPS) {
       const [x, y, r, s] = P[id], c = PROPS[id];
-      $(id).setAttribute('transform', `translate(${x} ${y}) rotate(${r}) scale(${s * (isMobMain() ? 1.1 : 1)}) translate(${-c[0]} ${-c[1]})`);   // (phones: 10% bigger)
+      $(id).setAttribute('transform', `translate(${x} ${y}) rotate(${r}) scale(${s * (isMobMain() ? 1.155 : 1)}) translate(${-c[0]} ${-c[1]})`);   // (phones: 15.5% bigger)
     }
     for (const n in DESK) {
       const p = cam.lag.desk, [x0, y0, r] = between(p, i => { const [x, y, rr] = DESK[n][i];
         return [x + (x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0), y + (y < 150 ? -cam.ey : y > 930 ? cam.ey : 0), rr]; });
       const frac = p - Math.floor(p), spin = SPIN[n] * 360 * smooth(frac);   // one whole turn per move (so it lands at the same angle), slow at the start and the end
-      $('dk-' + n).setAttribute('transform', `translate(${x0} ${y0}) rotate(${r + spin})${isMobMain() ? ' scale(1.21)' : ''}`);
+      $('dk-' + n).setAttribute('transform', `translate(${x0} ${y0}) rotate(${r + spin})${isMobMain() ? ' scale(1.27)' : ''}`);
     }
     $('heroLineMove').setAttribute('transform', `translate(0 ${between(cam.lag.line, i => [CAM[i].ly])[0]})`);
     const step = mod(Math.round(cam.pos)), near = Math.max(0, 1 - Math.abs(cam.pos - Math.round(cam.pos)) * 5);
