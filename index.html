@@ -2834,9 +2834,15 @@
      slowly; a big, quick scroll builds up (each notch counts for more the faster they come) and carries them on further. */
   const heat = { v: 0, t: 0 };
   const mainActive = () => heroState.shown && intro.entered && !work.open && !about.open && !contact.open && !caseOpen;
-  Observer.create({ target: window, type: 'wheel,touch', tolerance: 0, onChangeY: self => {
+  // a finger: one flick (any swipe past a few pixels) is one whole move to the next object
+  const flick = { sum: 0, done: false };
+  Observer.create({ target: window, type: 'wheel,touch', tolerance: 0, onPress: () => { flick.sum = 0; flick.done = false; }, onChangeY: self => {
     if (!mainActive()) return;
     const now = performance.now(), touch = self.event && self.event.type.startsWith('touch');
+    if (touch) {
+      flick.sum += self.deltaY; if (flick.done || Math.abs(flick.sum) < 18 || cam.catching) return;
+      flick.done = true; cam.absorb = false; cam.vel = 0; cam.lastIn = now; advance(flick.sum < 0 ? 1 : -1); return;
+    }
     let d = touch ? -self.deltaY / 900 : self.deltaY / 1500;
     heat.v = heat.v * Math.exp(-(now - heat.t) / 260) + Math.min(1, Math.abs(d) * 15); heat.t = now;   // ~1 per notch, fades in a quarter second
     const gain = 0.35 + Math.min(1.9, heat.v * 0.45);                         // one notch ~0.8x, a fast run of notches up to ~2.2x
