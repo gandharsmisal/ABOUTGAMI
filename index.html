@@ -2845,7 +2845,7 @@
     }
     let d = touch ? -self.deltaY / 900 : self.deltaY / 1500;
     heat.v = heat.v * Math.exp(-(now - heat.t) / 260) + Math.min(1, Math.abs(d) * 15); heat.t = now;   // ~1 per notch, fades in a quarter second
-    const gain = 0.35 + Math.min(1.9, heat.v * 0.45);                         // one notch ~0.8x, a fast run of notches up to ~2.2x
+    const gain = Math.min(7, 0.35 + 0.45 * Math.min(1, heat.v) + 1.5 * Math.max(0, heat.v - 1));   // one notch ~0.8x (as before); a quick run of notches builds up fast: 3-4 notches a move
     d *= gain;
     if (cam.catching) return;                                                  // gliding in: scrolling waits
     if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = now; return; }       // the one scroll of rest on an object
