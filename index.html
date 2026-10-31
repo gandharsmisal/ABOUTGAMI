@@ -4297,7 +4297,7 @@
     const l = page._lenis = new Lenis({ wrapper: page, content: page.querySelector('.csInner'),
       lerp: CASE_LERP, smoothWheel: true, wheelMultiplier: CASE_WHEEL,
       // a finger gets the same soft glide: the swipe sets where to go, the page eases there and keeps drifting after
-      syncTouch: true, syncTouchLerp: 0.06, touchInertiaMultiplier: 28, touchMultiplier: 1.2 });
+      syncTouch: true, syncTouchLerp: 0.06, touchInertiaMultiplier: 38, touchMultiplier: 2 });   // (each swipe carries further, like the wheel)
     l.stop();                                                     // runs only while the page is open
     l.on('scroll', ScrollTrigger.update);
     gsap.ticker.add(time => l.raf(time * 1000));
