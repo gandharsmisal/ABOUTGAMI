@@ -4289,7 +4289,7 @@
   // Smooth scrolling inside the case study: each case page has its own Lenis (the page is its wrapper, .csInner its
   // content), driven by the GSAP ticker and telling ScrollTrigger on every scroll, so the parallax below stays in step.
   // Keys scroll natively; Lenis picks up from there. Touch glides like the wheel does.
-  const CASE_LERP = 0.075, CASE_WHEEL = 1.25;                 // lower lerp = longer, softer glide (0.075: it follows the wheel closely and settles quickly - light, not floaty)
+  const CASE_LERP = 0.06, CASE_WHEEL = 2.5;                   // lower lerp = longer, softer glide (0.06: a smooth glide that still settles quickly; each notch covers a lot)
   const SMOOTH = window.Lenis && !matchMedia('(prefers-reduced-motion: reduce)').matches;
   Object.values(CASES).forEach(page => {
     page.addEventListener('scroll', () => lazyLoad(page), { passive: true });
