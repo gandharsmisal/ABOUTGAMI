@@ -11,7 +11,7 @@
   :root {
     --ink: #000;
     --line: #fff;
-    --paper: #F4EFE3;
+    --paper: #F5F1E7;
     --pen: #141414;
     --muted: #8d8d8d;
     --muted-2: #a2a2a2;
@@ -370,7 +370,7 @@
   /* every sketch line in crayon (same thickness as before) */
   #heroFig, #heroNotes path, .hnMobArrow, #hnLaptop path, #hnBook path, #hnMug path, .csDocHolder .csSketch, .abPage .doodle { filter: url(#crayonLine); }
   .csDocHolder { --sketch: #000; }   /* the case studies' sketches: a soft grey pencil */
-  .csDocHolder .csInkFill { fill: var(--sketch); stroke: #F4EFE3; stroke-width: 0.38px; vector-effect: non-scaling-stroke; filter: url(#crayonLine); }
+  .csDocHolder .csInkFill { fill: var(--sketch); stroke: #F5F1E7; stroke-width: 0.38px; vector-effect: non-scaling-stroke; filter: url(#crayonLine); }
   .csDocHolder .csInk { stroke: var(--sketch); stroke-width: 1.2px; vector-effect: non-scaling-stroke; }
   html.mob-doc .csDocHolder .csInk { stroke-width: 0.9px; }   /* phones: every sketch line a little thinner, all the same */
   .abResume { cursor: zoom-in; }
@@ -723,7 +723,7 @@
     <path id="arm" class="ln" d="M 0 0" style="visibility:hidden"></path>
 
     <!-- light: the room turns white -->
-    <rect id="whiteout" x="-2000" y="-2000" width="6000" height="6000" fill="#F4EFE3" opacity="0"></rect>
+    <rect id="whiteout" x="-2000" y="-2000" width="6000" height="6000" fill="#F5F1E7" opacity="0"></rect>
   </svg>
 </section>
 
@@ -960,7 +960,7 @@
       <feMorphology in="SourceAlpha" operator="dilate" radius="11" result="grown"></feMorphology>
       <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="4" result="tear"></feTurbulence>
       <feDisplacementMap in="grown" in2="tear" scale="9" xChannelSelector="R" yChannelSelector="G" result="rough"></feDisplacementMap>
-      <feFlood flood-color="#F4EFE3"></feFlood><feComposite in2="rough" operator="in" result="paper"></feComposite>
+      <feFlood flood-color="#F5F1E7"></feFlood><feComposite in2="rough" operator="in" result="paper"></feComposite>
       <feMerge><feMergeNode in="paper"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
     </filter></svg>
     <!-- cut out round its edge like a paper scrap, grained like the rest of the site, taped down -->
@@ -3724,7 +3724,7 @@
       if (t > 2.6) return;                                          // a solid shape, not a line
       if (t < INK_PX) { el.style.stroke = 'var(--sketch)'; el.style.strokeWidth = (INK_PX - t).toFixed(2) + 'px'; }
       // thicker ones are thinned, but only big shapes (thinning erased small rings: heads, gears)
-      else if (t > INK_PX + 0.15 && Math.min(b.width, b.height) * Math.hypot(m.a, m.b) > 30) { el.style.stroke = '#F4EFE3'; el.style.strokeWidth = Math.min(t - INK_PX, t * 0.4).toFixed(2) + 'px'; }
+      else if (t > INK_PX + 0.15 && Math.min(b.width, b.height) * Math.hypot(m.a, m.b) > 30) { el.style.stroke = '#F5F1E7'; el.style.strokeWidth = Math.min(t - INK_PX, t * 0.4).toFixed(2) + 'px'; }
     });
   }
   function mobStrips(page, holder, mob, shiftAt) {
