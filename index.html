@@ -384,7 +384,7 @@
   .csTitle { filter: url(#crayon); }
   .wipPaper h2 { filter: url(#pencil); }
   /* the menu is written in a fine pen: solid ink, thin lines */
-  #menu .label { font-family: "Gandhar Hand", "Indie Flower", var(--hand); font-size: 22px; filter: url(#crayon); -webkit-text-stroke: 0.3px currentColor; }   /* (a little heavier) */
+  #menu .label { font-family: "Gandhar Hand", "Indie Flower", var(--hand); font-size: 22px; filter: url(#crayon); -webkit-text-stroke: 0.15px currentColor; }   /* (a touch heavier) */
   #menu .pill-icon { filter: url(#crayon); }   /* written in crayon, like the headings */
   .abMess { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
   .abMess text { font-family: "Gandhar Hand", "Indie Flower", var(--hand); fill: #48484C; }
@@ -512,7 +512,7 @@
   #menu .label { position: relative; }
   #menu .pill-icon { width: 28px; height: 28px; flex: none; overflow: visible; }
   /* thin pen lines, like the logo and the drawings */
-  #menu .pill-icon .ink { fill: none; stroke: currentColor; stroke-width: 1.5px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  #menu .pill-icon .ink { fill: none; stroke: currentColor; stroke-width: 1.35px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
   #menu .pill-icon .dot { fill: currentColor; transition: transform 0.12s ease-out; }
   /* hover: a hand-drawn line scribbles itself in under the word, and rubs out again when the pointer leaves */
   #menu .scribble { position: absolute; left: -3px; right: -3px; top: calc(100% + 4px); width: calc(100% + 6px); height: 7px; overflow: visible; pointer-events: none; }
