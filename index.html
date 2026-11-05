@@ -370,7 +370,7 @@
   #figSvg .hpen, #hero .hpen { stroke: #000; stroke-width: 1.2px; }
   @media (max-width: 600px) { #figSvg .hpen, #hero .hpen, .abPage .doodle path { stroke-width: 0.9px; } }   /* (phones: 0.9px) */
   /* every sketch line in crayon (same thickness as before) */
-  #heroFig, #heroNotes path, .hnMobArrow, #hnLaptop path, #hnBook path, #hnMug path, .csDocHolder .csSketch, .abPage .doodle { filter: url(#crayonLine); }
+  #heroFig .hpen, #heroNotes path, .hnMobArrow, #hnLaptop path, #hnBook path, #hnMug path, .csDocHolder .csSketch, .abPage .doodle { filter: url(#crayonLine); }
   .csDocHolder { --sketch: #000; }   /* the case studies' sketches: a soft grey pencil */
   .csDocHolder .csInkFill { fill: var(--sketch); stroke: #F5F1E6; stroke-width: 0.38px; vector-effect: non-scaling-stroke; filter: url(#crayonLine); }
   .csDocHolder .csInk { stroke: var(--sketch); stroke-width: 1.2px; vector-effect: non-scaling-stroke; }
