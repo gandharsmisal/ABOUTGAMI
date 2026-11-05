@@ -78,7 +78,7 @@
   .case { scrollbar-width: none; }
   /* in a case study the grain lies on the paper only, under the text and pictures (the app screens stay clean) */
   html.in-case #grain { display: none; }
-  .case::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.35;
+  .case::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.5;
     background-image: var(--grain); background-repeat: repeat; }
   .csInner { position: relative; z-index: 1; }
   /* "Next" at the bottom of a case study, centred: a plain label with a hand-drawn arrow; on hover the whole button
@@ -203,7 +203,7 @@
   #aboutPage { position: fixed; inset: 0; z-index: 38; overflow: hidden; visibility: hidden; color-scheme: light; }
   .abBg { position: absolute; inset: 0; background: rgba(60, 54, 42, 0.14); opacity: 0; }   /* the page a little darker while it is up */
   /* the site's grain on the background only, under the book and the phone */
-  .abBg::before, .ctBg::before { content: ""; position: absolute; inset: 0; opacity: 0.35; background-image: var(--grain); }
+  .abBg::before, .ctBg::before { content: ""; position: absolute; inset: 0; opacity: 0.5; background-image: var(--grain); }
   .abBg::after, .ctBg::after { content: ""; position: absolute; inset: 0; background-image: var(--mottle); }   /* the coarser mottle */
   .abStage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
   #abStage { filter: sepia(0.08) saturate(0.55) brightness(1.05) contrast(0.97); }
@@ -639,7 +639,7 @@
     pointer-events: none; mix-blend-mode: difference; color: #fff; }
   .clickfx path { fill: none; stroke: currentColor; stroke-width: 3.2px; stroke-linecap: round; vector-effect: non-scaling-stroke; filter: url(#crayonLine); }   /* thicker, in crayon */
   @media (max-width: 600px) { .clickfx path { stroke-width: 2.6px; } }   /* (phones as they were) */
-  #grain { position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: 0.35; background-repeat: repeat; }   /* (the paper's grain, softened) */   /* over the menu too */
+  #grain { position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: 0.5; background-repeat: repeat; }   /* (the paper's grain, softened) */   /* over the menu too */
 
   /* phones: the menu in a row beside the logo, like the desktop (no menu button) */
   @media (max-width: 600px) {
