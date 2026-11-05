@@ -44,11 +44,6 @@
 
   /* ---------- intro ---------- */
   #stage { position: absolute; inset: 0; background: var(--ink); }
-  /* the intro's black is the main page's sheet in the dark: the very same grain tile, size and place as the paper's
-     (#grain), only its specks turned light - so the texture matches exactly when the black gives way to the paper */
-  #stage::before { content: ""; position: fixed; inset: 0; pointer-events: none; background-image: var(--grain); background-repeat: repeat;
-    filter: invert(1); mix-blend-mode: screen; opacity: 1; }
-  #stage { isolation: isolate; } #stage::before { z-index: -1; }   /* (the specks under the drawing, over the black) */
   #scene { display: block; width: 100%; height: 100%; }
   #scene .ln {
     fill: none;
@@ -752,7 +747,7 @@
       <g id="hpPhone" data-open="contact"><image class="hprop" href="assets/photo/contact-phone.webp?v=7" x="532.8" y="494" width="86.4" height="180" style="filter: drop-shadow(0 2px 4px rgba(40, 32, 18, 0.2))"></image></g>
       <g id="hpCup" data-open="contact"><image class="hprop" href="assets/photo/hero-cup-dull.webp?v=2" x="462.3" y="424.3" width="178.3" height="159.3"></image></g>
       <g id="hpLaptop" data-open="work">
-        <image class="hprop" href="assets/photo/hero-laptop-screen.webp" x="772" y="335" width="374" height="360"></image>
+        <image class="hprop" href="assets/photo/hero-laptop.webp" x="772" y="335" width="374" height="360"></image>
         <!-- on the laptop step its screen shows the Work page -->
         <clipPath id="heroScreenClip"><rect x="795" y="372" width="327" height="198" rx="2"></rect></clipPath>
         <g id="heroScreen" clip-path="url(#heroScreenClip)" opacity="0">
