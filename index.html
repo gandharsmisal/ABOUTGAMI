@@ -2657,12 +2657,18 @@
     scissors:   [[1100, 1060, 20],[380, 1065, -25], [1880, 690, 30],  [1380, 1065, -15]],
     marker:     [[25, 400, 70],   [840, 55, -60],   [1320, 55, 100],  [1180, 55, -80]]
   }, SPIN = { paper: 1, camera: -1, sketchbook: 1, scissors: -1, marker: 1 };
-  // the side objects sit on the page's edges, half on and half off (each centred on its nearest edge)
+  // the side objects sit on the page's edges, half on and half off (each centred on its nearest edge), or as much
+  // inside as DESK_INSIDE says (first view; the paper as it was)
+  const DESK_INSIDE = isMobMain() ? {} : { marker: 0.6, scissors: 0.6, sketchbook: 0.6, camera: 0.6 };
   for (const n in DESK_DESK) DESK_DESK[n] = DESK_DESK[n].map(([x, y, r], step) => {
     if (step !== 0) return [x, y, r];                                        // (only the first view; the other steps as they were)
     const d = [x, 1920 - x, y, 1080 - y], e = d.indexOf(Math.min(...d));
     const im = document.querySelector(`#dk-${n} image`), h = +(im && im.getAttribute('height')) || 0, w = +(im && im.getAttribute('width')) || 0;
     const top = step === 0 ? -0.1 * h : -0.2 * h;                            // along the top: 60% off on the first view, 70% after
+    const f = DESK_INSIDE[n]; if (f !== undefined) {                       // set: this much of it inside the frame (its turned box)
+      const a = r * Math.PI / 180, bw = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a)), bh = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a));
+      return e === 0 ? [bw * (f - 0.5), y, r] : e === 1 ? [1920 - bw * (f - 0.5), y, r] : e === 2 ? [x, bh * (f - 0.5), r] : [x, 1080 - bh * (f - 0.5), r];
+    }
     return e === 0 ? [0, y, r] : e === 1 ? [1920, y, r] : e === 2 ? [x, top, r] : [x, 1080, r];   // sides and bottom: half off
   });
   let CAM = CAM_DESK, DESK = DESK_DESK;
