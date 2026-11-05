@@ -45,9 +45,9 @@
   /* ---------- intro ---------- */
   #stage { position: absolute; inset: 0; background: var(--ink); }
   /* the intro's black: the paper's specks, turned light, so it reads as a textured sheet (just visible) */
-  #stage::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: var(--grain); background-size: 180px;
-    filter: invert(1) brightness(1.8); mix-blend-mode: screen; opacity: 0.6; }
-  #scene { position: relative; z-index: 1; }
+  #stage::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: var(--grain), var(--grain); background-size: 300px, 190px; background-position: 0 0, 70px 40px;
+    filter: invert(1) brightness(3); mix-blend-mode: screen; opacity: 0.9; }   /* (bigger, brighter specks: they show on a phone too) */
+  #stage { isolation: isolate; } #stage::before { z-index: -1; }   /* (the specks under the drawing, over the black) */
   #scene { display: block; width: 100%; height: 100%; }
   #scene .ln {
     fill: none;
