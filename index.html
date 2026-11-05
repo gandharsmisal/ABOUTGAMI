@@ -2696,6 +2696,7 @@
     c.ly = (-365 + 1810 * 0.46) - 751;
     const D = { paper: [0.48, 0.05, -8], sketchbook: [0.06, 0.5, 14], camera: [0.95, 0.42, -18], scissors: [0.92, 0.62, 28], marker: [0.1, 0.36, 70] };
     for (const n in D) { const [x, y] = at(D[n][0], D[n][1]); DESK_MOB[n][0] = [x, y, D[n][2]]; }
+    { const [x, y] = at(0.96, 0.13); DESK_MOB.sketchbook[2] = [x, y, -14]; }   // (notebook stop: the sketchbook to the top right, clear of the cup and phone)
     CAM_MOB.forEach(s => { for (const k of ['hpLaptop', 'hpBook', 'hpPhone', 'hpCup']) s[k][3] = c[k][3]; });   // (no growing or shrinking as it scrolls)
     // the other steps, laid out for the upright screen: the one in focus in the middle under the words, the rest off at the edges
     const place = (s, k, rx, ry, r) => { const [x, y] = at(rx, ry);
@@ -2703,7 +2704,7 @@
       else s[k] = [x, y, r, c[k][3]]; };
     const L = [null,
       { focus: 'hpLaptop', text: 0.27, hpLaptop: [0.5, 0.6, 0], hpBook: [0.06, 0.95, 14], hpPhone: [0.93, 0.16, -10] },
-      { focus: 'hpBook', text: 0.25, hpBook: [0.5, 0.58, 2], hpLaptop: [0.1, 0.97, 16], hpPhone: [0.94, 0.17, 8] },
+      { focus: 'hpBook', text: 0.25, hpBook: [0.5, 0.58, 2], hpLaptop: [0.1, 0.97, 16], hpPhone: [0.2, 0.16, 8] },   // (the cup and phone top left)
       { focus: 'hpPhone', text: 0.27, hpPhone: [0.5, 0.6, 2], hpLaptop: [0.18, -0.02, 12], hpBook: [0.93, 0.1, -12] }];   // (the laptop on top, left; the notebook to the right)
     const HALF = { hpLaptop: 163, hpBook: 123, hpPhone: 90 };
     for (let i = 1; i <= 3; i++) {
