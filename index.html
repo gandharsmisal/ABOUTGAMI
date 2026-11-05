@@ -1750,10 +1750,14 @@
       });
       arm.setAttribute('d', `M ${P[0]} ${P[1]} C ${P[2]} ${P[3]}, ${P[4]} ${P[5]}, ${P[6]} ${P[7]} C ${P[8]} ${P[9]}, ${P[10]} ${P[11]}, ${P[12]} ${P[13]}`);
       drawOn(arm, F.arm);
-      bubble.style.opacity = F.bubble > 0 ? 1 - d : 0;              // the bubble fades as the arm comes down
+      // the bubble fades as the arm comes down - its outline and word do; its paper stays solid while it is there at all,
+      // so nothing behind ever shows through it
+      const fade = F.bubble > 0 ? 1 - d : 0;
+      bubble.style.opacity = fade > 0.15 ? 1 : 0;
+      bubblePath.style.opacity = fade;
       drawOn(bubblePath, F.bubble);
-      $('hfBubbleFill').style.opacity = F.bubble;                   // the cloud's paper comes in with its outline
-      $('heroScroll').style.opacity = Math.max(0, (F.bubble - 0.6) / 0.4);
+      $('hfBubbleFill').style.opacity = F.bubble > 0.05 ? 1 : 0;
+      $('heroScroll').style.opacity = fade * Math.max(0, (F.bubble - 0.6) / 0.4);
     }
     const walkIn = gsap.timeline({ paused: true, onUpdate: figFrame })
       .fromTo(F, { x: X0, stride: 1, arm: 0, bubble: 0 }, { x: HX, duration: 1.7, ease: 'none' }, 0)
@@ -2703,7 +2707,7 @@
       if (k === 'hpPhone') { s.hpPhone = [x, y, r, c.hpPhone[3]]; s.hpCup = [x + cup[0] * pk, y + cup[1] * pk, r, c.hpCup[3]]; }
       else s[k] = [x, y, r, c[k][3]]; };
     const L = [null,
-      { focus: 'hpLaptop', text: 0.27, hpLaptop: [0.5, 0.6, 0], hpBook: [0.06, 0.95, 14], hpPhone: [0.93, 0.16, -10] },
+      { focus: 'hpLaptop', text: 0.27, hpLaptop: [0.5, 0.54, 0], hpBook: [0.06, 0.95, 14], hpPhone: [0.93, 0.16, -10] },
       { focus: 'hpBook', text: 0.25, hpBook: [0.5, 0.58, 2], hpLaptop: [0.1, 0.97, 16], hpPhone: [0.2, 0.16, 8] },   // (the cup and phone top left)
       { focus: 'hpPhone', text: 0.27, hpPhone: [0.5, 0.6, 2], hpLaptop: [0.18, -0.02, 12], hpBook: [0.93, 0.1, -12] }];   // (the laptop on top, left; the notebook to the right)
     const HALF = { hpLaptop: 163, hpBook: 123, hpPhone: 90 };
