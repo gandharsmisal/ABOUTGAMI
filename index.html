@@ -44,9 +44,10 @@
 
   /* ---------- intro ---------- */
   #stage { position: absolute; inset: 0; background: var(--ink); }
-  /* the intro's black: the paper's specks, turned light, so it reads as a textured sheet (just visible) */
-  #stage::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: var(--grain), var(--grain); background-size: 300px, 190px; background-position: 0 0, 70px 40px;
-    filter: invert(1) brightness(2); mix-blend-mode: screen; opacity: 0.45; }   /* (bigger, brighter specks: they show on a phone too) */
+  /* the intro's black is the main page's sheet in the dark: the very same grain tile, size and place as the paper's
+     (#grain), only its specks turned light - so the texture matches exactly when the black gives way to the paper */
+  #stage::before { content: ""; position: fixed; inset: 0; pointer-events: none; background-image: var(--grain); background-repeat: repeat;
+    filter: invert(1); mix-blend-mode: screen; opacity: 1; }
   #stage { isolation: isolate; } #stage::before { z-index: -1; }   /* (the specks under the drawing, over the black) */
   #scene { display: block; width: 100%; height: 100%; }
   #scene .ln {
