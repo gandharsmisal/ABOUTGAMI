@@ -2245,7 +2245,7 @@
   }
 
   const N = WORK.length, ease = t => t * t * (3 - 2 * t), clamp01 = t => Math.min(1, Math.max(0, t));
-  const SWELL = 34, SWELL_SCALE = 0.035;                          // how fat the frame gets just before it bursts
+  const SWELL = 34, SWELL_SCALE = 0.04;                           // how fat the frame gets just before it bursts
   const PRE = 0.75;                                               // how far the next sand gets while you're still pushing
   const wpFrame = $('wpFrame');
   // state: cur = the project shown; fat = how swollen the frame is (0..1); trans = a change in progress
