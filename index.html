@@ -2726,8 +2726,8 @@
      the canvas follows it softly and every prop trails a little behind at its own pace, tilting as it drifts, so
      they float rather than slide. When the scrolling stops it settles on the nearest step (leaning the way it was
      going), and that step's note and figure appear. */
-  // phones: everything moves a little quicker (it felt heavy) - the main page's glide, the book and the phone opening
-  const PACE = isMob() ? 1.5 : 1;
+  // everything moves a little quicker (it felt heavy) - the main page's glide, the book and the phone opening
+  const PACE = 1.5;
   const cam = { pos: 0, target: 0, vel: 0, lastIn: 0, catching: false, absorb: false, absorbSeen: false, lag: {}, lift: 0, shown: null, ex: 0, ey: 0, t: 0 };
   // the mug and the phone travel together (same pace, same bob)
   const LAG = { hpLaptop: 0.075, hpBook: 0.062, hpCup: 0.07, hpPhone: 0.07, line: 0.07, desk: 0.06 }, BOB = { hpLaptop: 0, hpBook: 2.1, hpCup: 4.2, hpPhone: 4.2 };
