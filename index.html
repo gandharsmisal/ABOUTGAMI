@@ -1979,12 +1979,12 @@
      a dark blurred copy of the picture with the sharp picture in the middle. */
   const WORK = [
     // kind: the kind of project; role: what I did; open: the colour of "Click to open project"
-    { img: 'assets/work-hobby.webp', fx: 0.5, name: 'P2P Hobby Sharing App', desc: 'Most hobbies die as ideas, with no one to start them with.',
-      kind: 'Service Design', role: 'Role: Almost everything', open: '#1A1A3E' },
+    { img: 'assets/work-cybersmart.webp', fx: 0.56, name: 'Cybersmart', desc: 'The dashboard that notices what people miss.',
+      kind: 'Industry Project', role: 'Role: Sole designer', open: '#1F9C7F' },
     { img: 'assets/work-music.webp', fx: 0.72, name: 'Music App', desc: 'For people who never needed sound to feel a song.',
       kind: 'Inclusive Design', role: 'Role: Almost everything', open: '#F08A2C' },
-    { img: 'assets/work-cybersmart.webp', fx: 0.56, name: 'Cybersmart', desc: 'The dashboard that notices what people miss.',
-      kind: 'Industry Project', role: 'Role: Sole designer', open: '#1F9C7F' }
+    { img: 'assets/work-hobby.webp', fx: 0.5, name: 'P2P Hobby Sharing App', desc: 'Most hobbies die as ideas, with no one to start them with.',
+      kind: 'Service Design', role: 'Role: Almost everything', open: '#1A1A3E' }
   ];
   const workPage = $('workPage'), wpStage = $('wpStage'), wpBody = $('wpBody'), wpCanvas = $('wpCanvas'), wpCtx = wpCanvas.getContext('2d');
   const FR = isMob() ? { x: 710, y: 190, w: 500, h: 700, r: 16 }   // a phone: narrower and taller (each picture cropped round its subject)
@@ -2894,7 +2894,7 @@
 
   /* ---------- case studies: a click on a project's picture (or its "Click to open project") opens its page ----
      Only the Music App has one so far. It opens over the Work page; Escape (or the browser's back) returns to it. */
-  const CASES = { 0: $('caseHobby'), 1: $('caseMusic'), 2: $('caseCyber') };   // (HobbyHop first)   // project index -> its page
+  const CASES = { 0: $('caseCyber'), 1: $('caseMusic'), 2: $('caseHobby') };   // (Cybersmart first, then Fankr, then HobbyHop)   // project index -> its page
   let caseOpen = null;
   function overPicture(e) {                                       // the pointer is on the frame / its open line
     const r = $('wpFrame').getBoundingClientRect();
