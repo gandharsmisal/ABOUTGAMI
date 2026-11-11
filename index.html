@@ -2290,7 +2290,7 @@
     if (dir !== W.dir) { W.dir = dir; W.pressure = 0; W.fat = 0; }
     W.pressure = Math.min(1, W.pressure + Math.abs(dy) / CHARGE);
     lastPush = performance.now();
-    if (W.pressure >= 1) burst();
+    // (full: it bursts once the frame has swelled up - see the ticker - so even one big scroll shows the swell)
   }
   function burst() {
     const from = W.cur, to = (from + W.dir + N) % N, fat0 = W.fat;
@@ -2310,8 +2310,9 @@
     clock.t += dt / 1000;
     if ((clock.t * 20 | 0) % 2 === 0) clock.spray = ((Math.random() * MW * MH) | 0);   // new flecks land ~10x a second
     if (!W.trans) {
-      if (performance.now() - lastPush > 380) W.pressure *= 0.94; // stopped scrolling: it relaxes back
+      if (W.pressure < 1 && performance.now() - lastPush > 380) W.pressure *= 0.94; // stopped scrolling: it relaxes back
       W.fat += (W.pressure - W.fat) * 0.16;                       // the frame follows the pressure smoothly
+      if (W.pressure >= 1 && W.fat > 0.9) burst();                // full and fully swelled: it bursts
     }
     brushStep();                                                  // grains pushed by the pointer settle back
     workRender();                                                 // every frame: the sand is alive
