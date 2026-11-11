@@ -488,10 +488,10 @@
     #menu { display: none !important; }
     #menuBtn { display: inline-flex; position: fixed; z-index: 70; top: calc(env(safe-area-inset-top, 0px) + 16px); right: 16px; padding: 9px 10px; background: none !important; }
     html.intro-locked #menuBtn { color: #fff; }
-    #drawerShade { display: block; position: fixed; inset: 0; z-index: 71; background: rgba(40, 32, 18, 0.18); opacity: 0; pointer-events: none; transition: opacity 0.35s ease; }
+    #drawerShade { display: block; position: fixed; inset: 0; z-index: 71; background: rgba(40, 32, 18, 0.18); opacity: 0; pointer-events: none; transition: opacity 0.22s ease; }
     #drawer { display: flex; flex-direction: column; position: fixed; z-index: 72; top: 0; right: 0; bottom: 0; width: 78vw; max-width: 360px;
       padding: calc(env(safe-area-inset-top, 0px) + 16px) 18px 24px 26px; box-sizing: border-box; background: var(--paper);
-      box-shadow: -10px 0 30px rgba(40, 32, 18, 0.22); transform: translateX(105%); transition: transform 0.45s cubic-bezier(.2, .8, .2, 1); }
+      box-shadow: -10px 0 30px rgba(40, 32, 18, 0.22); transform: translateX(105%); transition: transform 0.26s cubic-bezier(.25, .9, .3, 1); will-change: transform; }   /* (quick and light) */
     #drawer::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: var(--grain); }
     #drawerClose { align-self: flex-end; position: relative; display: inline-flex; align-items: center; gap: 10px; height: 46px; padding: 0; border: 0; background: none; cursor: pointer;
       font: 400 22px "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); color: var(--pen); text-transform: lowercase; letter-spacing: 0.04em; }
@@ -1940,7 +1940,7 @@
       d.innerHTML = b.querySelector('.pill-icon').outerHTML + b.querySelector('.label').outerHTML;   // (with its scribble)
       // a tap plays the desktop hover once (hammer, eyes, heartbeat, the line scribbled in), then goes
       d.addEventListener('click', () => { if (d.classList.contains('tapped')) return; d.classList.add('tapped');
-        setTimeout(() => { open(false); setTimeout(() => { b.click(); d.classList.remove('tapped'); }, 250); }, 700); });
+        setTimeout(() => { open(false); setTimeout(() => { b.click(); d.classList.remove('tapped'); }, 150); }, 450); });
       list.appendChild(d);
     });
     $('menuBtn').addEventListener('click', () => open(true));
@@ -2668,7 +2668,7 @@
   }, SPIN = { paper: 1, camera: -1, sketchbook: 1, scissors: -1, marker: 1 };
   // the side objects sit on the page's edges, half on and half off (each centred on its nearest edge), or as much
   // inside as DESK_INSIDE says (first view; the paper as it was)
-  const DESK_INSIDE = isMobMain() ? {} : { marker: 0.6, scissors: 0.6, sketchbook: 0.6, camera: 0.6 };
+  const DESK_INSIDE = isMobMain() ? {} : { marker: 0.6, scissors: 0.5, sketchbook: 0.6, camera: 0.6 };
   for (const n in DESK_DESK) DESK_DESK[n] = DESK_DESK[n].map(([x, y, r], step) => {
     if (step !== 0) return [x, y, r];                                        // (only the first view; the other steps as they were)
     const d = [x, 1920 - x, y, 1080 - y], e = d.indexOf(Math.min(...d));
