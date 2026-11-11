@@ -2518,7 +2518,7 @@
     gsap.set(aboutPage, { autoAlpha: 1 });
     document.documentElement.classList.add('in-about');
     if (nb) nb.style.opacity = 0;
-    about.tl = gsap.timeline()
+    about.tl = gsap.timeline({ onStart() { this.timeScale(PACE); } })
       .to('#aboutPage .abBg', { opacity: 1, duration: 0.6, ease: 'sine.inOut' }, 0.1)
       .to(abBook, { x: 0, y: 0, scale: 1, rotation: 0, duration: 1.15, ease: 'power3.inOut' }, 0)             // comes over from the desk...
       .to('#abCover', { rotationY: -180, duration: 1, ease: 'power2.inOut' }, 0.15)                           // ...opening as it comes
@@ -2554,7 +2554,7 @@
     // on the second spread the page turns back first, then the cover closes
     const back = about.page ? 0.75 : 0;
     if (about.page) { about.page = 0; gsap.to('#abLeaf', { rotationY: 0, duration: back, ease: 'power2.inOut', overwrite: true }); gsap.to('#abArrow', { opacity: 0, duration: 0.2 }); }
-    gsap.delayedCall(back, () => tl.timeScale(1).reverse());   // closes at the same pace it opened
+    gsap.delayedCall(back / PACE, () => tl.timeScale(PACE).reverse());   // closes at the same pace it opened
     return true;
   }
   aboutPage.addEventListener('click', e => {
@@ -2613,6 +2613,7 @@
       gsap.fromTo('#ctPhone', { x: sx, y: sy, scale: k, rotation: hp.rot, filter: 'drop-shadow(0px 2px 3px rgba(0,0,0,0.18))' },
         { x: 0, y: 0, scale: 1, rotation: 0, filter: 'drop-shadow(0px 10px 14px rgba(0,0,0,0.2))', duration: 1.05, ease: 'power3.inOut' });   // from the desk to the middle
     } else gsap.fromTo('#ctPhone', { x: 0, y: innerHeight * 0.7, scale: 1, rotation: 8 }, { y: 0, rotation: 0, duration: 0.9, ease: 'power3.out', delay: 0.1 });
+    if (PACE !== 1) gsap.getTweensOf('#ctPhone, #contactPage .ctBg').forEach(tw => tw.timeScale(PACE));
   }
   function closeContact(fast, then) {
     if (!contact.open) return false;
@@ -2630,6 +2631,7 @@
       gsap.to('#ctPhone', { x: hp.x - innerWidth / 2, y: hp.y - (pr.top + pr.height / 2), scale: hp.h / pr.height, rotation: hp.rot,
         filter: 'drop-shadow(0px 2px 3px rgba(0,0,0,0.18))', duration: 1.05, ease: 'power3.inOut', onComplete: done });   // the same pace as it came up
     } else gsap.to('#ctPhone', { y: innerHeight * 0.7, rotation: 8, duration: 0.6, ease: 'power2.in', onComplete: done });
+    if (PACE !== 1) gsap.getTweensOf('#ctPhone, #contactPage .ctBg').forEach(tw => tw.timeScale(PACE));
     return true;
   }
   ctMsg.addEventListener('input', () => { ctSend.disabled = !ctMsg.value.trim(); });
@@ -2724,6 +2726,8 @@
      the canvas follows it softly and every prop trails a little behind at its own pace, tilting as it drifts, so
      they float rather than slide. When the scrolling stops it settles on the nearest step (leaning the way it was
      going), and that step's note and figure appear. */
+  // phones: everything moves a little quicker (it felt heavy) - the main page's glide, the book and the phone opening
+  const PACE = isMob() ? 1.5 : 1;
   const cam = { pos: 0, target: 0, vel: 0, lastIn: 0, catching: false, absorb: false, absorbSeen: false, lag: {}, lift: 0, shown: null, ex: 0, ey: 0, t: 0 };
   // the mug and the phone travel together (same pace, same bob)
   const LAG = { hpLaptop: 0.075, hpBook: 0.062, hpCup: 0.07, hpPhone: 0.07, line: 0.07, desk: 0.06 }, BOB = { hpLaptop: 0, hpBook: 2.1, hpCup: 4.2, hpPhone: 4.2 };
@@ -2830,10 +2834,10 @@
     }
     // quick on the way, easing off as an object comes in: the last stretch before it slows right down
     const gap = Math.abs(cam.target - cam.pos), mid = cam.catching ? (cam.cTotal = cam.cTotal || Math.max(gap, 0.01), Math.sin(Math.PI * Math.min(1, Math.max(0, 1 - gap / cam.cTotal)))) : (cam.cTotal = 0, 0),
-      ease = cam.catching ? (0.018 + 0.032 * Math.min(1, gap / 0.6)) * (1 + 1.0 * mid) : 0.06;   // (2x quicker mid-way; start and end as they were)   // arriving: as it always was; on the way: keeps up with the scroll's own speed
+      ease = (cam.catching ? (0.018 + 0.032 * Math.min(1, gap / 0.6)) * (1 + 1.0 * mid) : 0.06) * PACE;   // (2x quicker mid-way; start and end as they were)   // arriving: as it always was; on the way: keeps up with the scroll's own speed
     cam.pos += (cam.target - cam.pos) * (1 - Math.pow(1 - ease, f));
     const lagK = cam.catching ? 0.6 + 0.4 * Math.min(1, gap / 0.6) : 1;      // the props settle in with it, not after it
-    for (const k in LAG) cam.lag[k] += (cam.pos - cam.lag[k]) * (1 - Math.pow(1 - LAG[k] * (cam.catching ? Math.max(lagK, 1.4 - lagK) * (1 + 1.0 * mid) : 1), f));
+    for (const k in LAG) cam.lag[k] += (cam.pos - cam.lag[k]) * (1 - Math.pow(1 - PACE * LAG[k] * (cam.catching ? Math.max(lagK, 1.4 - lagK) * (1 + 1.0 * mid) : 1), f));
     const settled = arrived && cam.target === Math.round(cam.target);
     if (settled && cam.shown !== mod(cam.target)) showNote(mod(cam.target));
     else if (!settled && cam.shown !== null && Math.abs(cam.target - cam.pos) > 0.06) hideNotes();
