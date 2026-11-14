@@ -2129,7 +2129,23 @@
   function buildProject(p, i) {
     const cv = document.createElement('canvas'); cv.width = CV.w; cv.height = CV.h;
     const c = cv.getContext('2d'), m = 44;
-    cover(c, p.image, PAD - m, PAD - m, FR.w + 2 * m, FR.h + 2 * m, p.fx);
+    // white frame (as Cedric Carr's): the picture smaller in the middle, and round it the picture blown up and blurred,
+    // sprayed out into the white with a ragged, grainy edge - like spray paint round a print
+    const iw = FR.w * 0.6, ih = FR.h * 0.62, ix = PAD + (FR.w - iw) / 2, iy = PAD + (FR.h - ih) / 2;
+    {
+      const hv = document.createElement('canvas'); hv.width = CV.w; hv.height = CV.h; const h = hv.getContext('2d');
+      h.filter = 'blur(10px)'; cover(h, p.image, ix - iw * 0.3, iy - ih * 0.34, iw * 1.6, ih * 1.68, p.fx); h.filter = 'none';
+      const hd = h.getImageData(0, 0, CV.w, CV.h), ad = hd.data, cx = PAD + FR.w / 2, cy = PAD + FR.h / 2, rx = iw / 2 * 1.5, ry = ih / 2 * 1.55;
+      for (let y = 0, k = 3; y < CV.h; y++) for (let x = 0; x < CV.w; x++, k += 4) {
+        const dx = Math.abs(x - cx) / rx, dy = Math.abs(y - cy) / ry, d = Math.pow(dx ** 4 + dy ** 4, 0.25);
+        const n1 = texN[(y % TEX) * TEX + (x % TEX)], n2 = texN[((y * 3 + 101) % TEX) * TEX + ((x * 3 + 57) % TEX)];
+        const dens = (1 - (d + 0.42 * (n1 - 0.5) + 0.2 * (n2 - 0.5))) / 0.28;
+        const al = dens >= 1 ? 255 : dens <= 0 ? 0 : hash(x, y, 600 + i) < dens * dens ? 255 : 0;
+        if (al < ad[k]) ad[k] = al;
+      }
+      h.putImageData(hd, 0, 0); c.drawImage(hv, 0, 0);
+    }
+    cover(c, p.image, ix, iy, iw, ih, p.fx);
     const src = c.getImageData(0, 0, CV.w, CV.h), out = c.createImageData(CV.w, CV.h), s = src.data, o = out.data;
     for (let y = 0; y < CV.h; y++) for (let x = 0; x < CV.w; x++) {
       const r1 = hash(x, y, 300 + i), r2 = hash(x, y, 400 + i), r3 = hash(x, y, 500 + i);
