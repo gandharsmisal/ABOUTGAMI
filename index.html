@@ -2840,13 +2840,15 @@
       cam.catching = false; cam.absorb = false; cam.absorbSeen = false; cam.holdUntil = performance.now() + 500;   // (it rests on the object for half a second)
     }
     if (cam.absorb && cam.absorbSeen && performance.now() - cam.lastIn > 160) cam.absorb = cam.absorbSeen = false;   // that scroll is over
+    // the wheel has stopped: it lands exactly on an object - the nearest one, leaning the way it was going - gliding in softly
+    if (!cam.catching && performance.now() - cam.lastIn > 350 && cam.target !== Math.round(cam.target)) cam.target = Math.round(cam.target + (cam.dir || 0) * 0.4);   // (a scroll of a notch or more that way goes on to the next one)
     if (performance.now() - cam.lastIn > 90 && cam.vel) {
       advance(cam.vel * f); cam.vel *= Math.pow(0.94, f);   // carries on a little longer (a glide)
       if (Math.abs(cam.vel) < 0.0015) { cam.vel = 0; if (Math.abs(cam.target - Math.round(cam.target)) < 0.015) cam.target = Math.round(cam.target); }
     }
     // quick on the way, easing off as an object comes in: the last stretch before it slows right down
     const gap = Math.abs(cam.target - cam.pos), mid = cam.catching ? (cam.cTotal = cam.cTotal || Math.max(gap, 0.01), Math.sin(Math.PI * Math.min(1, Math.max(0, 1 - gap / cam.cTotal)))) : (cam.cTotal = 0, 0),
-      ease = (cam.catching ? (0.018 + 0.032 * Math.min(1, gap / 0.6)) * (1 + 1.0 * mid) : 0.14) * PACE;   // (2x quicker mid-way; start and end as they were)   // arriving: as it always was; on the way: keeps up with the scroll's own speed
+      ease = (cam.catching ? (0.018 + 0.032 * Math.min(1, gap / 0.6)) * (1 + 1.0 * mid) : 0.07);   // (2x quicker mid-way; start and end as they were)   // arriving: as it always was; on the way: keeps up with the scroll's own speed
     cam.pos += (cam.target - cam.pos) * (1 - Math.pow(1 - ease, f));
     const lagK = cam.catching ? 0.6 + 0.4 * Math.min(1, gap / 0.6) : 1;      // the props settle in with it, not after it
     for (const k in LAG) cam.lag[k] += (cam.pos - cam.lag[k]) * (1 - Math.pow(1 - PACE * LAG[k] * (cam.catching ? Math.max(lagK, 1.4 - lagK) * (1 + 1.0 * mid) : 1), f));
@@ -2883,17 +2885,10 @@
     if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = now; return; }       // the one scroll of rest on an object
     // resting on an object: for half a second the scroll that brought it in is ignored (so it stops there); after that,
     // scrolling - carrying on or new - moves on, with no pause or mouse move needed
-    if (now < (cam.holdUntil || 0)) { cam.lastIn = now; return; }
-    // the move to the next object follows the scroll itself (your speed; stop scrolling and it stops), drawn through an
-    // ease in-out: the first part of the scroll moves it softly out of the stop, the middle part quickly, the last part
-    // softly into the exact spot - where it lands and rests a moment; scrolling back goes back the same way
-    { if (!cam.seg) { const fr = Math.round(cam.target); cam.seg = { from: fr, to: fr + (d > 0 ? 1 : -1), s: 0 }; }
-      const sg = cam.seg, dir = sg.to > sg.from ? 1 : -1;
-      sg.s += d * dir * 3;                                                     // (about 5-6 notches a move; quicker scrolling, fewer)
-      if (sg.s >= 1) { cam.target = sg.to; cam.seg = null; cam.holdUntil = now + 500; }
-      else if (sg.s <= 0) { cam.target = sg.from; cam.seg = null; }
-      else { const x = sg.s, e = x < 0.5 ? 2 * x * x : 1 - 2 * (1 - x) * (1 - x); cam.target = sg.from + (sg.to - sg.from) * e; }
-      cam.vel = 0; }
+    // scrubbed like webdesign.kernjosh.com (Lenis-style): the wheel moves a scroll position straight through the steps
+    // (about 6 notches a step), the camera eases after it - the motion keeps easing out for about a second after the last
+    // notch, then everything stays where it is: no snapping to a stop, nothing moves on by itself
+    cam.target += self.deltaY / 600; cam.vel = 0; cam.seg = null; cam.dir = Math.sign(self.deltaY);
     cam.lastIn = now;
   } });
   function camGo(i, instant) {
