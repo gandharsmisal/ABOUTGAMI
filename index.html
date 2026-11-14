@@ -2883,9 +2883,12 @@
     if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = now; return; }       // the one scroll of rest on an object
     // scrubbed like Lenis + ScrollTrigger (scrub: true, lerp 0.1): the wheel moves a scroll position straight through the
     // steps, 1000px of wheel per step, no build-up, no snapping, no momentum; the camera eases after it at lerp 0.1
-    cam.target += self.deltaY / 1000;
-    cam.vel = 0;
-    cam.lastIn = now;
+    // it stops exactly on the next object and stays there for the rest of that scroll; a new scroll (after the wheel has
+    // paused a moment) goes on to the next one
+    const gapIn = now - cam.lastIn; cam.lastIn = now; cam.vel = 0;
+    if (cam.hold) { if (gapIn < 200) return; cam.hold = false; }
+    { const q = v => Math.round(v * 1e6) / 1e6, fr = q(cam.target), dd = self.deltaY / 1000, k = dd > 0 ? Math.floor(fr + 1e-6) + 1 : Math.ceil(fr - 1e-6) - 1, to = q(fr + dd);   // (q: no float slips past a stop)
+      if (dd > 0 ? to >= k : to <= k) { cam.target = k; cam.hold = true; } else cam.target = to; }
   } });
   function camGo(i, instant) {
     const r0 = Math.round(cam.target); let dI = mod(i - mod(r0)); if (dI > NS / 2) dI -= NS;   // the short way round
