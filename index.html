@@ -2809,13 +2809,13 @@
     }
     for (const id in PROPS) {
       const [x, y, r, s] = P[id], c = PROPS[id];
-      $(id).setAttribute('transform', `translate(${x} ${y}) rotate(${r}) scale(${s * (isMobMain() ? 1.155 : 1)}) translate(${-c[0]} ${-c[1]})`);   // (phones: 15.5% bigger)
+      $(id).setAttribute('transform', `translate(${x} ${y}) rotate(${r}) scale(${s * (isMobMain() ? 1.155 : 0.95)}) translate(${-c[0]} ${-c[1]})`);   // (phones: 15.5% bigger)
     }
     for (const n in DESK) {
       const p = cam.lag.desk, [x0, y0, r, ds] = between(p, i => { const [x, y, rr, s = 1] = DESK[n][i];
         return [x + (x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0), y + (y < 150 ? -cam.ey : y > 930 ? cam.ey : 0), rr, s]; });
       const frac = p - Math.floor(p), spin = SPIN[n] * 360 * smooth(frac);   // one whole turn per move (so it lands at the same angle), slow at the start and the end
-      $('dk-' + n).setAttribute('transform', `translate(${x0} ${y0}) rotate(${r + spin}) scale(${(isMobMain() ? 1.27 : 1) * ds})`);
+      $('dk-' + n).setAttribute('transform', `translate(${x0} ${y0}) rotate(${r + spin}) scale(${(isMobMain() ? 1.27 : 0.95) * ds})`);
     }
     $('heroLineMove').setAttribute('transform', `translate(0 ${between(cam.lag.line, i => [CAM[i].ly])[0]})`);
     const step = mod(Math.round(cam.pos)), near = Math.max(0, 1 - Math.abs(cam.pos - Math.round(cam.pos)) * 5);
