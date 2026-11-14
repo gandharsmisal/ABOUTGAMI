@@ -2654,7 +2654,7 @@
   const PROPS = { hpLaptop: [959, 515], hpCup: [551.5, 504], hpPhone: [576, 584], hpBook: [1372, 539] };   // each image's own centre
   // per step, each prop's [x, y, rotation, scale] (of its centre, on the 1920 x 1080 page), the line's offset and the note
   const CAM_DESK = [   // (each object keeps one size at every step)
-    { hpLaptop: [950, 482, -2, 1.2], hpCup: [498.5, 447.9, 4, 1.03], hpPhone: [517.9, 531.8, 4, 1.03], hpBook: [1465, 505, -7, 1.35], ly: 0 },   // (the cup and phone 75 nearer the laptop; the book 25)
+    { hpLaptop: [1195,360, -2, 1.2], hpCup: [420.6, 576.1, 4, 1.03], hpPhone: [440, 660, 4, 1.03], hpBook: [900,860, -7, 1.35], ly: -60 },   // (first view, laid out round the side objects)
     { hpLaptop: [960, 760, 0, 1.2], hpCup: [555.6, 11.1, 0, 1.03], hpPhone: [575, 95, 0, 1.03], hpBook: [1895, 645, 8, 1.35], ly: -440 },
     { hpLaptop: [-105, 530, 15, 1.2], hpCup: [1920.6, 306.1, 0, 1.03], hpPhone: [1940, 390, 0, 1.03], hpBook: [958, 528, 2, 1.35], ly: 60 },
     { hpLaptop: [-17, 1207, 0, 1.2], hpCup: [965.6, 756.1, 2, 1.03], hpPhone: [985, 840, 2, 1.03], hpBook: [560, -10, 2, 1.35], ly: -220 }
@@ -2669,9 +2669,12 @@
   // the side objects sit on the page's edges, half on and half off (each centred on its nearest edge), or as much
   // inside as DESK_INSIDE says. Desktop, first view: every one wholly inside the frame, drawn at DESK0_SCALE so they fit
   // round the laptop, the mug and the notebook (they grow back to full size as they move to the next step)
-  const DESK_INSIDE = isMobMain() ? {} : { paper: 1, marker: 1, scissors: 1, sketchbook: 1, camera: 1 }, DESK0_SCALE = isMobMain() ? 1 : 0.8;
+  const DESK_INSIDE = {}, DESK0_SCALE = 1;
+  // desktop, first view: every side object wholly inside the frame at full size, each where it was placed by hand
+  const DESK0 = isMobMain() ? null : {"scissors":[210,300],"paper":[700,230],"camera":[1670,360],"sketchbook":[1720,912],"marker":[1300,945]};
   for (const n in DESK_DESK) DESK_DESK[n] = DESK_DESK[n].map(([x, y, r], step) => {
     if (step !== 0) return [x, y, r];                                        // (only the first view; the other steps as they were)
+    if (DESK0 && DESK0[n]) return [DESK0[n][0], DESK0[n][1], r, 1];
     const d = [x, 1920 - x, y, 1080 - y], e = d.indexOf(Math.min(...d));
     const im = document.querySelector(`#dk-${n} image`), h = (+(im && im.getAttribute('height')) || 0) * DESK0_SCALE, w = (+(im && im.getAttribute('width')) || 0) * DESK0_SCALE;
     const top = step === 0 ? -0.1 * h : -0.2 * h;                            // along the top: 60% off on the first view, 70% after
