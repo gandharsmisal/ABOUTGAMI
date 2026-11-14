@@ -2846,12 +2846,12 @@
     }
     // quick on the way, easing off as an object comes in: the last stretch before it slows right down
     const gap = Math.abs(cam.target - cam.pos), mid = cam.catching ? (cam.cTotal = cam.cTotal || Math.max(gap, 0.01), Math.sin(Math.PI * Math.min(1, Math.max(0, 1 - gap / cam.cTotal)))) : (cam.cTotal = 0, 0),
-      ease = (cam.catching ? (0.018 + 0.032 * Math.min(1, gap / 0.6)) * (1 + 1.0 * mid) : 0.35) * PACE;   // (2x quicker mid-way; start and end as they were)   // arriving: as it always was; on the way: keeps up with the scroll's own speed
+      ease = (cam.catching ? (0.018 + 0.032 * Math.min(1, gap / 0.6)) * (1 + 1.0 * mid) : 0.1);   // (2x quicker mid-way; start and end as they were)   // arriving: as it always was; on the way: keeps up with the scroll's own speed
     cam.pos += (cam.target - cam.pos) * (1 - Math.pow(1 - ease, f));
     const lagK = cam.catching ? 0.6 + 0.4 * Math.min(1, gap / 0.6) : 1;      // the props settle in with it, not after it
     for (const k in LAG) cam.lag[k] += (cam.pos - cam.lag[k]) * (1 - Math.pow(1 - Math.min(0.9, PACE * LAG[k] * (cam.catching ? Math.max(lagK, 1.4 - lagK) * (1 + 1.0 * mid) : 6)), f));
-    const settled = arrived && cam.target === Math.round(cam.target);
-    if (settled && cam.shown !== mod(cam.target)) showNote(mod(cam.target));
+    const settled = arrived && Math.abs(cam.target - Math.round(cam.target)) < 0.04;   // (resting on or right by an object: its note shows)
+    if (settled && cam.shown !== mod(Math.round(cam.target))) showNote(mod(Math.round(cam.target)));
     else if (!settled && cam.shown !== null && Math.abs(cam.target - cam.pos) > 0.06) hideNotes();
     camDraw();
   });
@@ -2881,10 +2881,9 @@
     d *= gain;
     if (cam.catching) return;                                                  // gliding in: scrolling waits
     if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = now; return; }       // the one scroll of rest on an object
-    // it moves only while the wheel turns: no glide after, no pull into an object - reaching one, it stops exactly on it,
-    // and the next turn carries on (each turn goes a little further, as nothing carries it on any more)
-    { const fr = cam.target, k = d > 0 ? Math.floor(fr + 1e-6) + 1 : Math.ceil(fr - 1e-6) - 1, to = fr + d * 2.5;
-      cam.target = (d > 0 ? to >= k : to <= k) ? k : Math.max(cam.pos - 1, Math.min(cam.pos + 1, to)); }
+    // scrubbed like Lenis + ScrollTrigger (scrub: true, lerp 0.1): the wheel moves a scroll position straight through the
+    // steps, 1000px of wheel per step, no build-up, no snapping, no momentum; the camera eases after it at lerp 0.1
+    cam.target += self.deltaY / 1000;
     cam.vel = 0;
     cam.lastIn = now;
   } });
