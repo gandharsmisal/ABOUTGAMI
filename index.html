@@ -2265,15 +2265,14 @@
     wpCtx.clip(clip);
     wpCtx.fillStyle = '#fff'; wpCtx.fillRect(0, 0, CV.w, CV.h);
     const grow = bulge * 0.9;
-    if (!tr) {
-      drawSand(WORK[W.cur], W.spreadIn, grow);
-      // pushing: the next project's sand already pours out over this one, further the harder you push
-      if (W.fat > 0.01) drawSand(WORK[(W.cur + W.dir + N) % N], PRE * W.fat, grow);
-    } else {
-      // the burst: the next sand spreads on over the whole frame
-      drawSand(WORK[tr.from], SAND_FULL, grow);
-      drawSand(WORK[tr.to], tr.l0 + (SAND_FULL - tr.l0) * ease(f), grow);
-    }
+    // the projects lie stacked one above the other inside the frame: scrolling slides the stack along with the scroll
+    // (the next picture comes up from below as this one goes up), and the change finishes the slide
+    const slide = tr ? tr.s0 + (1 - tr.s0) * ease(f) : W.fat, dir = tr ? tr.dir : W.dir, gap = FR.h + 88;   // (each picture is drawn 44 px past the frame all round: no gap between them)
+    const from = tr ? tr.from : W.cur, next = tr ? tr.to : (W.cur + W.dir + N) % N;
+    wpCtx.save(); wpCtx.translate(0, -dir * slide * gap);
+    drawSand(WORK[from], tr ? SAND_FULL : W.spreadIn, grow);
+    if (slide > 0.002) { wpCtx.translate(0, dir * gap); drawSand(WORK[next], SAND_FULL, grow); }
+    wpCtx.restore();
     wpCtx.restore();
     const shown = tr && f >= 0.5 ? tr.to : tr ? tr.from : W.cur;
     if (shown !== work.shown) { work.shown = shown; writeProject(shown); }
@@ -2294,9 +2293,9 @@
   }
   function burst() {
     const from = W.cur, to = (from + W.dir + N) % N, fat0 = W.fat;
-    W.trans = { from, to, f: 0, l0: PRE * fat0 };
+    W.trans = { from, to, f: 0, s0: fat0, dir: W.dir };
     W.pressure = 0;
-    gsap.to(W.trans, { f: 1, duration: 1.1, ease: 'none',
+    gsap.to(W.trans, { f: 1, duration: 0.6, ease: 'none',
       onUpdate() { W.fat = fat0 * (1 - ease(clamp01(W.trans.f / 0.9))); },
       onComplete() { W.cur = to; W.trans = null; W.fat = 0; brushReset(WORK[to]); } });
   }
