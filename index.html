@@ -2837,7 +2837,7 @@
     cam.t = time;
     const arrived = Math.abs(cam.target - cam.pos) < 0.04 && Object.entries(cam.lag).every(([k, v]) => k === 'desk' || Math.abs(cam.target - v) < 0.06);   // (the notes don't wait for the side objects)
     if (cam.catching && arrived) {
-      cam.catching = false; cam.absorb = true; cam.absorbSeen = false;       // the next scroll is spent here (the note shows)
+      cam.catching = false; cam.absorb = false; cam.absorbSeen = false;      // (no rest scroll: carrying on scrolling moves straight on)
     }
     if (cam.absorb && cam.absorbSeen && performance.now() - cam.lastIn > 160) cam.absorb = cam.absorbSeen = false;   // that scroll is over
     if (performance.now() - cam.lastIn > 90 && cam.vel) {
