@@ -2707,22 +2707,21 @@
   let CAM = CAM_DESK, DESK = DESK_DESK;
   // desktop, the stops (1 laptop, 2 notebook, 3 mug & phone): where each object that is not in the middle sits, worked out
   // from the object itself (its drawn pixels, turned as it lies, not its picture's box with its empty corners): a share of it
-  // inside the frame on its nearest edge - about 40% for a middling one, the laptop about a quarter, the small ones more
-  // (the camera measured by its body, not its strap), and the camera, the scissors, the sketchbook and the notebook a little
-  // further in again. [x, y, turn, size, edge (0 left, 1 right, 2 top, 3 bottom)]. Fixed numbers, so it comes out the same
+  // inside the frame on its nearest edge - about a third for a middling one, the laptop about a fifth, the small ones up to 60%
+  // (the camera measured by its body, not its strap). [x, y, turn, size, edge (0 left, 1 right, 2 top, 3 bottom)]. Fixed numbers, so it comes out the same
   // wherever the page is opened.
   if (!isMobMain()) {
     const STOP_PROPS = [
-      { hpLaptop: [960, 600, 0, 1.2], hpBook: [1915.4, 645, 8, 1.35, 1], hpPhone: [575, 77.9, 0, 1.03, 2], hpCup: [555.6, -6, 0, 1.03] },
-      { hpLaptop: [-92, 530, 15, 1.2, 0], hpBook: [958, 528, 2, 1.35], hpPhone: [1905.5, 390, 0, 1.03, 1], hpCup: [1886.1, 306.1, 0, 1.03] },
-      { hpLaptop: [117.2, 1199.2, 0, 1.2, 3], hpBook: [560, 4.4, 2, 1.35, 2], hpPhone: [985, 840, 2, 1.03], hpCup: [965.6, 756.1, 2, 1.03] }
+      { hpLaptop: [960, 600, 0, 1.2], hpBook: [1953.9, 645, 8, 1.35, 1], hpPhone: [575, 47.5, 0, 1.03, 2], hpCup: [555.6, -36.4, 0, 1.03] },
+      { hpLaptop: [-109.6, 530, 15, 1.2, 0], hpBook: [958, 528, 2, 1.35], hpPhone: [1926.2, 390, 0, 1.03, 1], hpCup: [1906.8, 306.1, 0, 1.03] },
+      { hpLaptop: [117.2, 1219, 0, 1.2, 3], hpBook: [560, -50.9, 2, 1.35, 2], hpPhone: [985, 840, 2, 1.03], hpCup: [965.6, 756.1, 2, 1.03] }
     ];
     const STOP_DESK = {
-      paper: [[1130, -50.7, 8, 1, 2], [1150, 1132.3, -6, 1, 3], [1989.2, 430, 14, 1, 1]],
-      camera: [[18.4, 470, -15, 1, 0], [1863, 950.9, 10, 1, 1], [1810, 950.8, -10, 1, 3]],
-      sketchbook: [[1790, 1063, 12, 1, 3], [620, 17.2, -14, 1, 2], [63.1, 560, 8, 1, 0]],
-      scissors: [[380, 964.1, -25, 1, 3], [1838.7, 690, 30, 1, 1], [1380, 965.1, -15, 1, 3]],
-      marker: [[840, 17.6, -60, 1, 2], [1320, 23.1, 100, 1, 2], [1180, 25.1, -80, 1, 2]]
+      paper: [[1130, -67.2, 8, 1, 2], [1150, 1149.3, -6, 1, 3], [2010.8, 430, 14, 1, 1]],
+      camera: [[-23, 470, -15, 1, 0], [1908.6, 950.9, 10, 1, 1], [1810, 981.6, -10, 1, 3]],
+      sketchbook: [[1790, 1122.1, 12, 1, 3], [620, -37.8, -14, 1, 2], [13.7, 560, 8, 1, 0]],
+      scissors: [[380, 1064, -25, 1, 3], [1916.3, 690, 30, 1, 1], [1380, 1052.5, -15, 1, 3]],
+      marker: [[840, 2.4, -60, 1, 2], [1320, 3.4, 100, 1, 2], [1180, 5.8, -80, 1, 2]]
     };
     STOP_PROPS.forEach((c, k) => Object.assign(CAM_DESK[k + 1], c));
     for (const n in STOP_DESK) STOP_DESK[n].forEach((v, k) => { DESK_DESK[n][k + 1] = v; });
