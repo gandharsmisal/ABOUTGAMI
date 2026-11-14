@@ -2888,7 +2888,12 @@
     // scrubbed like webdesign.kernjosh.com (Lenis-style): the wheel moves a scroll position straight through the steps
     // (about 6 notches a step), the camera eases after it - the motion keeps easing out for about a second after the last
     // notch, then everything stays where it is: no snapping to a stop, nothing moves on by itself
-    cam.target += self.deltaY / 600; cam.vel = 0; cam.seg = null; cam.dir = Math.sign(self.deltaY);
+    // reaching an object while scrolling, it stops exactly on it and holds there: the rest of that scroll is ignored until
+    // the wheel pauses a moment, or 0.7 s of carrying on (so it never gets stuck)
+    cam.vel = 0; cam.seg = null; cam.dir = Math.sign(self.deltaY);
+    if (cam.hold) { if (now - cam.lastIn < 200 && now < cam.holdUntil) { cam.lastIn = now; return; } cam.hold = false; }
+    { const q = v => Math.round(v * 1e6) / 1e6, fr = q(cam.target), dd = self.deltaY / 600, k = dd > 0 ? Math.floor(fr + 1e-6) + 1 : Math.ceil(fr - 1e-6) - 1, to = q(fr + dd);
+      if (dd > 0 ? to >= k : to <= k) { cam.target = k; cam.hold = true; cam.holdUntil = now + 700; } else cam.target = to; }
     cam.lastIn = now;
   } });
   function camGo(i, instant) {
