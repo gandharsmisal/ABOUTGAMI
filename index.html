@@ -2655,7 +2655,7 @@
   // per step, each prop's [x, y, rotation, scale] (of its centre, on the 1920 x 1080 page), the line's offset and the note
   const CAM_DESK = [   // (each object keeps one size at every step)
     { hpLaptop: [968, 845, -2, 1.2], hpCup: [460.6, 346.1, 4, 1.03], hpPhone: [480, 430, 4, 1.03], hpBook: [1515, 365, -7, 1.35], ly: -195 },   // (first view, laid out round the side objects)
-    { hpLaptop: [960, 600, 0, 1.2], hpCup: [555.6, -38.9, 0, 1.03], hpPhone: [575, 45, 0, 1.03], hpBook: [1950, 645, 8, 1.35], ly: -440 },
+    { hpLaptop: [960, 600, 0, 1.2], hpCup: [555.6, -13.9, 0, 1.03], hpPhone: [575, 70, 0, 1.03], hpBook: [1950, 645, 8, 1.35], ly: -440 },
     { hpLaptop: [-105, 530, 15, 1.2], hpCup: [1920.6, 306.1, 0, 1.03], hpPhone: [1940, 390, 0, 1.03], hpBook: [958, 528, 2, 1.35], ly: 60 },
     { hpLaptop: [-17, 1207, 0, 1.2], hpCup: [965.6, 756.1, 2, 1.03], hpPhone: [985, 840, 2, 1.03], hpBook: [560, -10, 2, 1.35], ly: -220 }
   ];
@@ -2680,7 +2680,7 @@
       const bw = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a)), bh = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a));
       // how much of each is inside: the big ones less, the small ones more (the camera's picture is mostly empty strap
       // room, so it counts as small); the laptop stop's camera a little further in again
-      const f = { paper: 0.25, sketchbook: 0.3, scissors: e === 3 ? 0.52 : 0.42, marker: 0.48, camera: e === 3 ? 0.75 : step === 1 ? 0.58 : 0.5 }[n] ?? 0.35;   // (on the bottom edge the camera's body - at the bottom of its picture - would be the part cut off)
+      const f = { paper: 0.35, sketchbook: 0.3, scissors: e === 3 ? 0.52 : 0.42, marker: 0.58, camera: e === 3 ? 0.75 : step === 1 ? 0.45 : 0.5 }[n] ?? 0.35;   // (on the bottom edge the camera's body - at the bottom of its picture - would be the part cut off)
       // and never lost in a corner: along its edge, at least most of it stays within the frame
       const ax = v => Math.max(bw * 0.25, Math.min(1920 - bw * 0.25, v)), ay = v => Math.max(bh * 0.25, Math.min(1080 - bh * 0.25, v));
       return e === 0 ? [bw * (f - 0.5), ay(y), r] : e === 1 ? [1920 - bw * (f - 0.5), ay(y), r] : e === 2 ? [ax(x), bh * (f - 0.5), r] : [ax(x), 1080 - bh * (f - 0.5), r];
