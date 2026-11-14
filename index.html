@@ -2281,7 +2281,7 @@
   // Scrolling: each scroll swells the frame (fatter the more you scroll) and pours the next project's sand out
   // from the middle; stop early and it all draws back. Keep scrolling until it's full and it bursts: the sand
   // spreads over the whole frame and the frame shrinks back to its own shape. Scrolling up goes back a project.
-  const CHARGE = 520;                                             // wheel pixels to fill the frame up (~5 notches)
+  const CHARGE = 1000;                                             // wheel pixels to fill the frame up (~5 notches)
   let lastPush = 0;
   function pushWork(dy) {
     if (!work.ready || W.trans || !dy || W.spreadIn < SAND_FULL) return;
@@ -2295,7 +2295,7 @@
     const from = W.cur, to = (from + W.dir + N) % N, fat0 = W.fat;
     W.trans = { from, to, f: 0, s0: fat0, dir: W.dir };
     W.pressure = 0;
-    gsap.to(W.trans, { f: 1, duration: 0.6, ease: 'none',
+    gsap.to(W.trans, { f: 1, duration: 1.0, ease: 'none',
       onUpdate() { W.fat = fat0 * (1 - ease(clamp01(W.trans.f / 0.9))); },
       onComplete() { W.cur = to; W.trans = null; W.fat = 0; brushReset(WORK[to]); } });
   }
@@ -2309,8 +2309,8 @@
     clock.t += dt / 1000;
     if ((clock.t * 20 | 0) % 2 === 0) clock.spray = ((Math.random() * MW * MH) | 0);   // new flecks land ~10x a second
     if (!W.trans) {
-      if (W.pressure < 1 && performance.now() - lastPush > 380) W.pressure *= 0.94; // stopped scrolling: it relaxes back
-      W.fat += (W.pressure - W.fat) * 0.16;                       // the frame follows the pressure smoothly
+      if (W.pressure < 1 && performance.now() - lastPush > 380) W.pressure *= 0.975; // stopped scrolling: it relaxes back (slowly, smoothly)
+      W.fat += (W.pressure - W.fat) * 0.08;                       // the frame follows the pressure smoothly
       if (W.pressure >= 1 && W.fat > 0.9) burst();                // full and fully swelled: it bursts
     }
     brushStep();                                                  // grains pushed by the pointer settle back
