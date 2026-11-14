@@ -2672,7 +2672,7 @@
   const DESK_INSIDE = {}, DESK0_SCALE = 1;
   // desktop, first view: every side object wholly inside the frame at full size, each where it was placed by hand
   const DESK0 = isMobMain() ? null : {"scissors":[1630,800],"paper":[980,163],"camera":[1780,330],"sketchbook":[220,230],"marker":[390,760]};
-  const INF = (i, n) => ({ 1: { camera: 0.5 }, 2: { hpLaptop: 0.2 }, 3: { hpLaptop: 0.2, paper: 0.2 } }[i] || {})[n] ?? ({ scissors: 0.4, marker: 0.4, camera: 0.4 }[n] ?? 0.3);
+  const INF = () => 0.3;
   const edgeIn = (x, y, r, w, h, f) => { const a = r * Math.PI / 180, bw = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a)), bh = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a));
     const d = [x, 1920 - x, y, 1080 - y], e = d.indexOf(Math.min(...d)), cx = v => clamp(v, bw * 0.2, 1920 - bw * 0.2), cy = v => clamp(v, bh * 0.2, 1080 - bh * 0.2);
     return e === 0 ? [bw * (f - 0.5), cy(y), e] : e === 1 ? [1920 - bw * (f - 0.5), cy(y), e] : e === 2 ? [cx(x), bh * (f - 0.5), e] : [cx(x), 1080 - bh * (f - 0.5), e]; };
@@ -2716,8 +2716,12 @@
       const c = document.createElement('canvas'); c.width = cw; c.height = ch; const g = c.getContext('2d'); g.drawImage(p, 0, 0, cw, ch);
       const d = g.getImageData(0, 0, cw, ch).data, out = [];
       for (let j = Math.floor(ch * below); j < ch; j++) for (let i = 0; i < cw; i++) if (d[(j * cw + i) * 4 + 3] > 40) out.push([(x + (i + 0.5) / cw * w - ox) * s, (y + (j + 0.5) / ch * h - oy) * s]);
+      out.area = out.length * (w / cw) * (h / ch) * s * s;                 // (how big it is on the page)
       return out;
     };
+    // how much of it is inside: the same rule for every object at every stop, a bigger share for a smaller object
+    // (about 40% for a middling one, the laptop about a quarter, a small one like the camera or the marker up to 70%)
+    const share = P => clamp(0.4 * 250 / Math.sqrt(P.area || 62500), 0.22, 0.7);
     const fitIn = (x, y, r, P, f) => {
       const a = r * Math.PI / 180, co = Math.cos(a), si = Math.sin(a);
       const X = P.map(([u, v]) => u * co - v * si).sort((m, n) => m - n), Y = P.map(([u, v]) => u * si + v * co).sort((m, n) => m - n), q = (A, z) => A[Math.floor(z * (A.length - 1))];
@@ -2727,16 +2731,16 @@
     };
     try {
       for (const n in DESK_DESK) { const P = await pts(document.querySelector(`#dk-${n} image`), 0, 0, 1, n === 'camera' ? 0.55 : 0);   // (the camera: its body, not the thin strap above it) if (!P.length) continue;
-        for (let i = 1; i < DESK_DESK[n].length; i++) { const [x, y, r] = DESK_DESK[n][i]; const [px, py, e] = fitIn(x, y, r, P, INF(i, n)); DESK_DESK[n][i] = [px, py, r, 1, e]; } }
+        for (let i = 1; i < DESK_DESK[n].length; i++) { const [x, y, r] = DESK_DESK[n][i]; const [px, py, e] = fitIn(x, y, r, P, share(P)); DESK_DESK[n][i] = [px, py, r, 1, e]; } }
       const FOC = [null, 'hpLaptop', 'hpBook', 'hpPhone'];
       for (let i = 1; i < CAM_DESK.length; i++) { const c = CAM_DESK[i];
         for (const k of ['hpLaptop', 'hpBook', 'hpPhone']) { if (k === FOC[i]) continue;
           const [x, y, r, s] = c[k];
           let P = await pts(document.querySelector(`#${k} image`), PROPS[k][0], PROPS[k][1], s);
           if (k === 'hpPhone') { const ox = c.hpCup[0] - x, oy = c.hpCup[1] - y;   // (the mug on it, as it sits)
-            P = P.concat((await pts(document.querySelector('#hpCup image'), PROPS.hpCup[0], PROPS.hpCup[1], c.hpCup[3])).map(([u, v]) => [u + ox, v + oy])); }
+            const C = await pts(document.querySelector('#hpCup image'), PROPS.hpCup[0], PROPS.hpCup[1], c.hpCup[3]), a = P.area + C.area; P = P.concat(C.map(([u, v]) => [u + ox, v + oy])); P.area = a; }
           if (!P.length) continue;
-          const [nx, ny, e] = fitIn(x, y, r, P, INF(i, k)), dx = nx - x, dy = ny - y;
+          const [nx, ny, e] = fitIn(x, y, r, P, share(P)), dx = nx - x, dy = ny - y;
           c[k] = [nx, ny, r, s, e];
           if (k === 'hpPhone') c.hpCup = [c.hpCup[0] + dx, c.hpCup[1] + dy, c.hpCup[2], c.hpCup[3]];
         }
