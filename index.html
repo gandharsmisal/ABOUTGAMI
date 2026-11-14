@@ -2129,26 +2129,7 @@
   function buildProject(p, i) {
     const cv = document.createElement('canvas'); cv.width = CV.w; cv.height = CV.h;
     const c = cv.getContext('2d'), m = 44;
-    // white frame (as Cedric Carr's): the picture sharp in the middle, and round it the picture's own colours sprayed out
-    // into the white - smeared outward from the picture in streaks, darker toward the spray's ragged edge
-    const iw = FR.w * 0.6, ih = FR.h * 0.62, ix = PAD + (FR.w - iw) / 2, iy = PAD + (FR.h - ih) / 2, pcx = ix + iw / 2, pcy = iy + ih / 2;
-    {
-      const hv = document.createElement('canvas'); hv.width = CV.w; hv.height = CV.h; const h = hv.getContext('2d');
-      for (let s = 1.55; s >= 1; s -= 0.05) {                          // stretched copies, smallest last: streaks out from it
-        h.globalAlpha = s === 1 ? 1 : 0.32; const w2 = iw * s, h2 = ih * s;
-        cover(h, p.image, pcx - w2 / 2, pcy - h2 / 2, w2, h2, p.fx);
-      }
-      h.globalAlpha = 1; const bl = document.createElement('canvas'); bl.width = CV.w; bl.height = CV.h; const b = bl.getContext('2d');
-      b.filter = 'blur(4px)'; b.drawImage(hv, 0, 0); b.filter = 'none';
-      b.globalCompositeOperation = 'multiply';                        // darker toward the outside, like the reference
-      const g = b.createRadialGradient(pcx, pcy, Math.min(iw, ih) * 0.45, pcx, pcy, Math.max(iw, ih) * 0.82);
-      g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(1, 'rgba(70,62,54,1)'); b.fillStyle = g; b.fillRect(0, 0, CV.w, CV.h);
-      p.halo = bl;
-      const sm = document.createElement('canvas'); sm.width = CV.w; sm.height = CV.h; const sc = sm.getContext('2d');
-      sc.filter = 'blur(7px)'; cover(sc, p.image, ix - 10, iy - 10, iw + 20, ih + 20, p.fx); sc.filter = 'none';
-      p.smear = sm;
-    }
-    cover(c, p.image, ix, iy, iw, ih, p.fx);
+    cover(c, p.image, PAD - m, PAD - m, FR.w + 2 * m, FR.h + 2 * m, p.fx);
     const src = c.getImageData(0, 0, CV.w, CV.h), out = c.createImageData(CV.w, CV.h), s = src.data, o = out.data;
     for (let y = 0; y < CV.h; y++) for (let x = 0; x < CV.w; x++) {
       const r1 = hash(x, y, 300 + i), r2 = hash(x, y, 400 + i), r3 = hash(x, y, 500 + i);
@@ -2200,15 +2181,17 @@
   BR.cv.width = CV.w; BR.cv.height = CV.h;
   const brCtx = BR.cv.getContext('2d');
   BR.img = brCtx.createImageData(CV.w, CV.h);
-  const BRUSH_R = 50, BRUSH_MAX = 56;                             // half-size px: brush radius, furthest push
+  const BRUSH_R = 42, BRUSH_MAX = 40;                             // half-size px: brush radius, furthest push
   function brushReset(p) {                                        // a new picture in the frame: smooth sand
     BR.for = p; BR.dx.fill(0); BR.dy.fill(0); BR.on = false; BR.box = null;
     if (!p || !p.sand) return;
     BR.img.data.set(p.sand);
     brCtx.putImageData(BR.img, 0, 0);
   }
-  const AB = { x: null, y: null, tx: 0, ty: 0, speed: 8, zig: 0, next: 0 };   // the unseen hand
-  function brushAt(hx, hy) {                                       // the brush at (hx, hy), half-size px
+  workPage.addEventListener('pointermove', e => {
+    if (!work.ready || W.trans || !BR.for) return;
+    const r = wpCanvas.getBoundingClientRect();
+    const hx = (e.clientX - r.left) * MW / r.width, hy = (e.clientY - r.top) * MH / r.height;
     const mx = BR.px === null ? 0 : Math.max(-14, Math.min(14, hx - BR.px)), my = BR.py === null ? 0 : Math.max(-14, Math.min(14, hy - BR.py));
     BR.px = hx; BR.py = hy;
     if (!mx && !my) return;
@@ -2224,14 +2207,15 @@
       BR.dx[k] = vx; BR.dy[k] = vy;
     }
     BR.on = true;
-  }
+  });
+  workPage.addEventListener('pointerleave', () => { BR.px = BR.py = null; });
   function brushStep() {
     if (!BR.on || !BR.for) return;
     // fade the push, and find the cells still pushed
     let bx0 = MW, by0 = MH, bx1 = -1, by1 = -1;
     for (let y = 0, k = 0; y < MH; y++) for (let x = 0; x < MW; x++, k++) {
       if (!BR.dx[k] && !BR.dy[k]) continue;
-      BR.dx[k] *= 0.975; BR.dy[k] *= 0.975;
+      BR.dx[k] *= 0.965; BR.dy[k] *= 0.965;
       if (Math.abs(BR.dx[k]) + Math.abs(BR.dy[k]) < 0.15) { BR.dx[k] = BR.dy[k] = 0; continue; }
       if (x < bx0) bx0 = x; if (x > bx1) bx1 = x; if (y < by0) by0 = y; if (y > by1) by1 = y;
     }
@@ -2248,7 +2232,7 @@
       if (vx || vy) {
         const m = Math.abs(vx) + Math.abs(vy), r1 = GRAIN[(x * 7 + y * 13 + so) % GRAIN.length], r2 = GRAIN[(x * 11 + y * 5 + so * 3) % GRAIN.length];
         // where it was pushed hardest the sand is thinned out and the paper shows through, like a finger's trail
-        if (r1 * r2 * 2.2 < m / BRUSH_MAX - 0.4) { o[j] = o[j + 1] = o[j + 2] = 250; o[j + 3] = 255; continue; }
+        if (r1 * r2 * 2.2 < m / BRUSH_MAX - 0.25) { o[j] = o[j + 1] = o[j + 2] = 250; o[j + 3] = 255; continue; }
         sx = Math.round(x - vx * 2 + (r1 - 0.5) * m * 2.6); sy = Math.round(y - vy * 2 + (r2 - 0.5) * m * 2.6);
         sx = sx < 0 ? 0 : sx >= CV.w ? CV.w - 1 : sx; sy = sy < 0 ? 0 : sy >= CV.h ? CV.h - 1 : sy;
       }
@@ -2260,46 +2244,6 @@
     if (bx1 < 0) BR.on = false;
   }
 
-  // the spray: a ragged blot round the picture with bursts reaching out, grainy at its edge, always creeping; and
-  // inside the picture, soft smeared patches drifting over it (as if the spray had been rubbed in)
-  const spMask = document.createElement('canvas'); spMask.width = MW; spMask.height = MH;
-  const spCtx = spMask.getContext('2d'), spData = spCtx.createImageData(MW, MH);
-  const spCv = document.createElement('canvas'); spCv.width = CV.w; spCv.height = CV.h;
-  const spLayer = spCv.getContext('2d');
-  function maskDraw(src, grow) {
-    spCtx.putImageData(spData, 0, 0);
-    spLayer.globalCompositeOperation = 'source-over'; spLayer.clearRect(0, 0, CV.w, CV.h);
-    spLayer.drawImage(src, -grow, -grow, CV.w + 2 * grow, CV.h + 2 * grow);
-    spLayer.globalCompositeOperation = 'destination-in'; spLayer.imageSmoothingEnabled = false;
-    spLayer.drawImage(spMask, -grow, -grow, CV.w + 2 * grow, CV.h + 2 * grow); spLayer.imageSmoothingEnabled = true;
-    wpCtx.drawImage(spCv, 0, 0);
-  }
-  function sprayAround(p, amt, grow) {
-    if (!p.halo || amt <= 0.01) return;
-    const a = spData.data, iw = FR.w * 0.6 / 2, ih = FR.h * 0.62 / 2, cx = MW / 2, cy = MH / 2, rx = iw / 2, ry = ih / 2;
-    const tt = clock.t, o1x = (tt * 9) | 0, o1y = (tt * 6) | 0, so = clock.spray, reach = 1.08 + 0.2 * amt;
-    for (let y = 0, k = 0; y < MH; y++) for (let x = 0; x < MW; x++, k++) {
-      const ux = (x - cx) / rx, uy = (y - cy) / ry, d = Math.pow(ux ** 6 + uy ** 6, 1 / 6);
-      const ang = Math.atan2(uy, ux), ai = ((ang + Math.PI) / (2 * Math.PI) * TEX * 2) | 0;
-      const burst = texN[((ai + (tt * 3 | 0)) % TEX) * TEX + 37] ** 3 * 0.7;          // bursts reaching out at some angles
-      const n1 = texN[((y + o1y + 4096) % TEX) * TEX + ((x + o1x + 4096) % TEX)], n2 = texN[((y * 3 + 4096) % TEX) * TEX + ((x * 3 + 4096) % TEX)];
-      const dens = (reach + burst - (d + 0.5 * (n1 - 0.5) + 0.25 * (n2 - 0.5))) / 0.32;
-      a[k * 4 + 3] = dens >= 1 ? 255 : dens <= 0 ? 0 : GRAIN[k + so] < dens * dens * dens ? 255 : 0;
-    }
-    maskDraw(p.halo, grow);
-  }
-  function smearOver(p, amt, grow) {
-    if (!p.smear || amt <= 0.01) return;
-    const a = spData.data, iw = FR.w * 0.6 / 2, ih = FR.h * 0.62 / 2, x0 = (MW - iw) / 2, y0 = (MH - ih) / 2;
-    const tt = clock.t, ox = (tt * 7) | 0, oy = (tt * -5) | 0, so = clock.spray;
-    for (let y = 0, k = 0; y < MH; y++) for (let x = 0; x < MW; x++, k++) {
-      if (x < x0 - 6 || x > x0 + iw + 6 || y < y0 - 6 || y > y0 + ih + 6) { a[k * 4 + 3] = 0; continue; }
-      const n = texN[((y + oy + 4096) % TEX) * TEX + ((x + ox + 4096) % TEX)];
-      const dens = (n - 0.63) / 0.1 * amt;
-      a[k * 4 + 3] = dens >= 1 ? 225 : dens <= 0 ? 0 : GRAIN[k + so] < dens ? 225 : 0;
-    }
-    maskDraw(p.smear, grow);
-  }
   const N = WORK.length, ease = t => t * t * (3 - 2 * t), clamp01 = t => Math.min(1, Math.max(0, t));
   const SWELL = 34, SWELL_SCALE = 0.04;                           // how fat the frame gets just before it bursts
   const PRE = 0.75;                                               // how far the next sand gets while you're still pushing
@@ -2322,10 +2266,7 @@
     wpCtx.fillStyle = '#fff'; wpCtx.fillRect(0, 0, CV.w, CV.h);
     const grow = bulge * 0.9;
     if (!tr) {
-      const amt = Math.min(1, W.spreadIn / SAND_FULL);
-      sprayAround(WORK[W.cur], amt, grow);                          // (grows in with the sand)
       drawSand(WORK[W.cur], W.spreadIn, grow);
-      smearOver(WORK[W.cur], amt, grow);
       // pushing: the next project's sand already pours out over this one, further the harder you push
       if (W.fat > 0.01) drawSand(WORK[(W.cur + W.dir + N) % N], PRE * W.fat, grow);
     } else {
@@ -2373,25 +2314,7 @@
       W.fat += (W.pressure - W.fat) * 0.16;                       // the frame follows the pressure smoothly
       if (W.pressure >= 1 && W.fat > 0.9) burst();                // full and fully swelled: it bursts
     }
-    // an unseen hand keeps swiping through the picture's sand - fast, restless and random, as if someone were
-    // scrubbing over it: it darts to a random spot (often out past the picture's edges), sometimes in a quick zigzag,
-    // pauses for a blink now and then, and darts off again (the grains it throws settle back behind it)
-    if (work.ready && !W.trans && BR.for) {
-      const ax = FR.w * 0.6 / 4 * 1.2, ay = FR.h * 0.62 / 4 * 1.25, now = clock.t;
-      if (AB.x === null) { AB.x = MW / 2; AB.y = MH / 2; }
-      if (now >= AB.next) {                                          // a new dart
-        AB.tx = MW / 2 + ax * (Math.random() * 2 - 1); AB.ty = MH / 2 + ay * (Math.random() * 2 - 1);
-        AB.speed = 6 + Math.random() * 10; AB.zig = Math.random() < 0.4 ? 3 + Math.random() * 5 : 0;
-        AB.next = now + (Math.random() < 0.15 ? 0.5 + Math.random() * 0.4 : 0.15 + Math.random() * 0.45);
-      }
-      const dx = AB.tx - AB.x, dy = AB.ty - AB.y, d = Math.hypot(dx, dy);
-      if (d > 1) {
-        const st = Math.min(d, AB.speed), z = AB.zig * Math.sin(now * 40);   // (a zigzag across the way it goes)
-        AB.x += dx / d * st - dy / d * z; AB.y += dy / d * st + dx / d * z;
-        brushAt(AB.x, AB.y);
-      } else BR.px = BR.py = null;                                   // (resting a blink: the next dart starts afresh)
-    }
-    brushStep();                                                  // grains pushed by the brush settle back
+    brushStep();                                                  // grains pushed by the pointer settle back
     workRender();                                                 // every frame: the sand is alive
   });
   workPage.addEventListener('wheel', e => {
