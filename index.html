@@ -2671,7 +2671,7 @@
   // round the laptop, the mug and the notebook (they grow back to full size as they move to the next step)
   const DESK_INSIDE = {}, DESK0_SCALE = 1;
   // desktop, first view: every side object wholly inside the frame at full size, each where it was placed by hand
-  const DESK0 = isMobMain() ? null : {"scissors":[1690,800],"paper":[1120,190],"camera":[1780,330],"sketchbook":[220,230],"marker":[440,760]};
+  const DESK0 = isMobMain() ? null : {"scissors":[1690,800],"paper":[980,163],"camera":[1780,330],"sketchbook":[220,230],"marker":[440,760]};
   for (const n in DESK_DESK) DESK_DESK[n] = DESK_DESK[n].map(([x, y, r], step) => {
     if (step !== 0) return [x, y, r];                                        // (only the first view; the other steps as they were)
     if (DESK0 && DESK0[n]) return [DESK0[n][0], DESK0[n][1], r, 1];
