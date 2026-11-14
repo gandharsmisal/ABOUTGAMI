@@ -2654,7 +2654,7 @@
   const PROPS = { hpLaptop: [959, 515], hpCup: [551.5, 504], hpPhone: [576, 584], hpBook: [1372, 539] };   // each image's own centre
   // per step, each prop's [x, y, rotation, scale] (of its centre, on the 1920 x 1080 page), the line's offset and the note
   const CAM_DESK = [   // (each object keeps one size at every step)
-    { hpLaptop: [1028, 845, -2, 1.2], hpCup: [600.6, 206.1, 4, 1.03], hpPhone: [620, 290, 4, 1.03], hpBook: [1380, 300, -7, 1.35], ly: -195 },   // (first view, laid out round the side objects)
+    { hpLaptop: [1028, 845, -2, 1.2], hpCup: [620.6, 236.1, 4, 1.03], hpPhone: [640, 320, 4, 1.03], hpBook: [1515, 365, -7, 1.35], ly: -195 },   // (first view, laid out round the side objects)
     { hpLaptop: [960, 760, 0, 1.2], hpCup: [555.6, 11.1, 0, 1.03], hpPhone: [575, 95, 0, 1.03], hpBook: [1895, 645, 8, 1.35], ly: -440 },
     { hpLaptop: [-105, 530, 15, 1.2], hpCup: [1920.6, 306.1, 0, 1.03], hpPhone: [1940, 390, 0, 1.03], hpBook: [958, 528, 2, 1.35], ly: 60 },
     { hpLaptop: [-17, 1207, 0, 1.2], hpCup: [965.6, 756.1, 2, 1.03], hpPhone: [985, 840, 2, 1.03], hpBook: [560, -10, 2, 1.35], ly: -220 }
@@ -2671,7 +2671,7 @@
   // round the laptop, the mug and the notebook (they grow back to full size as they move to the next step)
   const DESK_INSIDE = {}, DESK0_SCALE = 1;
   // desktop, first view: every side object wholly inside the frame at full size, each where it was placed by hand
-  const DESK0 = isMobMain() ? null : {"scissors":[580,780],"paper":[1010,235],"camera":[1675,740],"sketchbook":[220,230],"marker":[200,560]};
+  const DESK0 = isMobMain() ? null : {"scissors":[1690,800],"paper":[1120,190],"camera":[1780,330],"sketchbook":[220,230],"marker":[290,600]};
   for (const n in DESK_DESK) DESK_DESK[n] = DESK_DESK[n].map(([x, y, r], step) => {
     if (step !== 0) return [x, y, r];                                        // (only the first view; the other steps as they were)
     if (DESK0 && DESK0[n]) return [DESK0[n][0], DESK0[n][1], r, 1];
