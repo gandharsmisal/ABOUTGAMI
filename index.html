@@ -2667,16 +2667,19 @@
     marker:     [[1100, 1060, 70], [840, 55, -60],   [1320, 55, 100],  [1180, 55, -80]]
   }, SPIN = { paper: 1, camera: -1, sketchbook: 1, scissors: -1, marker: 1 };
   // the side objects sit on the page's edges, half on and half off (each centred on its nearest edge), or as much
-  // inside as DESK_INSIDE says (first view; the paper as it was)
-  const DESK_INSIDE = isMobMain() ? {} : { marker: 0.6, scissors: 0.5, sketchbook: 0.6, camera: 0.6 };
+  // inside as DESK_INSIDE says. Desktop, first view: every one wholly inside the frame, drawn at DESK0_SCALE so they fit
+  // round the laptop, the mug and the notebook (they grow back to full size as they move to the next step)
+  const DESK_INSIDE = isMobMain() ? {} : { paper: 1, marker: 1, scissors: 1, sketchbook: 1, camera: 1 }, DESK0_SCALE = isMobMain() ? 1 : 0.8;
   for (const n in DESK_DESK) DESK_DESK[n] = DESK_DESK[n].map(([x, y, r], step) => {
     if (step !== 0) return [x, y, r];                                        // (only the first view; the other steps as they were)
     const d = [x, 1920 - x, y, 1080 - y], e = d.indexOf(Math.min(...d));
-    const im = document.querySelector(`#dk-${n} image`), h = +(im && im.getAttribute('height')) || 0, w = +(im && im.getAttribute('width')) || 0;
+    const im = document.querySelector(`#dk-${n} image`), h = (+(im && im.getAttribute('height')) || 0) * DESK0_SCALE, w = (+(im && im.getAttribute('width')) || 0) * DESK0_SCALE;
     const top = step === 0 ? -0.1 * h : -0.2 * h;                            // along the top: 60% off on the first view, 70% after
     const f = DESK_INSIDE[n]; if (f !== undefined) {                       // set: this much of it inside the frame (its turned box)
       const a = r * Math.PI / 180, bw = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a)), bh = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a));
-      return e === 0 ? [bw * (f - 0.5), y, r] : e === 1 ? [1920 - bw * (f - 0.5), y, r] : e === 2 ? [x, bh * (f - 0.5), r] : [x, 1080 - bh * (f - 0.5), r];
+      let [px, py] = e === 0 ? [bw * (f - 0.5), y] : e === 1 ? [1920 - bw * (f - 0.5), y] : e === 2 ? [x, bh * (f - 0.5)] : [x, 1080 - bh * (f - 0.5)];
+      if (f >= 1) { px = Math.max(bw / 2, Math.min(1920 - bw / 2, px)); py = Math.max(bh / 2, Math.min(1080 - bh / 2, py)); }   // (wholly in, corners too)
+      return [px, py, r, DESK0_SCALE];
     }
     return e === 0 ? [0, y, r] : e === 1 ? [1920, y, r] : e === 2 ? [x, top, r] : [x, 1080, r];   // sides and bottom: half off
   });
@@ -2795,10 +2798,10 @@
       $(id).setAttribute('transform', `translate(${x} ${y}) rotate(${r}) scale(${s * (isMobMain() ? 1.155 : 1)}) translate(${-c[0]} ${-c[1]})`);   // (phones: 15.5% bigger)
     }
     for (const n in DESK) {
-      const p = cam.lag.desk, [x0, y0, r] = between(p, i => { const [x, y, rr] = DESK[n][i];
-        return [x + (x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0), y + (y < 150 ? -cam.ey : y > 930 ? cam.ey : 0), rr]; });
+      const p = cam.lag.desk, [x0, y0, r, ds] = between(p, i => { const [x, y, rr, s = 1] = DESK[n][i];
+        return [x + (x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0), y + (y < 150 ? -cam.ey : y > 930 ? cam.ey : 0), rr, s]; });
       const frac = p - Math.floor(p), spin = SPIN[n] * 360 * smooth(frac);   // one whole turn per move (so it lands at the same angle), slow at the start and the end
-      $('dk-' + n).setAttribute('transform', `translate(${x0} ${y0}) rotate(${r + spin})${isMobMain() ? ' scale(1.27)' : ''}`);
+      $('dk-' + n).setAttribute('transform', `translate(${x0} ${y0}) rotate(${r + spin}) scale(${(isMobMain() ? 1.27 : 1) * ds})`);
     }
     $('heroLineMove').setAttribute('transform', `translate(0 ${between(cam.lag.line, i => [CAM[i].ly])[0]})`);
     const step = mod(Math.round(cam.pos)), near = Math.max(0, 1 - Math.abs(cam.pos - Math.round(cam.pos)) * 5);
