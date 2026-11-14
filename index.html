@@ -2704,6 +2704,44 @@
     }
   }
   let CAM = CAM_DESK, DESK = DESK_DESK;
+  // desktop, the stops: the 25% above is of each picture's box, which has empty corners and margins, so a thin or turned
+  // object could show next to nothing. Once the pictures are in, each is placed again so that 25% of the object itself
+  // (its drawn pixels, turned as it lies) is inside the frame, and most of it along the edge
+  if (!isMobMain()) (async () => {
+    const pts = async (im, ox, oy, s) => {                                   // the drawn pixels of an <image>, as points about the object's centre
+      const href = im.getAttribute('href'), x = +im.getAttribute('x'), y = +im.getAttribute('y'), w = +im.getAttribute('width'), h = +im.getAttribute('height');
+      const p = new Image(); p.src = href; await p.decode();
+      const k = Math.min(1, 90 / Math.max(p.naturalWidth, p.naturalHeight)), cw = Math.max(1, Math.round(p.naturalWidth * k)), ch = Math.max(1, Math.round(p.naturalHeight * k));
+      const c = document.createElement('canvas'); c.width = cw; c.height = ch; const g = c.getContext('2d'); g.drawImage(p, 0, 0, cw, ch);
+      const d = g.getImageData(0, 0, cw, ch).data, out = [];
+      for (let j = 0; j < ch; j++) for (let i = 0; i < cw; i++) if (d[(j * cw + i) * 4 + 3] > 40) out.push([(x + (i + 0.5) / cw * w - ox) * s, (y + (j + 0.5) / ch * h - oy) * s]);
+      return out;
+    };
+    const fitIn = (x, y, r, P, f) => {
+      const a = r * Math.PI / 180, co = Math.cos(a), si = Math.sin(a);
+      const X = P.map(([u, v]) => u * co - v * si).sort((m, n) => m - n), Y = P.map(([u, v]) => u * si + v * co).sort((m, n) => m - n), q = (A, z) => A[Math.floor(z * (A.length - 1))];
+      const d = [x, 1920 - x, y, 1080 - y], e = d.indexOf(Math.min(...d));
+      const ax = v => clamp(v, -q(X, 0.15), 1920 - q(X, 0.85)), ay = v => clamp(v, -q(Y, 0.15), 1080 - q(Y, 0.85));
+      return e === 0 ? [-q(X, 1 - f), ay(y)] : e === 1 ? [1920 - q(X, f), ay(y)] : e === 2 ? [ax(x), -q(Y, 1 - f)] : [ax(x), 1080 - q(Y, f)];
+    };
+    try {
+      for (const n in DESK_DESK) { const P = await pts(document.querySelector(`#dk-${n} image`), 0, 0, 1); if (!P.length) continue;
+        for (let i = 1; i < DESK_DESK[n].length; i++) { const [x, y, r] = DESK_DESK[n][i]; DESK_DESK[n][i] = [...fitIn(x, y, r, P, 0.25), r]; } }
+      const FOC = [null, 'hpLaptop', 'hpBook', 'hpPhone'];
+      for (let i = 1; i < CAM_DESK.length; i++) { const c = CAM_DESK[i];
+        for (const k of ['hpLaptop', 'hpBook', 'hpPhone']) { if (k === FOC[i]) continue;
+          const [x, y, r, s] = c[k];
+          let P = await pts(document.querySelector(`#${k} image`), PROPS[k][0], PROPS[k][1], s);
+          if (k === 'hpPhone') { const ox = c.hpCup[0] - x, oy = c.hpCup[1] - y;   // (the mug on it, as it sits)
+            P = P.concat((await pts(document.querySelector('#hpCup image'), PROPS.hpCup[0], PROPS.hpCup[1], c.hpCup[3])).map(([u, v]) => [u + ox, v + oy])); }
+          if (!P.length) continue;
+          const [nx, ny] = fitIn(x, y, r, P, 0.25), dx = nx - x, dy = ny - y;
+          c[k] = [nx, ny, r, s];
+          if (k === 'hpPhone') c.hpCup = [c.hpCup[0] + dx, c.hpCup[1] + dy, c.hpCup[2], c.hpCup[3]];
+        }
+      }
+    } catch (err) {}   // (a picture that cannot be read: kept as placed by its box)
+  })();
   CAM_DESK.forEach((c, i) => {
     const m = {};
     for (const k of ['hpLaptop', 'hpBook', 'hpPhone', 'hpCup']) m[k] = [MX(c[k][0]), MY(c[k][1]), c[k][2], c[k][3] * 0.85];
