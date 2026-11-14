@@ -2654,7 +2654,7 @@
   const PROPS = { hpLaptop: [959, 515], hpCup: [551.5, 504], hpPhone: [576, 584], hpBook: [1372, 539] };   // each image's own centre
   // per step, each prop's [x, y, rotation, scale] (of its centre, on the 1920 x 1080 page), the line's offset and the note
   const CAM_DESK = [   // (each object keeps one size at every step)
-    { hpLaptop: [950, 482, -2, 1.2], hpCup: [498.5, 447.9, 4, 1.03], hpPhone: [517.9, 531.8, 4, 1.03], hpBook: [1465, 505, -7, 1.35], ly: 0 },   // (the cup and phone 75 nearer the laptop; the book 25)
+    { hpLaptop: [968, 845, -2, 1.2], hpCup: [460.6, 346.1, 4, 1.03], hpPhone: [480, 430, 4, 1.03], hpBook: [1515, 365, -7, 1.35], ly: -195 },   // (first view, laid out round the side objects)
     { hpLaptop: [960, 760, 0, 1.2], hpCup: [555.6, 11.1, 0, 1.03], hpPhone: [575, 95, 0, 1.03], hpBook: [1895, 645, 8, 1.35], ly: -440 },
     { hpLaptop: [-105, 530, 15, 1.2], hpCup: [1920.6, 306.1, 0, 1.03], hpPhone: [1940, 390, 0, 1.03], hpBook: [958, 528, 2, 1.35], ly: 60 },
     { hpLaptop: [-17, 1207, 0, 1.2], hpCup: [965.6, 756.1, 2, 1.03], hpPhone: [985, 840, 2, 1.03], hpBook: [560, -10, 2, 1.35], ly: -220 }
@@ -2667,16 +2667,22 @@
     marker:     [[1100, 1060, 70], [840, 55, -60],   [1320, 55, 100],  [1180, 55, -80]]
   }, SPIN = { paper: 1, camera: -1, sketchbook: 1, scissors: -1, marker: 1 };
   // the side objects sit on the page's edges, half on and half off (each centred on its nearest edge), or as much
-  // inside as DESK_INSIDE says (first view; the paper as it was)
-  const DESK_INSIDE = isMobMain() ? {} : { marker: 0.6, scissors: 0.5, sketchbook: 0.6, camera: 0.6 };
+  // inside as DESK_INSIDE says. Desktop, first view: every one wholly inside the frame, drawn at DESK0_SCALE so they fit
+  // round the laptop, the mug and the notebook (they grow back to full size as they move to the next step)
+  const DESK_INSIDE = {}, DESK0_SCALE = 1;
+  // desktop, first view: every side object wholly inside the frame at full size, each where it was placed by hand
+  const DESK0 = isMobMain() ? null : {"scissors":[1630,800],"paper":[980,163],"camera":[1780,330],"sketchbook":[220,230],"marker":[390,760]};
   for (const n in DESK_DESK) DESK_DESK[n] = DESK_DESK[n].map(([x, y, r], step) => {
     if (step !== 0) return [x, y, r];                                        // (only the first view; the other steps as they were)
+    if (DESK0 && DESK0[n]) return [DESK0[n][0], DESK0[n][1], r, 1];
     const d = [x, 1920 - x, y, 1080 - y], e = d.indexOf(Math.min(...d));
-    const im = document.querySelector(`#dk-${n} image`), h = +(im && im.getAttribute('height')) || 0, w = +(im && im.getAttribute('width')) || 0;
+    const im = document.querySelector(`#dk-${n} image`), h = (+(im && im.getAttribute('height')) || 0) * DESK0_SCALE, w = (+(im && im.getAttribute('width')) || 0) * DESK0_SCALE;
     const top = step === 0 ? -0.1 * h : -0.2 * h;                            // along the top: 60% off on the first view, 70% after
     const f = DESK_INSIDE[n]; if (f !== undefined) {                       // set: this much of it inside the frame (its turned box)
       const a = r * Math.PI / 180, bw = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a)), bh = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a));
-      return e === 0 ? [bw * (f - 0.5), y, r] : e === 1 ? [1920 - bw * (f - 0.5), y, r] : e === 2 ? [x, bh * (f - 0.5), r] : [x, 1080 - bh * (f - 0.5), r];
+      let [px, py] = e === 0 ? [bw * (f - 0.5), y] : e === 1 ? [1920 - bw * (f - 0.5), y] : e === 2 ? [x, bh * (f - 0.5)] : [x, 1080 - bh * (f - 0.5)];
+      if (f >= 1) { px = Math.max(bw / 2, Math.min(1920 - bw / 2, px)); py = Math.max(bh / 2, Math.min(1080 - bh / 2, py)); }   // (wholly in, corners too)
+      return [px, py, r, DESK0_SCALE];
     }
     return e === 0 ? [0, y, r] : e === 1 ? [1920, y, r] : e === 2 ? [x, top, r] : [x, 1080, r];   // sides and bottom: half off
   });
@@ -2795,10 +2801,10 @@
       $(id).setAttribute('transform', `translate(${x} ${y}) rotate(${r}) scale(${s * (isMobMain() ? 1.155 : 1)}) translate(${-c[0]} ${-c[1]})`);   // (phones: 15.5% bigger)
     }
     for (const n in DESK) {
-      const p = cam.lag.desk, [x0, y0, r] = between(p, i => { const [x, y, rr] = DESK[n][i];
-        return [x + (x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0), y + (y < 150 ? -cam.ey : y > 930 ? cam.ey : 0), rr]; });
+      const p = cam.lag.desk, [x0, y0, r, ds] = between(p, i => { const [x, y, rr, s = 1] = DESK[n][i];
+        return [x + (x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0), y + (y < 150 ? -cam.ey : y > 930 ? cam.ey : 0), rr, s]; });
       const frac = p - Math.floor(p), spin = SPIN[n] * 360 * smooth(frac);   // one whole turn per move (so it lands at the same angle), slow at the start and the end
-      $('dk-' + n).setAttribute('transform', `translate(${x0} ${y0}) rotate(${r + spin})${isMobMain() ? ' scale(1.27)' : ''}`);
+      $('dk-' + n).setAttribute('transform', `translate(${x0} ${y0}) rotate(${r + spin}) scale(${(isMobMain() ? 1.27 : 1) * ds})`);
     }
     $('heroLineMove').setAttribute('transform', `translate(0 ${between(cam.lag.line, i => [CAM[i].ly])[0]})`);
     const step = mod(Math.round(cam.pos)), near = Math.max(0, 1 - Math.abs(cam.pos - Math.round(cam.pos)) * 5);
@@ -2834,10 +2840,10 @@
     }
     // quick on the way, easing off as an object comes in: the last stretch before it slows right down
     const gap = Math.abs(cam.target - cam.pos), mid = cam.catching ? (cam.cTotal = cam.cTotal || Math.max(gap, 0.01), Math.sin(Math.PI * Math.min(1, Math.max(0, 1 - gap / cam.cTotal)))) : (cam.cTotal = 0, 0),
-      ease = (cam.catching ? (0.018 + 0.032 * Math.min(1, gap / 0.6)) * (1 + 1.0 * mid) : 0.16) * PACE;   // (2x quicker mid-way; start and end as they were)   // arriving: as it always was; on the way: keeps up with the scroll's own speed
+      ease = (cam.catching ? (0.018 + 0.032 * Math.min(1, gap / 0.6)) * (1 + 1.0 * mid) : 0.06) * PACE;   // (2x quicker mid-way; start and end as they were)   // arriving: as it always was; on the way: keeps up with the scroll's own speed
     cam.pos += (cam.target - cam.pos) * (1 - Math.pow(1 - ease, f));
     const lagK = cam.catching ? 0.6 + 0.4 * Math.min(1, gap / 0.6) : 1;      // the props settle in with it, not after it
-    for (const k in LAG) cam.lag[k] += (cam.pos - cam.lag[k]) * (1 - Math.pow(1 - Math.min(0.9, PACE * LAG[k] * (cam.catching ? Math.max(lagK, 1.4 - lagK) * (1 + 1.0 * mid) : 2.5)), f));
+    for (const k in LAG) cam.lag[k] += (cam.pos - cam.lag[k]) * (1 - Math.pow(1 - PACE * LAG[k] * (cam.catching ? Math.max(lagK, 1.4 - lagK) * (1 + 1.0 * mid) : 1), f));
     const settled = arrived && cam.target === Math.round(cam.target);
     if (settled && cam.shown !== mod(cam.target)) showNote(mod(cam.target));
     else if (!settled && cam.shown !== null && Math.abs(cam.target - cam.pos) > 0.06) hideNotes();
@@ -2869,8 +2875,8 @@
     d *= gain;
     if (cam.catching) return;                                                  // gliding in: scrolling waits
     if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = now; return; }       // the one scroll of rest on an object
-    advance(d * 2.5);                                                          // (nothing carries it on after the wheel, so each turn goes a little further)
-    cam.vel = 0;                                                               // no glide after the wheel stops
+    advance(d);
+    if (!cam.catching) cam.vel = cam.vel * 0.6 + d * 0.04 * gain;            // the bigger the scroll, the further it carries
     cam.lastIn = now;
   } });
   function camGo(i, instant) {
