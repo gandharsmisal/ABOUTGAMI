@@ -2842,6 +2842,7 @@
     if (cam.absorb && cam.absorbSeen && performance.now() - cam.lastIn > 160) cam.absorb = cam.absorbSeen = false;   // that scroll is over
     // the wheel has stopped: it lands exactly on an object - the nearest one, leaning the way it was going - gliding in softly
     if (!cam.catching && performance.now() - cam.lastIn > 350 && cam.target !== Math.round(cam.target)) cam.target = Math.round(cam.target + (cam.dir || 0) * 0.4);   // (a scroll of a notch or more that way goes on to the next one)
+    if (cam.hold && !cam.arrivedAt && Math.abs(cam.pos - cam.target) < 0.02) cam.arrivedAt = performance.now();   // (landed on the object)
     if (performance.now() - cam.lastIn > 90 && cam.vel) {
       advance(cam.vel * f); cam.vel *= Math.pow(0.94, f);   // carries on a little longer (a glide)
       if (Math.abs(cam.vel) < 0.0015) { cam.vel = 0; if (Math.abs(cam.target - Math.round(cam.target)) < 0.015) cam.target = Math.round(cam.target); }
@@ -2894,9 +2895,10 @@
     cam.vel = 0; cam.seg = null; cam.dir = Math.sign(self.deltaY);
     const raw = Math.abs((self.event && self.event.deltaY) || self.deltaY) || 1;
     if (cam.hold) { const gap = now - cam.lastIn; cam.holdMin = Math.min(cam.holdMin, raw);
+      if (!cam.arrivedAt || now - cam.arrivedAt < 350) { cam.lastIn = now; return; }   // (nothing moves it on until it has landed and rested a moment)
       if (gap < 250 && raw < cam.holdMin * 1.8 + 4) { cam.lastIn = now; return; } cam.hold = false; }
     { const q = v => Math.round(v * 1e6) / 1e6, fr = q(cam.target), dd = self.deltaY / 600, k = dd > 0 ? Math.floor(fr + 1e-6) + 1 : Math.ceil(fr - 1e-6) - 1, to = q(fr + dd);
-      if (dd > 0 ? to >= k : to <= k) { cam.target = k; cam.hold = true; cam.holdMin = raw; } else cam.target = to; }
+      if (dd > 0 ? to >= k : to <= k) { cam.target = k; cam.hold = true; cam.holdMin = raw; cam.arrivedAt = 0; } else cam.target = to; }
     cam.lastIn = now;
   } });
   function camGo(i, instant) {
