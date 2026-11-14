@@ -2847,7 +2847,7 @@
     // quick on the way, easing off as an object comes in: the last stretch before it slows right down
     const gap = Math.abs(cam.target - cam.pos), mid = cam.catching ? (cam.cTotal = cam.cTotal || Math.max(gap, 0.01), Math.sin(Math.PI * Math.min(1, Math.max(0, 1 - gap / cam.cTotal)))) : (cam.cTotal = 0, 0),
       ease = (cam.catching ? (0.018 + 0.032 * Math.min(1, gap / 0.6)) * (1 + 1.0 * mid) : 0.06) * PACE;   // (2x quicker mid-way; start and end as they were)   // arriving: as it always was; on the way: keeps up with the scroll's own speed
-    cam.pos += (cam.target - cam.pos) * (1 - Math.pow(1 - ease, f));
+    if (!cam.tw) cam.pos += (cam.target - cam.pos) * (1 - Math.pow(1 - ease, f));   // (a wheel move runs on its own eased tween)
     const lagK = cam.catching ? 0.6 + 0.4 * Math.min(1, gap / 0.6) : 1;      // the props settle in with it, not after it
     for (const k in LAG) cam.lag[k] += (cam.pos - cam.lag[k]) * (1 - Math.pow(1 - PACE * LAG[k] * (cam.catching ? Math.max(lagK, 1.4 - lagK) * (1 + 1.0 * mid) : 1), f));
     const settled = arrived && cam.target === Math.round(cam.target);
@@ -2884,14 +2884,19 @@
     // resting on an object: for half a second the scroll that brought it in is ignored (so it stops there); after that,
     // scrolling - carrying on or new - moves on, with no pause or mouse move needed
     if (now < (cam.holdUntil || 0)) { cam.lastIn = now; return; }
-    d *= 1.6;                                                                  // (less scrolling for a move)
-    advance(d);
-    if (!cam.catching) cam.vel = cam.vel * 0.6 + d * 0.04 * gain;            // the bigger the scroll, the further it carries
+    // a scroll starts the move to the next object: soft at the start, quick in the middle, soft again into the exact spot
+    // (ease in-out); a quicker scroll makes the move a little quicker
+    { const fr = cam.target, k = d > 0 ? Math.floor(fr + 1e-6) + 1 : Math.ceil(fr - 1e-6) - 1, dur = clamp(1.5 - 0.3 * heat.v, 0.9, 1.5) / PACE;
+      cam.target = k; cam.vel = 0; cam.catching = true;
+      if (cam.tw) cam.tw.kill();
+      const mv = { v: cam.pos };   // (its own object: the notes' tweens on cam use overwrite and would kill it)
+      cam.tw = gsap.to(mv, { v: k, duration: dur, ease: 'power2.inOut', onUpdate: () => { cam.pos = mv.v; }, onComplete: () => { cam.pos = k; cam.tw = null; } }); }
     cam.lastIn = now;
   } });
   function camGo(i, instant) {
     const r0 = Math.round(cam.target); let dI = mod(i - mod(r0)); if (dI > NS / 2) dI -= NS;   // the short way round
     cam.target = r0 + dI;
+    if (cam.tw) { cam.tw.kill(); cam.tw = null; }
     cam.vel = 0; cam.catching = !instant; cam.absorb = false;
     if (instant) { cam.pos = cam.target; for (const k in LAG) cam.lag[k] = cam.target; hideNotes(); camDraw(); }
   }
