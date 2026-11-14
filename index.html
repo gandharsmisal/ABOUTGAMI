@@ -784,7 +784,7 @@
       <g id="hnBook" opacity="0" transform="translate(85 0)"><text class="hnote" x="527" y="403">Click to Know more</text><text class="hnote" x="527" y="431">Scroll to continue</text>
         <path class="hpen" d="M744 426 C 800 426, 850 432, 872 446 C 885 456, 878 476, 858 478 C 836 480, 826 460, 840 450 C 860 438, 900 462, 922 512"></path></g>
       <!-- step 3: the mug sits on the phone and slides off it to the side; once the screen shows, the note appears -->
-      <g id="hnMug" opacity="0" transform="translate(43 -90)"><text class="hnote" x="1147" y="778">Tap to view</text><text class="hnote" x="1147" y="806">contact info</text><text class="hnote" x="1147" y="834">be quick , cup is heavy</text>
+      <g id="hnMug" opacity="0" transform="translate(43 -170)"><text class="hnote" x="1147" y="778">Tap to view</text><text class="hnote" x="1147" y="806">contact info</text><text class="hnote" x="1147" y="834">be quick , cup is heavy</text>
         <path class="hpen" d="M1131 763 C 1100 762, 1072 764, 1056 770 C 1042 776, 1046 792, 1064 792 C 1082 792, 1082 772, 1064 772 C 1050 772, 1036 790, 1022 810 M1024 798 L1021 811 L1033 806"></path></g>
     </g>
     </g>
@@ -2657,7 +2657,7 @@
     { hpLaptop: [968, 845, -2, 1.2], hpCup: [460.6, 346.1, 4, 1.03], hpPhone: [480, 430, 4, 1.03], hpBook: [1515, 365, -7, 1.35], ly: -195 },   // (first view, laid out round the side objects)
     { hpLaptop: [960, 600, 0, 1.2], hpCup: [360.6, -48.9, 0, 1.03], hpPhone: [380, 35, 0, 1.03], hpBook: [1950, 645, 8, 1.35], ly: -440 },
     { hpLaptop: [-105, 530, 15, 1.2], hpCup: [1890.6, 306.1, 0, 1.03], hpPhone: [1910, 390, 0, 1.03], hpBook: [958, 528, 2, 1.35], ly: 60 },
-    { hpLaptop: [-17, 1207, 0, 1.2], hpCup: [1022.6, 666.1, 2, 1.03], hpPhone: [1042, 750, 2, 1.03], hpBook: [560, -50, 2, 1.35], ly: -280 }
+    { hpLaptop: [-17, 1207, 0, 1.2], hpCup: [1022.6, 586.1, 2, 1.03], hpPhone: [1042, 670, 2, 1.03], hpBook: [560, -50, 2, 1.35], ly: -360 }
   ];
   const DESK_DESK = {   // (kept clear of the logo, the menu and the figure in the corners)
     paper:      [[540, 55, -12],  [1130, 55, 8],    [1150, 1060, -6], [1880, 430, 14]],
@@ -2777,7 +2777,7 @@
         g.appendChild(a); });
     } else {
       $('heroSvg').setAttribute('viewBox', '0 0 1920 1080');
-      const desk = { hnLaptop: 'translate(-129 -89)', hnBook: 'translate(85 0)', hnMug: 'translate(43 -90)' };
+      const desk = { hnLaptop: 'translate(-129 -89)', hnBook: 'translate(85 0)', hnMug: 'translate(43 -170)' };
       for (const k in desk) $(k).setAttribute('transform', desk[k]);
       document.querySelectorAll('#hnLaptop text, #hnBook text, #hnMug text').forEach(tx => { if (tx._y0 !== undefined) tx.setAttribute('y', tx._y0); });
       const hb = hero.getBoundingClientRect(), k = Math.min(hb.width / 1920, hb.height / 1080) || 1;
