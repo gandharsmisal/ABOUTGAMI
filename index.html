@@ -778,7 +778,7 @@
     <filter id="charInkLight"><feMorphology operator="dilate" radius="0.12"></feMorphology></filter>   <!-- (~1.4px: the mug figure) -->   <!-- the picture characters drawn a touch heavier (~1.6px lines) -->
     <g id="heroNotes">
       <!-- step 1: the laptop; the figure stands to the right, pointing -->
-      <g id="hnLaptop" opacity="0" transform="translate(-129 -149)"><text class="hnote" x="1415" y="728">tap to</text><text class="hnote" x="1415" y="756">view</text>
+      <g id="hnLaptop" opacity="0" transform="translate(-129 -89)"><text class="hnote" x="1415" y="728">tap to</text><text class="hnote" x="1415" y="756">view</text>
         <path class="hpen" d="M1400 707 C 1360 714, 1310 724, 1282 722 C 1262 720, 1258 692, 1280 680 C 1302 668, 1322 690, 1310 708 C 1296 728, 1258 722, 1240 700 C 1230 686, 1225 668, 1223 652 M1219 662 L1223 650 L1228 661"></path></g>
       <!-- step 2: the notebook; a little figure sits on it reading -->
       <g id="hnBook" opacity="0" transform="translate(85 0)"><text class="hnote" x="527" y="403">Click to Know more</text><text class="hnote" x="527" y="431">Scroll to continue</text>
@@ -2655,7 +2655,7 @@
   // per step, each prop's [x, y, rotation, scale] (of its centre, on the 1920 x 1080 page), the line's offset and the note
   const CAM_DESK = [   // (each object keeps one size at every step)
     { hpLaptop: [968, 845, -2, 1.2], hpCup: [460.6, 346.1, 4, 1.03], hpPhone: [480, 430, 4, 1.03], hpBook: [1515, 365, -7, 1.35], ly: -195 },   // (first view, laid out round the side objects)
-    { hpLaptop: [960, 540, 0, 1.2], hpCup: [555.6, 11.1, 0, 1.03], hpPhone: [575, 95, 0, 1.03], hpBook: [1895, 645, 8, 1.35], ly: -440 },
+    { hpLaptop: [960, 600, 0, 1.2], hpCup: [555.6, 11.1, 0, 1.03], hpPhone: [575, 95, 0, 1.03], hpBook: [1895, 645, 8, 1.35], ly: -440 },
     { hpLaptop: [-105, 530, 15, 1.2], hpCup: [1920.6, 306.1, 0, 1.03], hpPhone: [1940, 390, 0, 1.03], hpBook: [958, 528, 2, 1.35], ly: 60 },
     { hpLaptop: [-17, 1207, 0, 1.2], hpCup: [965.6, 756.1, 2, 1.03], hpPhone: [985, 840, 2, 1.03], hpBook: [560, -10, 2, 1.35], ly: -220 }
   ];
@@ -2673,11 +2673,11 @@
   // desktop, first view: every side object wholly inside the frame at full size, each where it was placed by hand
   const DESK0 = isMobMain() ? null : {"scissors":[1630,800],"paper":[980,163],"camera":[1780,330],"sketchbook":[220,230],"marker":[390,760]};
   for (const n in DESK_DESK) DESK_DESK[n] = DESK_DESK[n].map(([x, y, r], step) => {
-    if (step !== 0) {                                                        // desktop, the other stops: only 30% inside the frame (its turned box), on its nearest edge
+    if (step !== 0) {                                                        // desktop, the other stops: only 20% inside the frame (its turned box), on its nearest edge
       if (isMobMain()) return [x, y, r];
       const d = [x, 1920 - x, y, 1080 - y], e = d.indexOf(Math.min(...d)), im = document.querySelector(`#dk-${n} image`);
       const h = +(im && im.getAttribute('height')) || 0, w = +(im && im.getAttribute('width')) || 0, a = r * Math.PI / 180;
-      const bw = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a)), bh = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a)), f = 0.3;
+      const bw = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a)), bh = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a)), f = 0.2;
       return e === 0 ? [bw * (f - 0.5), y, r] : e === 1 ? [1920 - bw * (f - 0.5), y, r] : e === 2 ? [x, bh * (f - 0.5), r] : [x, 1080 - bh * (f - 0.5), r];
     }
     if (DESK0 && DESK0[n]) return [DESK0[n][0], DESK0[n][1], r, 1];
@@ -2772,7 +2772,7 @@
         g.appendChild(a); });
     } else {
       $('heroSvg').setAttribute('viewBox', '0 0 1920 1080');
-      const desk = { hnLaptop: 'translate(-129 -149)', hnBook: 'translate(85 0)', hnMug: 'translate(-14 0)' };
+      const desk = { hnLaptop: 'translate(-129 -89)', hnBook: 'translate(85 0)', hnMug: 'translate(-14 0)' };
       for (const k in desk) $(k).setAttribute('transform', desk[k]);
       document.querySelectorAll('#hnLaptop text, #hnBook text, #hnMug text').forEach(tx => { if (tx._y0 !== undefined) tx.setAttribute('y', tx._y0); });
       const hb = hero.getBoundingClientRect(), k = Math.min(hb.width / 1920, hb.height / 1080) || 1;
