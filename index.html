@@ -2672,13 +2672,14 @@
   const DESK_INSIDE = {}, DESK0_SCALE = 1;
   // desktop, first view: every side object wholly inside the frame at full size, each where it was placed by hand
   const DESK0 = isMobMain() ? null : {"scissors":[1630,800],"paper":[980,163],"camera":[1780,330],"sketchbook":[220,230],"marker":[390,760]};
+  const edgeIn = (x, y, r, w, h, f) => { const a = r * Math.PI / 180, bw = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a)), bh = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a));
+    const d = [x, 1920 - x, y, 1080 - y], e = d.indexOf(Math.min(...d)), cx = v => clamp(v, bw * 0.2, 1920 - bw * 0.2), cy = v => clamp(v, bh * 0.2, 1080 - bh * 0.2);
+    return e === 0 ? [bw * (f - 0.5), cy(y)] : e === 1 ? [1920 - bw * (f - 0.5), cy(y)] : e === 2 ? [cx(x), bh * (f - 0.5)] : [cx(x), 1080 - bh * (f - 0.5)]; };
   for (const n in DESK_DESK) DESK_DESK[n] = DESK_DESK[n].map(([x, y, r], step) => {
-    if (step !== 0) {                                                        // desktop, the other stops: only 20% inside the frame (its turned box), on its nearest edge
+    if (step !== 0) {                                                        // desktop, the other stops: only 25% inside the frame (its turned box), on its nearest edge
       if (isMobMain()) return [x, y, r];
-      const d = [x, 1920 - x, y, 1080 - y], e = d.indexOf(Math.min(...d)), im = document.querySelector(`#dk-${n} image`);
-      const h = +(im && im.getAttribute('height')) || 0, w = +(im && im.getAttribute('width')) || 0, a = r * Math.PI / 180;
-      const bw = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a)), bh = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a)), f = 0.2;
-      return e === 0 ? [bw * (f - 0.5), y, r] : e === 1 ? [1920 - bw * (f - 0.5), y, r] : e === 2 ? [x, bh * (f - 0.5), r] : [x, 1080 - bh * (f - 0.5), r];
+      const im = document.querySelector(`#dk-${n} image`), h = +(im && im.getAttribute('height')) || 0, w = +(im && im.getAttribute('width')) || 0;
+      return [...edgeIn(x, y, r, w, h, 0.25), r];
     }
     if (DESK0 && DESK0[n]) return [DESK0[n][0], DESK0[n][1], r, 1];
     const d = [x, 1920 - x, y, 1080 - y], e = d.indexOf(Math.min(...d));
@@ -2692,6 +2693,16 @@
     }
     return e === 0 ? [0, y, r] : e === 1 ? [1920, y, r] : e === 2 ? [x, top, r] : [x, 1080, r];   // sides and bottom: half off
   });
+  if (!isMobMain()) {   // desktop, the stops: the laptop, the notebook, the mug and phone - all but the one in the middle - only 25% inside too
+    const FOC = [null, 'hpLaptop', 'hpBook', 'hpPhone'], SZ = { hpLaptop: [374, 360], hpBook: [221, 267], hpPhone: [178.3, 249.7] }, GO = { hpLaptop: [0, 0], hpBook: [0, 0], hpPhone: [-24.55, -34.85] };   // (the phone's size and centre take in its mug)
+    for (let i = 1; i < CAM_DESK.length; i++) { const c = CAM_DESK[i];
+      for (const k of ['hpLaptop', 'hpBook', 'hpPhone']) { if (k === FOC[i]) continue;
+        const [x, y, r, s] = c[k], o = GO[k], [nx, ny] = edgeIn(x + o[0] * s, y + o[1] * s, r, SZ[k][0] * s, SZ[k][1] * s, 0.25), dx = nx - x - o[0] * s, dy = ny - y - o[1] * s;
+        c[k] = [x + dx, y + dy, r, s];
+        if (k === 'hpPhone') c.hpCup = [c.hpCup[0] + dx, c.hpCup[1] + dy, c.hpCup[2], c.hpCup[3]];
+      }
+    }
+  }
   let CAM = CAM_DESK, DESK = DESK_DESK;
   CAM_DESK.forEach((c, i) => {
     const m = {};
