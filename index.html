@@ -585,7 +585,7 @@
     #menu-list { background: var(--paper); padding: 14px 20px 16px; border-radius: 10px; box-shadow: 0 8px 24px rgba(40, 30, 10, 0.18), 0 0 0 1px rgba(40, 30, 10, 0.08); }
     #menu-list::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0.06; background-image: var(--grain); }
   }
-  html.mob #wpFront text { font-size: 27px; }
+  html.mob #wpFront text { font-size: 22px; } html.mob #wpFront text .wpName { font-size: 32px; } html.mob #wpFront text .wpStar { font-size: 19px; }   /* (a phone: a little smaller than before) */
   /* the case study's first screen on a phone: the picture across the width, the title under it, then the story */
   html.mob-case .csHero { height: auto; padding-bottom: 72px; }
   html.mob-case .csPicBox { margin-top: 96px; width: calc(100% - 24px); }
@@ -1987,8 +1987,8 @@
       kind: 'Service Design', role: 'Role: Almost everything', open: '#1A1A3E' }
   ];
   const workPage = $('workPage'), wpStage = $('wpStage'), wpBody = $('wpBody'), wpCanvas = $('wpCanvas'), wpCtx = wpCanvas.getContext('2d');
-  const FR = isMob() ? { x: 710, y: 190, w: 500, h: 700, r: 16 }   // a phone: narrower and taller (each picture cropped round its subject)
-    : { x: 489, y: 245, w: 942, h: 588, r: 16 };                   // the frame round the picture, on the 1920x1080 stage
+  const FR = isMob() ? { x: 730, y: 160, w: 460, h: 760, r: 30 }   // a phone: narrower and taller (each picture cropped round its subject)
+    : { x: 489, y: 245, w: 942, h: 588, r: 34 };                   // the frame round the picture, on the 1920x1080 stage
   const PAD = 90;                                                  // room round it on the canvas for the swelling
   const CV = { x: FR.x - PAD, y: FR.y - PAD, w: FR.w + 2 * PAD, h: FR.h + 2 * PAD };
   const MW = CV.w / 2, MH = CV.h / 2;                              // grunge masks are worked out at half size
@@ -1997,7 +1997,9 @@
   const work = { open: false, shown: -1, v: 0, ready: false };
   // a hand-drawn rounded outline: the rounded rectangle traced in many small steps with an uneven wobble; `bulge`
   // pushes the middle of every side outward (the frame swelling up while it scrolls)
+  const REST_BULGE = 7;                                          // (the sides bowed out a little even at rest)
   function framePts(x, y, w, h, r, amp, seed, bulge) {
+    bulge += REST_BULGE;
     const pts = [], L = 2 * (w + h - 4 * r) + 2 * Math.PI * r, n = 240;
     const seg = [w - 2 * r, Math.PI * r / 2, h - 2 * r, Math.PI * r / 2, w - 2 * r, Math.PI * r / 2, h - 2 * r, Math.PI * r / 2];
     const at = s => {                                            // a point s along the outline, clockwise from top-left
@@ -2036,7 +2038,8 @@
   // the writing runs clockwise just outside the frame, on the frame's own hand-drawn outline grown by OFF (so it
   // curves with every wobble, and bulges out with the frame while it swells): along the top, round the corner and
   // down the right side, and along the bottom (which, going right to left, reads upside down)
-  const OFF = 16, TR = FR.r + OFF, WOBBLE = 4.2, SEED = 1.7;
+  const OFF = isMob() ? 40 : 26, TR = FR.r + OFF,   // (a phone: the writing further out)
+   WOBBLE = 2.4, SEED = 1.7;
   const textPathEl = $('wpTextPath');
   function placeTextPath(bulge) {
     const pts = framePts(FR.x - OFF, FR.y - OFF, FR.w + 2 * OFF, FR.h + 2 * OFF, TR, WOBBLE, SEED, bulge);
@@ -2321,12 +2324,16 @@
     pushWork(e.deltaMode === 1 ? e.deltaY * 32 : e.deltaY);
   }, { passive: false });
   let touchY = null;
-  workPage.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; }, { passive: true });
+  let touchSum = 0;
+  workPage.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; touchSum = 0; }, { passive: true });
   workPage.addEventListener('touchmove', e => {
     if (touchY === null) return;
-    const y = e.touches[0].clientY; pushWork((touchY - y) * 1.6); touchY = y;
+    const y = e.touches[0].clientY; touchSum += touchY - y; pushWork((touchY - y) * 1.6); touchY = y;
   }, { passive: true });
-  workPage.addEventListener('touchend', () => { touchY = null; });
+  workPage.addEventListener('touchend', () => {
+    touchY = null;
+    if (Math.abs(touchSum) > 30 && work.ready && !W.trans && W.spreadIn >= SAND_FULL) { W.dir = Math.sign(touchSum); burst(); }   // one swipe, one picture
+  });
   addEventListener('keydown', e => {
     if (!work.open) return;
     if (e.key === 'ArrowDown' || e.key === 'PageDown') { e.preventDefault(); pushWork(CHARGE * 0.35); }
@@ -2879,8 +2886,11 @@
     if (!mainActive()) return;
     const now = performance.now(), touch = self.event && self.event.type.startsWith('touch');
     if (touch) {
-      flick.sum += self.deltaY; if (flick.done || Math.abs(flick.sum) < 18 || cam.catching) return;
-      flick.done = true; cam.absorb = false; cam.vel = 0; cam.lastIn = now; advance(flick.sum < 0 ? 1 : -1); return;
+      flick.sum += self.deltaY; if (flick.done || Math.abs(flick.sum) < 18) return;
+      flick.done = true; cam.absorb = false; cam.inert = false; cam.vel = 0; cam.lastIn = now;
+      const dir = flick.sum < 0 ? 1 : -1;
+      if (cam.catching) { if (Math.abs(cam.target + dir - cam.pos) <= 1.5) { cam.target += dir; cam.cTotal = 0; } return; }   // (still gliding in: on to the next one, no wait)
+      advance(dir); return;
     }
     let d = touch ? -self.deltaY / 900 : self.deltaY / 1500;
     heat.v = heat.v * Math.exp(-(now - heat.t) / 260) + Math.min(1, Math.abs(d) * 15); heat.t = now;   // ~1 per notch, fades in a quarter second
