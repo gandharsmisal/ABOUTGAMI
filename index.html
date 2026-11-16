@@ -2902,8 +2902,18 @@
       return e === 0 ? [X0 - q(X, 1 - f), ay(y)] : e === 1 ? [X1 - q(X, f), ay(y)] : e === 2 ? [Math.min(ax(x), X1 - 330 - q(X, 0.6)), Y0 - q(Y, 1 - f)] : [ax(x), Y1 - q(Y, f)];   // (along the top: kept clear of the menu button)
     };
     try {
+      // as the reference: at each stop the side objects lie in a row along the top and the bottom edge, spaced out, each
+      // about half in view; the two main objects not in focus sit in opposite corners (top left, bottom right)
+      const q = (A, z) => A[Math.floor(z * (A.length - 1))];
+      const turned = (P, r) => { const a = r * Math.PI / 180, co = Math.cos(a), si = Math.sin(a);
+        return [P.map(([u, v]) => u * co - v * si).sort((m, n) => m - n), P.map(([u, v]) => u * si + v * co).sort((m, n) => m - n)]; };
+      const SLOTS = { 1: { top: { paper: 0.34, marker: 0.58 }, bot: { sketchbook: 0.3, scissors: 0.55, camera: 0.8 } },
+                      2: { top: { camera: 0.34, scissors: 0.58 }, bot: { paper: 0.3, marker: 0.55, sketchbook: 0.8 } },
+                      3: { top: { sketchbook: 0.34, marker: 0.58 }, bot: { scissors: 0.3, paper: 0.55, camera: 0.8 } } };
       for (const n in DESK_MOB) { const P = await pts(document.querySelector(`#dk-${n} image`), 0, 0, 1.27); if (!P.length) continue;
-        for (let i = 1; i < DESK_MOB[n].length; i++) { const [x, y, r] = DESK_MOB[n][i]; DESK_MOB[n][i] = [...fit(x, y, r, P, SIDE), r]; } }
+        for (let i = 1; i < DESK_MOB[n].length; i++) { const r = DESK_MOB[n][i][2], sl = SLOTS[i], [X, Y] = turned(P, r);
+          const top = sl.top[n] !== undefined, cx = X0 + (X1 - X0) * (top ? sl.top[n] : sl.bot[n]) - q(X, 0.5);
+          DESK_MOB[n][i] = [cx, top ? Y0 - 40 - q(Y, 1 - SIDE) : Y1 + 40 - q(Y, SIDE), r]; } }
       const FOC = [null, 'hpLaptop', 'hpBook', 'hpPhone'];
       for (let i = 1; i < CAM_MOB.length; i++) { const s = CAM_MOB[i];
         for (const k of ['hpLaptop', 'hpBook', 'hpPhone']) { if (k === FOC[i]) continue;
@@ -2912,7 +2922,9 @@
           if (k === 'hpPhone') { const ox = (s.hpCup[0] - x) * 1.1, oy = (s.hpCup[1] - y) * 1.1;
             P = P.concat((await pts(document.querySelector('#hpCup image'), PROPS.hpCup[0], PROPS.hpCup[1], s.hpCup[3] * 1.155 * 1.1)).map(([u, v]) => [u + ox, v + oy])); }
           if (!P.length) continue;
-          const [nx, ny] = fit(x, y, r, P), dx = nx - x, dy = ny - y;
+          const [X, Y] = turned(P, r), first = ['hpLaptop', 'hpBook', 'hpPhone'].filter(m => m !== FOC[i])[0] === k;
+          const [nx, ny] = first ? [X0 - q(X, 0.62), Y0 - 40 - q(Y, 0.66)] : [X1 - q(X, 0.38), Y1 + 40 - q(Y, 0.34)];   // (top-left / bottom-right corner, about a third in)
+          const dx = nx - x, dy = ny - y;
           s[k] = [nx, ny, r, sc];
           if (k === 'hpPhone') s.hpCup = [s.hpCup[0] + dx, s.hpCup[1] + dy, s.hpCup[2], s.hpCup[3]];
         }
