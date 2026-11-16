@@ -739,19 +739,19 @@
   <svg id="heroSvg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet">
     <g id="heroCam">   <!-- the camera: moved and zoomed by the main-page scroll steps (set in JS) -->
     <g id="heroDecor" aria-hidden="true">   <!-- the rest of the desk, peeking in at the edges (placed in JS) -->
-        <g id="dk-paper" class="deskBit"><image href="assets/photo/desk-grid.webp" x="-235.6" y="-185.4" width="471.1" height="370.8"></image></g>
-        <g id="dk-marker" class="deskBit"><image href="assets/exact/desk-marker.png" x="-98" y="-120.6" width="196" height="241.3"></image></g>
-        <g id="dk-scissors" class="deskBit"><image href="assets/exact/desk-scissors-film.webp" x="-152.2" y="-182.7" width="304.5" height="365.4"></image><g id="dkp-scissors"><image href="assets/exact/desk-scissors-blade.webp" x="-152.2" y="-182.7" width="304.5" height="365.4"></image></g></g>
-        <g id="dk-sketchbook" class="deskBit"><image href="assets/exact/desk-sketchbook-book.webp" x="-181.2" y="-142.1" width="362.5" height="284.2"></image><g id="dkp-sketchbook"><image href="assets/exact/desk-sketchbook-pencil.webp" x="-181.2" y="-142.1" width="362.5" height="284.2"></image></g></g>
+        <g id="dk-paper" class="deskBit"><image href="assets/photo/desk-grid-hq.webp" x="-235.6" y="-185.4" width="471.1" height="370.8"></image></g>
+        <g id="dk-marker" class="deskBit"><image href="assets/exact/desk-marker-hq.webp" x="-98" y="-120.6" width="196" height="241.3"></image></g>
+        <g id="dk-scissors" class="deskBit"><image href="assets/exact/desk-scissors-film-hq.webp" x="-152.2" y="-182.7" width="304.5" height="365.4"></image><g id="dkp-scissors"><image href="assets/exact/desk-scissors-blade-hq.webp" x="-152.2" y="-182.7" width="304.5" height="365.4"></image></g></g>
+        <g id="dk-sketchbook" class="deskBit"><image href="assets/exact/desk-sketchbook-book-hq.webp" x="-181.2" y="-142.1" width="362.5" height="284.2"></image><g id="dkp-sketchbook"><image href="assets/exact/desk-sketchbook-pencil-hq.webp" x="-181.2" y="-142.1" width="362.5" height="284.2"></image></g></g>
         <g id="dk-camera" class="deskBit"><image href="assets/photo/desk-camera.webp" x="-183.3" y="-227.6" width="366.8" height="455.3"></image></g>
     </g>
     <g id="heroProps">
       <!-- each prop 1.2x, spread apart and set down a little off-square (own height and tilt) so they look dropped there -->
       <!-- each prop is placed by JS (translate / rotate / scale about its own centre) for each scroll step -->
       <g id="hpPhone" data-open="contact"><image class="hprop" href="assets/photo/contact-phone-off.webp" x="532.8" y="494" width="86.4" height="180" style="filter: sepia(0.2) saturate(1.15) brightness(1.03) drop-shadow(0 2px 4px rgba(40, 32, 18, 0.2))"></image></g>
-      <g id="hpCup" data-open="contact"><image class="hprop" href="assets/photo/hero-cup-bright.webp" x="462.3" y="424.3" width="178.3" height="159.3"></image></g>
+      <g id="hpCup" data-open="contact"><image class="hprop" href="assets/photo/hero-cup-bright-hq.webp" x="462.3" y="424.3" width="178.3" height="159.3"></image></g>
       <g id="hpLaptop" data-open="work">
-        <image class="hprop" href="assets/photo/hero-laptop-code.webp" x="772" y="335" width="374" height="360"></image>
+        <image class="hprop" href="assets/photo/hero-laptop-code-hq.webp" x="772" y="335" width="374" height="360"></image>
         <!-- on the laptop step its screen shows the Work page -->
         <clipPath id="heroScreenClip"><rect x="795" y="372" width="327" height="198" rx="2"></rect></clipPath>
         <g id="heroScreen" clip-path="url(#heroScreenClip)" opacity="0">
@@ -762,7 +762,7 @@
         </g>
       </g>
       <g id="hpBook" data-open="about">
-        <image class="hprop" href="assets/photo/hero-notebook-sharp.webp" x="1261.5" y="405.5" width="221" height="267"></image>
+        <image class="hprop" href="assets/photo/hero-notebook-sharp-hq.webp" x="1261.5" y="405.5" width="221" height="267"></image>
       </g>
     </g>
     </g>
@@ -2861,7 +2861,7 @@
     }
     if (cam.absorb && cam.absorbSeen && performance.now() - cam.lastIn > 160) cam.absorb = cam.absorbSeen = false;   // that scroll is over
     if (performance.now() - cam.lastIn > 90 && cam.vel) {
-      advance(cam.vel * f); cam.vel *= Math.pow(0.94, f);   // carries on a little longer (a glide)
+      advance(cam.vel * f); cam.vel *= Math.pow(0.955, f);   // carries on a little longer (a glide)
       if (Math.abs(cam.vel) < 0.0015) { cam.vel = 0; if (Math.abs(cam.target - Math.round(cam.target)) < 0.003) cam.target = Math.round(cam.target); }   // (only a hair off: back on it; a small first push is not undone)
     }
     // quick on the way, easing off as an object comes in: the last stretch before it slows right down
@@ -2869,7 +2869,7 @@
     // scroll and its momentum; end: the glide into the next object
     const ramp = cam.startT ? (u => 0.06 + 0.94 * u * u)(Math.min(1, (performance.now() - cam.startT) / 700)) : 1;   // (a slow, small glide first, building over almost a second)
     const gap = Math.abs(cam.target - cam.pos), mid = cam.catching ? (cam.cTotal = cam.cTotal || Math.max(gap, 0.01), Math.sin(Math.PI * Math.min(1, Math.max(0, 1 - gap / cam.cTotal)))) : (cam.cTotal = 0, 0),
-      ease = (cam.catching ? (0.018 + 0.032 * Math.min(1, gap / 0.6)) * (1 + 1.0 * mid) : 0.06) * PACE * ramp;   // (2x quicker mid-way; start and end as they were)   // arriving: as it always was; on the way: keeps up with the scroll's own speed
+      ease = (cam.catching ? (0.018 + 0.032 * Math.min(1, gap / 0.6)) * (1 + 1.0 * mid) : 0.045) * PACE * ramp;   // (2x quicker mid-way; start and end as they were)   // arriving: as it always was; on the way: keeps up with the scroll's own speed
     cam.pos += (cam.target - cam.pos) * (1 - Math.pow(1 - ease, f));
     const lagK = cam.catching ? 0.6 + 0.4 * Math.min(1, gap / 0.6) : 1;      // the props settle in with it, not after it
     for (const k in LAG) cam.lag[k] += (cam.pos - cam.lag[k]) * (1 - Math.pow(1 - PACE * LAG[k] * (cam.catching ? Math.max(lagK, 1.4 - lagK) * (1 + 1.0 * mid) : 1), f));
@@ -2914,7 +2914,7 @@
     if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = now; return; }       // the one scroll of rest on an object
     if (cam.target === Math.round(cam.target)) { d *= 0.5; if (Math.abs(cam.pos - cam.target) < 0.01) cam.startT = now; }   // (the first push off a resting stop: heavy, only a small soft glide)
     advance(d);
-    if (!cam.catching) cam.vel = cam.vel * 0.6 + d * 0.04 * gain;            // the bigger the scroll, the further it carries
+    if (!cam.catching) cam.vel = cam.vel * 0.6 + d * 0.075 * gain;   // (the faster the scroll, the further it glides on)            // the bigger the scroll, the further it carries
     cam.lastIn = now;
   } });
   function camGo(i, instant) {
