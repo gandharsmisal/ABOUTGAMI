@@ -2991,7 +2991,7 @@
       r += drift * 7; y -= Math.abs(drift) * 18; y += Math.sin(cam.t * 0.9 + BOB[id]) * 2.2;
       if (id === 'hpCup') x -= SLIDE * cam.lift;                           // slid along the table, never lifted
       {   // on the way between stops every object swings in across the middle, then out to its next place (desktop and phones)
-        const lg = cam.lag[id === 'hpCup' ? 'hpPhone' : id], fr = lg - Math.floor(lg), b = mod(Math.floor(lg)) === 0 ? 0 : Math.pow(Math.sin(Math.PI * fr), 1.3) * (isMobMain() ? 0.6 : 0.5);   // (straight to and from the laptop stop)
+        const lg = cam.lag[id === 'hpCup' ? 'hpPhone' : id], fr = lg - Math.floor(lg), b = isMobMain() && mod(Math.floor(lg)) === 0 ? 0 : Math.pow(Math.sin(Math.PI * fr), 1.3) * (isMobMain() ? 0.6 : 0.5);   // (phones: straight to and from the laptop stop; desktop crosses on every move)
         const CM = { hpLaptop: [-120, 150], hpBook: [140, -140], hpPhone: [150, 120], hpCup: [150, 120] }[id];
         x += (960 + CM[0] - x) * b; y += (540 + CM[1] - y) * b;
       }
@@ -3019,7 +3019,7 @@
       // on the way between stops they travel through the middle, close together as a loose group, then out to their next
       // places (strongest halfway, none at the stops)
       const CL = { paper: [-190, -70], sketchbook: [190, -90], camera: [250, 100], scissors: [-230, 120], marker: [20, 170] }[n] || [0, 0];
-      const bump = mod(Math.floor(p)) === 0 ? 0 : Math.pow(Math.sin(Math.PI * frac), 1.2) * 0.95, mk = isMobMain() ? 0.55 : 0.8;   // (every one crosses right through the middle)
+      const bump = isMobMain() && mod(Math.floor(p)) === 0 ? 0 : Math.pow(Math.sin(Math.PI * frac), 1.2) * 0.95, mk = isMobMain() ? 0.55 : 0.8;   // (every one crosses right through the middle)
       const x1 = x0 + (960 + CL[0] * mk - x0) * bump, y1 = y0 + (560 + CL[1] * mk - y0) * bump;
       $('dk-' + n).setAttribute('transform', `translate(${x1} ${y1}) rotate(${r + spin}) scale(${(isMobMain() ? 1.27 : 0.95 * ({ sketchbook: 1.1, marker: 1.3, scissors: 1.2, camera: 0.8 }[n] || 1)) * ds})`);
       // desktop, first view: the pencil lies apart from the sketchbook and the scissors apart from the film; at the other stops they come together
