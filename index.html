@@ -1823,11 +1823,11 @@
       $('heroScroll').style.opacity = fade * Math.max(0, (F.bubble - 0.6) / 0.4);
     }
     const walkIn = gsap.timeline({ paused: true, onUpdate: figFrame })
-      // (walks at the intro figure's pace: the same steps per second as the walk out of the door, ~4.9)
-      .fromTo(F, { x: X0, stride: 1, arm: 0, bubble: 0 }, { x: HX, duration: 1.79, ease: 'none' }, 0)
-      .to(F, { stride: 0, duration: 0.37, ease: 'sine.inOut' }, 1.42)
-      .to(F, { arm: 1, duration: 0.45, ease: 'sine.inOut' }, 1.89)
-      .to(F, { bubble: 1, duration: 0.55, ease: 'none' }, 2.39);
+      // (a brisker walk than the intro figure: ~6.3 steps a second)
+      .fromTo(F, { x: X0, stride: 1, arm: 0, bubble: 0 }, { x: HX, duration: 1.4, ease: 'none' }, 0)
+      .to(F, { stride: 0, duration: 0.3, ease: 'sine.inOut' }, 1.1)
+      .to(F, { arm: 1, duration: 0.45, ease: 'sine.inOut' }, 1.5)
+      .to(F, { bubble: 1, duration: 0.55, ease: 'none' }, 2.0);
     // windows wider than 16:9 leave a margin beside the 1920 stage: the figure keeps to the window's real left edge
     const fig = $('heroFig');
     const hugLeft = () => {
