@@ -3019,7 +3019,7 @@
       // on the way between stops they travel through the middle, close together as a loose group, then out to their next
       // places (strongest halfway, none at the stops)
       const CL = { paper: [-190, -70], sketchbook: [190, -90], camera: [250, 100], scissors: [-230, 120], marker: [20, 170] }[n] || [0, 0];
-      const bump = Math.pow(Math.sin(Math.PI * frac), 1.4) * 0.62, mk = isMobMain() ? 0.7 : 1;
+      const bump = Math.pow(Math.sin(Math.PI * frac), 1.2) * 0.95, mk = isMobMain() ? 0.55 : 0.8;   // (every one crosses right through the middle)
       const x1 = x0 + (960 + CL[0] * mk - x0) * bump, y1 = y0 + (560 + CL[1] * mk - y0) * bump;
       $('dk-' + n).setAttribute('transform', `translate(${x1} ${y1}) rotate(${r + spin}) scale(${(isMobMain() ? 1.27 : 0.95 * ({ sketchbook: 1.1, marker: 1.3, scissors: 1.2, camera: 0.8 }[n] || 1)) * ds})`);
       // desktop, first view: the pencil lies apart from the sketchbook and the scissors apart from the film; at the other stops they come together
