@@ -2998,7 +2998,12 @@
       const p = cam.lag.desk, [x0, y0, r, ds] = between(p, i => { const [x, y, rr, s = 1] = DESK[n][i];
         return [x + (x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0), y + (y < 150 ? -cam.ey : y > 930 ? cam.ey : 0), rr, s]; });
       const frac = p - Math.floor(p), spin = SPIN[n] * 360 * smooth(frac);   // one whole turn per move (so it lands at the same angle), slow at the start and the end
-      $('dk-' + n).setAttribute('transform', `translate(${x0} ${y0}) rotate(${r + spin}) scale(${(isMobMain() ? 1.27 : 0.95 * ({ sketchbook: 1.1, marker: 1.3, scissors: 1.2, camera: 0.8 }[n] || 1)) * ds})`);
+      // on the way between stops they travel through the middle, close together as a loose group, then out to their next
+      // places (strongest halfway, none at the stops)
+      const CL = { paper: [-190, -70], sketchbook: [190, -90], camera: [250, 100], scissors: [-230, 120], marker: [20, 170] }[n] || [0, 0];
+      const bump = Math.pow(Math.sin(Math.PI * frac), 1.4) * 0.62, mk = isMobMain() ? 0.7 : 1;
+      const x1 = x0 + (960 + CL[0] * mk - x0) * bump, y1 = y0 + (560 + CL[1] * mk - y0) * bump;
+      $('dk-' + n).setAttribute('transform', `translate(${x1} ${y1}) rotate(${r + spin}) scale(${(isMobMain() ? 1.27 : 0.95 * ({ sketchbook: 1.1, marker: 1.3, scissors: 1.2, camera: 0.8 }[n] || 1)) * ds})`);
       // desktop, first view: the pencil lies apart from the sketchbook and the scissors apart from the film; at the other stops they come together
       const sp = SPLIT[n]; if (sp) { const k = isMobMain() ? 0 : between(p, i => [i === 0 ? 1 : 0])[0];
         $('dkp-' + n).setAttribute('transform', `translate(${sp[0] * k} ${sp[1] * k}) rotate(${sp[2] * k} ${sp[3]} ${sp[4]})`); }
