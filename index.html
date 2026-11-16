@@ -2310,7 +2310,7 @@
   }
 
   const N = WORK.length, ease = t => t * t * (3 - 2 * t), clamp01 = t => Math.min(1, Math.max(0, t));
-  const SWELL = isMob() ? 64 : 34, SWELL_SCALE = isMob() ? 0.06 : 0.04;   // how fat the frame gets just before it bursts (a phone: more, as it is shown smaller)
+  const SWELL = isMob() ? 44 : 34, SWELL_SCALE = isMob() ? 0.045 : 0.04;   // how fat the frame gets just before it bursts (a phone: more, as it is shown smaller)
   const PRE = 0.75;                                               // how far the next sand gets while you're still pushing
   const wpFrame = $('wpFrame');
   // state: cur = the project shown; fat = how swollen the frame is (0..1); trans = a change in progress
@@ -2796,7 +2796,7 @@
     { const [x, y] = at(0.96, 0.13); DESK_MOB.sketchbook[2] = [x, y, -14]; }   // (notebook stop: the sketchbook to the top right, clear of the cup and phone)
     // phones, the stops: each side object pushed out to its nearest edge of the phone's view, only a share of it inside
     // (they were pulled in with the rest of the layout and sat too far in)
-    { const [X0, Y0] = at(0, 0), [X1, Y1] = at(1, 1), SH = { paper: 0.3, sketchbook: 0.32, camera: 0.42, scissors: 0.4, marker: 0.45 };
+    { const [X0, Y0] = at(0, 0), [X1, Y1] = at(1, 1), SH = { paper: 0.22, sketchbook: 0.24, camera: 0.34, scissors: 0.32, marker: 0.36 };
       for (const n in DESK_MOB) for (let i = 1; i < DESK_MOB[n].length; i++) {
         const [x, y, r] = DESK_MOB[n][i], im = document.querySelector(`#dk-${n} image`);
         const w = (+(im && im.getAttribute('width')) || 0) * 1.27, h = (+(im && im.getAttribute('height')) || 0) * 1.27, a = r * Math.PI / 180;
@@ -2813,7 +2813,7 @@
     const L = [null,
       { focus: 'hpLaptop', text: 0.27, hpLaptop: [0.5, 0.54, 0], hpBook: [0.06, 0.95, 14], hpPhone: [0.93, 0.16, -10] },
       { focus: 'hpBook', text: 0.42, hpBook: [0.5, 0.58, 2], hpLaptop: [0.1, 0.97, 16], hpPhone: [0.2, 0.16, 8] },   // (the cup and phone top left)
-      { focus: 'hpPhone', text: 0.27, hpPhone: [0.5, 0.6, 2], hpLaptop: [0.18, -0.02, 12], hpBook: [0.93, 0.1, -12] }];   // (the laptop on top, left; the notebook to the right)
+      { focus: 'hpPhone', text: 0.27, hpPhone: [0.5, 0.5, 2], hpLaptop: [0.18, -0.02, 12], hpBook: [0.93, 0.1, -12] }];   // (the laptop on top, left; the notebook to the right)
     const HALF = { hpLaptop: 163, hpBook: 123, hpPhone: 90 };
     for (let i = 1; i <= 3; i++) {
       const s = CAM_MOB[i], l = L[i];
