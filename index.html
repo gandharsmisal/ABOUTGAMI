@@ -258,6 +258,7 @@
   .abPage::before { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
     background: var(--paperTex) 0 0 / 100% 100%; mix-blend-mode: multiply; }
   .abHalfR .abPage::before { transform: scaleX(-1); }
+  #ctPhone { will-change: transform; }   /* (the phone moves as one layer: lighter to animate) */
   /* photocopies glued in: torn white paper round a grainy print (the tear is cut in JS) */
   .abCopy { position: absolute; margin: 0; filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.22)); }
   .abCopy .tear { padding: 9px; background: linear-gradient(rgba(150, 140, 148, 0.24), rgba(150, 140, 148, 0.24)), url(assets/about/paper-white.jpg) center / cover; }
@@ -546,7 +547,7 @@
   #menu button:hover::before, #menu button:focus-visible::before { opacity: 0.55; }
   #menu .scribble { display: none !important; }
   /* thin pen lines, like the logo and the drawings */
-  #menu .pill-icon .ink { fill: none; stroke: #050403; stroke-width: 2.6px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  #menu .pill-icon .ink { fill: none; stroke: #050403; stroke-width: 1.8px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
   #menu .pill-icon .dot { fill: currentColor; transition: transform 0.12s ease-out; }
   /* hover: a hand-drawn line scribbles itself in under the word, and rubs out again when the pointer leaves */
   #menu .scribble { position: absolute; left: -3px; right: -3px; top: calc(100% + 4px); width: calc(100% + 6px); height: 7px; overflow: visible; pointer-events: none; }
@@ -2600,8 +2601,8 @@
     if (nb) nb.style.opacity = 0;
     about.tl = gsap.timeline({ onStart() { this.timeScale(PACE); } })
       .to('#aboutPage .abBg', { opacity: 1, duration: 0.6, ease: 'sine.inOut' }, 0.1)
-      .to(abBook, { x: 0, y: 0, scale: 1, rotation: 0, duration: 1.15, ease: 'power3.inOut' }, 0)             // comes over from the desk...
-      .to('#abCover', { rotationY: -180, duration: 1, ease: 'power2.inOut' }, 0.15)                           // ...opening as it comes
+      .to(abBook, { x: 0, y: 0, scale: 1, rotation: 0, duration: 0.95, ease: 'power3.inOut' }, 0)             // comes over from the desk...
+      .to('#abCover', { rotationY: -180, duration: 0.85, ease: 'power2.inOut' }, 0.12)                           // ...opening as it comes
       .set('#abLeaf', { zIndex: 2 }, 0.65)
       .to('#abRings, #abArrow', { opacity: 1, duration: 0.25, ease: 'none' }, 1)
       .fromTo('#abBook .abShadow', { opacity: 0 }, { opacity: 1, duration: 0.5, ease: 'sine.out' }, 0.6)
@@ -2690,9 +2691,9 @@
       gsap.set('#ctPhone', { x: 0, y: 0, scale: 1, rotation: 0 });
       const pr = $('ctPhone').getBoundingClientRect(), k = hp.h / pr.height, sx = hp.x - innerWidth / 2, sy = hp.y - (pr.top + pr.height / 2);
       $('hpPhone').style.opacity = 0;
-      gsap.fromTo('#ctPhone', { x: sx, y: sy, scale: k, rotation: hp.rot, filter: 'drop-shadow(0px 2px 3px rgba(0,0,0,0.18))' },
-        { x: 0, y: 0, scale: 1, rotation: 0, filter: 'drop-shadow(0px 10px 14px rgba(0,0,0,0.2))', duration: 1.05, ease: 'power3.inOut' });   // from the desk to the middle
-    } else gsap.fromTo('#ctPhone', { x: 0, y: innerHeight * 0.7, scale: 1, rotation: 8 }, { y: 0, rotation: 0, duration: 0.9, ease: 'power3.out', delay: 0.1 });
+      gsap.fromTo('#ctPhone', { x: sx, y: sy, scale: k, rotation: hp.rot },
+        { x: 0, y: 0, scale: 1, rotation: 0, duration: 0.85, ease: 'power3.inOut' });   // from the desk to the middle
+    } else gsap.fromTo('#ctPhone', { x: 0, y: innerHeight * 0.7, scale: 1, rotation: 8 }, { y: 0, rotation: 0, duration: 0.8, ease: 'power3.out', delay: 0.1 });
     if (PACE !== 1) gsap.getTweensOf('#ctPhone, #contactPage .ctBg').forEach(tw => tw.timeScale(PACE));
   }
   function closeContact(fast, then) {
@@ -2709,7 +2710,7 @@
       const pr = $('ctPhone').getBoundingClientRect();
       gsap.set('#ctPhone', { scale: cur });
       gsap.to('#ctPhone', { x: hp.x - innerWidth / 2, y: hp.y - (pr.top + pr.height / 2), scale: hp.h / pr.height, rotation: hp.rot,
-        filter: 'drop-shadow(0px 2px 3px rgba(0,0,0,0.18))', duration: 1.05, ease: 'power3.inOut', onComplete: done });   // the same pace as it came up
+        duration: 0.85, ease: 'power3.inOut', onComplete: done });   // the same pace as it came up
     } else gsap.to('#ctPhone', { y: innerHeight * 0.7, rotation: 8, duration: 0.6, ease: 'power2.in', onComplete: done });
     if (PACE !== 1) gsap.getTweensOf('#ctPhone, #contactPage .ctBg').forEach(tw => tw.timeScale(PACE));
     return true;
