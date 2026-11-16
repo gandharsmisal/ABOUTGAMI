@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>GA.MI Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand+SC&family=Playfair+Display:wght@700&family=Source+Serif+4:wght@400;600&family=Reenie+Beanie&family=Outfit:wght@400;600&family=Architects+Daughter&family=Indie+Flower&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand+SC&family=Playfair+Display:wght@700&family=Source+Serif+4:wght@400;600&family=Reenie+Beanie&family=Outfit:wght@400;600&family=Architects+Daughter&family=Indie+Flower&family=Noto+Serif+JP:wght@400&display=swap">
 <style>
   /* Layout: one pinned full-screen intro; scroll distance drives its scrubbed timeline. */
   :root {
@@ -192,8 +192,8 @@
   .wpBody { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 960px 539px; will-change: transform; }
   #wpCanvas { left: 442px; top: 182px; width: 1036px; height: 714px; }
   .wpFrame { fill: none; stroke: #111; stroke-width: 3.6px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-  #wpFront text { fill: var(--pen); font: 400 21px "Outfit", system-ui, sans-serif; letter-spacing: 0.005em; }
-  #wpFront .wpName { font: 400 36px "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); letter-spacing: 0.01em; }
+  #wpFront text { fill: var(--pen); font: 400 20px "Noto Serif JP", serif; letter-spacing: 0.005em; }
+  #wpFront .wpName { font: 400 36px "Gandhar Hand", "Indie Flower", var(--hand); letter-spacing: 0.01em; stroke: var(--pen); stroke-width: 0.9px; paint-order: stroke; }
   #wpFront .wpStar { font-size: 19px; }
   #wpDots .wpDot { fill: none; stroke: #8f8f8f; stroke-width: 1.2px; vector-effect: non-scaling-stroke; }
   #wpDots .wpDot.on { stroke: var(--pen); }
@@ -2060,9 +2060,9 @@
     $('wpBottom').innerHTML = `<tspan class="wpStar">✩</tspan><tspan dx="12" style="fill:${p.open}">Click to open project</tspan>`;
     // every line ends bending round the top-right corner, like a long one does; the side and bottom lines follow
     // on after it (the measured lengths leave out the 12px gaps after the stars)
-    const topLen = $('wpTop').getComputedTextLength() + 48, topAt = Math.max(0, TOP_LEN + ARC * 0.85 - topLen);
+    const topLen = $('wpTop').getComputedTextLength() + 48, topAt = 0;
     // one continuous line: each part starts a star's gap after the one before, round the corners
-    const sideAt = topAt + topLen + 4;
+    const sideAt = Math.max(topAt + topLen + 4, TOP_LEN + ARC * 0.85);
     const sideEnd = sideAt + $('wpSide').getComputedTextLength() + 24;
     textAt.top = topAt; textAt.side = sideAt;
     textAt.bottom = sideEnd + 4;
