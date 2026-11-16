@@ -2917,7 +2917,11 @@
             P = P.concat((await pts(document.querySelector('#hpCup image'), PROPS.hpCup[0], PROPS.hpCup[1], s.hpCup[3] * 1.155 * 1.1)).map(([u, v]) => [u + ox, v + oy])); }
           if (!P.length) continue;
           const [X, Y] = turned(P, r), first = ['hpLaptop', 'hpBook', 'hpPhone'].filter(m => m !== FOC[i])[0] === k;
-          const [nx, ny] = first ? [X0 - q(X, 0.62), Y0 - 40 - q(Y, 0.66)] : [X1 - q(X, 0.38), Y1 + 40 - q(Y, 0.34)];   // (top-left / bottom-right corner, about a third in)
+          // (top-left / bottom-right corner, about a third in; at the notebook stop the other way round - top-right /
+          // bottom-left - so the mug and phone move to a new place at every stop)
+          const flip = i === 2;
+          const [nx, ny] = first !== flip ? [flip ? X1 - q(X, 0.38) : X0 - q(X, 0.62), Y0 - 40 - q(Y, 0.66)]
+                                          : [flip ? X0 - q(X, 0.62) : X1 - q(X, 0.38), Y1 + 40 - q(Y, 0.34)];
           const dx = nx - x, dy = ny - y;
           s[k] = [nx, ny, r, sc];
           if (k === 'hpPhone') s.hpCup = [s.hpCup[0] + dx, s.hpCup[1] + dy, s.hpCup[2], s.hpCup[3]];
@@ -2986,6 +2990,11 @@
       const drift = cam.pos - cam.lag[id];                                  // how far it trails: it tilts and lifts as it floats
       r += drift * 7; y -= Math.abs(drift) * 18; y += Math.sin(cam.t * 0.9 + BOB[id]) * 2.2;
       if (id === 'hpCup') x -= SLIDE * cam.lift;                           // slid along the table, never lifted
+      if (isMobMain()) {   // phones: on the way between stops it swings in near the middle too, then out to its next place
+        const lg = cam.lag[id === 'hpCup' ? 'hpPhone' : id], fr = lg - Math.floor(lg), b = Math.pow(Math.sin(Math.PI * fr), 1.4) * 0.45;
+        const CM = { hpLaptop: [-120, 150], hpBook: [140, -140], hpPhone: [150, 120], hpCup: [150, 120] }[id];
+        x += (960 + CM[0] - x) * b; y += (540 + CM[1] - y) * b;
+      }
       P[id] = [x, y, r, s];
     }
     for (const id in TURN) {
