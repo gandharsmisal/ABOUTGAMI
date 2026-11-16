@@ -70,6 +70,7 @@
   #heroProps > g { pointer-events: auto; cursor: pointer; }
   #heroDecor { pointer-events: none; }
   .deskBit image { filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.12)); }
+  #dk-camera image { filter: sepia(0.2) saturate(1.15) brightness(1.03) drop-shadow(0 3px 4px rgba(0, 0, 0, 0.12)); }   /* a little warmer */
   .hnote { font: 400 26px "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); fill: var(--pen); letter-spacing: 0.03em; }
   #heroScroll { font-family: "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); font-size: 28px; fill: var(--pen); text-transform: lowercase; letter-spacing: 0.04em; }
   /* ---------- case study pages: over the Work page (and the figure); they scroll on their own ---------- */
@@ -746,7 +747,7 @@
     <g id="heroProps">
       <!-- each prop 1.2x, spread apart and set down a little off-square (own height and tilt) so they look dropped there -->
       <!-- each prop is placed by JS (translate / rotate / scale about its own centre) for each scroll step -->
-      <g id="hpPhone" data-open="contact"><image class="hprop" href="assets/photo/contact-phone-off.webp" x="532.8" y="494" width="86.4" height="180" style="filter: drop-shadow(0 2px 4px rgba(40, 32, 18, 0.2))"></image></g>
+      <g id="hpPhone" data-open="contact"><image class="hprop" href="assets/photo/contact-phone-off.webp" x="532.8" y="494" width="86.4" height="180" style="filter: sepia(0.2) saturate(1.15) brightness(1.03) drop-shadow(0 2px 4px rgba(40, 32, 18, 0.2))"></image></g>
       <g id="hpCup" data-open="contact"><image class="hprop" href="assets/photo/hero-cup-bright.webp" x="462.3" y="424.3" width="178.3" height="159.3"></image></g>
       <g id="hpLaptop" data-open="work">
         <image class="hprop" href="assets/photo/hero-laptop-calm-bright.webp" x="772" y="335" width="374" height="360"></image>
@@ -760,7 +761,7 @@
         </g>
       </g>
       <g id="hpBook" data-open="about">
-        <image class="hprop" href="assets/photo/hero-notebook-warm.webp" x="1261.5" y="405.5" width="221" height="267"></image>
+        <image class="hprop" href="assets/photo/hero-notebook-sharp.webp" x="1261.5" y="405.5" width="221" height="267"></image>
       </g>
     </g>
     </g>
