@@ -114,8 +114,13 @@
   /* "back" on the book and the phone: like Previous, in the menu's thicker hand */
   #pageBack { position: fixed; z-index: 60; display: none; font-family: "Gandhar Hand", "Indie Flower", var(--hand); font-size: 22px;
     padding: 8px 16px; transform: translateY(-50%); }   /* placed beside the menu (left of "work", or of "menu" on a phone) by pageBackAt() */
-  #pageBack .csNextPill { filter: url(#crayon); }
   #pageBack .csNextArrow path { stroke-width: 2.6px; }
+  /* desktop: "back" as one of the menu's pills - the same height, type and fill (its hover is the menu's beige) */
+  @media (min-width: 601px) {
+    #pageBack { min-height: 36px; padding: 0 18px 0 14px; box-sizing: border-box; font: 600 16px/1 "Noto Serif JP", serif; text-transform: lowercase; }
+    #pageBack:hover, #pageBack:focus-visible { background-color: #EAE0C5; }
+    #pageBack:hover::before, #pageBack:focus-visible::before { opacity: 0; }
+  }
   html.ab-open #pageBack, html.ct-open #pageBack { display: inline-flex; }
   /* phones: on the book and the phone, "close" stands where the menu was (as in a case study); no menu, no back */
   @media (max-width: 600px) {
@@ -388,7 +393,8 @@
   .csTitle { filter: url(#crayon); }
   .wipPaper h2 { filter: url(#pencil); }
   /* the menu is written in a fine pen: solid ink, thin lines */
-  #menu .label { font-family: "Noto Serif JP", serif; font-weight: 600; font-size: 19px; }
+  #menu .label { font-family: "Noto Serif JP", serif; font-weight: 600; font-size: 16px; }
+  #menu .pill-icon { filter: url(#crayon); }   /* written in crayon, like the headings */
   .abMess { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
   .abMess text { font-family: "Gandhar Hand", "Indie Flower", var(--hand); fill: #48484C; }
   .abMess .scrib { fill: none; stroke: #3A3A3E; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
@@ -510,7 +516,7 @@
     position: relative; display: inline-flex; align-items: center; gap: 9px;
     min-height: 36px; padding: 0 20px 0 15px; border: 0; border-radius: 999px; color: inherit; cursor: pointer;
     background-color: #EAE0C5; background-image: var(--mottle), var(--grain); background-size: 120px, 180px; transition: background-color 0.18s ease;
-    font: 600 19px/1 "Noto Serif JP", serif; text-transform: none; letter-spacing: 0;
+    font: 600 16px/1 "Noto Serif JP", serif; text-transform: lowercase; letter-spacing: 0;
     -webkit-tap-highlight-color: transparent;
   }
   #menu button:focus-visible { outline: none; }
@@ -519,7 +525,7 @@
   #menu button:hover, #menu button:focus-visible { background-color: #E0D3B0; }
   #menu .scribble { display: none !important; }
   /* thin pen lines, like the logo and the drawings */
-  #menu .pill-icon .ink { fill: none; stroke: currentColor; stroke-width: 2.2px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  #menu .pill-icon .ink { fill: none; stroke: currentColor; stroke-width: 1.35px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
   #menu .pill-icon .dot { fill: currentColor; transition: transform 0.12s ease-out; }
   /* hover: a hand-drawn line scribbles itself in under the word, and rubs out again when the pointer leaves */
   #menu .scribble { position: absolute; left: -3px; right: -3px; top: calc(100% + 4px); width: calc(100% + 6px); height: 7px; overflow: visible; pointer-events: none; }
