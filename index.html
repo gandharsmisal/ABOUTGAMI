@@ -161,6 +161,20 @@
   #caseClose svg { width: 20px; height: 20px; }
   #caseClose path { fill: none; stroke: #1F1D1A; stroke-width: 2.2px; stroke-linecap: round; }
   #caseClose:hover .badge { transform: rotate(90deg); }
+  /* desktop: "close" as one of the menu's pills - beige, the cross and the word in Noto Serif JP; olive with texture on hover */
+  @media (min-width: 601px) {
+    #caseClose { height: 36px; top: calc(env(safe-area-inset-top, 0px) + 24px); gap: 8px; padding: 0 18px 0 13px; border-radius: 999px; isolation: isolate;
+      background-color: #EAE0C5; background-image: var(--mottle), var(--grain); background-size: 120px, 180px; transition: background-color 0.3s ease;
+      font: 600 16px/1 "Noto Serif JP", serif; text-transform: lowercase; letter-spacing: 0; color: #141210; }
+    #caseClose::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+      background-image: var(--mottle), var(--grain), var(--mottle); background-size: 90px, 140px, 210px; mix-blend-mode: multiply; opacity: 0; transition: opacity 0.3s ease; }
+    #caseClose:hover, #caseClose:focus-visible { background-color: #C2B287; }
+    #caseClose:hover::before, #caseClose:focus-visible::before { opacity: 0.55; }
+    #caseClose .badge, #caseClose:hover .badge, #caseClose:focus-visible .badge { width: 20px; height: 20px; background: none; }
+    #caseClose .badge::before { display: none; }
+    #caseClose svg { width: 17px; height: 17px; }
+    #caseClose path { stroke: #141210; stroke-width: 2.6px; }
+  }
   html.in-case #menu, html.in-case #menuBtn { display: none !important; }
   #csLoader { position: fixed; inset: 0; z-index: 45; display: none; place-items: center; background: var(--paper); }
   #csLoader::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: var(--grain); opacity: 0.6; }
@@ -522,9 +536,14 @@
   #menu .label { position: relative; }
   #menu .pill-icon { width: 24px; height: 24px; flex: none; overflow: visible; }
   #menu button:hover, #menu button:focus-visible { background-color: #C2B287; }   /* (hover: the warm olive of "back") */
+  /* the hover as on Next / back: the olive with a heavier mottled texture over it (blotches and grain, darker in patches) */
+  #menu button { isolation: isolate; }
+  #menu button::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+    background-image: var(--mottle), var(--grain), var(--mottle); background-size: 90px, 140px, 210px; mix-blend-mode: multiply; opacity: 0; transition: opacity 0.3s ease; }
+  #menu button:hover::before, #menu button:focus-visible::before { opacity: 0.55; }
   #menu .scribble { display: none !important; }
   /* thin pen lines, like the logo and the drawings */
-  #menu .pill-icon .ink { fill: none; stroke: currentColor; stroke-width: 1.35px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  #menu .pill-icon .ink { fill: none; stroke: currentColor; stroke-width: 2.1px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
   #menu .pill-icon .dot { fill: currentColor; transition: transform 0.12s ease-out; }
   /* hover: a hand-drawn line scribbles itself in under the word, and rubs out again when the pointer leaves */
   #menu .scribble { position: absolute; left: -3px; right: -3px; top: calc(100% + 4px); width: calc(100% + 6px); height: 7px; overflow: visible; pointer-events: none; }
@@ -568,6 +587,37 @@
   #drawerList [data-go="contact"] .pill-icon { transform-origin: 50% 52%; }
   #drawerList [data-go="contact"].tapped .pill-icon { animation: heartpop 0.9s ease-out; }
   #drawerList [data-go="about"].tapped .dot { animation: glance 0.7s ease-in-out; }
+
+  /* ---- every button as a beige paper pill in Noto Serif JP (like the desktop menu), the textured olive on hover ---- */
+  .mPill, .mPill .label { font-family: "Noto Serif JP", serif !important; font-weight: 600 !important; letter-spacing: 0 !important; -webkit-text-stroke: 0 !important; }
+  .mPill .label, .mPill .pill-icon { filter: none !important; }
+  .mPill .pill-icon .ink { stroke-width: 2.3px !important; }
+  /* Previous / Next (and back): beige pills at rest too */
+  .csNext { min-height: 44px; padding: 0 24px; box-sizing: border-box; background-color: #EAE0C5; background-image: var(--mottle), var(--grain); background-size: 120px, 180px;
+    font: 600 18px/1 "Noto Serif JP", serif; text-transform: lowercase; color: #141210; }
+  @media (max-width: 600px) {
+    #menuBtn { height: 44px; padding: 0 20px 0 15px !important; gap: 9px; font-size: 18px;
+      background-color: #EAE0C5 !important; background-image: var(--mottle), var(--grain) !important; background-size: 120px, 180px !important; box-shadow: 0 2px 8px rgba(40, 32, 18, 0.12); }
+    html.intro-locked #menuBtn { color: #141210; }
+    #drawerClose { height: 44px; padding: 0 20px 0 14px; gap: 8px; border-radius: 999px; color: #141210;
+      background-color: #D6C59D; background-image: var(--mottle), var(--grain); background-size: 120px, 180px;
+      font: 600 18px/1 "Noto Serif JP", serif !important; -webkit-text-stroke: 0 !important; letter-spacing: 0; }
+    #drawerClose .badge { width: 20px; height: 20px; }
+    #drawerClose svg { width: 17px; height: 17px; }
+    #drawerClose path { stroke: #141210; stroke-width: 2.6px !important; }
+    #drawerList { gap: 12px; margin-top: 22px; }
+    #drawerList .mPill { height: 54px; padding: 0 22px; gap: 14px; font-size: 19px;
+      background-color: #EAE0C5 !important; background-image: var(--mottle), var(--grain) !important; background-size: 120px, 180px !important; }
+    #drawerList .mPill .pill-icon { width: 24px; height: 24px; }
+    #drawerList .scribble { display: none; }
+    #caseClose { height: 40px; padding: 0 16px 0 12px; gap: 7px; border-radius: 999px; color: #141210;
+      background-color: #EAE0C5; background-image: var(--mottle), var(--grain); background-size: 120px, 180px;
+      font: 600 16px/1 "Noto Serif JP", serif !important; -webkit-text-stroke: 0 !important; letter-spacing: 0; }
+    #caseClose .badge { width: 20px; height: 20px; background: none !important; }
+    #caseClose svg { width: 16px; height: 16px; }
+    #caseClose path { stroke: #141210; stroke-width: 2.6px !important; }
+    .csNext { font-size: 17px; min-height: 42px; padding: 0 20px; }
+  }
   @keyframes glance { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(-1.8px, -1.6px); } 55% { transform: translate(1.8px, -1.2px); } 80% { transform: translate(0.6px, 1.4px); } }
   @media (prefers-reduced-motion: reduce) { #menu .pill-icon, #menu .label { animation: none !important; } }
   /* the logo, top left, level with the menu */
