@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>GA.MI Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand+SC&family=Playfair+Display:wght@700&family=Source+Serif+4:wght@400;600&family=Reenie+Beanie&family=Outfit:wght@400;600&family=Architects+Daughter&family=Indie+Flower&family=Noto+Serif+JP:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand+SC&family=Playfair+Display:wght@700&family=Source+Serif+4:wght@400;600&family=Reenie+Beanie&family=Outfit:wght@400;600&family=Architects+Daughter&family=Indie+Flower&family=Noto+Serif+JP:wght@400;600&display=swap">
 <style>
   /* Layout: one pinned full-screen intro; scroll distance drives its scrubbed timeline. */
   :root {
@@ -388,8 +388,7 @@
   .csTitle { filter: url(#crayon); }
   .wipPaper h2 { filter: url(#pencil); }
   /* the menu is written in a fine pen: solid ink, thin lines */
-  #menu .label { font-family: "Gandhar Hand", "Indie Flower", var(--hand); font-size: 22px; filter: url(#crayon); -webkit-text-stroke: 0.15px currentColor; }   /* (a touch heavier) */
-  #menu .pill-icon { filter: url(#crayon); }   /* written in crayon, like the headings */
+  #menu .label { font-family: "Noto Serif JP", serif; font-weight: 600; font-size: 19px; }
   .abMess { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
   .abMess text { font-family: "Gandhar Hand", "Indie Flower", var(--hand); fill: #48484C; }
   .abMess .scrib { fill: none; stroke: #3A3A3E; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
@@ -472,9 +471,9 @@
   #menu {
     position: fixed; z-index: 50; top: calc(env(safe-area-inset-top, 0px) + 18px); right: 36px;
     height: 48px; display: flex; align-items: center;
-    color: #fff; mix-blend-mode: difference;
+    color: #141210;
   }
-  #menu-list { display: flex; align-items: center; gap: 26px; }
+  #menu-list { display: flex; align-items: center; gap: 12px; }
   /* phones: the menu button and its drawer (the row of words is not shown there) */
   #menuBtn, #drawer, #drawerShade { display: none; }
   .mPill { display: inline-flex; align-items: center; gap: 10px; border: 0; border-radius: 999px; cursor: pointer; color: #141210;
@@ -506,17 +505,21 @@
     html.drawer-open #drawer { transform: none; }
     html.drawer-open #drawerShade { opacity: 1; pointer-events: auto; }
   }
+  /* menu items as beige pills: a dark hand-drawn icon and the word in Noto Serif JP */
   #menu button {
-    position: relative; display: inline-flex; align-items: center; gap: 8px;
-    min-height: 44px; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer;
-    font: 400 22px/1 "Gandhar Hand", "Indie Flower", var(--hand); text-transform: lowercase; letter-spacing: 0.02em;
+    position: relative; display: inline-flex; align-items: center; gap: 9px;
+    min-height: 36px; padding: 0 20px 0 15px; border: 0; border-radius: 999px; color: inherit; cursor: pointer;
+    background-color: #EAE0C5; background-image: var(--mottle), var(--grain); background-size: 120px, 180px; transition: background-color 0.18s ease;
+    font: 600 19px/1 "Noto Serif JP", serif; text-transform: none; letter-spacing: 0;
     -webkit-tap-highlight-color: transparent;
   }
   #menu button:focus-visible { outline: none; }
   #menu .label { position: relative; }
-  #menu .pill-icon { width: 28px; height: 28px; flex: none; overflow: visible; }
+  #menu .pill-icon { width: 24px; height: 24px; flex: none; overflow: visible; }
+  #menu button:hover, #menu button:focus-visible { background-color: #E0D3B0; }
+  #menu .scribble { display: none !important; }
   /* thin pen lines, like the logo and the drawings */
-  #menu .pill-icon .ink { fill: none; stroke: currentColor; stroke-width: 1.35px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  #menu .pill-icon .ink { fill: none; stroke: currentColor; stroke-width: 2.2px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
   #menu .pill-icon .dot { fill: currentColor; transition: transform 0.12s ease-out; }
   /* hover: a hand-drawn line scribbles itself in under the word, and rubs out again when the pointer leaves */
   #menu .scribble { position: absolute; left: -3px; right: -3px; top: calc(100% + 4px); width: calc(100% + 6px); height: 7px; overflow: visible; pointer-events: none; }
@@ -2747,6 +2750,8 @@
       s.note = [960, s[l.focus][1] + HALF[l.focus] * s[l.focus][3] + 40];
     }
   }
+  // the desk's pictures decoded up front (the bigger, sharper ones made the first move stutter while they were decoded)
+  document.querySelectorAll('#heroProps image, #heroDecor image').forEach(im => { const p = new Image(); p.src = im.getAttribute('href'); if (p.decode) p.decode().catch(() => {}); });
   const NOTES = [null, 'hnLaptop', 'hnBook', 'hnMug'], NS = CAM.length, SLIDE = 125;   // how far the mug slides off the phone
   /* The scroll is in the visitor's hands: the wheel / finger moves a target along the steps (about 4 notches a step),
      the canvas follows it softly and every prop trails a little behind at its own pace, tilting as it drifts, so
@@ -2870,9 +2875,16 @@
     const ramp = cam.startT ? (u => 0.06 + 0.94 * u * u)(Math.min(1, (performance.now() - cam.startT) / 700)) : 1;   // (a slow, small glide first, building over almost a second)
     const gap = Math.abs(cam.target - cam.pos), mid = cam.catching ? (cam.cTotal = cam.cTotal || Math.max(gap, 0.01), Math.sin(Math.PI * Math.min(1, Math.max(0, 1 - gap / cam.cTotal)))) : (cam.cTotal = 0, 0),
       ease = (cam.catching ? (0.018 + 0.032 * Math.min(1, gap / 0.6)) * (1 + 1.0 * mid) : 0.045) * PACE * ramp;   // (2x quicker mid-way; start and end as they were)   // arriving: as it always was; on the way: keeps up with the scroll's own speed
-    cam.pos += (cam.target - cam.pos) * (1 - Math.pow(1 - ease, f));
+    // a smooth glide: the target itself is eased first (each notch or a stop's pull flows in, never a jump), and the speed
+    // of following changes gradually (no sudden switch when it reaches an object and starts gliding in)
+    if (cam.tS === undefined) cam.tS = cam.target;
+    cam.tS += (cam.target - cam.tS) * (1 - Math.pow(1 - 0.2, f));
+    cam.easeS = cam.easeS === undefined ? ease : cam.easeS + (ease - cam.easeS) * (1 - Math.pow(0.9, f));
+    cam.pos += (cam.tS - cam.pos) * (1 - Math.pow(1 - cam.easeS, f));
     const lagK = cam.catching ? 0.6 + 0.4 * Math.min(1, gap / 0.6) : 1;      // the props settle in with it, not after it
-    for (const k in LAG) cam.lag[k] += (cam.pos - cam.lag[k]) * (1 - Math.pow(1 - PACE * LAG[k] * (cam.catching ? Math.max(lagK, 1.4 - lagK) * (1 + 1.0 * mid) : 1), f));
+    const lagM = cam.catching ? Math.max(lagK, 1.4 - lagK) * (1 + 1.0 * mid) : 1;
+    cam.lagMS = cam.lagMS === undefined ? lagM : cam.lagMS + (lagM - cam.lagMS) * (1 - Math.pow(0.9, f));   // (changes gradually too)
+    for (const k in LAG) cam.lag[k] += (cam.pos - cam.lag[k]) * (1 - Math.pow(1 - PACE * LAG[k] * cam.lagMS, f));
     const settled = arrived && cam.target === Math.round(cam.target);
     if (settled && cam.shown !== mod(cam.target)) showNote(mod(cam.target));
     else if (!settled && cam.shown !== null && Math.abs(cam.target - cam.pos) > 0.06) hideNotes();
@@ -2921,7 +2933,7 @@
     const r0 = Math.round(cam.target); let dI = mod(i - mod(r0)); if (dI > NS / 2) dI -= NS;   // the short way round
     cam.target = r0 + dI;
     cam.vel = 0; cam.catching = !instant; cam.absorb = false;
-    if (instant) { cam.pos = cam.target; for (const k in LAG) cam.lag[k] = cam.target; hideNotes(); camDraw(); }
+    if (instant) { cam.pos = cam.tS = cam.target; for (const k in LAG) cam.lag[k] = cam.target; hideNotes(); camDraw(); }
   }
   addEventListener('keydown', e => {
     if (!mainActive()) return;
