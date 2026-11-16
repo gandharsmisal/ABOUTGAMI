@@ -944,7 +944,7 @@
             <h2 style="left: 40px; top: 30px; transform: rotate(-2deg)">pen &amp; ink</h2>
             <!-- the pen portraits (moved here from the first spread): bigger, the clean print with only a light photocopy feel -->
             <figure class="abCopy" style="left: 120px; top: 110px; transform: rotate(-3deg); filter: none">
-              <div class="tear"><img src="assets/about/pen-copy2.jpg?v=5" alt="Pen portraits: a turtle, a koala, a dancer, a squirrel, a Kathakali face and a warkari" width="500" height="687"></div>
+              <div class="tear"><img src="assets/about/pen-copy2.jpg?v=6" alt="Pen portraits: a turtle, a koala, a dancer, a squirrel, a Kathakali face and a warkari" width="500" height="687"></div>
             </figure>
             <div class="abNote" style="left: 150px; top: 830px; width: 460px; transform: rotate(-1deg); text-align: center">pen &amp; ink —<br>a turtle, a sleepy koala &amp; a few faces</div>
           </div>
@@ -1824,10 +1824,10 @@
     }
     const walkIn = gsap.timeline({ paused: true, onUpdate: figFrame })
       // (a brisker walk than the intro figure: ~6.3 steps a second)
-      .fromTo(F, { x: X0, stride: 1, arm: 0, bubble: 0 }, { x: HX, duration: 1.4, ease: 'none' }, 0)
-      .to(F, { stride: 0, duration: 0.3, ease: 'sine.inOut' }, 1.1)
-      .to(F, { arm: 1, duration: 0.45, ease: 'sine.inOut' }, 1.5)
-      .to(F, { bubble: 1, duration: 0.55, ease: 'none' }, 2.0);
+      .fromTo(F, { x: X0, stride: 1, arm: 0, bubble: 0 }, { x: HX, duration: 1.1, ease: 'none' }, 0)
+      .to(F, { stride: 0, duration: 0.25, ease: 'sine.inOut' }, 0.86)
+      .to(F, { arm: 1, duration: 0.4, ease: 'sine.inOut' }, 1.2)
+      .to(F, { bubble: 1, duration: 0.5, ease: 'none' }, 1.65);
     // windows wider than 16:9 leave a margin beside the 1920 stage: the figure keeps to the window's real left edge
     const fig = $('heroFig');
     const hugLeft = () => {
