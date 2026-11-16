@@ -2862,7 +2862,7 @@
     if (cam.absorb && cam.absorbSeen && performance.now() - cam.lastIn > 160) cam.absorb = cam.absorbSeen = false;   // that scroll is over
     if (performance.now() - cam.lastIn > 90 && cam.vel) {
       advance(cam.vel * f); cam.vel *= Math.pow(0.94, f);   // carries on a little longer (a glide)
-      if (Math.abs(cam.vel) < 0.0015) { cam.vel = 0; if (Math.abs(cam.target - Math.round(cam.target)) < 0.015) cam.target = Math.round(cam.target); }
+      if (Math.abs(cam.vel) < 0.0015) { cam.vel = 0; if (Math.abs(cam.target - Math.round(cam.target)) < 0.003) cam.target = Math.round(cam.target); }   // (only a hair off: back on it; a small first push is not undone)
     }
     // quick on the way, easing off as an object comes in: the last stretch before it slows right down
     // start: leaving a stop, it glides off softly (the follow builds up over about half a second); middle: it follows the
@@ -2912,7 +2912,7 @@
     if (cam.catching) { cam.lastIn = now; return; }                              // gliding in: scrolling waits
     if (cam.inert) { if (gapIn < 120 && raw <= lastRaw * 1.15) { cam.lastIn = now; return; } cam.inert = false; }
     if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = now; return; }       // the one scroll of rest on an object
-    if (cam.target === Math.round(cam.target)) { d *= 1.8; if (Math.abs(cam.pos - cam.target) < 0.01) cam.startT = now; }   // (the first push off a resting stop: not heavy; it glides off softly)
+    if (cam.target === Math.round(cam.target)) { d *= 0.5; if (Math.abs(cam.pos - cam.target) < 0.01) cam.startT = now; }   // (the first push off a resting stop: heavy, only a small soft glide)
     advance(d);
     if (!cam.catching) cam.vel = cam.vel * 0.6 + d * 0.04 * gain;            // the bigger the scroll, the further it carries
     cam.lastIn = now;
