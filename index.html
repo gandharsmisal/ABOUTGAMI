@@ -2990,8 +2990,8 @@
       const drift = cam.pos - cam.lag[id];                                  // how far it trails: it tilts and lifts as it floats
       r += drift * 7; y -= Math.abs(drift) * 18; y += Math.sin(cam.t * 0.9 + BOB[id]) * 2.2;
       if (id === 'hpCup') x -= SLIDE * cam.lift;                           // slid along the table, never lifted
-      if (isMobMain()) {   // phones: on the way between stops it swings in near the middle too, then out to its next place
-        const lg = cam.lag[id === 'hpCup' ? 'hpPhone' : id], fr = lg - Math.floor(lg), b = Math.pow(Math.sin(Math.PI * fr), 1.4) * 0.45;
+      {   // on the way between stops every object swings in across the middle, then out to its next place (desktop and phones)
+        const lg = cam.lag[id === 'hpCup' ? 'hpPhone' : id], fr = lg - Math.floor(lg), b = Math.pow(Math.sin(Math.PI * fr), 1.3) * (isMobMain() ? 0.6 : 0.5);
         const CM = { hpLaptop: [-120, 150], hpBook: [140, -140], hpPhone: [150, 120], hpCup: [150, 120] }[id];
         x += (960 + CM[0] - x) * b; y += (540 + CM[1] - y) * b;
       }
