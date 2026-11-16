@@ -1885,7 +1885,7 @@
      itself - the door opens, the figure walks out, the lamp comes down and is pulled - at an even pace, and leaves
      the visitor in the white room; from there scrolling takes over (the laptop rises). The intro can't be scrolled
      back into; when the site loops back to the door it waits for a click again. */
-  const INTRO_SECS = 0.38;                                  // seconds per timeline step while the intro plays (quicker)
+  const INTRO_SECS = 0.48;                                  // seconds per timeline step while the intro plays (quicker)
   const introRestT = () => workAt - 0.05;                   // the white room, just before the laptop
   const timeToY = t => mainST.start + (t / master.duration()) * (mainST.end - mainST.start);
   const introRestY = () => timeToY(introRestT());
