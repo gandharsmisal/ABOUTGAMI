@@ -117,9 +117,8 @@
   #pageBack .csNextArrow path { stroke-width: 2.6px; }
   /* desktop: "back" as one of the menu's pills - the same height, type and fill (its hover is the menu's beige) */
   @media (min-width: 601px) {
-    #pageBack { min-height: 36px; padding: 0 18px 0 14px; box-sizing: border-box; font: 600 16px/1 "Noto Serif JP", serif; text-transform: lowercase; }
-    #pageBack:hover, #pageBack:focus-visible { background-color: #EAE0C5; }
-    #pageBack:hover::before, #pageBack:focus-visible::before { opacity: 0; }
+    #pageBack { min-height: 36px; padding: 0 18px 0 14px; box-sizing: border-box; font: 600 16px/1 "Noto Serif JP", serif; text-transform: lowercase;
+      background-color: #EAE0C5; background-image: var(--mottle), var(--grain); background-size: 120px, 180px; }   /* (a beige pill like the menu's; olive on hover) */
   }
   html.ab-open #pageBack, html.ct-open #pageBack { display: inline-flex; }
   /* phones: on the book and the phone, "close" stands where the menu was (as in a case study); no menu, no back */
@@ -522,7 +521,7 @@
   #menu button:focus-visible { outline: none; }
   #menu .label { position: relative; }
   #menu .pill-icon { width: 24px; height: 24px; flex: none; overflow: visible; }
-  #menu button:hover, #menu button:focus-visible { background-color: #E0D3B0; }
+  #menu button:hover, #menu button:focus-visible { background-color: #C2B287; }   /* (hover: the warm olive of "back") */
   #menu .scribble { display: none !important; }
   /* thin pen lines, like the logo and the drawings */
   #menu .pill-icon .ink { fill: none; stroke: currentColor; stroke-width: 1.35px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
