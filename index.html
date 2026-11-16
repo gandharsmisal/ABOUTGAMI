@@ -966,7 +966,7 @@
             <div class="abSticky" style="left: 44px; top: 140px; width: 230px; transform: rotate(-3deg)">I started by moving furniture around on a screen. Now I move buttons around on one.</div>
             <!-- big: sitting by the curtain, photocopied -->
             <figure class="abCopy" style="left: 388px; top: 112px; transform: rotate(3deg)">
-              <div class="tear"><img src="assets/about/copy-sit2.jpg?v=8" alt="Gandhar in glasses, a passport photo, as a grainy photocopy" width="160" height="212"></div>
+              <div class="tear"><img src="assets/about/copy-sit2.jpg?v=8" alt="Gandhar in glasses, a passport photo, as a grainy photocopy" width="135" height="179"></div>
             </figure>
             <span class="abTape" style="left: 476px; top: 100px; transform: rotate(-5deg)"></span>
             <div class="abNote" style="left: 440px; top: 420px; width: 200px; transform: rotate(-2deg)">that’s me!</div>
@@ -1623,7 +1623,7 @@
   // still in the doorway first); the last step slows into the stop
   const WALK0 = 0.5;                                                       // the door has swung open (swing 0.5)
   tl.to(S, { stride: 1, duration: 0.3, ease: 'sine.out' }, WALK0);
-  const INTRO_WALK = walkT(STOP * GAIT_INTRO) * 0.5;                    // walk out of the door to the lamp (6 steps), brisker: it plays by itself on "click to enter"
+  const INTRO_WALK = walkT(STOP * GAIT_INTRO) * 0.42;                    // walk out of the door to the lamp (6 steps), brisker: it plays by itself on "click to enter"
   tl.to(S, { u: STOP, duration: INTRO_WALK, ease: 'none' }, WALK0);
   tl.to(S, { stride: 0, duration: 0.5, ease: 'sine.inOut' }, WALK0 + INTRO_WALK - 0.5);   // comes to a stop, as in the other walks
   // the lamp slides down from the top as it walks (frame 28, step 8)
