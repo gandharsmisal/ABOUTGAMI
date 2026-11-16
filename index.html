@@ -594,6 +594,9 @@
   .mPill .pill-icon { filter: url(#crayon) !important; }   /* (the icons in crayon, as in the desktop menu) */
   .mPill .pill-icon .ink { stroke-width: 2.1px !important; }
   #caseCyber .csPrev { display: none; }   /* (Cybersmart is the first case study: no previous one) */
+  /* pressed (a finger on a phone): the same textured olive as the desktop hover */
+  .mPill:active, #drawerList .mPill:active, #menuBtn:active, #drawerClose:active, #caseClose:active, .csNext:active, #menu button:active { background-color: #C2B287 !important; }
+  .csNext:active::before, #menu button:active::before, #caseClose:active::before { opacity: 0.55; }
   /* Previous / Next (and back): beige pills at rest too */
   .csNext { min-height: 44px; padding: 0 24px; box-sizing: border-box; background-color: #EAE0C5; background-image: var(--mottle), var(--grain); background-size: 120px, 180px;
     font: 600 18px/1 "Noto Serif JP", serif; text-transform: lowercase; color: #141210; }
@@ -1265,6 +1268,7 @@
   })();
 </script>
 <script>
+  document.addEventListener('touchstart', () => {}, { passive: true });   // (lets a pressed button show its :active fill on iPhones)
   // the paper's texture over every scene: a clear tile with what recycled paper has in it - sparse fine specks, a few
   // short fibres (some faintly pink or blue) - made once and repeated
   (() => {
