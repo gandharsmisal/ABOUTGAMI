@@ -2399,7 +2399,7 @@
   workPage.addEventListener('touchend', () => {
     touchY = null;
     // one swipe, one picture: the frame swells all the way up (as on a desktop), then bursts on to the next one
-    if (Math.abs(touchSum) > 30 && work.ready && !W.trans && W.spreadIn >= SAND_FULL) {
+    if (Math.abs(touchSum) > 110 && work.ready && !W.trans && W.spreadIn >= SAND_FULL) {   // (a soft, half swipe just swells and settles back)
       const dir = Math.sign(touchSum); if (dir !== W.dir) { W.dir = dir; W.fat = 0; }
       W.pressure = 1; lastPush = performance.now();
     }
@@ -2800,7 +2800,7 @@
     { const [x, y] = at(0.96, 0.13); DESK_MOB.sketchbook[2] = [x, y, -14]; }   // (notebook stop: the sketchbook to the top right, clear of the cup and phone)
     // phones, the stops: each side object pushed out to its nearest edge of the phone's view, only a share of it inside
     // (they were pulled in with the rest of the layout and sat too far in)
-    { const [X0, Y0] = at(0, 0), [X1, Y1] = at(1, 1), SH = { paper: 0.22, sketchbook: 0.24, camera: 0.34, scissors: 0.32, marker: 0.36 };
+    { const [X0, Y0] = at(0, 0), [X1, Y1] = at(1, 1), SH = { paper: 0.16, sketchbook: 0.18, camera: 0.42, scissors: 0.4, marker: 0.44 };
       for (const n in DESK_MOB) for (let i = 1; i < DESK_MOB[n].length; i++) {
         const [x, y, r] = DESK_MOB[n][i], im = document.querySelector(`#dk-${n} image`);
         const w = (+(im && im.getAttribute('width')) || 0) * 1.27, h = (+(im && im.getAttribute('height')) || 0) * 1.27, a = r * Math.PI / 180;
