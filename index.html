@@ -741,8 +741,8 @@
     <g id="heroDecor" aria-hidden="true">   <!-- the rest of the desk, peeking in at the edges (placed in JS) -->
         <g id="dk-paper" class="deskBit"><image href="assets/photo/desk-grid.webp" x="-235.6" y="-185.4" width="471.1" height="370.8"></image></g>
         <g id="dk-marker" class="deskBit"><image href="assets/exact/desk-marker.png" x="-98" y="-120.6" width="196" height="241.3"></image></g>
-        <g id="dk-scissors" class="deskBit"><image href="assets/exact/desk-scissors.webp" x="-152.2" y="-182.7" width="304.5" height="365.4"></image></g>
-        <g id="dk-sketchbook" class="deskBit"><image href="assets/exact/desk-sketchbook.webp" x="-181.2" y="-142.1" width="362.5" height="284.2"></image></g>
+        <g id="dk-scissors" class="deskBit"><image href="assets/exact/desk-scissors-film.webp" x="-152.2" y="-182.7" width="304.5" height="365.4"></image><g id="dkp-scissors"><image href="assets/exact/desk-scissors-blade.webp" x="-152.2" y="-182.7" width="304.5" height="365.4"></image></g></g>
+        <g id="dk-sketchbook" class="deskBit"><image href="assets/exact/desk-sketchbook-book.webp" x="-181.2" y="-142.1" width="362.5" height="284.2"></image><g id="dkp-sketchbook"><image href="assets/exact/desk-sketchbook-pencil.webp" x="-181.2" y="-142.1" width="362.5" height="284.2"></image></g></g>
         <g id="dk-camera" class="deskBit"><image href="assets/photo/desk-camera.webp" x="-183.3" y="-227.6" width="366.8" height="455.3"></image></g>
     </g>
     <g id="heroProps">
@@ -2674,6 +2674,7 @@
     scissors:   [[25, 400, 20],   [380, 1065, -25], [1880, 690, 30],  [1380, 1065, -15]],
     marker:     [[1100, 1060, 70], [840, 55, -60],   [1320, 55, 100],  [1180, 55, -80]]
   }, SPIN = { paper: 1, camera: -1, sketchbook: 1, scissors: -1, marker: 1 };
+  const SPLIT = { sketchbook: [26, -8, 6, 75, 0], scissors: [34, -80, -12, 35, -43] };   // [dx, dy, turn, about x, about y] of the pencil / the scissors on the first view
   // the side objects sit on the page's edges, half on and half off (each centred on its nearest edge), or as much
   // inside as DESK_INSIDE says. Desktop, first view: every one wholly inside the frame, drawn at DESK0_SCALE so they fit
   // round the laptop, the mug and the notebook (they grow back to full size as they move to the next step)
@@ -2827,6 +2828,9 @@
         return [x + (x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0), y + (y < 150 ? -cam.ey : y > 930 ? cam.ey : 0), rr, s]; });
       const frac = p - Math.floor(p), spin = SPIN[n] * 360 * smooth(frac);   // one whole turn per move (so it lands at the same angle), slow at the start and the end
       $('dk-' + n).setAttribute('transform', `translate(${x0} ${y0}) rotate(${r + spin}) scale(${(isMobMain() ? 1.27 : 0.95 * ({ sketchbook: 1.1, marker: 1.3, scissors: 1.2, camera: 0.8 }[n] || 1)) * ds})`);
+      // desktop, first view: the pencil lies apart from the sketchbook and the scissors apart from the film; at the other stops they come together
+      const sp = SPLIT[n]; if (sp) { const k = isMobMain() ? 0 : between(p, i => [i === 0 ? 1 : 0])[0];
+        $('dkp-' + n).setAttribute('transform', `translate(${sp[0] * k} ${sp[1] * k}) rotate(${sp[2] * k} ${sp[3]} ${sp[4]})`); }
     }
     $('heroLineMove').setAttribute('transform', `translate(0 ${between(cam.lag.line, i => [CAM[i].ly])[0]})`);
     const step = mod(Math.round(cam.pos)), near = Math.max(0, 1 - Math.abs(cam.pos - Math.round(cam.pos)) * 5);
