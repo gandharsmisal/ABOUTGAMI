@@ -3023,7 +3023,9 @@
     cam.easeS = cam.easeS === undefined ? ease : cam.easeS + (ease - cam.easeS) * (1 - Math.pow(0.9, f));
     // the camera follows like something with weight on a soft spring: it can't jump to speed (a soft start), it moves as
     // fast as your scroll (the middle is yours) and it can't stop dead (a soft landing on the object) - one smooth curve
-    { const dts = Math.min(0.05, dt / 1000), w = cam.catching ? 6.5 : 9;
+    // (how fast you're scrolling right now - quick, continuous scrolling makes it travel and glide in faster)
+    { const h = heat.v * Math.exp(-(performance.now() - heat.t) / 400); cam.spd = (cam.spd || 0) + (Math.min(3, h) - (cam.spd || 0)) * (1 - Math.pow(0.92, f)); }
+    { const dts = Math.min(0.05, dt / 1000), w = (cam.catching ? 6.5 : 9) * (1 + 0.55 * cam.spd);
       cam.pv = (cam.pv || 0) + (w * w * (cam.tS - cam.pos) - 2 * w * (cam.pv || 0)) * dts;
       cam.pos += cam.pv * dts;
       if (Math.abs(cam.tS - cam.pos) < 0.0005 && Math.abs(cam.pv) < 0.002) { cam.pos = cam.tS; cam.pv = 0; } }
@@ -3068,7 +3070,7 @@
     // moves on at once (no pointer move needed)
     const raw = Math.abs((self.event && self.event.deltaY) || self.deltaY) || 1, gapIn = now - cam.lastIn, lastRaw = cam.lastRaw || 0; cam.lastRaw = raw;
     if (cam.catching) { cam.lastIn = now; return; }                              // gliding in: scrolling waits
-    if (cam.inert) { if (gapIn < 120 && raw <= lastRaw * 1.15) { cam.lastIn = now; return; } cam.inert = false; }
+    if (cam.inert) { if (gapIn < 120 && raw < lastRaw * 0.97) { cam.lastIn = now; return; } cam.inert = false; }   // (only a fading momentum tail is ignored; scrolling on - even fast and steady - carries straight on)
     if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = now; return; }       // the one scroll of rest on an object
     if (cam.target === Math.round(cam.target)) { d *= 1.4; if (Math.abs(cam.pos - cam.target) < 0.01) cam.startT = now; }   // (the first push off a resting stop: heavy, only a small soft glide)
     advance(d);
