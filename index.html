@@ -2664,7 +2664,7 @@
   const CAM_DESK = [   // (each object keeps one size at every step)
     { hpLaptop: [968, 845, -2, 1.2], hpCup: [460.6, 346.1, 4, 1.03], hpPhone: [480, 430, 4, 1.03], hpBook: [1515, 365, -7, 1.35], ly: -195 },   // (first view, laid out round the side objects)
     { hpLaptop: [960, 600, 0, 1.2], hpCup: [360.6, -48.9, 0, 1.03], hpPhone: [380, 35, 0, 1.03], hpBook: [1950, 645, 8, 1.35], ly: -440 },
-    { hpLaptop: [-105, 530, 15, 1.2], hpCup: [1890.6, 306.1, 0, 1.03], hpPhone: [1910, 390, 0, 1.03], hpBook: [958, 528, 2, 1.35], ly: 60 },
+    { hpLaptop: [-105, 530, 15, 1.2], hpCup: [1915.6, 306.1, 0, 1.03], hpPhone: [1935, 390, 0, 1.03], hpBook: [958, 528, 2, 1.35], ly: 60 },
     { hpLaptop: [-17, 1207, 0, 1.2], hpCup: [1022.6, 586.1, 2, 1.03], hpPhone: [1042, 670, 2, 1.03], hpBook: [560, -50, 2, 1.35], ly: -360 }
   ];
   const DESK_DESK = {   // (kept clear of the logo, the menu and the figure in the corners)
@@ -2689,7 +2689,7 @@
       const bw = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a)), bh = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a));
       // how much of each is inside: the big ones less, the small ones more (the camera's picture is mostly empty strap
       // room, so it counts as small); the laptop stop's camera a little further in again
-      const f = { paper: 0.35, sketchbook: step === 3 ? 0.55 : 0.3, scissors: e === 3 ? 0.52 : 0.42, marker: 0.58, camera: e === 3 ? 0.6 : step === 1 ? 0.45 : 0.5 }[n] ?? 0.35;   // (on the bottom edge the camera's body - at the bottom of its picture - would be the part cut off)
+      const f = { paper: step === 1 ? 0.22 : 0.35, sketchbook: step === 3 ? 0.55 : 0.3, scissors: step === 1 ? 0.34 : step === 2 ? 0.32 : step === 3 ? 0.4 : e === 3 ? 0.52 : 0.42, marker: step === 1 ? 0.4 : 0.58, camera: e === 3 ? 0.6 : step === 1 ? 0.45 : 0.5 }[n] ?? 0.35;   // (on the bottom edge the camera's body - at the bottom of its picture - would be the part cut off)
       // and never lost in a corner: along its edge, at least most of it stays within the frame
       const ax = v => Math.max(bw * 0.25, Math.min(1920 - bw * 0.25, v)), ay = v => Math.max(bh * 0.25, Math.min(1080 - bh * 0.25, v));
       return e === 0 ? [bw * (f - 0.5), ay(y), r] : e === 1 ? [1920 - bw * (f - 0.5), ay(y), r] : e === 2 ? [ax(x), bh * (f - 0.5), r] : [ax(x), 1080 - bh * (f - 0.5), r];
@@ -2900,7 +2900,7 @@
     }
     let d = touch ? -self.deltaY / 900 : self.deltaY / 1500;
     heat.v = heat.v * Math.exp(-(now - heat.t) / 260) + Math.min(1, Math.abs(d) * 15); heat.t = now;   // ~1 per notch, fades in a quarter second
-    const gain = Math.min(7, 0.35 + 0.45 * Math.min(1, heat.v) + 1.5 * Math.max(0, heat.v - 1));   // one notch ~0.8x (as before); a quick run of notches builds up fast: 3-4 notches a move
+    const gain = Math.min(7, 0.6 + 0.45 * Math.min(1, heat.v) + 1.5 * Math.max(0, heat.v - 1));   // one notch ~0.8x (as before); a quick run of notches builds up fast: 3-4 notches a move
     d *= gain;
     // after landing on an object, the fading tail of the scroll that brought it in (a trackpad's momentum, or the same
     // wheel run still turning) does nothing, so it stays there; a new scroll - a fresh push, or after a short pause -
@@ -2909,6 +2909,7 @@
     if (cam.catching) { cam.lastIn = now; return; }                              // gliding in: scrolling waits
     if (cam.inert) { if (gapIn < 120 && raw <= lastRaw * 1.15) { cam.lastIn = now; return; } cam.inert = false; }
     if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = now; return; }       // the one scroll of rest on an object
+    if (cam.target === Math.round(cam.target)) d *= 1.8;                       // (the first push off a resting stop: not heavy)
     advance(d);
     if (!cam.catching) cam.vel = cam.vel * 0.6 + d * 0.04 * gain;            // the bigger the scroll, the further it carries
     cam.lastIn = now;
