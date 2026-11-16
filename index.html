@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="cs-loading intro-locked">
+<html lang="en" class="intro-locked">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -191,6 +191,9 @@
   html.intro-locked #csLoader path { stroke: #fff; }
   html.intro-locked #csLoadPct img { filter: invert(1); }   /* (white on the intro's black) */
   html.cs-loading.intro-locked #menuBtn, html.cs-loading.intro-locked #menu { visibility: hidden; }   /* (the first visit's loading: nothing over it) */
+  /* no menu during the intro: it fades in once the visitor is inside */
+  #menu, #menuBtn { transition: opacity 0.4s ease; }
+  html.intro-locked #menu, html.intro-locked #menuBtn { opacity: 0; visibility: hidden; pointer-events: none; }
   html.in-case #caseClose { display: inline-flex; }
   @media (max-width: 600px) { #caseClose { right: 14px; top: calc(env(safe-area-inset-top, 0px) + 10px); } }
   .csDocHolder svg { display: block; width: calc(100% * 1250 / 1400); height: auto;
@@ -543,7 +546,7 @@
   #menu button:hover::before, #menu button:focus-visible::before { opacity: 0.55; }
   #menu .scribble { display: none !important; }
   /* thin pen lines, like the logo and the drawings */
-  #menu .pill-icon .ink { fill: none; stroke: currentColor; stroke-width: 2.1px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  #menu .pill-icon .ink { fill: none; stroke: #050403; stroke-width: 2.6px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
   #menu .pill-icon .dot { fill: currentColor; transition: transform 0.12s ease-out; }
   /* hover: a hand-drawn line scribbles itself in under the word, and rubs out again when the pointer leaves */
   #menu .scribble { position: absolute; left: -3px; right: -3px; top: calc(100% + 4px); width: calc(100% + 6px); height: 7px; overflow: visible; pointer-events: none; }
@@ -1626,7 +1629,7 @@
   // still in the doorway first); the last step slows into the stop
   const WALK0 = 0.5;                                                       // the door has swung open (swing 0.5)
   tl.to(S, { stride: 1, duration: 0.3, ease: 'sine.out' }, WALK0);
-  const INTRO_WALK = walkT(STOP * GAIT_INTRO) * 0.5;                     // walk out of the door to the lamp (6 steps), brisker: it plays by itself on "click to enter"
+  const INTRO_WALK = walkT(STOP * GAIT_INTRO) * 0.4;                    // walk out of the door to the lamp (6 steps), brisker: it plays by itself on "click to enter"
   tl.to(S, { u: STOP, duration: INTRO_WALK, ease: 'none' }, WALK0);
   tl.to(S, { stride: 0, duration: 0.5, ease: 'sine.inOut' }, WALK0 + INTRO_WALK - 0.5);   // comes to a stop, as in the other walks
   // the lamp slides down from the top as it walks (frame 28, step 8)
@@ -1881,7 +1884,7 @@
      itself - the door opens, the figure walks out, the lamp comes down and is pulled - at an even pace, and leaves
      the visitor in the white room; from there scrolling takes over (the laptop rises). The intro can't be scrolled
      back into; when the site loops back to the door it waits for a click again. */
-  const INTRO_SECS = 0.6;                                   // seconds per timeline step while the intro plays
+  const INTRO_SECS = 0.38;                                  // seconds per timeline step while the intro plays (quicker)
   const introRestT = () => workAt - 0.05;                   // the white room, just before the laptop
   const timeToY = t => mainST.start + (t / master.duration()) * (mainST.end - mainST.start);
   const introRestY = () => timeToY(introRestT());
@@ -1953,20 +1956,21 @@
   // the first visit's loading screen (the case studies' scribble): until the door, the figure and the rest have come in
   {
     const html = document.documentElement, path = $('csLoadPath'), pct = $('csLoadPct'), L = path.getTotalLength(), t0 = performance.now();
+    // shown only when the page really is still loading (nothing for a quick or cached load)
     let shown = 0, ready = document.readyState === 'complete';
     addEventListener('load', () => { ready = true; });
     path.style.strokeDasharray = L;
+    setTimeout(() => { if (!ready) { html.classList.add('cs-loading'); requestAnimationFrame(tick); } }, 450);
     const tick = now => {
       const imgs = [...document.images], got = imgs.length ? imgs.filter(i => i.complete).length / imgs.length : 0;
       const want = ready ? 100 : Math.min(95, Math.max(got * 95, 92 * (1 - Math.exp(-(now - t0) / 3000))));
-      shown += (want - shown) * 0.12; setPct(pct, Math.round(shown));
+      shown += (want - shown) * (ready ? 0.3 : 0.12); setPct(pct, Math.round(shown));
       path.style.strokeDashoffset = L * (1 - ((now - t0) / 1600 % 1));
       if (ready && shown > 99) { setPct(pct, 100);
         gsap.to('#csLoader', { autoAlpha: 0, duration: 0.35, onComplete: () => { html.classList.remove('cs-loading'); gsap.set('#csLoader', { clearProps: 'all' }); } });
         return; }
       requestAnimationFrame(tick);
     };
-    requestAnimationFrame(tick);
   }
 
   /* ---------- a silent jump to a point of the intro timeline (unlocks the intro) ---------- */
@@ -2798,15 +2802,17 @@
     const D = { paper: [0.48, 0.05, -8], sketchbook: [0.06, 0.5, 14], camera: [0.95, 0.42, -18], scissors: [0.92, 0.62, 28], marker: [0.1, 0.36, 70] };
     for (const n in D) { const [x, y] = at(D[n][0], D[n][1]); DESK_MOB[n][0] = [x, y, D[n][2]]; }
     { const [x, y] = at(0.96, 0.13); DESK_MOB.sketchbook[2] = [x, y, -14]; }   // (notebook stop: the sketchbook to the top right, clear of the cup and phone)
+    { const [x, y] = at(0.62, 1.02); DESK_MOB.scissors[3] = [x, y, DESK_MOB.scissors[3][2]]; }   // (mug stop: the scissors on the bottom edge, not hidden behind the camera)
     // phones, the stops: each side object pushed out to its nearest edge of the phone's view, only a share of it inside
     // (they were pulled in with the rest of the layout and sat too far in)
-    { const [X0, Y0] = at(0, 0), [X1, Y1] = at(1, 1), SH = { paper: 0.16, sketchbook: 0.18, camera: 0.42, scissors: 0.4, marker: 0.44 };
+    { const mb = mobBox(), X0 = mb.x, Y0 = mb.y, X1 = mb.x + mb.w, Y1 = mb.y + mb.h, SH = { paper: 0.16, sketchbook: 0.18, camera: 0.5, scissors: 0.52, marker: 0.5 };   // (the phone's real view)
       for (const n in DESK_MOB) for (let i = 1; i < DESK_MOB[n].length; i++) {
         const [x, y, r] = DESK_MOB[n][i], im = document.querySelector(`#dk-${n} image`);
         const w = (+(im && im.getAttribute('width')) || 0) * 1.27, h = (+(im && im.getAttribute('height')) || 0) * 1.27, a = r * Math.PI / 180;
         const bw = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a)), bh = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a)), f = SH[n] || 0.35;
         const d = [x - X0, X1 - x, y - Y0, Y1 - y], e = d.indexOf(Math.min(...d));
-        const cx = v => Math.max(X0 + bw * 0.25, Math.min(X1 - bw * 0.25, v)), cy = v => Math.max(Y0 + bh * 0.25, Math.min(Y1 - bh * 0.25, v));
+        const g = f >= 0.3 ? 0.45 : 0.25;   // (a small one is kept almost wholly in along its edge, so at least ~30% of it shows even in a corner)
+        const cx = v => Math.max(X0 + bw * g, Math.min(X1 - bw * g, v)), cy = v => Math.max(Y0 + bh * g, Math.min(Y1 - bh * g, v));
         DESK_MOB[n][i] = e === 0 ? [X0 + bw * (f - 0.5), cy(y), r] : e === 1 ? [X1 - bw * (f - 0.5), cy(y), r] : e === 2 ? [cx(x), Y0 + bh * (f - 0.5), r] : [cx(x), Y1 - bh * (f - 0.5), r];
       } }
     CAM_MOB.forEach(s => { for (const k of ['hpLaptop', 'hpBook', 'hpPhone', 'hpCup']) s[k][3] = c[k][3]; });   // (no growing or shrinking as it scrolls)
@@ -2824,6 +2830,24 @@
       for (const k of ['hpLaptop', 'hpBook', 'hpPhone']) place(s, k, ...l[k]);
       s.ly = (-365 + 1810 * l.text) - 751;
       s.note = [960, s[l.focus][1] + HALF[l.focus] * s[l.focus][3] + 40];
+      // the main objects not in focus: pushed out to their nearest edge like the desktop, only a share inside
+      // (the laptop least, the notebook a little more, the mug and phone most)
+      const mb = mobBox(), X0 = mb.x, Y0 = mb.y, X1 = mb.x + mb.w, Y1 = mb.y + mb.h, MS = { hpLaptop: 0.26, hpBook: 0.3, hpPhone: 0.34 }, K = 1.155;
+      const box = (k) => { const [x, y, r, sc] = s[k], c0 = PROPS[k], im = document.querySelector(`#${k} image`);
+        const w = (+im.getAttribute('width')) * sc * K, h = (+im.getAttribute('height')) * sc * K, a = r * Math.PI / 180;
+        const bw = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a)), bh = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a));
+        return [x - bw / 2, y - bh / 2, x + bw / 2, y + bh / 2]; };
+      for (const k of ['hpLaptop', 'hpBook', 'hpPhone']) { if (k === l.focus) continue;
+        let [x0, y0, x1, y1] = box(k);
+        if (k === 'hpPhone') { const b = box('hpCup'); x0 = Math.min(x0, b[0]); y0 = Math.min(y0, b[1]); x1 = Math.max(x1, b[2]); y1 = Math.max(y1, b[3]); }   // (the mug with it)
+        const bw = x1 - x0, bh = y1 - y0, mx = (x0 + x1) / 2, my = (y0 + y1) / 2, f = MS[k];
+        const d = [mx - X0, X1 - mx, my - Y0, Y1 - my], e = d.indexOf(Math.min(...d));
+        const cx = v => Math.max(X0 + bw * 0.3, Math.min(X1 - bw * 0.3, v)), cy = v => Math.max(Y0 + bh * 0.3, Math.min(Y1 - bh * 0.3, v));
+        const [nx, ny] = e === 0 ? [X0 + bw * (f - 0.5), cy(my)] : e === 1 ? [X1 - bw * (f - 0.5), cy(my)] : e === 2 ? [cx(mx), Y0 + bh * (f - 0.5)] : [cx(mx), Y1 - bh * (f - 0.5)];
+        const dx = nx - mx, dy = ny - my;
+        s[k] = [s[k][0] + dx, s[k][1] + dy, s[k][2], s[k][3]];
+        if (k === 'hpPhone') s.hpCup = [s.hpCup[0] + dx, s.hpCup[1] + dy, s.hpCup[2], s.hpCup[3]];
+      }
     }
   }
   // the desk's pictures decoded up front (the bigger, sharper ones made the first move stutter while they were decoded)
