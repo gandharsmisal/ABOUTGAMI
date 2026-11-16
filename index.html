@@ -2741,11 +2741,11 @@
     { hpLaptop: [-17, 1207, 0, 1.2], hpCup: [1022.6, 586.1, 2, 1.03], hpPhone: [1042, 670, 2, 1.03], hpBook: [560, -50, 2, 1.35], ly: -360 }
   ];
   const DESK_DESK = {   // (kept clear of the logo, the menu and the figure in the corners)
-    paper:      [[540, 55, -12],  [1370, 1060, 8],    [1150, 1060, -6], [1880, 430, 14]],
+    paper:      [[540, 55, -12],  [1130, 55, 8],    [1150, 1060, -6], [1880, 430, 14]],
     camera:     [[1880, 430, 18], [35, 470, -15],   [1850, 970, 10],  [1810, 1010, -10]],
     sketchbook: [[1820, 1010, -8],[1790, 1040, 12], [620, 55, -14],   [40, 560, 8]],
     scissors:   [[25, 400, 20],   [380, 1065, -25], [1880, 690, 30],  [1380, 1065, -15]],
-    marker:     [[1100, 1060, 70], [640, 1065, -60],   [1320, 55, 100],  [1180, 55, -80]]
+    marker:     [[1100, 1060, 70], [840, 55, -60],   [1320, 55, 100],  [1180, 55, -80]]
   }, SPIN = { paper: 1, camera: -1, sketchbook: 1, scissors: -1, marker: 1 };
   const SPLIT = { sketchbook: [55, 240, 8, 75, 0], scissors: [-169, -141, 12, 35, -43] };   // (first view: the pencil down level with the phone, the scissors under the notebook)   // [dx, dy, turn, about x, about y] of the pencil / the scissors on the first view
   // the side objects sit on the page's edges, half on and half off (each centred on its nearest edge), or as much
@@ -2804,7 +2804,8 @@
     for (const n in D) { const [x, y] = at(D[n][0], D[n][1]); DESK_MOB[n][0] = [x, y, D[n][2]]; }
     { const [x, y] = at(0.96, 0.13); DESK_MOB.sketchbook[2] = [x, y, -14]; }   // (notebook stop: the sketchbook to the top right, clear of the cup and phone)
     { const [x, y] = at(0.62, 1.02); DESK_MOB.scissors[3] = [x, y, DESK_MOB.scissors[3][2]]; }   // (mug stop: the scissors on the bottom edge, not hidden behind the camera)
-    for (const i of [2, 3]) { const [x, y] = at(0.42, -0.06); DESK_MOB.marker[i] = [x, y, DESK_MOB.marker[i][2]]; }   // (notebook and mug stops: the marker along the top, not hidden behind the sketchbook / notebook on the right)
+    for (const i of [2, 3]) { const [x, y] = at(0.42, -0.06); DESK_MOB.marker[i] = [x, y, DESK_MOB.marker[i][2]]; }
+    { let [x, y] = at(0.3, 1.04); DESK_MOB.marker[1] = [x, y, DESK_MOB.marker[1][2]]; [x, y] = at(0.72, 1.04); DESK_MOB.paper[1] = [x, y, DESK_MOB.paper[1][2]]; }   // (phones, laptop stop: the marker and the papers along the bottom)   // (notebook and mug stops: the marker along the top, not hidden behind the sketchbook / notebook on the right)
     // phones, the stops: each side object pushed out to its nearest edge of the phone's view, only a share of it inside
     // (they were pulled in with the rest of the layout and sat too far in)
     { const mb = mobBox(), X0 = mb.x, Y0 = mb.y, X1 = mb.x + mb.w, Y1 = mb.y + mb.h, SH = { paper: 0.16, sketchbook: 0.18, camera: 0.5, scissors: 0.52, marker: 0.5 };   // (the phone's real view)
