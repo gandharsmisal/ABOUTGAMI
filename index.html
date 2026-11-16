@@ -3055,7 +3055,7 @@
     // fast as your scroll (the middle is yours) and it can't stop dead (a soft landing on the object) - one smooth curve
     // (how fast you're scrolling right now - quick, continuous scrolling makes it travel and glide in faster)
     { const h = heat.v * Math.exp(-(performance.now() - heat.t) / 400); cam.spd = (cam.spd || 0) + (Math.min(3, h) - (cam.spd || 0)) * (1 - Math.pow(0.92, f)); }
-    { const dts = Math.min(0.05, dt / 1000), w = (cam.catching ? 6.5 : 9) * (1 + 0.55 * cam.spd);
+    { const dts = Math.min(0.05, dt / 1000), w = (cam.catching ? 6.5 : 9) * (1 + 0.55 * cam.spd) * (performance.now() - (cam.direct || -1e9) < 600 && !cam.catching ? 1.8 : 1);   /* (trackpad / finger: tighter, no trailing drift) */
       cam.pv = (cam.pv || 0) + (w * w * (cam.tS - cam.pos) - 2 * w * (cam.pv || 0)) * dts;
       cam.pos += cam.pv * dts;
       if (Math.abs(cam.tS - cam.pos) < 0.0005 && Math.abs(cam.pv) < 0.002) { cam.pos = cam.tS; cam.pv = 0; } }
@@ -3081,7 +3081,20 @@
   const mainActive = () => heroState.shown && intro.entered && !work.open && !about.open && !contact.open && !caseOpen;
   // a finger: one flick (any swipe past a few pixels) is one whole move to the next object
   const flick = { sum: 0, done: false };
-  Observer.create({ target: window, type: 'wheel,touch', tolerance: 0, onPress: () => { flick.sum = 0; flick.done = false; }, onChangeY: self => {
+  Observer.create({ target: window, type: 'wheel,touch', tolerance: 0, onPress: () => { flick.sum = 0; flick.done = false; cam.tDir = 0; cam.tSum = 0; },
+    // a finger lifting: a proper swipe goes on to the next object (one swipe, one object); a soft one only part of the way,
+    // and the next swipe finishes it - either way with the soft landing
+    onRelease: self => {
+      if (!mainActive() || cam.catching || !cam.tDir || !(self.event && self.event.type.startsWith('touch'))) return;
+      const t0 = cam.target, fl = Math.floor(t0 + 1e-6), frac = t0 - fl;
+      if (frac < 1e-3) return;
+      const second = cam.partial === cam.tDir && Math.abs(cam.tSum || 0) >= 30;   // (a second soft swipe the same way)
+      cam.partial = 0;
+      if (Math.abs(cam.tSum || 0) >= 110 || second || (cam.tDir > 0 ? frac >= 0.3 : frac <= 0.7)) {   // (a swipe of 110px or more, or most of the way already)
+        cam.target = cam.tDir > 0 ? fl + 1 : fl; cam.vel = 0; cam.catching = true; cam.cTotal = 0; }
+      else if (Math.abs(cam.tSum || 0) >= 30) cam.partial = cam.tDir;   // (a soft one: the next swipe this way finishes it)
+    },
+    onChangeY: self => {
     if (!mainActive()) return;
     const now = performance.now(), touch = self.event && self.event.type.startsWith('touch');
     // a finger works like the wheel: it moves things as far and as fast as it moves (a slow, small drag a little, a quick
@@ -3094,6 +3107,9 @@
     cam.pad = pad ? Math.min(1, (cam.pad || 0) + 0.34) : Math.max(0, (cam.pad || 0) - 0.5);
     if (cam.pad > 0.5) {
       const raw = Math.abs(we.deltaY) || 1, gapIn = now - cam.lastIn, lastRaw = cam.lastRaw || 0; cam.lastRaw = raw;
+      cam.fade = gapIn < 80 && raw < lastRaw * 0.96 ? (cam.fade || 0) + 1 : 0;   // (fading for several events in a row: the coasting)
+      cam.direct = now;
+      if (cam.fade >= 3) { cam.lastIn = now; return; }                       // no after-glide: the trackpad's coasting is ignored
       heat.v = heat.v * Math.exp(-(now - heat.t) / 260) + Math.min(0.25, raw / 400); heat.t = now;   // (for the follow's speed only)
       if (gapIn > 250) cam.gStart = now;
       if (cam.catching) { cam.lastIn = now; return; }
@@ -3118,7 +3134,8 @@
     if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = now; return; }       // the one scroll of rest on an object
     if (cam.target === Math.round(cam.target)) { d *= 1.4; if (Math.abs(cam.pos - cam.target) < 0.01) cam.startT = now; }   // (the first push off a resting stop: heavy, only a small soft glide)
     advance(d);
-    if (!cam.catching) cam.vel = cam.vel * 0.6 + d * 0.045 * gain;   // (the faster the scroll, the further it glides on)            // the bigger the scroll, the further it carries
+    if (touch) { cam.vel = 0; cam.direct = now; if (d) cam.tDir = Math.sign(d); cam.tSum = (cam.tSum || 0) - self.deltaY; }                              // (a finger: no glide on after it lifts)
+    else if (!cam.catching) cam.vel = cam.vel * 0.6 + d * 0.045 * gain;   // (the faster the scroll, the further it glides on)            // the bigger the scroll, the further it carries
     cam.lastIn = now;
   } });
   function camGo(i, instant) {
