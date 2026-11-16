@@ -2803,6 +2803,7 @@
     for (const n in D) { const [x, y] = at(D[n][0], D[n][1]); DESK_MOB[n][0] = [x, y, D[n][2]]; }
     { const [x, y] = at(0.96, 0.13); DESK_MOB.sketchbook[2] = [x, y, -14]; }   // (notebook stop: the sketchbook to the top right, clear of the cup and phone)
     { const [x, y] = at(0.62, 1.02); DESK_MOB.scissors[3] = [x, y, DESK_MOB.scissors[3][2]]; }   // (mug stop: the scissors on the bottom edge, not hidden behind the camera)
+    for (const i of [2, 3]) { const [x, y] = at(0.42, -0.06); DESK_MOB.marker[i] = [x, y, DESK_MOB.marker[i][2]]; }   // (notebook and mug stops: the marker along the top, not hidden behind the sketchbook / notebook on the right)
     // phones, the stops: each side object pushed out to its nearest edge of the phone's view, only a share of it inside
     // (they were pulled in with the rest of the layout and sat too far in)
     { const mb = mobBox(), X0 = mb.x, Y0 = mb.y, X1 = mb.x + mb.w, Y1 = mb.y + mb.h, SH = { paper: 0.16, sketchbook: 0.18, camera: 0.5, scissors: 0.52, marker: 0.5 };   // (the phone's real view)
@@ -2850,6 +2851,46 @@
       }
     }
   }
+  // phones, the stops: every object at the edges equally visible - placed again once the pictures are in so that the same
+  // share of the object itself (its drawn pixels, turned as it lies, not its picture's box with empty margins) is inside
+  // the phone's view, and most of it along the edge (never lost in a corner)
+  if (isMobMain()) (async () => {
+    const SHARE = 0.32;
+    const pts = async (im, ox, oy, s) => {
+      const p = new Image(); p.src = im.getAttribute('href'); await p.decode();
+      const x = +im.getAttribute('x'), y = +im.getAttribute('y'), w = +im.getAttribute('width'), h = +im.getAttribute('height');
+      const k = Math.min(1, 80 / Math.max(p.naturalWidth, p.naturalHeight)), cw = Math.max(1, Math.round(p.naturalWidth * k)), ch = Math.max(1, Math.round(p.naturalHeight * k));
+      const c = document.createElement('canvas'); c.width = cw; c.height = ch; const g = c.getContext('2d'); g.drawImage(p, 0, 0, cw, ch);
+      const d = g.getImageData(0, 0, cw, ch).data, out = [];
+      for (let j = 0; j < ch; j++) for (let i = 0; i < cw; i++) if (d[(j * cw + i) * 4 + 3] > 60) out.push([(x + (i + 0.5) / cw * w - ox) * s, (y + (j + 0.5) / ch * h - oy) * s]);
+      return out;
+    };
+    const mb = mobBox(), X0 = mb.x, Y0 = mb.y + 40, X1 = mb.x + mb.w, Y1 = mb.y + mb.h - 40;
+    const fit = (x, y, r, P) => {
+      const a = r * Math.PI / 180, co = Math.cos(a), si = Math.sin(a);
+      const X = P.map(([u, v]) => u * co - v * si).sort((m, n) => m - n), Y = P.map(([u, v]) => u * si + v * co).sort((m, n) => m - n), q = (A, z) => A[Math.floor(z * (A.length - 1))];
+      const d = [x - X0, X1 - x, y - Y0, Y1 - y], e = d.indexOf(Math.min(...d)), f = SHARE;
+      const ax = v => Math.max(X0 - q(X, 0.15), Math.min(X1 - q(X, 0.85), v)), ay = v => Math.max(Y0 - q(Y, 0.15), Math.min(Y1 - q(Y, 0.85), v));
+      return e === 0 ? [X0 - q(X, 1 - f), ay(y)] : e === 1 ? [X1 - q(X, f), ay(y)] : e === 2 ? [Math.min(ax(x), X1 - 330 - q(X, 0.6)), Y0 - q(Y, 1 - f)] : [ax(x), Y1 - q(Y, f)];   // (along the top: kept clear of the menu button)
+    };
+    try {
+      for (const n in DESK_MOB) { const P = await pts(document.querySelector(`#dk-${n} image`), 0, 0, 1.27); if (!P.length) continue;
+        for (let i = 1; i < DESK_MOB[n].length; i++) { const [x, y, r] = DESK_MOB[n][i]; DESK_MOB[n][i] = [...fit(x, y, r, P), r]; } }
+      const FOC = [null, 'hpLaptop', 'hpBook', 'hpPhone'];
+      for (let i = 1; i < CAM_MOB.length; i++) { const s = CAM_MOB[i];
+        for (const k of ['hpLaptop', 'hpBook', 'hpPhone']) { if (k === FOC[i]) continue;
+          const [x, y, r, sc] = s[k];
+          let P = await pts(document.querySelector(`#${k} image`), PROPS[k][0], PROPS[k][1], sc * 1.155);
+          if (k === 'hpPhone') { const ox = s.hpCup[0] - x, oy = s.hpCup[1] - y;
+            P = P.concat((await pts(document.querySelector('#hpCup image'), PROPS.hpCup[0], PROPS.hpCup[1], s.hpCup[3] * 1.155)).map(([u, v]) => [u + ox, v + oy])); }
+          if (!P.length) continue;
+          const [nx, ny] = fit(x, y, r, P), dx = nx - x, dy = ny - y;
+          s[k] = [nx, ny, r, sc];
+          if (k === 'hpPhone') s.hpCup = [s.hpCup[0] + dx, s.hpCup[1] + dy, s.hpCup[2], s.hpCup[3]];
+        }
+      }
+    } catch (err) {}   // (a picture that cannot be read: kept as placed by its box)
+  })();
   // the desk's pictures decoded up front (the bigger, sharper ones made the first move stutter while they were decoded)
   document.querySelectorAll('#heroProps image, #heroDecor image').forEach(im => { const p = new Image(); p.src = im.getAttribute('href'); if (p.decode) p.decode().catch(() => {}); });
   const NOTES = [null, 'hnLaptop', 'hnBook', 'hnMug'], NS = CAM.length, SLIDE = 125;   // how far the mug slides off the phone
