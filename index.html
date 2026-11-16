@@ -3082,13 +3082,29 @@
   const mainActive = () => heroState.shown && intro.entered && !work.open && !about.open && !contact.open && !caseOpen;
   // a finger: one flick (any swipe past a few pixels) is one whole move to the next object
   const flick = { sum: 0, done: false };
-  Observer.create({ target: window, type: 'wheel,touch', tolerance: 0, onPress: () => { flick.sum = 0; flick.done = false; cam.tDir = 0; cam.tSum = 0; },
+  Observer.create({ target: window, type: 'wheel,touch', tolerance: 0, onPress: self => { flick.sum = 0; flick.done = false; cam.tDir = 0; cam.tSum = 0; cam.tStart = cam.target; },
+    // a finger lifting: the swipe carries on smoothly by itself - a short swipe more than half way to the next object, a
+    // normal swipe all the way there (soft landing); swiping again soon after goes a little quicker
+    onRelease: self => {
+      if (!mainActive() || !(self.event && self.event.type.startsWith('touch'))) return;
+      const dist = Math.abs(cam.tSum || 0), dir = Math.sign(cam.tSum || 0), now = performance.now();
+      if (dist < 14 || !dir) return;
+      const quick = now - (cam.tRel || -1e9) < 900; cam.tRel = now;
+      if (cam.catching) { if (dist >= 40 && Math.abs(cam.target + dir - cam.pos) <= 1.6) { cam.target += dir; cam.cTotal = 0; heat.v = Math.min(3, heat.v + 1.2); heat.t = now; } return; }   // (swiping again while it glides in: on to the next one)
+      if (quick) { heat.v = Math.min(3, heat.v + 1.2); heat.t = now; }   // (keeps swiping: a little quicker)
+      const start = cam.tStart ?? cam.target, frac = Math.min(1, 0.58 + dist / 360 + (quick ? 0.15 : 0));
+      const next = dir > 0 ? Math.floor(start + 1e-6) + 1 : Math.ceil(start - 1e-6) - 1, dest = start + dir * frac;
+      cam.vel = 0;
+      if (dir > 0 ? dest >= next - 0.04 : dest <= next + 0.04) { cam.target = next; cam.catching = true; cam.cTotal = 0; }
+      else if (dir > 0 ? dest > cam.target : dest < cam.target) cam.target = dest;
+    },
     onChangeY: self => {
     if (!mainActive()) return;
     const now = performance.now(), touch = self.event && self.event.type.startsWith('touch');
     // a finger works like the wheel: it moves things as far and as fast as it moves (a slow, small drag a little, a quick
     // swipe further, gliding on after it lifts), with the same slow pick-up at the start and the soft landing on an object
-    let d = touch ? -self.deltaY / 520 : self.deltaY / 1500;   // (a finger works exactly like the mouse: its speed builds up the pace, it glides on and lands softly)
+    if (touch) cam.tSum = (cam.tSum || 0) - self.deltaY;
+    let d = touch ? -self.deltaY / 420 : self.deltaY / 1500;   // (a finger: follows while it moves; the rest of the swipe is finished on release - see onRelease)
     // a trackpad (a stream of small, smooth movements, with its own coasting after the fingers lift) is told apart from a
     // mouse wheel (separate big notches): it moves things directly with the fingers - no build-up and none of the page's
     // own extra glide (the trackpad's coasting already does that) - with a short soft pick-up and the same soft landing
@@ -3127,7 +3143,8 @@
     if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = now; return; }       // the one scroll of rest on an object
     if (cam.target === Math.round(cam.target)) { d *= 1.4; if (Math.abs(cam.pos - cam.target) < 0.01) cam.startT = now; }   // (the first push off a resting stop: heavy, only a small soft glide)
     advance(d);
-    if (!cam.catching) cam.vel = cam.vel * 0.6 + d * 0.045 * gain;   // (the faster the scroll, the further it glides on)            // the bigger the scroll, the further it carries
+    if (touch) cam.vel = 0;
+    else if (!cam.catching) cam.vel = cam.vel * 0.6 + d * 0.045 * gain;   // (the faster the scroll, the further it glides on)            // the bigger the scroll, the further it carries
     cam.lastIn = now;
   } });
   function camGo(i, instant) {
