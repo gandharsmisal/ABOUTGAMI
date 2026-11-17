@@ -3135,22 +3135,7 @@
       // a trackpad (small, smooth deltas) counted out in mouse notches: every 100px of its swipe is one notch, so it moves
       // exactly as the wheel does
       const ev = self.event || {}, dy = self.deltaY, pad = ev.deltaMode === 0 && (Math.abs(dy) < 50 || (ev.wheelDeltaY && ev.wheelDeltaY % 120 !== 0) || dy % 1 !== 0);
-      if (pad) {   // (the trackpad's coasting after the fingers lift - a run of shrinking deltas - is ignored: it stops when you stop, like the wheel)
-        const a = Math.abs(dy), pv = cam.padPrev || 0, newG = now - (cam.padT || 0) > 150;
-        if (now - (cam.padT || 0) > 150) { cam.padDec = 0; cam.padInert = false; }
-        else if (a < pv * 0.97) cam.padDec = (cam.padDec || 0) + 1;
-        else if (a > pv * 1.15) { cam.padDec = 0; cam.padInert = false; }
-        if (cam.padDec >= 3 && !cam.padInert) { cam.padInert = true; cam.padAcc = 0; }
-        cam.padPrev = a; cam.padT = now;
-        if (cam.padInert) return;
-        // one swipe = one stop: a swipe takes it on to the next object and nothing more; more swiping meanwhile is ignored
-        // until it has landed there and the swiping has paused - then the next swipe goes on to the one after
-        const rest = Math.abs(cam.pos - cam.target) < 0.02 && Math.abs(cam.target - Math.round(cam.target)) < 0.001;
-        if (cam.padGo && rest && newG) cam.padGo = false;
-        if (cam.padGo) return;
-        if (newG || cam.padBase === undefined) { cam.padBase = Math.round(cam.target); cam.padAcc = 0; }
-        cam.padAcc = (cam.padAcc || 0) + dy;
-        if (Math.abs(cam.padAcc) >= 30) { cam.target = cam.padBase + Math.sign(cam.padAcc); cam.padGo = true; cam.padAcc = 0; } }
+      if (pad) { cam.target += dy * 0.0008; if (cam.tk !== undefined) cam.tk += dy * 0.0008; }   // (a trackpad exactly as on the reference: every pixel of the swipe and its coasting moves it, chased at the same rate - no notches, nothing ignored)
       else cam.target += dy * 0.0008;
       cam.kv = 0.07; } return; }   // (the reference: ~1250px of wheel or ~450px of swipe per stop)
     // a finger works like the wheel: it moves things as far and as fast as it moves (a slow, small drag a little, a quick
