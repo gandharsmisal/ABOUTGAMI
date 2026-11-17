@@ -70,7 +70,7 @@
   #heroProps > g { pointer-events: auto; cursor: pointer; }
   /* the grid paper and the camera toned down to sit like the other printed pieces (softer contrast, less colour, warm) */
   #dk-paper image { filter: saturate(0.68) contrast(0.84) brightness(1.04) sepia(0.14); }
-  #dk-camera image { filter: saturate(0.6) contrast(0.76) brightness(1.07) sepia(0.14); }   /* (the camera softer still) */
+  #dk-camera image { filter: saturate(0.5) contrast(0.66) brightness(1.11) sepia(0.15); }   /* (the camera softer still) */
   #heroDecor { pointer-events: none; }
   #heroScreen { display: none; }   /* (the laptop keeps its own screen: no Work page shown on it) */
   .deskBit image { filter: none; }   /* (no live shadow filter: lighter to draw while everything moves) */
@@ -3077,7 +3077,7 @@
       P[id][2] += spin;
     }
     // desktop: each object's size matched to the reference desk (the mug keeps its place on the phone)
-    const SZ = isMobMain() ? { hpBook: 1.1, hpPhone: 1.45, hpCup: 1.1 } : { hpLaptop: 1, hpBook: 0.95, hpPhone: 1.32, hpCup: 1 };   /* (the phone a little bigger, the mug gone) */   // (the notebook and the mug and phone a little bigger)
+    const SZ = isMobMain() ? { hpBook: 1.0, hpPhone: 1.45, hpCup: 1.1 } : { hpLaptop: 1, hpBook: 0.86, hpPhone: 1.32, hpCup: 1 };   /* (the F1 card a little smaller) */   /* (the phone a little bigger, the mug gone) */   // (the notebook and the mug and phone a little bigger)
     if (SZ.hpPhone) { P.hpCup[0] = P.hpPhone[0] + (P.hpCup[0] - P.hpPhone[0]) * SZ.hpPhone; P.hpCup[1] = P.hpPhone[1] + (P.hpCup[1] - P.hpPhone[1]) * SZ.hpPhone; }
     for (const id in PROPS) {
       const [x, y, r, s0] = P[id], c = PROPS[id], s = s0 * (SZ[id] || 1);
