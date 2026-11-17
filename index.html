@@ -3049,7 +3049,7 @@
     if (KJ) {                                                               // (the reference: chase the target, nothing else)
       // each notch flows in: the target itself is eased first (no sudden kick at every notch), then the view chases it
       if (cam.tk === undefined) cam.tk = cam.target;
-      cam.tk += (cam.target - cam.tk) * (1 - Math.pow(1 - 0.18, f));
+      cam.tk += (cam.target - cam.tk) * (1 - Math.pow(1 - 0.085, f));   // (softer: each notch flows in over a longer moment)
       if (Math.abs(cam.target - cam.tk) < 5e-5) cam.tk = cam.target;
       cam.pos += (cam.tk - cam.pos) * (1 - Math.pow(1 - (cam.kv || 0.07), f));
       if (Math.abs(cam.target - cam.pos) < 5e-5) cam.pos = cam.target;
