@@ -2888,18 +2888,18 @@
     // place across the view, its own turn as it goes - big turns, as there - and one size throughout)
     //   laptop=laptop, phone=phone, F1 card=f1, grid=paper, brown papers=notebook, film+scissors=film, marker=edding, camera=rubber band
     const L3 = {   // [overview, side objects in the middle, main objects in the middle]: [x, y, turn]
-      hpLaptop: [[1039, 744, -2], [1708, 60, 5], [961, 474, 2]],
-      hpPhone: [[628, 283, 4], [1695, 1065, 164], [715, 526, 362]],   // (upright again in the middle)
-      hpBook: [[1476, 331, -6], [238, 1048, -196], [1285, 536, -113]] };
+      hpLaptop: [[1039, 744, -2], [1708, 60, 5], [964, 468, 2]],
+      hpPhone: [[628, 283, 4], [1695, 1065, 164], [593, 527, 362]],   // (upright again in the middle)
+      hpBook: [[1476, 331, -6], [238, 1048, -196], [1453, 533, -113]] };
     for (const k in L3) for (let i = 0; i < 3; i++) { const [x, y, r] = L3[k][i]; CAM_DESK[i][k] = [x, y, r, CAM_DESK[i][k][3]]; }
     for (let i = 0; i < 3; i++) CAM_DESK[i].hpCup = CAM_DESK[i].hpPhone.slice();
-    CAM_DESK[0].ly = -255; CAM_DESK[1].ly = -463; CAM_DESK[2].ly = -5;
+    CAM_DESK[0].ly = -255; CAM_DESK[1].ly = -463; CAM_DESK[2].ly = -11;
     const S3 = {
-      paper: [[1098, 248, -8], [849, 525, -78], [517, -66, 8]],
-      sketchbook: [[178, 212, -8], [985, 585, -18], [1440, -77, 12]],
-      scissors: [[1806, 760, -13], [1105, 520, -233], [285, 1167, -93]],
-      marker: [[218, 549, -22], [1175, 640, 8], [629, 1118, -42]],
-      camera: [[1860, 331, 6], [1190, 430, 136], [1339, 1111, 21]] };   // (the cluster spread a little so each shows)
+      paper: [[1098, 248, -8], [849, 525, -78], [330, -60, 8]],
+      sketchbook: [[178, 300, -8], [985, 585, -18], [1640, -70, 12]],
+      scissors: [[1806, 760, -13], [1105, 520, -233], [1800, 1120, -93]],
+      marker: [[218, 640, -22], [1175, 640, 8], [411, 1100, -42]],
+      camera: [[1860, 331, 6], [1190, 430, 136], [1535, 1110, 21]] };   // (the cluster spread a little so each shows)
     for (const n in S3) for (let i = 0; i < 3; i++) DESK_DESK[n][i] = [S3[n][i][0], S3[n][i][1], S3[n][i][2], 1];
     // phones (the phone's view: at(0..1, 0..1))
     const at = (rx, ry) => [460 + 1000 * rx, -365 + 1810 * ry], c = CAM_MOB[0], sc = k => c[k][3];
