@@ -2733,7 +2733,7 @@
     { hpLaptop: [968, 845, -2, 1.2], hpCup: [460.6, 346.1, 4, 1.03], hpPhone: [480, 430, 4, 1.03], hpBook: [1515, 365, -7, 1.35], ly: -195 },   // (first view, laid out round the side objects)
     { hpLaptop: [960, 600, 0, 1.2], hpCup: [360.6, -48.9, 0, 1.03], hpPhone: [380, 35, 0, 1.03], hpBook: [1950, 645, 8, 1.35], ly: -440 },
     { hpLaptop: [-105, 530, 15, 1.2], hpCup: [1915.6, 306.1, 0, 1.03], hpPhone: [1935, 390, 0, 1.03], hpBook: [958, 528, 2, 1.35], ly: 60 },
-    { hpLaptop: [1560, 1207, 0, 1.2], hpCup: [1022.6, 586.1, 2, 1.03], hpPhone: [1042, 670, 2, 1.03], hpBook: [560, -50, 2, 1.35], ly: -360 }
+    { hpLaptop: [1700, 1190, 0, 1.2], hpCup: [1022.6, 586.1, 2, 1.03], hpPhone: [1042, 670, 2, 1.03], hpBook: [560, -50, 2, 1.35], ly: -360 }
   ];
   const DESK_DESK = {   // (kept clear of the logo, the menu and the figure in the corners)
     paper:      [[540, 55, -12],  [1130, 55, 8],    [1150, 1060, -6], [1880, 430, 14]],
@@ -2991,7 +2991,7 @@
       r += drift * 7; y -= Math.abs(drift) * 18; y += Math.sin(cam.t * 0.9 + BOB[id]) * 2.2;
       if (id === 'hpCup') x -= SLIDE * cam.lift;                           // slid along the table, never lifted
       {   // on the way between stops every object swings in across the middle, then out to its next place (desktop and phones)
-        const lg = cam.lag[id === 'hpCup' ? 'hpPhone' : id], fr = lg - Math.floor(lg), b = 0;   // (no swing: straight to the next place)   // (phones: straight to and from the laptop stop; desktop crosses on every move)
+        const lg = cam.lag[id === 'hpCup' ? 'hpPhone' : id], fr = lg - Math.floor(lg), b = !isMobMain() && id === 'hpLaptop' ? Math.pow(Math.sin(Math.PI * fr), 1.2) * 0.75 : 0;   // (desktop: the laptop crosses through the middle on its way; the rest go straight)   // (phones: straight to and from the laptop stop; desktop crosses on every move)
         const CM = { hpLaptop: [-120, 150], hpBook: [140, -140], hpPhone: [150, 120], hpCup: [150, 120] }[id];
         x += (960 + CM[0] - x) * b; y += (540 + CM[1] - y) * b;
       }
