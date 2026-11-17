@@ -3034,7 +3034,7 @@
     return u < 0.5 ? [A[0] + (Mx - A[0]) * u * 2, A[1] + (My - A[1]) * u * 2] : [Mx + (B[0] - Mx) * (u * 2 - 1), My + (B[1] - My) * (u * 2 - 1)]; };
   const between = (p, f, lin) => { const a = Math.floor(p), u = KJ ? p4(p - a) : lin ? p - a : smooth(p - a),   /* (main objects on the same gentle curve as the side objects' travel - same pace) */ A = f(mod(a)), B = f(mod(a + 1)); return A.map((v, j) => v + (B[j] - v) * u); };
   // the notebook and the phone turn once round on each move (the mug, riding on the phone, turns with it round the phone)
-  const TURN = { hpLaptop: 1, hpBook: -1, hpPhone: 1, hpCup: 1 };   // (each spins one whole turn on the way, landing at its same angle)
+  const TURN = { hpBook: -1, hpPhone: 1, hpCup: 1 };   /* (the laptop doesn't spin) */   // (each spins one whole turn on the way, landing at its same angle)
   function camDraw() {
     const P = {};
     for (const id in PROPS) {
