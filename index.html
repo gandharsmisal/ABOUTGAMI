@@ -2805,7 +2805,7 @@
     // (they were pulled in with the rest of the layout and sat too far in)
     { const mb = mobBox(), X0 = mb.x, Y0 = mb.y, X1 = mb.x + mb.w, Y1 = mb.y + mb.h, SH = { paper: 0.16, sketchbook: 0.18, camera: 0.5, scissors: 0.52, marker: 0.5 };   // (the phone's real view)
       // per stop, by hand: laptop stop - the camera further out, the bottom row further in; notebook stop - the marker and papers along the top in, the films on the right out; mug stop - the two in the middle of the sides in
-      const OV = { 1: { camera: 0.32, scissors: 0.62, sketchbook: 0.3, marker: 0.65, paper: 0.3 }, 2: { marker: 0.7, paper: 0.3, scissors: 0.38 }, 3: { paper: 0.34, sketchbook: 0.34 } };
+      const OV = { 1: { camera: 0.32, scissors: 0.46, sketchbook: 0.3, marker: 0.65, paper: 0.3 }, 2: { marker: 0.7, paper: 0.3, scissors: 0.38 }, 3: { paper: 0.34, sketchbook: 0.34 } };
       for (const n in DESK_MOB) for (let i = 1; i < DESK_MOB[n].length; i++) {
         const [x, y, r] = DESK_MOB[n][i], im = document.querySelector(`#dk-${n} image`);
         const w = (+(im && im.getAttribute('width')) || 0) * 1.27, h = (+(im && im.getAttribute('height')) || 0) * 1.27, a = r * Math.PI / 180;
@@ -2822,7 +2822,7 @@
       else s[k] = [x, y, r, c[k][3]]; };
     const L = [null,
       { focus: 'hpLaptop', text: 0.27, hpLaptop: [0.5, 0.54, 0], hpBook: [0.06, 0.95, 14], hpPhone: [0.93, 0.16, -10] },
-      { focus: 'hpBook', text: 0.42, hpBook: [0.5, 0.58, 2], hpLaptop: [0.1, 0.97, 16], hpPhone: [0.2, 0.16, 8] },   // (the cup and phone top left)
+      { focus: 'hpBook', text: 0.36, hpBook: [0.5, 0.58, 2], hpLaptop: [0.1, 0.97, 16], hpPhone: [0.2, 0.16, 8] },   // (the cup and phone top left)
       { focus: 'hpPhone', text: 0.27, hpPhone: [0.5, 0.5, 2], hpLaptop: [0.18, -0.02, 12], hpBook: [0.93, 0.1, -12] }];   // (the laptop on top, left; the notebook to the right)
     const HALF = { hpLaptop: 163, hpBook: 123, hpPhone: 90 };
     for (let i = 1; i <= 3; i++) {
@@ -2832,7 +2832,7 @@
       s.note = [960, s[l.focus][1] + HALF[l.focus] * s[l.focus][3] + 40];
       // the main objects not in focus: pushed out to their nearest edge like the desktop, only a share inside
       // (the laptop least, the notebook a little more, the mug and phone most)
-      const mb = mobBox(), X0 = mb.x, Y0 = mb.y, X1 = mb.x + mb.w, Y1 = mb.y + mb.h, MS = { hpLaptop: i === 2 ? 0.18 : 0.26, hpBook: i === 1 ? 0.4 : 0.3, hpPhone: 0.34 }, K = 1.155;   // (laptop stop: the notebook a little further in; notebook stop: the laptop a little further out)
+      const mb = mobBox(), X0 = mb.x, Y0 = mb.y, X1 = mb.x + mb.w, Y1 = mb.y + mb.h, MS = { hpLaptop: i === 2 ? 0.18 : 0.26, hpBook: i === 1 ? 0.3 : 0.3, hpPhone: 0.34 }, K = 1.155;   // (laptop stop: the notebook a little further in; notebook stop: the laptop a little further out)
       const box = (k) => { const [x, y, r, sc] = s[k], c0 = PROPS[k], im = document.querySelector(`#${k} image`);
         const w = (+im.getAttribute('width')) * sc * K, h = (+im.getAttribute('height')) * sc * K, a = r * Math.PI / 180;
         const bw = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a)), bh = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a));
