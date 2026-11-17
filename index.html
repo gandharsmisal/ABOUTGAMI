@@ -817,7 +817,8 @@
         <g id="dk-paper" class="deskBit"><image href="assets/photo/desk-grid-hq.webp" x="-235.6" y="-185.4" width="471.1" height="370.8"></image></g>
         <g id="dk-marker" class="deskBit"><image href="assets/exact/desk-marker-hq.webp" x="-98" y="-120.6" width="196" height="241.3"></image></g>
         <g id="dk-scissors" class="deskBit"><image href="assets/exact/desk-scissors-film-hq.webp" x="-152.2" y="-182.7" width="304.5" height="365.4"></image><g id="dkp-scissors"><image href="assets/exact/desk-scissors-blade-hq.webp" x="-152.2" y="-182.7" width="304.5" height="365.4"></image></g></g>
-        <g id="dk-sketchbook" class="deskBit"><image href="assets/exact/desk-sketchbook-book-v2.webp" x="-181.2" y="-142.1" width="362.5" height="284.2"></image><g id="dkp-sketchbook"><image href="assets/exact/desk-sketchbook-pencil-hq.webp" x="-181.2" y="-142.1" width="362.5" height="284.2"></image></g></g>
+        <g id="dk-sketchbook" class="deskBit"><image href="assets/exact/desk-sketchbook-book-v2.webp" x="-181.2" y="-142.1" width="362.5" height="284.2"></image><g id="dkp-sketchbook"><image href="assets/exact/desk-sketchbook-pencil-hq.webp" x="-181.2" y="-142.1" width="362.5" height="284.2" transform="translate(78.7 5.1) scale(1.35) translate(-78.7 -5.1)"></image></g></g>
+        <g id="dk-cup" class="deskBit"><image href="assets/photo/desk-cup-print.webp" x="-120" y="-108.2" width="240" height="216.5"></image></g>
         <g id="dk-camera" class="deskBit"><image href="assets/photo/desk-camera.webp" x="-183.3" y="-227.6" width="366.8" height="455.3"></image></g>
     </g>
     <g id="heroProps">
@@ -2548,7 +2549,7 @@
       abStage.style.transform = `translate(${ox}px, ${oy}px) scale(${k})`;
       return { k, ox, oy };
     }
-    const vw = innerWidth, vh = innerHeight, k = Math.min((vh - AB_TOP - AB_BOTTOM) / 1194, (vw - 60) / 1879) * 0.88;   /* (a little smaller) */
+    const vw = innerWidth, vh = innerHeight, k = Math.min((vh - AB_TOP - AB_BOTTOM) / 1194, (vw - 60) / 1879) * 0.8;   /* (smaller) */
     const ox = (vw - 1879 * k) / 2, oy = AB_TOP + (vh - AB_TOP - AB_BOTTOM - 1194 * k) / 2;
     abStage.style.transform = `translate(${ox}px, ${oy}px) scale(${k})`;
     return { k, ox, oy };
@@ -2749,15 +2750,16 @@
     camera:     [[1880, 430, 18], [35, 470, -15],   [1850, 970, 10],  [700, 1060, -10]],
     sketchbook: [[1820, 1010, -8],[1790, 1040, 12], [620, 55, -14],   [40, 560, 8]],
     scissors:   [[25, 400, 20],   [380, 1065, -25], [1880, 690, 30],  [960, 1065, -15]],
-    marker:     [[1100, 1060, 70], [840, 55, -60],   [1320, 55, 100],  [1180, 55, -80]]
-  }, SPIN = { paper: 1, camera: -1, sketchbook: 1, scissors: -1, marker: 1 };
+    marker:     [[1100, 1060, 70], [840, 55, -60],   [1320, 55, 100],  [1180, 55, -80]],
+    cup:        [[1300, 820, 6],   [1500, 1060, 8],  [400, 55, -6],    [1650, 1060, 6]]
+  }, SPIN = { paper: 1, camera: -1, sketchbook: 1, scissors: -1, marker: 1, cup: -1 };
   const SPLIT = { sketchbook: [55, 240, 8, 75, 0], scissors: [-169, -141, 12, 35, -43] };   // (first view: the pencil down level with the phone, the scissors under the notebook)   // [dx, dy, turn, about x, about y] of the pencil / the scissors on the first view
   // the side objects sit on the page's edges, half on and half off (each centred on its nearest edge), or as much
   // inside as DESK_INSIDE says. Desktop, first view: every one wholly inside the frame, drawn at DESK0_SCALE so they fit
   // round the laptop, the mug and the notebook (they grow back to full size as they move to the next step)
   const DESK_INSIDE = {}, DESK0_SCALE = 1;
   // desktop, first view: every side object wholly inside the frame at full size, each where it was placed by hand
-  const DESK0 = isMobMain() ? null : {"scissors":[1630,810,-13],"paper":[968,845],"camera":[1780,290],"sketchbook":[220,230],"marker":[390,760]};
+  const DESK0 = isMobMain() ? null : {"scissors":[1630,810,-13],"paper":[968,845],"camera":[1780,290],"sketchbook":[220,230],"marker":[390,760],"cup":[1190,930]};
   for (const n in DESK_DESK) DESK_DESK[n] = DESK_DESK[n].map(([x, y, r], step) => {
     if (step !== 0) {                                                        // desktop, the other stops: further out - 35% inside the frame (its turned box), on its nearest edge
       if (isMobMain()) return [x, y, r];
@@ -2766,7 +2768,7 @@
       const bw = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a)), bh = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a));
       // how much of each is inside: the big ones less, the small ones more (the camera's picture is mostly empty strap
       // room, so it counts as small); the laptop stop's camera a little further in again
-      const f = { paper: step === 1 ? 0.22 : 0.35, sketchbook: step === 3 ? 0.55 : 0.3, scissors: step === 1 ? 0.34 : step === 2 ? 0.32 : step === 3 ? 0.4 : e === 3 ? 0.52 : 0.42, marker: step === 1 ? 0.4 : 0.58, camera: e === 3 ? 0.6 : step === 1 ? 0.45 : 0.5 }[n] ?? 0.35;   // (on the bottom edge the camera's body - at the bottom of its picture - would be the part cut off)
+      const f = { paper: step === 1 ? 0.22 : 0.35, sketchbook: step === 3 ? 0.55 : 0.3, scissors: step === 1 ? 0.34 : step === 2 ? 0.32 : step === 3 ? 0.4 : e === 3 ? 0.52 : 0.42, marker: step === 1 ? 0.4 : 0.58, cup: 0.62, camera: e === 3 ? 0.6 : step === 1 ? 0.45 : 0.5 }[n] ?? 0.35;   // (on the bottom edge the camera's body - at the bottom of its picture - would be the part cut off)
       // and never lost in a corner: along its edge, at least most of it stays within the frame
       const ax = v => Math.max(bw * 0.25, Math.min(1920 - bw * 0.25, v)), ay = v => Math.max(bh * 0.25, Math.min(1080 - bh * 0.25, v));
       return e === 0 ? [bw * (f - 0.5), ay(y), r] : e === 1 ? [1920 - bw * (f - 0.5), ay(y), r] : e === 2 ? [ax(x), bh * (f - 0.5), r] : [ax(x), 1080 - bh * (f - 0.5), r];
@@ -2917,6 +2919,7 @@
                       3: { top: { sketchbook: 0.34, marker: 0.58 }, bot: { scissors: 0.3, paper: 0.55, camera: 0.8 } } };
       for (const n in DESK_MOB) { const P = await pts(document.querySelector(`#dk-${n} image`), 0, 0, 1.27); if (!P.length) continue;
         for (let i = 1; i < DESK_MOB[n].length; i++) { const r = DESK_MOB[n][i][2], sl = SLOTS[i], [X, Y] = turned(P, r);
+          if (sl.top[n] === undefined && sl.bot[n] === undefined) continue;
           const top = sl.top[n] !== undefined, cx = X0 + (X1 - X0) * (top ? sl.top[n] : sl.bot[n]) - q(X, 0.5);
           const DEPTH = 245;   // (how far each reaches into the view, the same for big and small - measured on its bulk, not a thin tip)
           DESK_MOB[n][i] = [cx, top ? mb.y + DEPTH - q(Y, 0.85) : mb.y + mb.h - DEPTH - q(Y, 0.15), r]; } }
@@ -3008,16 +3011,16 @@
   // phones, at the stops: as the reference - everything not in focus in a row along the top and a row along the bottom,
   // spread evenly across, each showing the same depth into the view. Each stop the rows swap (top <-> bottom) and the
   // order runs the other way, so every object still settles on the opposite side to where it was.
-  const MOB_ROWS = { 1: { top: ['camera', 'scissors', 'sketchbook'], bot: ['hpPhone', 'paper', 'marker', 'hpBook'] },
-                     2: { top: ['marker', 'paper', 'hpPhone'], bot: ['sketchbook', 'hpLaptop', 'scissors', 'camera'] },
-                     3: { top: ['camera', 'scissors', 'hpLaptop', 'sketchbook'], bot: ['hpBook', 'paper', 'marker'] } };
+  const MOB_ROWS = { 1: { top: ['cup', 'camera', 'scissors', 'sketchbook'], bot: ['hpPhone', 'paper', 'marker', 'hpBook'] },
+                     2: { top: ['marker', 'paper', 'hpPhone'], bot: ['sketchbook', 'hpLaptop', 'scissors', 'camera', 'cup'] },
+                     3: { top: ['cup', 'camera', 'scissors', 'hpLaptop', 'sketchbook'], bot: ['hpBook', 'paper', 'marker'] } };
   const MOB_ROW_K = 1;   // (the laptop, notebook and mug keep their size in the rows)
   const mobBoxOf = (i, id) => {   // its turned box on the phone (as drawn)
     const side = !id.startsWith('hp'), im = document.querySelector(side ? '#dk-' + id + ' image' : '#' + id + ' image');
     const r = (side ? DESK[id][0][2] : CAM[0][id][2]) * Math.PI / 180;
     const k = side ? 1.27 * (id === 'camera' ? 1.3 : 1) : CAM[i][id][3] * MOB_ROW_K * 1.155 * (id === 'hpLaptop' ? 1 : 1.1);
     let w = (+(im && im.getAttribute('width')) || 200) * k, h = (+(im && im.getAttribute('height')) || 200) * k;
-    if (id === 'hpPhone') w *= 1.15;   // (a little bigger; no mug any more)
+    if (id === 'hpPhone') w *= 1.32;   // (bigger; no mug on it any more)
     return [Math.abs(w * Math.cos(r)) + Math.abs(h * Math.sin(r)), Math.abs(w * Math.sin(r)) + Math.abs(h * Math.cos(r))]; };
   const mobSlot = (i, id) => {
     const R = MOB_ROWS[i], top = R.top.includes(id), row = top ? R.top : R.bot, j = row.indexOf(id), B = cam.box;
@@ -3068,7 +3071,7 @@
       P[id][2] += spin;
     }
     // desktop: each object's size matched to the reference desk (the mug keeps its place on the phone)
-    const SZ = isMobMain() ? { hpBook: 1.1, hpPhone: 1.27, hpCup: 1.1 } : { hpLaptop: 1, hpBook: 0.95, hpPhone: 1.15, hpCup: 1 };   /* (the phone a little bigger, the mug gone) */   // (the notebook and the mug and phone a little bigger)
+    const SZ = isMobMain() ? { hpBook: 1.1, hpPhone: 1.45, hpCup: 1.1 } : { hpLaptop: 1, hpBook: 0.95, hpPhone: 1.32, hpCup: 1 };   /* (the phone a little bigger, the mug gone) */   // (the notebook and the mug and phone a little bigger)
     if (SZ.hpPhone) { P.hpCup[0] = P.hpPhone[0] + (P.hpCup[0] - P.hpPhone[0]) * SZ.hpPhone; P.hpCup[1] = P.hpPhone[1] + (P.hpCup[1] - P.hpPhone[1]) * SZ.hpPhone; }
     for (const id in PROPS) {
       const [x, y, r, s0] = P[id], c = PROPS[id], s = s0 * (SZ[id] || 1);
