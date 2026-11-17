@@ -2950,7 +2950,7 @@
     CAM = mob ? CAM_MOB : CAM_DESK; DESK = mob ? DESK_MOB : DESK_DESK;
     if (mob) {                                                    // the phone's window on the stage
       const b = mobBox(); $('heroSvg').setAttribute('viewBox', `${b.x} ${b.y} ${b.w} ${b.h}`);
-      cam.ex = 0; cam.ey = 0;                                     // (the phone layout already reaches its edges)
+      cam.ex = 0; cam.ey = 0; cam.cy = b.y + b.h / 2;            // (the phone layout already reaches its edges; the middle of its view)
       // the notes sit under the object in the middle (their arrows were drawn for the desktop layout)
       [1, 2, 3].forEach(i => { const g = $(NOTES[i]), n = CAM[i].note; if (!g || !n) return;
         let a = g.querySelector('.hnMobArrow'); if (a) a.remove();
@@ -2971,7 +2971,7 @@
           ` M${ax} ${ay} L${tx} ${ty} L${bx} ${by}`);
         g.appendChild(a); });
     } else {
-      $('heroSvg').setAttribute('viewBox', '0 0 1920 1080');
+      $('heroSvg').setAttribute('viewBox', '0 0 1920 1080'); cam.cy = 540;
       const desk = { hnLaptop: 'translate(-129 -89)', hnBook: 'translate(85 0)', hnMug: 'translate(43 -170)' };
       for (const k in desk) $(k).setAttribute('transform', desk[k]);
       document.querySelectorAll('#hnLaptop text, #hnBook text, #hnMug text').forEach(tx => { if (tx._y0 !== undefined) tx.setAttribute('y', tx._y0); });
@@ -2979,7 +2979,22 @@
       cam.ex = Math.max(0, (hb.width / k - 1920) / 2); cam.ey = Math.max(0, (hb.height / k - 1080) / 2);
     }
   };
-  const at = (i, id) => { let [x, y, r, s] = CAM[i][id];
+  // every object settles on the opposite side to where it came from: if its place at a stop is on the same side
+  // (left/right, top/bottom) as where it was at the stop before, that place is mirrored across the middle - so from top
+  // right it comes to rest bottom left. (The object in focus stays in the middle, and the move out of the middle goes to
+  // its own place.)
+  const FOCUS = { hpLaptop: 1, hpBook: 2, hpPhone: 3, hpCup: 3 };
+  const oppo = (raw, i, focusAt) => { const cy = cam.cy || 540; let prev = raw(0).slice(), fl = [false, false];
+    for (let k = 1; k <= i; k++) { const d = raw(k).slice(); let fx = false, fy = false;
+      if (focusAt !== k && focusAt !== k - 1) { fx = Math.sign(d[0] - 960) === Math.sign(prev[0] - 960); fy = Math.sign(d[1] - cy) === Math.sign(prev[1] - cy); }
+      if (fx) { d[0] = 1920 - d[0]; d[2] = -d[2]; } if (fy) d[1] = 2 * cy - d[1];
+      prev = d; fl = [fx, fy]; }
+    return { p: prev, fl }; };
+  const placeOf = (i, id) => {
+    if (id !== 'hpCup') return oppo(k => CAM[k][id], i, FOCUS[id]).p;
+    const { fl } = oppo(k => CAM[k].hpPhone, i, FOCUS.hpPhone), d = CAM[i].hpCup.slice(), cy = cam.cy || 540;   // (the mug goes where the phone goes)
+    if (fl[0]) { d[0] = 1920 - d[0]; d[2] = -d[2]; } if (fl[1]) d[1] = 2 * cy - d[1]; return d; };
+  const at = (i, id) => { let [x, y, r, s] = placeOf(i, id);
     if (i) { x += x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0; y += y < 150 ? -cam.ey : y > 930 ? cam.ey : 0; }   // peeking props stay at the real edges
     return [x, y, r, s]; };
   // through the middle in straight lines: from where it was straight to its meeting point near the centre (62% of the way
@@ -3022,7 +3037,7 @@
       $(id).setAttribute('transform', `translate(${x} ${y}) rotate(${r}) scale(${s * (isMobMain() ? 1.155 : 0.95)}) translate(${-c[0]} ${-c[1]})`);   // (phones: 15.5% bigger)
     }
     for (const n in DESK) {
-      const dAt = i => { const [x, y, rr, s = 1] = DESK[n][i];
+      const dAt = i => { const [x, y, rr, s = 1] = oppo(k => DESK[n][k], i, -1).p;
         return [x + (x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0), y + (y < 150 ? -cam.ey : y > 930 ? cam.ey : 0), rr, s]; };
       const p = cam.lag.desk, [, , r, ds] = between(p, dAt);
       const frac = KJ ? p4(p - Math.floor(p)) : p - Math.floor(p), spin = SPIN[n] * 360 * (KJ ? frac : smooth(frac));   // (the reference: every object on the same power4.inOut curve - they rest at each stop, rush between)   // one whole turn per move (so it lands at the same angle), slow at the start and the end
@@ -3160,8 +3175,10 @@
     if (!mainActive()) return;
     const now = performance.now(), touch = self.event && self.event.type.startsWith('touch');
     if (KJ) { if (touch) { cam.target -= self.deltaY * 0.0022; cam.kv = 0.3; cam.pd = 90; cam.pOut = false; } else {
-      cam.target += self.deltaY * 0.0008;   // (wheel and trackpad alike, as the reference)
-      { const v = self.deltaY * 0.0008 / Math.max(16, Math.min(120, now - (cam.kIn || 0))) * 1000; cam.kSpd = now - (cam.kIn || 0) > 300 ? v : cam.kSpd * 0.6 + v * 0.4; cam.kIn = now; cam.kGl = false; }   // (how fast you're scrolling, in stops a second)
+      // a trackpad (its steps aren't whole mouse notches, or they're small) moves at less than half the wheel's rate
+      const ev0 = self.event || {}, pad = (ev0.wheelDeltaY !== undefined && ev0.wheelDeltaY % 120 !== 0) || Math.abs(self.deltaY) < 30, dS = self.deltaY * 0.0008 * (pad ? 0.42 : 1);
+      cam.target += dS;
+      { const v = dS / Math.max(16, Math.min(120, now - (cam.kIn || 0))) * 1000; cam.kSpd = now - (cam.kIn || 0) > 300 ? v : cam.kSpd * 0.6 + v * 0.4; cam.kIn = now; cam.kGl = false; }   // (how fast you're scrolling, in stops a second)
       cam.kv = 0.2; cam.pd = 900; cam.pOut = true; } return; }   // (the reference: ~1250px of wheel or ~450px of swipe per stop)
     // a finger works like the wheel: it moves things as far and as fast as it moves (a slow, small drag a little, a quick
     // swipe further, gliding on after it lifts), with the same slow pick-up at the start and the soft landing on an object
