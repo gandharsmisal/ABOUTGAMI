@@ -2944,7 +2944,7 @@
   const mod = a => ((a % NS) + NS) % NS, smooth = x => x * x * (3 - 2 * x);
   // the reference site's scroll: the wheel / finger moves a target, the view chases it by a fixed share each frame, and
   // between two stops everything moves on a strong ease-in-out (power4.inOut) - no stopping, no snapping
-  const KJ = true, p4 = x => 0.8 * (x < 0.5 ? 16 * x ** 5 : 1 - 16 * (1 - x) ** 5) + 0.2 * x;   // (the reference's power4.inOut, with a little even motion mixed in so a small scroll and its glide show near a stop too)   // (the reference's power4.inOut)   // (a gentler in-out than the reference's: the objects ease to a natural rest at each stop - the same moves as before, only slowing in and out of each stop)
+  const KJ = true, p4 = x => x < 0.5 ? 16 * x ** 5 : 1 - 16 * (1 - x) ** 5;   // (the reference's power4.inOut: rests at each stop, glides between)   // (the reference's power4.inOut, with a little even motion mixed in so a small scroll and its glide show near a stop too)   // (the reference's power4.inOut)   // (a gentler in-out than the reference's: the objects ease to a natural rest at each stop - the same moves as before, only slowing in and out of each stop)
   const edges = () => {
     const mob = isMobMain();
     CAM = mob ? CAM_MOB : CAM_DESK; DESK = mob ? DESK_MOB : DESK_DESK;
@@ -3080,20 +3080,9 @@
       // one after another overlap into one steady speed, so a run of notches is a continuous glide with no pulse per notch.
       // A light follow on top rounds it off. (Measured: speed varies 0-5% between notches, against 7-28% before, and it
       // comes to rest sooner after the last notch.)
-      // when the scrolling stops, the objects don't stop with it: they carry on a little with the speed they had (a bit
-      // further the faster you scrolled) and ease softly to rest - no jump to a stop
-      if (!cam.kGl && cam.kIn && performance.now() - cam.kIn > 250) {
-        cam.kGl = true;
-        // the wheel stays exactly where its notches put it (12 notches = one stop); a trackpad, which can stop anywhere, glides
-        // softly on to the nearest stop
-        if (cam.kPad && Math.abs(cam.target - Math.round(cam.target)) > 1e-6) { cam.target = Math.round(cam.target); cam.pd = 900; cam.pOut = true; cam.kv = 0.2; }
-      }
-      { const now = performance.now(); cam.pulses = cam.pulses || []; if (cam.pB === undefined) cam.pB = cam.target;
-        let sum = 0; for (const p of cam.pulses) sum += p.a;
-        const extra = cam.target - (cam.pB + sum); if (Math.abs(extra) > 1e-9) cam.pulses.push({ a: extra, t: now, d: cam.pd || 320, out: !!cam.pOut });
-        let g = cam.pB;
-        cam.pulses = cam.pulses.filter(p => { const u = Math.min(1, (now - p.t) / p.d); if (u >= 1) { cam.pB += p.a; g += p.a; return false; } g += p.a * (p.out ? 1 - (1 - u) ** 4 : 0.5 - 0.5 * Math.cos(Math.PI * u)); return true; });   // (wheel / trackpad: a quick start, then a long easing glide on - the objects coast to rest after every scroll)
-        const e = g - cam.pos; if (Math.abs(e) > 5e-5 || cam.pulses.length) cam.pos += e * (1 - Math.pow(1 - (cam.kv || 0.25), f)); else cam.pos = cam.target; }
+      // exactly as the reference: every frame the view moves a fixed share of the way to the target (7% wheel / trackpad,
+      // 16% finger, 6% after a flick) - nothing else
+      { const e = cam.target - cam.pos; if (Math.abs(e) > 5e-5) cam.pos += e * (cam.kv || 0.07); else cam.pos = cam.target; }
       for (const q in LAG) cam.lag[q] = cam.pos;
       cam.catching = false;
       const r = Math.round(cam.pos), near = Math.abs(cam.pos - r) < 0.1 && Math.abs(cam.target - r) < 0.12;   // (on the curve an object looks at rest well before exactly on it)
@@ -3156,7 +3145,7 @@
     // normal swipe all the way there (soft landing); swiping again soon after goes a little quicker
     onRelease: self => {
       if (!mainActive() || !(self.event && self.event.type.startsWith('touch'))) return;
-      if (KJ) { cam.target += Math.max(-1, Math.min(1, -self.velocityY * 0.0022 * 0.05)); cam.kv = 0.25; cam.pd = 650; cam.pOut = true; return; }   // (the reference: a flick adds a little, at most one stop)
+      if (KJ) { cam.target += Math.max(-1, Math.min(1, -self.velocityY * 0.0022 * 0.05)); cam.kv = 0.06; return; }   // (the reference: a flick adds a little, at most one stop)
       const dist = Math.abs(cam.tSum || 0), dir = Math.sign(cam.tSum || 0), now = performance.now();
       if (dist < 14 || !dir) return;
       const quick = now - (cam.tRel || -1e9) < 900; cam.tRel = now;
@@ -3172,13 +3161,13 @@
     onChangeY: self => {
     if (!mainActive()) return;
     const now = performance.now(), touch = self.event && self.event.type.startsWith('touch');
-    if (KJ) { if (touch) { cam.target -= self.deltaY * 0.0022; cam.kv = 0.3; cam.pd = 90; cam.pOut = false; } else {
+    if (KJ) { if (touch) { cam.target -= self.deltaY * 0.0022; cam.kv = 0.16; } else {
       // a trackpad (its steps aren't whole mouse notches, or they're small) moves at less than half the wheel's rate
-      const ev0 = self.event || {}, pad = (ev0.wheelDeltaY !== undefined && ev0.wheelDeltaY % 120 !== 0) || Math.abs(self.deltaY) < 30, notches = Math.max(1, Math.round(Math.abs(self.deltaY) / (Math.abs(ev0.deltaY) || Math.abs(self.deltaY) || 1))), dS = pad ? self.deltaY * 0.0008 * 0.42 : Math.sign(self.deltaY) * notches / 12;   // (a mouse: every notch exactly 1/12 of the way, so 12 notches land exactly on the next stop)
+      const ev0 = self.event || {}, pad = (ev0.wheelDeltaY !== undefined && ev0.wheelDeltaY % 120 !== 0) || Math.abs(self.deltaY) < 30, notches = Math.max(1, Math.round(Math.abs(self.deltaY) / (Math.abs(ev0.deltaY) || Math.abs(self.deltaY) || 1))), dS = self.deltaY * 0.0008 * (pad ? 0.42 : 1);   // (a mouse: every notch exactly 1/12 of the way, so 12 notches land exactly on the next stop)
       cam.kPad = pad;
       cam.target += dS;
       { const v = dS / Math.max(16, Math.min(120, now - (cam.kIn || 0))) * 1000; cam.kSpd = now - (cam.kIn || 0) > 300 ? v : cam.kSpd * 0.6 + v * 0.4; cam.kIn = now; cam.kGl = false; }   // (how fast you're scrolling, in stops a second)
-      cam.kv = 0.2; cam.pd = 900; cam.pOut = true; } return; }   // (the reference: ~1250px of wheel or ~450px of swipe per stop)
+      cam.kv = 0.07; } return; }   // (the reference: ~1250px of wheel or ~450px of swipe per stop)
     // a finger works like the wheel: it moves things as far and as fast as it moves (a slow, small drag a little, a quick
     // swipe further, gliding on after it lifts), with the same slow pick-up at the start and the soft landing on an object
     if (touch) cam.tSum = (cam.tSum || 0) - self.deltaY;
@@ -3206,12 +3195,12 @@
   function camGo(i, instant) {
     const r0 = Math.round(cam.target); let dI = mod(i - mod(r0)); if (dI > NS / 2) dI -= NS;   // the short way round
     cam.target = r0 + dI;
-    cam.vel = 0; cam.catching = !instant; cam.absorb = false; cam.kv = 0.25; cam.pd = 800; cam.pOut = false;
+    cam.vel = 0; cam.catching = !instant; cam.absorb = false; cam.kv = 0.07;
     if (instant) { cam.pos = cam.tS = cam.tk = cam.tk2 = cam.pB = cam.target; cam.pulses = []; cam.pv = 0; for (const k in LAG) cam.lag[k] = cam.target; hideNotes(); camDraw(); }
   }
   addEventListener('keydown', e => {
     if (!mainActive()) return;
-    if (KJ) { if (/^(ArrowDown|PageDown)$/.test(e.key)) cam.target = Math.round(cam.target) + 1; if (/^(ArrowUp|PageUp)$/.test(e.key)) cam.target = Math.round(cam.target) - 1; cam.kv = 0.25; cam.pd = 800; cam.pOut = false; return; }
+    if (KJ) { if (/^(ArrowDown|PageDown)$/.test(e.key)) cam.target = Math.round(cam.target) + 1; if (/^(ArrowUp|PageUp)$/.test(e.key)) cam.target = Math.round(cam.target) - 1; cam.kv = 0.07; return; }
     if (cam.catching) return;
     if (cam.absorb && /^(Arrow(Up|Down)|Page(Up|Down))$/.test(e.key)) { cam.absorb = false; return; }
     if (/^(ArrowDown|PageDown)$/.test(e.key)) advance(1);
