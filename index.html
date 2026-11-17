@@ -2908,7 +2908,18 @@
     m1.hpCup = m1.hpPhone.slice(); m1.ly = (-365 + 1810 * 0.25) - 751;
     ['hpLaptop', 'hpPhone', 'hpBook'].forEach(k => { m2[k] = CAM_MOB[1][k].slice(); }); m2.hpCup = m2.hpPhone.slice(); m2.ly = (-365 + 1810 * 0.27) - 751;   // (placed in the rows)
     CAM_MOB[1] = m2; CAM_MOB[2] = m1; CAM_MOB.length = 3;   // (side objects first, then the main objects)
-    const MCL = { paper: [0.42, 0.5, -10], sketchbook: [0.3, 0.6, 12], scissors: [0.64, 0.6, -22], camera: [0.66, 0.46, 10], marker: [0.5, 0.7, 38] };
+    // phones, as the reference's phone screens (spots read off them across / down the view)
+    { const P = (k, rx, ry, r) => { const [x, y] = at(rx, ry); return [x, y, r, sc(k)]; };
+      // overview: spread round the words - papers, grid, phone, card along the top, the laptop low in the middle
+      CAM_MOB[0].hpLaptop = P('hpLaptop', 0.48, 0.69, -3); CAM_MOB[0].hpPhone = P('hpPhone', 0.51, 0.25, 4); CAM_MOB[0].hpBook = P('hpBook', 0.77, 0.27, 6);
+      CAM_MOB[0].hpCup = CAM_MOB[0].hpPhone.slice(); CAM_MOB[0].ly = (-365 + 1810 * 0.47) - 751;
+      // side objects in the middle: the card peeks in top left, the laptop top right, the phone bottom right
+      CAM_MOB[1].hpBook = P('hpBook', 0.05, 0.03, 8); CAM_MOB[1].hpLaptop = P('hpLaptop', 0.88, 0.02, -4); CAM_MOB[1].hpPhone = P('hpPhone', 0.98, 0.94, -10);
+      CAM_MOB[1].hpCup = CAM_MOB[1].hpPhone.slice(); CAM_MOB[1].ly = (-365 + 1810 * 0.28) - 751; }
+
+    const MCL = { paper: [0.42, 0.46, -10], sketchbook: [0.32, 0.55, 12], scissors: [0.6, 0.56, -22], camera: [0.63, 0.43, 10], marker: [0.52, 0.62, 38] };   // (the cluster under the words, as the reference)
+    const MOV = { sketchbook: [0.2, 0.14, -8], paper: [0.6, 0.12, -6], camera: [0.92, 0.33, 10], marker: [0.07, 0.55, -20], scissors: [0.8, 0.8, -13] };   // (overview: round the edges, as the reference)
+    for (const n in MOV) { const [x, y] = at(MOV[n][0], MOV[n][1]); DESK_MOB[n][0] = [x, y, MOV[n][2]]; }
     for (const n in DESK_MOB) { const [x, y] = at(MCL[n][0], MCL[n][1]); DESK_MOB[n][2] = DESK_MOB[n][1]; DESK_MOB[n][1] = [x, y, MCL[n][2]]; DESK_MOB[n].length = 3; }
   }
   // desktop, the stops: the side objects measured on their drawn pixels as well, about a third of each in view (as the
@@ -3061,7 +3072,7 @@
   // phones, at the stops: as the reference - everything not in focus in a row along the top and a row along the bottom,
   // spread evenly across, each showing the same depth into the view. Each stop the rows swap (top <-> bottom) and the
   // order runs the other way, so every object still settles on the opposite side to where it was.
-  const MOB_ROWS = { 1: { top: ['hpBook', 'hpPhone'], bot: ['hpLaptop'] }, 2: { top: ['camera', 'scissors', 'sketchbook'], bot: ['paper', 'marker'] } };   // (1: side objects in the middle, main ones in the rows; 2: the other way round)
+  const MOB_ROWS = { 1: { top: [], bot: [] }, 2: { top: ['camera', 'scissors', 'sketchbook'], bot: ['paper', 'marker'] } };   // (1: side objects in the middle, main ones in the rows; 2: the other way round)
   const MOB_ROWS_OLD = { 1: { top: ['camera', 'scissors', 'sketchbook'], bot: ['hpPhone', 'paper', 'marker', 'hpBook'] },
                      2: { top: ['hpLaptop', 'sketchbook', 'scissors', 'camera'], bot: ['marker', 'paper', 'hpPhone'] },
                      3: { top: ['camera', 'scissors', 'sketchbook', 'hpLaptop'], bot: ['hpBook', 'paper', 'marker'] } };   // (each keeps its row; the order flips each stop, so it crosses to the other side)
