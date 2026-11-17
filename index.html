@@ -2994,6 +2994,14 @@
       if (id === 'hpCup') x -= SLIDE * cam.lift;                           // slid along the table, never lifted
       P[id] = [x, y, r, s];
     }
+    // the main objects travel through the middle on the way too, like the side objects - a loose group near the centre
+    // halfway, then out to their next places (the mug rides with the phone)
+    { const CLM = { hpLaptop: [0, 40], hpBook: [-210, -60], hpPhone: [220, -50] }, mk = isMobMain() ? 0.7 : 1;
+      for (const id of ['hpLaptop', 'hpBook', 'hpPhone']) {
+        const p = cam.lag[id], fr = KJ ? p4(p - Math.floor(p)) : p - Math.floor(p), bump = Math.pow(Math.sin(Math.PI * fr), 1.4) * 0.62;
+        const dx = (960 + CLM[id][0] * mk - P[id][0]) * bump, dy = (560 + CLM[id][1] * mk - P[id][1]) * bump;
+        P[id][0] += dx; P[id][1] += dy;
+        if (id === 'hpPhone') { P.hpCup[0] += dx; P.hpCup[1] += dy; } } }
     for (const id in TURN) {
       const lg = id === 'hpCup' ? cam.lag.hpPhone : cam.lag[id], spin = TURN[id] * 360 * (lg - Math.floor(lg));
       if (id === 'hpCup') {                                                 // round the phone's centre
@@ -3047,12 +3055,14 @@
     const f = Math.min(3, dt / 16.67);                                      // frame-rate independent easing
     cam.t = time;
     if (KJ) {                                                               // (the reference: chase the target, nothing else)
-      // the view follows the target on a soft spring: a notch changes how it speeds up, never its speed in one jump, so no
-      // step is felt per notch - and it stays light and quick (settles in about half a second)
-      { const dts = Math.min(0.05, dt / 1000), w = 9;
-        cam.pv = (cam.pv || 0) + (w * w * (cam.target - cam.pos) - 2 * w * (cam.pv || 0)) * dts;
-        cam.pos += cam.pv * dts;
-        if (Math.abs(cam.target - cam.pos) < 5e-5 && Math.abs(cam.pv) < 1e-3) { cam.pos = cam.target; cam.pv = 0; } }
+      // every notch (or bit of a swipe) becomes its own short glide - easing in and out over ~0.4 s - and overlapping glides
+      // add up, so a run of notches is one continuous smooth motion with no step at each notch and no long heavy tail
+      { const now = performance.now(); cam.pulses = cam.pulses || []; if (cam.pB === undefined) cam.pB = cam.target;
+        let sum = 0; for (const p of cam.pulses) sum += p.a;
+        const extra = cam.target - (cam.pB + sum); if (Math.abs(extra) > 1e-9) cam.pulses.push({ a: extra, t: now, d: cam.pd || 650 });
+        let e = cam.pB;
+        cam.pulses = cam.pulses.filter(p => { const u = Math.min(1, (now - p.t) / p.d); if (u >= 1) { cam.pB += p.a; e += p.a; return false; } e += p.a * (0.5 - 0.5 * Math.cos(Math.PI * u)); return true; });
+        cam.pos = e; }
       for (const q in LAG) cam.lag[q] = cam.pos;
       cam.catching = false;
       const r = Math.round(cam.pos), near = Math.abs(cam.pos - r) < 0.1 && Math.abs(cam.target - r) < 0.12;   // (on the curve an object looks at rest well before exactly on it)
@@ -3131,12 +3141,12 @@
     onChangeY: self => {
     if (!mainActive()) return;
     const now = performance.now(), touch = self.event && self.event.type.startsWith('touch');
-    if (KJ) { if (touch) { cam.target -= self.deltaY * 0.0022; cam.kv = 0.16; } else {
+    if (KJ) { if (touch) { cam.target -= self.deltaY * 0.0022; cam.kv = 0.16; cam.pd = 220; } else {
       // a trackpad (small, smooth deltas) counted out in mouse notches: every 100px of its swipe is one notch, so it moves
       // exactly as the wheel does
       const ev = self.event || {}, dy = self.deltaY, pad = ev.deltaMode === 0 && (Math.abs(dy) < 50 || (ev.wheelDeltaY && ev.wheelDeltaY % 120 !== 0) || dy % 1 !== 0);
-      if (pad) { cam.target += dy * 0.0008; if (cam.tk !== undefined) { cam.tk += dy * 0.0008; cam.tk2 += dy * 0.0008; } }   // (a trackpad exactly as on the reference: every pixel of the swipe and its coasting moves it, chased at the same rate - no notches, nothing ignored)
-      else cam.target += dy * 0.0008;
+      if (pad) { cam.target += dy * 0.0008; cam.pd = 260; }   // (a trackpad exactly as on the reference: every pixel of the swipe and its coasting moves it, chased at the same rate - no notches, nothing ignored)
+      else { cam.target += dy * 0.0008; cam.pd = 420; }
       cam.kv = 0.07; } return; }   // (the reference: ~1250px of wheel or ~450px of swipe per stop)
     // a finger works like the wheel: it moves things as far and as fast as it moves (a slow, small drag a little, a quick
     // swipe further, gliding on after it lifts), with the same slow pick-up at the start and the soft landing on an object
@@ -3165,8 +3175,8 @@
   function camGo(i, instant) {
     const r0 = Math.round(cam.target); let dI = mod(i - mod(r0)); if (dI > NS / 2) dI -= NS;   // the short way round
     cam.target = r0 + dI;
-    cam.vel = 0; cam.catching = !instant; cam.absorb = false; cam.kv = 0.07;
-    if (instant) { cam.pos = cam.tS = cam.tk = cam.tk2 = cam.target; cam.pv = 0; for (const k in LAG) cam.lag[k] = cam.target; hideNotes(); camDraw(); }
+    cam.vel = 0; cam.catching = !instant; cam.absorb = false; cam.kv = 0.07; cam.pd = 700;
+    if (instant) { cam.pos = cam.tS = cam.tk = cam.tk2 = cam.pB = cam.target; cam.pulses = []; cam.pv = 0; for (const k in LAG) cam.lag[k] = cam.target; hideNotes(); camDraw(); }
   }
   addEventListener('keydown', e => {
     if (!mainActive()) return;
