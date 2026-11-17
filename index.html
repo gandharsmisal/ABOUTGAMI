@@ -2905,7 +2905,7 @@
     const at = (rx, ry) => [460 + 1000 * rx, -365 + 1810 * ry], c = CAM_MOB[0], sc = k => c[k][3];
     const m1 = {}, m2 = {};
     // as the reference's phone screen: the laptop in the middle, the phone left and the card right of it, sized to fit side by side; the words under them
-    [['hpLaptop', 0.48, 0.47, 0, 0.91], ['hpPhone', 0.15, 0.53, -4, 1], ['hpBook', 0.83, 0.51, 4, 0.6]].forEach(([k, x, y, r, f]) => { const [px, py] = at(x, y); m1[k] = [px, py, r, sc(k) * f]; });
+    [['hpLaptop', 0.5, 0.47, 0, 0.91], ['hpPhone', 0.2, 0.52, 0, 0.82], ['hpBook', 0.81, 0.51, 0, 0.72]]   /* (straight; the phone smaller, the card bigger, both closer in) */.forEach(([k, x, y, r, f]) => { const [px, py] = at(x, y); m1[k] = [px, py, r, sc(k) * f]; });
     m1.hpCup = m1.hpPhone.slice(); m1.ly = (-365 + 1810 * 0.7) - 751;
     ['hpLaptop', 'hpPhone', 'hpBook'].forEach(k => { m2[k] = CAM_MOB[1][k].slice(); }); m2.hpCup = m2.hpPhone.slice(); m2.ly = (-365 + 1810 * 0.27) - 751;   // (placed in the rows)
     CAM_MOB[1] = m2; CAM_MOB[2] = m1; CAM_MOB.length = 3;   // (side objects first, then the main objects)
@@ -2916,7 +2916,10 @@
       CAM_MOB[0].hpCup = CAM_MOB[0].hpPhone.slice(); CAM_MOB[0].ly = (-365 + 1810 * 0.47) - 751;
       // side objects in the middle: the card peeks in top left, the laptop top right, the phone bottom right
       CAM_MOB[1].hpBook = P('hpBook', 0.05, 0.03, 8); CAM_MOB[1].hpLaptop = P('hpLaptop', 0.88, 0.02, -4); CAM_MOB[1].hpPhone = P('hpPhone', 0.98, 0.94, -10);
-      CAM_MOB[1].hpCup = CAM_MOB[1].hpPhone.slice(); CAM_MOB[1].ly = (-365 + 1810 * 0.28) - 751; }
+      CAM_MOB[1].hpCup = CAM_MOB[1].hpPhone.slice(); CAM_MOB[1].ly = (-365 + 1810 * 0.28) - 751;
+      // the phone and the card keep one size at every stop on a phone (the main-objects stop's)
+      const PH = CAM_MOB[2].hpPhone[3], BK = CAM_MOB[2].hpBook[3];
+      for (let i = 0; i < 3; i++) { CAM_MOB[i].hpPhone[3] = PH; CAM_MOB[i].hpCup[3] = PH; CAM_MOB[i].hpBook[3] = BK; } }
 
     const MCL = { paper: [0.42, 0.46, -10], sketchbook: [0.32, 0.55, 12], scissors: [0.6, 0.56, -22], camera: [0.63, 0.43, 10], marker: [0.52, 0.62, 38] };   // (the cluster under the words, as the reference)
     const MOV = { sketchbook: [0.2, 0.14, -8], paper: [0.6, 0.12, -6], camera: [0.92, 0.33, 10], marker: [0.07, 0.55, -20], scissors: [0.8, 0.8, -13] };   // (overview: round the edges, as the reference)
