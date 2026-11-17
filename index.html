@@ -2733,7 +2733,7 @@
     { hpLaptop: [968, 845, -2, 1.2], hpCup: [460.6, 346.1, 4, 1.03], hpPhone: [480, 430, 4, 1.03], hpBook: [1515, 365, -7, 1.35], ly: -195 },   // (first view, laid out round the side objects)
     { hpLaptop: [960, 600, 0, 1.2], hpCup: [360.6, -48.9, 0, 1.03], hpPhone: [380, 35, 0, 1.03], hpBook: [1950, 645, 8, 1.35], ly: -440 },
     { hpLaptop: [-105, 530, 15, 1.2], hpCup: [1915.6, 306.1, 0, 1.03], hpPhone: [1935, 390, 0, 1.03], hpBook: [958, 528, 2, 1.35], ly: 60 },
-    { hpLaptop: [960, 1207, 0, 1.2], hpCup: [1022.6, 586.1, 2, 1.03], hpPhone: [1042, 670, 2, 1.03], hpBook: [560, -50, 2, 1.35], ly: -360 }
+    { hpLaptop: [1240, 1207, 0, 1.2], hpCup: [1022.6, 586.1, 2, 1.03], hpPhone: [1042, 670, 2, 1.03], hpBook: [560, -50, 2, 1.35], ly: -360 }
   ];
   const DESK_DESK = {   // (kept clear of the logo, the menu and the figure in the corners)
     paper:      [[540, 55, -12],  [1130, 55, 8],    [1150, 1060, -6], [1880, 430, 14]],
@@ -2921,7 +2921,7 @@
           // bottom-left - so the mug and phone move to a new place at every stop)
           const flip = i === 2, swapX = i === 3;   // (mug stop: the laptop across on the right, so it crosses the middle)
           const right = swapX ? first : (first !== flip ? flip : !flip);
-          const [nx, ny] = [swapX && first ? (X0 + X1) / 2 - q(X, 0.5) : right ? X1 - q(X, 0.38) : X0 - q(X, 0.62), (swapX ? !first : first !== flip) ? Y0 - 40 - q(Y, 0.66) : Y1 + 40 - q(Y, 0.34)];   // (mug stop: the laptop down at the bottom)
+          const [nx, ny] = [swapX && first ? X0 + (X1 - X0) * 0.66 - q(X, 0.5) : right ? X1 - q(X, 0.38) : X0 - q(X, 0.62), (swapX ? !first : first !== flip) ? Y0 - 40 - q(Y, 0.66) : Y1 + 40 - q(Y, 0.34)];   // (mug stop: the laptop down at the bottom)
           const dx = nx - x, dy = ny - y;
           s[k] = [nx, ny, r, sc];
           if (k === 'hpPhone') s.hpCup = [s.hpCup[0] + dx, s.hpCup[1] + dy, s.hpCup[2], s.hpCup[3]];
