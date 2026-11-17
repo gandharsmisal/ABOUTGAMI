@@ -2804,10 +2804,12 @@
     // phones, the stops: each side object pushed out to its nearest edge of the phone's view, only a share of it inside
     // (they were pulled in with the rest of the layout and sat too far in)
     { const mb = mobBox(), X0 = mb.x, Y0 = mb.y, X1 = mb.x + mb.w, Y1 = mb.y + mb.h, SH = { paper: 0.16, sketchbook: 0.18, camera: 0.5, scissors: 0.52, marker: 0.5 };   // (the phone's real view)
+      // per stop, by hand: laptop stop - the camera further out, the bottom row further in; notebook stop - the marker and papers along the top in, the films on the right out; mug stop - the two in the middle of the sides in
+      const OV = { 1: { camera: 0.32, scissors: 0.62, sketchbook: 0.3, marker: 0.65, paper: 0.3 }, 2: { marker: 0.7, paper: 0.3, scissors: 0.38 }, 3: { paper: 0.34, sketchbook: 0.34 } };
       for (const n in DESK_MOB) for (let i = 1; i < DESK_MOB[n].length; i++) {
         const [x, y, r] = DESK_MOB[n][i], im = document.querySelector(`#dk-${n} image`);
         const w = (+(im && im.getAttribute('width')) || 0) * 1.27, h = (+(im && im.getAttribute('height')) || 0) * 1.27, a = r * Math.PI / 180;
-        const bw = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a)), bh = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a)), f = SH[n] || 0.35;
+        const bw = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a)), bh = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a)), f = (OV[i] && OV[i][n]) ?? (SH[n] || 0.35);
         const d = [x - X0, X1 - x, y - Y0, Y1 - y], e = d.indexOf(Math.min(...d));
         const g = f >= 0.3 ? 0.45 : 0.25;   // (a small one is kept almost wholly in along its edge, so at least ~30% of it shows even in a corner)
         const cx = v => Math.max(X0 + bw * g, Math.min(X1 - bw * g, v)), cy = v => Math.max(Y0 + bh * g, Math.min(Y1 - bh * g, v));
@@ -2830,7 +2832,7 @@
       s.note = [960, s[l.focus][1] + HALF[l.focus] * s[l.focus][3] + 40];
       // the main objects not in focus: pushed out to their nearest edge like the desktop, only a share inside
       // (the laptop least, the notebook a little more, the mug and phone most)
-      const mb = mobBox(), X0 = mb.x, Y0 = mb.y, X1 = mb.x + mb.w, Y1 = mb.y + mb.h, MS = { hpLaptop: 0.26, hpBook: 0.3, hpPhone: 0.34 }, K = 1.155;
+      const mb = mobBox(), X0 = mb.x, Y0 = mb.y, X1 = mb.x + mb.w, Y1 = mb.y + mb.h, MS = { hpLaptop: i === 2 ? 0.18 : 0.26, hpBook: i === 1 ? 0.4 : 0.3, hpPhone: 0.34 }, K = 1.155;   // (laptop stop: the notebook a little further in; notebook stop: the laptop a little further out)
       const box = (k) => { const [x, y, r, sc] = s[k], c0 = PROPS[k], im = document.querySelector(`#${k} image`);
         const w = (+im.getAttribute('width')) * sc * K, h = (+im.getAttribute('height')) * sc * K, a = r * Math.PI / 180;
         const bw = Math.abs(w * Math.cos(a)) + Math.abs(h * Math.sin(a)), bh = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a));
@@ -2852,7 +2854,7 @@
   // reference), along the top kept clear of the logo and the menu
   if (!isMobMain()) (async () => {
     const SHARE = 0.35;
-    const pts = async (im) => { const p = new Image(); p.crossOrigin = 'anonymous'; p.src = im.getAttribute('href'); await p.decode();
+    const pts = async (im) => { const p = new Image(); p.src = im.getAttribute('href'); await p.decode();
       const x = +im.getAttribute('x'), y = +im.getAttribute('y'), w = +im.getAttribute('width'), h = +im.getAttribute('height');
       const k = Math.min(1, 80 / Math.max(p.naturalWidth, p.naturalHeight)), cw = Math.max(1, Math.round(p.naturalWidth * k)), ch = Math.max(1, Math.round(p.naturalHeight * k));
       const c = document.createElement('canvas'); c.width = cw; c.height = ch; const g = c.getContext('2d'); g.drawImage(p, 0, 0, cw, ch);
@@ -2878,7 +2880,7 @@
   if (isMobMain()) (async () => {
     const SHARE = 0.35, BIG = { hpBook: 1.1, hpPhone: 1.1 };   // (about a third of each in view, as the reference; the notebook and phone drawn 10% bigger)
     const pts = async (im, ox, oy, s) => {
-      const p = new Image(); p.crossOrigin = 'anonymous'; p.src = im.getAttribute('href'); await p.decode();
+      const p = new Image(); p.src = im.getAttribute('href'); await p.decode();
       const x = +im.getAttribute('x'), y = +im.getAttribute('y'), w = +im.getAttribute('width'), h = +im.getAttribute('height');
       const k = Math.min(1, 80 / Math.max(p.naturalWidth, p.naturalHeight)), cw = Math.max(1, Math.round(p.naturalWidth * k)), ch = Math.max(1, Math.round(p.naturalHeight * k));
       const c = document.createElement('canvas'); c.width = cw; c.height = ch; const g = c.getContext('2d'); g.drawImage(p, 0, 0, cw, ch);
@@ -2927,7 +2929,7 @@
     } catch (err) {}   // (a picture that cannot be read: kept as placed by its box)
   })();
   // the desk's pictures decoded up front (the bigger, sharper ones made the first move stutter while they were decoded)
-  document.querySelectorAll('#heroProps image, #heroDecor image').forEach(im => { const p = new Image(); p.crossOrigin = 'anonymous'; p.src = im.getAttribute('href'); if (p.decode) p.decode().catch(() => {}); });
+  document.querySelectorAll('#heroProps image, #heroDecor image').forEach(im => { const p = new Image(); p.src = im.getAttribute('href'); if (p.decode) p.decode().catch(() => {}); });
   const NOTES = [null, 'hnLaptop', 'hnBook', 'hnMug'], NS = CAM.length, SLIDE = 125;   // how far the mug slides off the phone
   /* The scroll is in the visitor's hands: the wheel / finger moves a target along the steps (about 4 notches a step),
      the canvas follows it softly and every prop trails a little behind at its own pace, tilting as it drifts, so
