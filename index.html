@@ -2852,7 +2852,7 @@
   // reference), along the top kept clear of the logo and the menu
   if (!isMobMain()) (async () => {
     const SHARE = 0.35;
-    const pts = async (im) => { const p = new Image(); p.src = im.getAttribute('href'); await p.decode();
+    const pts = async (im) => { const p = new Image(); p.crossOrigin = 'anonymous'; p.src = im.getAttribute('href'); await p.decode();
       const x = +im.getAttribute('x'), y = +im.getAttribute('y'), w = +im.getAttribute('width'), h = +im.getAttribute('height');
       const k = Math.min(1, 80 / Math.max(p.naturalWidth, p.naturalHeight)), cw = Math.max(1, Math.round(p.naturalWidth * k)), ch = Math.max(1, Math.round(p.naturalHeight * k));
       const c = document.createElement('canvas'); c.width = cw; c.height = ch; const g = c.getContext('2d'); g.drawImage(p, 0, 0, cw, ch);
@@ -2878,7 +2878,7 @@
   if (isMobMain()) (async () => {
     const SHARE = 0.35, BIG = { hpBook: 1.1, hpPhone: 1.1 };   // (about a third of each in view, as the reference; the notebook and phone drawn 10% bigger)
     const pts = async (im, ox, oy, s) => {
-      const p = new Image(); p.src = im.getAttribute('href'); await p.decode();
+      const p = new Image(); p.crossOrigin = 'anonymous'; p.src = im.getAttribute('href'); await p.decode();
       const x = +im.getAttribute('x'), y = +im.getAttribute('y'), w = +im.getAttribute('width'), h = +im.getAttribute('height');
       const k = Math.min(1, 80 / Math.max(p.naturalWidth, p.naturalHeight)), cw = Math.max(1, Math.round(p.naturalWidth * k)), ch = Math.max(1, Math.round(p.naturalHeight * k));
       const c = document.createElement('canvas'); c.width = cw; c.height = ch; const g = c.getContext('2d'); g.drawImage(p, 0, 0, cw, ch);
@@ -2927,7 +2927,7 @@
     } catch (err) {}   // (a picture that cannot be read: kept as placed by its box)
   })();
   // the desk's pictures decoded up front (the bigger, sharper ones made the first move stutter while they were decoded)
-  document.querySelectorAll('#heroProps image, #heroDecor image').forEach(im => { const p = new Image(); p.src = im.getAttribute('href'); if (p.decode) p.decode().catch(() => {}); });
+  document.querySelectorAll('#heroProps image, #heroDecor image').forEach(im => { const p = new Image(); p.crossOrigin = 'anonymous'; p.src = im.getAttribute('href'); if (p.decode) p.decode().catch(() => {}); });
   const NOTES = [null, 'hnLaptop', 'hnBook', 'hnMug'], NS = CAM.length, SLIDE = 125;   // how far the mug slides off the phone
   /* The scroll is in the visitor's hands: the wheel / finger moves a target along the steps (about 4 notches a step),
      the canvas follows it softly and every prop trails a little behind at its own pace, tilting as it drifts, so
