@@ -2944,7 +2944,7 @@
   const mod = a => ((a % NS) + NS) % NS, smooth = x => x * x * (3 - 2 * x);
   // the reference site's scroll: the wheel / finger moves a target, the view chases it by a fixed share each frame, and
   // between two stops everything moves on a strong ease-in-out (power4.inOut) - no stopping, no snapping
-  const KJ = true, p4 = x => x < 0.5 ? 16 * x ** 5 : 1 - 16 * (1 - x) ** 5;   // (the reference's power4.inOut)   // (a gentler in-out than the reference's: the objects ease to a natural rest at each stop - the same moves as before, only slowing in and out of each stop)
+  const KJ = true, p4 = x => 0.8 * (x < 0.5 ? 16 * x ** 5 : 1 - 16 * (1 - x) ** 5) + 0.2 * x;   // (the reference's power4.inOut, with a little even motion mixed in so a small scroll and its glide show near a stop too)   // (the reference's power4.inOut)   // (a gentler in-out than the reference's: the objects ease to a natural rest at each stop - the same moves as before, only slowing in and out of each stop)
   const edges = () => {
     const mob = isMobMain();
     CAM = mob ? CAM_MOB : CAM_DESK; DESK = mob ? DESK_MOB : DESK_DESK;
