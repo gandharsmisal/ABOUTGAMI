@@ -1827,10 +1827,10 @@
     }
     const walkIn = gsap.timeline({ paused: true, onUpdate: figFrame })
       // (a brisker walk than the intro figure: ~6.3 steps a second)
-      .fromTo(F, { x: X0, stride: 1, arm: 0, bubble: 0 }, { x: HX, duration: 0.9, ease: 'none' }, 0)
-      .to(F, { stride: 0, duration: 0.22, ease: 'sine.inOut' }, 0.7)
-      .to(F, { arm: 1, duration: 0.4, ease: 'sine.inOut' }, 1.0)
-      .to(F, { bubble: 1, duration: 0.5, ease: 'none' }, 1.45);
+      .fromTo(F, { x: X0, stride: 1, arm: 0, bubble: 0 }, { x: HX, duration: 1.0, ease: 'none' }, 0)
+      .to(F, { stride: 0, duration: 0.24, ease: 'sine.inOut' }, 0.78)
+      .to(F, { arm: 1, duration: 0.4, ease: 'sine.inOut' }, 1.1)
+      .to(F, { bubble: 1, duration: 0.5, ease: 'none' }, 1.55);
     // windows wider than 16:9 leave a margin beside the 1920 stage: the figure keeps to the window's real left edge
     const fig = $('heroFig');
     const hugLeft = () => {
