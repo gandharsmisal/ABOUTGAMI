@@ -2731,7 +2731,7 @@
   // per step, each prop's [x, y, rotation, scale] (of its centre, on the 1920 x 1080 page), the line's offset and the note
   const CAM_DESK = [   // (each object keeps one size at every step)
     { hpLaptop: [975, 262, -2, 1.2], hpCup: [460.6, 346.1, 4, 1.03], hpPhone: [480, 430, 4, 1.03], hpBook: [1515, 365, -7, 1.35], ly: -195 },   // (first view, laid out round the side objects)
-    { hpLaptop: [960, 600, 0, 1.2], hpCup: [360.6, -48.9, 0, 1.03], hpPhone: [380, 35, 0, 1.03], hpBook: [1950, 645, 8, 1.35], ly: -440 },
+    { hpLaptop: [960, 600, 0, 1.2], hpCup: [360.6, -48.9, 0, 1.03], hpPhone: [380, 35, 0, 1.03], hpBook: [1380, 1030, 8, 1.35], ly: -440 },
     { hpLaptop: [-105, 530, 15, 1.2], hpCup: [1915.6, 306.1, 0, 1.03], hpPhone: [1935, 390, 0, 1.03], hpBook: [958, 528, 2, 1.35], ly: 60 },
     { hpLaptop: [1520, 1207, 0, 1.2], hpCup: [1022.6, 586.1, 2, 1.03], hpPhone: [1042, 670, 2, 1.03], hpBook: [560, -50, 2, 1.35], ly: -360 }
   ];
@@ -2984,7 +2984,7 @@
     return [x, y, r, s]; };
   // through the middle in straight lines: from where it was straight to its meeting point near the centre (62% of the way
   // from halfway between its two places to its spot in the group), then straight on to its next place - no curve
-  const vee = (A, B, C, u) => { const mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, Mx = mx + (C[0] - mx) * 0.62, My = my + (C[1] - my) * 0.62;
+  const vee = (A, B, C, u) => { const mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, Mx = C[0], My = C[1];   /* (every object right through its spot in the middle) */
     return u < 0.5 ? [A[0] + (Mx - A[0]) * u * 2, A[1] + (My - A[1]) * u * 2] : [Mx + (B[0] - Mx) * (u * 2 - 1), My + (B[1] - My) * (u * 2 - 1)]; };
   const between = (p, f, lin) => { const a = Math.floor(p), u = KJ ? p4(p - a) : lin ? p - a : smooth(p - a),   /* (main objects on the same gentle curve as the side objects' travel - same pace) */ A = f(mod(a)), B = f(mod(a + 1)); return A.map((v, j) => v + (B[j] - v) * u); };
   // the notebook and the phone turn once round on each move (the mug, riding on the phone, turns with it round the phone)
@@ -3069,7 +3069,7 @@
       // further the faster you scrolled) and ease softly to rest - no jump to a stop
       if (!cam.kGl && cam.kIn && performance.now() - cam.kIn > 110) {
         cam.kGl = true;
-        let more = Math.max(-0.08, Math.min(0.08, (cam.kSpd || 0) * 0.07));   // (a short glide: about a notch at most)
+        let more = Math.max(-0.15, Math.min(0.15, (cam.kSpd || 0) * 0.13));   // (a short glide: about a notch at most)
         // near a stop the glide is very small (a touch at most), and it never carries past the stop
         { const r = Math.round(cam.target), d = Math.abs(cam.target - r); more *= Math.max(0, Math.min(1, (d - 0.15) / 0.25));   // (none at all near a stop: it stays there)
           const nx = more > 0 ? Math.ceil(cam.target - 1e-9) : Math.floor(cam.target + 1e-9); if (more > 0 ? cam.target + more > nx : cam.target + more < nx) more = nx - cam.target; }
