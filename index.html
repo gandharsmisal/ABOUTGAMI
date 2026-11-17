@@ -2737,7 +2737,7 @@
   ];
   const DESK_DESK = {   // (kept clear of the logo, the menu and the figure in the corners)
     paper:      [[540, 55, -12],  [1130, 55, 8],    [1150, 1060, -6], [1880, 430, 14]],
-    camera:     [[1880, 430, 18], [35, 470, -15],   [1850, 970, 10],  [1810, 1010, -10]],
+    camera:     [[1880, 430, 18], [35, 470, -15],   [1850, 970, 10],  [1880, 640, -10]],
     sketchbook: [[1820, 1010, -8],[1790, 1040, 12], [620, 55, -14],   [40, 560, 8]],
     scissors:   [[25, 400, 20],   [380, 1065, -25], [1880, 690, 30],  [1380, 1065, -15]],
     marker:     [[1100, 1060, 70], [840, 55, -60],   [1320, 55, 100],  [1180, 55, -80]]
@@ -3119,7 +3119,7 @@
     const gain = Math.min(7, 0.5 + 0.45 * Math.min(1, heat.v) + 1.5 * Math.max(0, heat.v - 1));   // one notch ~0.8x (as before); a quick run of notches builds up fast: 3-4 notches a move
     // pick-up: a scroll starts slowly and gathers pace over its first ~0.7 s (like a car pulling away), then goes as fast
     // as you scroll - fast if you scroll fast, normal if normal
-    if (now - cam.lastIn > (touch ? 1500 : 350)) cam.gStart = now;   // (a finger: the pick-up only for the first swipe after a rest; swiping on is at full pace)
+    if (!cam.picked) { cam.picked = true; cam.gStart = now; }   // (the pick-up only on the very first scroll; after that every scroll goes at its own pace straight away)   // (a finger: the pick-up only for the first swipe after a rest; swiping on is at full pace)
     { const u = Math.min(1, (now - (cam.gStart || now)) / 700); d *= gain * (0.3 + 0.7 * u * u * (3 - 2 * u)); }
     // after landing on an object, the fading tail of the scroll that brought it in (a trackpad's momentum, or the same
     // wheel run still turning) does nothing, so it stays there; a new scroll - a fresh push, or after a short pause -
@@ -3128,7 +3128,7 @@
     if (cam.catching) { cam.lastIn = now; return; }                              // gliding in: scrolling waits
     if (cam.inert) { if (gapIn < 120 && raw < lastRaw * 0.97) { cam.lastIn = now; return; } cam.inert = false; }   // (only a fading momentum tail is ignored; scrolling on - even fast and steady - carries straight on)
     if (cam.absorb) { cam.absorbSeen = true; cam.lastIn = now; return; }       // the one scroll of rest on an object
-    if (cam.target === Math.round(cam.target)) { d *= 1.4; if (Math.abs(cam.pos - cam.target) < 0.01) cam.startT = now; }   // (the first push off a resting stop: heavy, only a small soft glide)
+    if (cam.target === Math.round(cam.target)) { d *= 1.4; if (Math.abs(cam.pos - cam.target) < 0.01 && !cam.softDone) { cam.startT = now; cam.softDone = true; } }   // (the first push off a resting stop: heavy, only a small soft glide)
     advance(d);
     if (touch) cam.vel = 0;
     else if (!cam.catching) cam.vel = cam.vel * 0.6 + d * 0.045 * gain;   // (the faster the scroll, the further it glides on)            // the bigger the scroll, the further it carries
