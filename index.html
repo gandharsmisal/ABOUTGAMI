@@ -2982,13 +2982,13 @@
   const at = (i, id) => { let [x, y, r, s] = CAM[i][id];
     if (i) { x += x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0; y += y < 150 ? -cam.ey : y > 930 ? cam.ey : 0; }   // peeking props stay at the real edges
     return [x, y, r, s]; };
-  const between = (p, f) => { const a = Math.floor(p), u = smooth(p - a),   /* (main objects on the same gentle curve as the side objects' travel - same pace) */ A = f(mod(a)), B = f(mod(a + 1)); return A.map((v, j) => v + (B[j] - v) * u); };
+  const between = (p, f, lin) => { const a = Math.floor(p), u = lin ? p - a : smooth(p - a),   /* (main objects on the same gentle curve as the side objects' travel - same pace) */ A = f(mod(a)), B = f(mod(a + 1)); return A.map((v, j) => v + (B[j] - v) * u); };
   // the notebook and the phone turn once round on each move (the mug, riding on the phone, turns with it round the phone)
   const TURN = {};
   function camDraw() {
     const P = {};
     for (const id in PROPS) {
-      let [x, y, r, s] = between(cam.lag[id], i => at(i, id));
+      let [x, y, r, s] = between(cam.lag[id], i => at(i, id), KJ);   // (main objects: an even pace with the scroll, as the side objects travel - out through the middle fast from the start)
       const drift = cam.pos - cam.lag[id];                                  // how far it trails: it tilts and lifts as it floats
       r += drift * 7; y -= Math.abs(drift) * 18; y += Math.sin(cam.t * 0.9 + BOB[id]) * 2.2;
       if (id === 'hpCup') x -= SLIDE * cam.lift;                           // slid along the table, never lifted
