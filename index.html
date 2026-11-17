@@ -2942,6 +2942,9 @@
   const LAG = { hpLaptop: 0.075, hpBook: 0.062, hpCup: 0.07, hpPhone: 0.07, line: 0.07, desk: 0.06 }, BOB = { hpLaptop: 0, hpBook: 2.1, hpCup: 4.2, hpPhone: 4.2 };
   for (const k in LAG) cam.lag[k] = 0;
   const mod = a => ((a % NS) + NS) % NS, smooth = x => x * x * (3 - 2 * x);
+  // the reference site's scroll: the wheel / finger moves a target, the view chases it by a fixed share each frame, and
+  // between two stops everything moves on a strong ease-in-out (power4.inOut) - no stopping, no snapping
+  const KJ = true, p4 = x => x < 0.5 ? 16 * x ** 5 : 1 - 16 * (1 - x) ** 5;
   const edges = () => {
     const mob = isMobMain();
     CAM = mob ? CAM_MOB : CAM_DESK; DESK = mob ? DESK_MOB : DESK_DESK;
@@ -2979,7 +2982,7 @@
   const at = (i, id) => { let [x, y, r, s] = CAM[i][id];
     if (i) { x += x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0; y += y < 150 ? -cam.ey : y > 930 ? cam.ey : 0; }   // peeking props stay at the real edges
     return [x, y, r, s]; };
-  const between = (p, f) => { const a = Math.floor(p), u = smooth(p - a), A = f(mod(a)), B = f(mod(a + 1)); return A.map((v, j) => v + (B[j] - v) * u); };
+  const between = (p, f) => { const a = Math.floor(p), u = (KJ ? p4 : smooth)(p - a), A = f(mod(a)), B = f(mod(a + 1)); return A.map((v, j) => v + (B[j] - v) * u); };
   // the notebook and the phone turn once round on each move (the mug, riding on the phone, turns with it round the phone)
   const TURN = {};
   function camDraw() {
@@ -3043,6 +3046,16 @@
     if (!heroState.shown || caseOpen || work.open || about.open || contact.open) return;   // (covered by another page: nothing to redraw)
     const f = Math.min(3, dt / 16.67);                                      // frame-rate independent easing
     cam.t = time;
+    if (KJ) {                                                               // (the reference: chase the target, nothing else)
+      cam.pos += (cam.target - cam.pos) * (1 - Math.pow(1 - (cam.kv || 0.07), f));
+      if (Math.abs(cam.target - cam.pos) < 5e-5) cam.pos = cam.target;
+      for (const q in LAG) cam.lag[q] = cam.pos;
+      cam.catching = false;
+      const r = Math.round(cam.pos), near = Math.abs(cam.pos - r) < 0.03 && Math.abs(cam.target - cam.pos) < 0.03;
+      if (near && cam.shown !== mod(r)) showNote(mod(r));
+      else if (!near && cam.shown !== null && Math.abs(cam.pos - r) > 0.06) hideNotes();
+      camDraw(); return;
+    }
     const arrived = Math.abs(cam.target - cam.pos) < 0.04 && Object.entries(cam.lag).every(([k, v]) => k === 'desk' || Math.abs(cam.target - v) < 0.06);   // (the notes don't wait for the side objects)
     if (cam.catching && arrived) {
       cam.catching = false; cam.absorb = false; cam.absorbSeen = false; cam.inert = true; cam.vel = 0;   // (landed: no glide on; the scroll's fading momentum is ignored)
@@ -3098,6 +3111,7 @@
     // normal swipe all the way there (soft landing); swiping again soon after goes a little quicker
     onRelease: self => {
       if (!mainActive() || !(self.event && self.event.type.startsWith('touch'))) return;
+      if (KJ) { cam.target += Math.max(-1, Math.min(1, -self.velocityY * 0.0022 * 0.05)); cam.kv = 0.06; return; }   // (the reference: a flick adds a little, at most one stop)
       const dist = Math.abs(cam.tSum || 0), dir = Math.sign(cam.tSum || 0), now = performance.now();
       if (dist < 14 || !dir) return;
       const quick = now - (cam.tRel || -1e9) < 900; cam.tRel = now;
@@ -3113,6 +3127,7 @@
     onChangeY: self => {
     if (!mainActive()) return;
     const now = performance.now(), touch = self.event && self.event.type.startsWith('touch');
+    if (KJ) { if (touch) { cam.target -= self.deltaY * 0.0022; cam.kv = 0.16; } else { cam.target += self.deltaY * 0.0008; cam.kv = 0.07; } return; }   // (the reference: ~1250px of wheel or ~450px of swipe per stop)
     // a finger works like the wheel: it moves things as far and as fast as it moves (a slow, small drag a little, a quick
     // swipe further, gliding on after it lifts), with the same slow pick-up at the start and the soft landing on an object
     if (touch) cam.tSum = (cam.tSum || 0) - self.deltaY;
@@ -3140,11 +3155,12 @@
   function camGo(i, instant) {
     const r0 = Math.round(cam.target); let dI = mod(i - mod(r0)); if (dI > NS / 2) dI -= NS;   // the short way round
     cam.target = r0 + dI;
-    cam.vel = 0; cam.catching = !instant; cam.absorb = false;
+    cam.vel = 0; cam.catching = !instant; cam.absorb = false; cam.kv = 0.07;
     if (instant) { cam.pos = cam.tS = cam.target; cam.pv = 0; for (const k in LAG) cam.lag[k] = cam.target; hideNotes(); camDraw(); }
   }
   addEventListener('keydown', e => {
     if (!mainActive()) return;
+    if (KJ) { if (/^(ArrowDown|PageDown)$/.test(e.key)) cam.target = Math.round(cam.target) + 1; if (/^(ArrowUp|PageUp)$/.test(e.key)) cam.target = Math.round(cam.target) - 1; cam.kv = 0.07; return; }
     if (cam.catching) return;
     if (cam.absorb && /^(Arrow(Up|Down)|Page(Up|Down))$/.test(e.key)) { cam.absorb = false; return; }
     if (/^(ArrowDown|PageDown)$/.test(e.key)) advance(1);
