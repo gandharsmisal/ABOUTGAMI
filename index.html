@@ -2982,6 +2982,10 @@
   const at = (i, id) => { let [x, y, r, s] = CAM[i][id];
     if (i) { x += x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0; y += y < 150 ? -cam.ey : y > 930 ? cam.ey : 0; }   // peeking props stay at the real edges
     return [x, y, r, s]; };
+  // through the middle in straight lines: from where it was straight to its meeting point near the centre (62% of the way
+  // from halfway between its two places to its spot in the group), then straight on to its next place - no curve
+  const vee = (A, B, C, u) => { const mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, Mx = mx + (C[0] - mx) * 0.62, My = my + (C[1] - my) * 0.62;
+    return u < 0.5 ? [A[0] + (Mx - A[0]) * u * 2, A[1] + (My - A[1]) * u * 2] : [Mx + (B[0] - Mx) * (u * 2 - 1), My + (B[1] - My) * (u * 2 - 1)]; };
   const between = (p, f, lin) => { const a = Math.floor(p), u = KJ ? p4(p - a) : lin ? p - a : smooth(p - a),   /* (main objects on the same gentle curve as the side objects' travel - same pace) */ A = f(mod(a)), B = f(mod(a + 1)); return A.map((v, j) => v + (B[j] - v) * u); };
   // the notebook and the phone turn once round on each move (the mug, riding on the phone, turns with it round the phone)
   const TURN = {};
@@ -2998,8 +3002,8 @@
     // halfway, then out to their next places (the mug rides with the phone)
     { const CLM = { hpLaptop: [0, 40], hpBook: [-210, -60], hpPhone: [220, -50] }, mk = isMobMain() ? 0.7 : 1;
       for (const id of ['hpLaptop', 'hpBook', 'hpPhone']) {
-        const p = cam.lag[id], fr = KJ ? p4(p - Math.floor(p)) : p - Math.floor(p), bump = Math.pow(Math.sin(Math.PI * fr), 1.4) * 0.62;
-        const dx = (960 + CLM[id][0] * mk - P[id][0]) * bump, dy = (560 + CLM[id][1] * mk - P[id][1]) * bump;
+        const p = cam.lag[id], a = Math.floor(p), fr = KJ ? p4(p - a) : p - a, A = at(mod(a), id), B = at(mod(a + 1), id);
+        const V = vee(A, B, [960 + CLM[id][0] * mk, 560 + CLM[id][1] * mk], fr), dx = V[0] - (A[0] + (B[0] - A[0]) * fr), dy = V[1] - (A[1] + (B[1] - A[1]) * fr);
         P[id][0] += dx; P[id][1] += dy;
         if (id === 'hpPhone') { P.hpCup[0] += dx; P.hpCup[1] += dy; } } }
     for (const id in TURN) {
@@ -3018,14 +3022,14 @@
       $(id).setAttribute('transform', `translate(${x} ${y}) rotate(${r}) scale(${s * (isMobMain() ? 1.155 : 0.95)}) translate(${-c[0]} ${-c[1]})`);   // (phones: 15.5% bigger)
     }
     for (const n in DESK) {
-      const p = cam.lag.desk, [x0, y0, r, ds] = between(p, i => { const [x, y, rr, s = 1] = DESK[n][i];
-        return [x + (x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0), y + (y < 150 ? -cam.ey : y > 930 ? cam.ey : 0), rr, s]; });
+      const dAt = i => { const [x, y, rr, s = 1] = DESK[n][i];
+        return [x + (x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0), y + (y < 150 ? -cam.ey : y > 930 ? cam.ey : 0), rr, s]; };
+      const p = cam.lag.desk, [, , r, ds] = between(p, dAt);
       const frac = KJ ? p4(p - Math.floor(p)) : p - Math.floor(p), spin = SPIN[n] * 360 * (KJ ? frac : smooth(frac));   // (the reference: every object on the same power4.inOut curve - they rest at each stop, rush between)   // one whole turn per move (so it lands at the same angle), slow at the start and the end
       // on the way between stops they travel through the middle, close together as a loose group, then out to their next
       // places (strongest halfway, none at the stops)
       const CL = { paper: [-190, -70], sketchbook: [190, -90], camera: [250, 100], scissors: [-230, 120], marker: [20, 170] }[n] || [0, 0];
-      const bump = Math.pow(Math.sin(Math.PI * frac), 1.4) * 0.62, mk = isMobMain() ? 0.7 : 1;
-      const x1 = x0 + (960 + CL[0] * mk - x0) * bump, y1 = y0 + (560 + CL[1] * mk - y0) * bump;
+      const mk = isMobMain() ? 0.7 : 1, a0 = Math.floor(p), [x1, y1] = vee(dAt(mod(a0)), dAt(mod(a0 + 1)), [960 + CL[0] * mk, 560 + CL[1] * mk], frac);
       $('dk-' + n).setAttribute('transform', `translate(${x1} ${y1}) rotate(${r + spin}) scale(${(isMobMain() ? 1.27 : 0.95 * ({ sketchbook: 1.1, marker: 1.3, scissors: 1.2, camera: 0.8 }[n] || 1)) * ds})`);
       // desktop, first view: the pencil lies apart from the sketchbook and the scissors apart from the film; at the other stops they come together
       const sp = SPLIT[n]; if (sp) { const k = isMobMain() ? 0 : between(p, i => [i === 0 ? 1 : 0])[0];
