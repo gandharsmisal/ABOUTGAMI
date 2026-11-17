@@ -2129,7 +2129,7 @@
     $('wpBottom').innerHTML = `<tspan class="wpStar">✩</tspan><tspan dx="12" style="fill:${p.open}">Click to open project</tspan>`;
     // every line ends bending round the top-right corner, like a long one does; the side and bottom lines follow
     // on after it (the measured lengths leave out the 12px gaps after the stars)
-    const topLen = $('wpTop').getComputedTextLength() + 48, topAt = 0;
+    const topLen = $('wpTop').getComputedTextLength() + 48, topAt = isMob() ? 0 : Math.max(0, TOP_LEN + ARC * 0.85 - topLen);   // (desktop: every top line ends bending round the top-right corner)
     // one continuous line: each part starts a star's gap after the one before, round the corners
     const sideAt = Math.max(topAt + topLen + 4, TOP_LEN + ARC * 0.85);
     const sideEnd = sideAt + $('wpSide').getComputedTextLength() + 24;
@@ -2737,9 +2737,9 @@
   ];
   const DESK_DESK = {   // (kept clear of the logo, the menu and the figure in the corners)
     paper:      [[540, 55, -12],  [1130, 55, 8],    [1150, 1060, -6], [1880, 430, 14]],
-    camera:     [[1880, 430, 18], [35, 470, -15],   [1850, 970, 10],  [1150, 1060, -10]],
+    camera:     [[1880, 430, 18], [35, 470, -15],   [1850, 970, 10],  [700, 1060, -10]],
     sketchbook: [[1820, 1010, -8],[1790, 1040, 12], [620, 55, -14],   [40, 560, 8]],
-    scissors:   [[25, 400, 20],   [380, 1065, -25], [1880, 690, 30],  [1380, 1065, -15]],
+    scissors:   [[25, 400, 20],   [380, 1065, -25], [1880, 690, 30],  [960, 1065, -15]],
     marker:     [[1100, 1060, 70], [840, 55, -60],   [1320, 55, 100],  [1180, 55, -80]]
   }, SPIN = { paper: 1, camera: -1, sketchbook: 1, scissors: -1, marker: 1 };
   const SPLIT = { sketchbook: [55, 240, 8, 75, 0], scissors: [-169, -141, 12, 35, -43] };   // (first view: the pencil down level with the phone, the scissors under the notebook)   // [dx, dy, turn, about x, about y] of the pencil / the scissors on the first view
