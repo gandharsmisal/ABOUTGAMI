@@ -2888,12 +2888,12 @@
     // place across the view, its own turn as it goes - big turns, as there - and one size throughout)
     //   laptop=laptop, phone=phone, F1 card=f1, grid=paper, brown papers=notebook, film+scissors=film, marker=edding, camera=rubber band
     const L3 = {   // [overview, side objects in the middle, main objects in the middle]: [x, y, turn]
-      hpLaptop: [[1039, 744, -2], [1708, 60, 5], [964, 468, 2]],
+      hpLaptop: [[1039, 790, -2], [1708, 60, 5], [964, 468, 2]],
       hpPhone: [[628, 283, 4], [1695, 1065, 164], [593, 527, 362]],   // (upright again in the middle)
       hpBook: [[1476, 331, -6], [238, 1048, -196], [1453, 533, -113]] };
     for (const k in L3) for (let i = 0; i < 3; i++) { const [x, y, r] = L3[k][i]; CAM_DESK[i][k] = [x, y, r, CAM_DESK[i][k][3]]; }
     for (let i = 0; i < 3; i++) CAM_DESK[i].hpCup = CAM_DESK[i].hpPhone.slice();
-    CAM_DESK[0].ly = -255; CAM_DESK[1].ly = -463; CAM_DESK[2].ly = -11;
+    CAM_DESK[0].ly = -210; CAM_DESK[1].ly = -463; CAM_DESK[2].ly = -11;
     const S3 = {
       paper: [[1098, 248, -8], [849, 525, -78], [330, -60, 8]],
       sketchbook: [[178, 360, -8], [985, 585, -18], [1640, -70, 12]],
