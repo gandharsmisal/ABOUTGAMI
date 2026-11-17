@@ -2730,7 +2730,7 @@
   const PROPS = { hpLaptop: [959, 515], hpCup: [551.5, 504], hpPhone: [576, 584], hpBook: [1372, 539] };   // each image's own centre
   // per step, each prop's [x, y, rotation, scale] (of its centre, on the 1920 x 1080 page), the line's offset and the note
   const CAM_DESK = [   // (each object keeps one size at every step)
-    { hpLaptop: [975, 215, -2, 1.2], hpCup: [460.6, 346.1, 4, 1.03], hpPhone: [480, 430, 4, 1.03], hpBook: [1515, 365, -7, 1.35], ly: -195 },   // (first view, laid out round the side objects)
+    { hpLaptop: [975, 262, -2, 1.2], hpCup: [460.6, 346.1, 4, 1.03], hpPhone: [480, 430, 4, 1.03], hpBook: [1515, 365, -7, 1.35], ly: -195 },   // (first view, laid out round the side objects)
     { hpLaptop: [960, 600, 0, 1.2], hpCup: [360.6, -48.9, 0, 1.03], hpPhone: [380, 35, 0, 1.03], hpBook: [1950, 645, 8, 1.35], ly: -440 },
     { hpLaptop: [-105, 530, 15, 1.2], hpCup: [1915.6, 306.1, 0, 1.03], hpPhone: [1935, 390, 0, 1.03], hpBook: [958, 528, 2, 1.35], ly: 60 },
     { hpLaptop: [1520, 1207, 0, 1.2], hpCup: [1022.6, 586.1, 2, 1.03], hpPhone: [1042, 670, 2, 1.03], hpBook: [560, -50, 2, 1.35], ly: -360 }
@@ -3057,7 +3057,16 @@
     if (KJ) {                                                               // (the reference: chase the target, nothing else)
       // exactly as the reference: every frame the view moves a fixed share of the way to the target (7% wheel / trackpad,
       // 16% finger, 6% after a flick)
-      { const e = cam.target - cam.pos; if (Math.abs(e) > 5e-5) cam.pos += e * (cam.kv || 0.07); else cam.pos = cam.target; }
+      // every notch becomes its own smooth glide (its speed rises and falls on a soft curve over ~0.32 s); notches that come
+      // one after another overlap into one steady speed, so a run of notches is a continuous glide with no pulse per notch.
+      // A light follow on top rounds it off. (Measured: speed varies 0-5% between notches, against 7-28% before, and it
+      // comes to rest sooner after the last notch.)
+      { const now = performance.now(); cam.pulses = cam.pulses || []; if (cam.pB === undefined) cam.pB = cam.target;
+        let sum = 0; for (const p of cam.pulses) sum += p.a;
+        const extra = cam.target - (cam.pB + sum); if (Math.abs(extra) > 1e-9) cam.pulses.push({ a: extra, t: now, d: cam.pd || 320 });
+        let g = cam.pB;
+        cam.pulses = cam.pulses.filter(p => { const u = Math.min(1, (now - p.t) / p.d); if (u >= 1) { cam.pB += p.a; g += p.a; return false; } g += p.a * (0.5 - 0.5 * Math.cos(Math.PI * u)); return true; });
+        const e = g - cam.pos; if (Math.abs(e) > 5e-5 || cam.pulses.length) cam.pos += e * (1 - Math.pow(1 - (cam.kv || 0.25), f)); else cam.pos = cam.target; }
       for (const q in LAG) cam.lag[q] = cam.pos;
       cam.catching = false;
       const r = Math.round(cam.pos), near = Math.abs(cam.pos - r) < 0.1 && Math.abs(cam.target - r) < 0.12;   // (on the curve an object looks at rest well before exactly on it)
@@ -3120,7 +3129,7 @@
     // normal swipe all the way there (soft landing); swiping again soon after goes a little quicker
     onRelease: self => {
       if (!mainActive() || !(self.event && self.event.type.startsWith('touch'))) return;
-      if (KJ) { cam.target += Math.max(-1, Math.min(1, -self.velocityY * 0.0022 * 0.05)); cam.kv = 0.06; return; }   // (the reference: a flick adds a little, at most one stop)
+      if (KJ) { cam.target += Math.max(-1, Math.min(1, -self.velocityY * 0.0022 * 0.05)); cam.kv = 0.25; cam.pd = 650; return; }   // (the reference: a flick adds a little, at most one stop)
       const dist = Math.abs(cam.tSum || 0), dir = Math.sign(cam.tSum || 0), now = performance.now();
       if (dist < 14 || !dir) return;
       const quick = now - (cam.tRel || -1e9) < 900; cam.tRel = now;
@@ -3136,9 +3145,9 @@
     onChangeY: self => {
     if (!mainActive()) return;
     const now = performance.now(), touch = self.event && self.event.type.startsWith('touch');
-    if (KJ) { if (touch) { cam.target -= self.deltaY * 0.0022; cam.kv = 0.16; cam.pd = 220; } else {
+    if (KJ) { if (touch) { cam.target -= self.deltaY * 0.0022; cam.kv = 0.3; cam.pd = 90; } else {
       cam.target += self.deltaY * 0.0008;   // (wheel and trackpad alike, as the reference)
-      cam.kv = 0.07; } return; }   // (the reference: ~1250px of wheel or ~450px of swipe per stop)
+      cam.kv = 0.25; cam.pd = 320; } return; }   // (the reference: ~1250px of wheel or ~450px of swipe per stop)
     // a finger works like the wheel: it moves things as far and as fast as it moves (a slow, small drag a little, a quick
     // swipe further, gliding on after it lifts), with the same slow pick-up at the start and the soft landing on an object
     if (touch) cam.tSum = (cam.tSum || 0) - self.deltaY;
@@ -3166,12 +3175,12 @@
   function camGo(i, instant) {
     const r0 = Math.round(cam.target); let dI = mod(i - mod(r0)); if (dI > NS / 2) dI -= NS;   // the short way round
     cam.target = r0 + dI;
-    cam.vel = 0; cam.catching = !instant; cam.absorb = false; cam.kv = 0.07; cam.pd = 700;
+    cam.vel = 0; cam.catching = !instant; cam.absorb = false; cam.kv = 0.25; cam.pd = 800;
     if (instant) { cam.pos = cam.tS = cam.tk = cam.tk2 = cam.pB = cam.target; cam.pulses = []; cam.pv = 0; for (const k in LAG) cam.lag[k] = cam.target; hideNotes(); camDraw(); }
   }
   addEventListener('keydown', e => {
     if (!mainActive()) return;
-    if (KJ) { if (/^(ArrowDown|PageDown)$/.test(e.key)) cam.target = Math.round(cam.target) + 1; if (/^(ArrowUp|PageUp)$/.test(e.key)) cam.target = Math.round(cam.target) - 1; cam.kv = 0.07; return; }
+    if (KJ) { if (/^(ArrowDown|PageDown)$/.test(e.key)) cam.target = Math.round(cam.target) + 1; if (/^(ArrowUp|PageUp)$/.test(e.key)) cam.target = Math.round(cam.target) - 1; cam.kv = 0.25; cam.pd = 800; return; }
     if (cam.catching) return;
     if (cam.absorb && /^(Arrow(Up|Down)|Page(Up|Down))$/.test(e.key)) { cam.absorb = false; return; }
     if (/^(ArrowDown|PageDown)$/.test(e.key)) advance(1);
