@@ -2751,7 +2751,7 @@
     sketchbook: [[1820, 1010, -8],[1790, 1040, 12], [620, 55, -14],   [40, 560, 8]],
     scissors:   [[25, 400, 20],   [380, 1065, -25], [1880, 690, 30],  [960, 1065, -15]],
     marker:     [[1100, 1060, 70], [840, 55, -60],   [1320, 55, 100],  [1180, 55, -80]],
-    cup:        [[1300, 820, 6],   [1500, 1060, 8],  [400, 55, -6],    [1650, 1060, 6]]
+    cup:        [[1300, 820, 6],   [1500, 1060, 8],  [1880, 700, -6],  [1650, 1060, 6]]   // (notebook stop: on the right-hand side, so it travels sideways once, not only up and down)
   }, SPIN = { paper: 1, camera: -1, sketchbook: 1, scissors: -1, marker: 1, cup: -1 };
   const SPLIT = { sketchbook: [55, 240, 8, 75, 0], scissors: [-169, -141, 12, 35, -43] };   // (first view: the pencil down level with the phone, the scissors under the notebook)   // [dx, dy, turn, about x, about y] of the pencil / the scissors on the first view
   // the side objects sit on the page's edges, half on and half off (each centred on its nearest edge), or as much
