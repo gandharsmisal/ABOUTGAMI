@@ -1624,7 +1624,7 @@
   // still in the doorway first); the last step slows into the stop
   const WALK0 = 0.5;                                                       // the door has swung open (swing 0.5)
   tl.to(S, { stride: 1, duration: 0.3, ease: 'sine.out' }, WALK0);
-  const INTRO_WALK = walkT(STOP * GAIT_INTRO) * 0.42;                    // walk out of the door to the lamp (6 steps), brisker: it plays by itself on "click to enter"
+  const INTRO_WALK = walkT(STOP * GAIT_INTRO) * 0.35;                    // walk out of the door to the lamp (6 steps), brisker: it plays by itself on "click to enter"
   tl.to(S, { u: STOP, duration: INTRO_WALK, ease: 'none' }, WALK0);
   tl.to(S, { stride: 0, duration: 0.5, ease: 'sine.inOut' }, WALK0 + INTRO_WALK - 0.5);   // comes to a stop, as in the other walks
   // the lamp slides down from the top as it walks (frame 28, step 8)
@@ -1825,10 +1825,10 @@
     }
     const walkIn = gsap.timeline({ paused: true, onUpdate: figFrame })
       // (a brisker walk than the intro figure: ~6.3 steps a second)
-      .fromTo(F, { x: X0, stride: 1, arm: 0, bubble: 0 }, { x: HX, duration: 1.1, ease: 'none' }, 0)
-      .to(F, { stride: 0, duration: 0.25, ease: 'sine.inOut' }, 0.86)
-      .to(F, { arm: 1, duration: 0.4, ease: 'sine.inOut' }, 1.2)
-      .to(F, { bubble: 1, duration: 0.5, ease: 'none' }, 1.65);
+      .fromTo(F, { x: X0, stride: 1, arm: 0, bubble: 0 }, { x: HX, duration: 0.9, ease: 'none' }, 0)
+      .to(F, { stride: 0, duration: 0.22, ease: 'sine.inOut' }, 0.7)
+      .to(F, { arm: 1, duration: 0.4, ease: 'sine.inOut' }, 1.0)
+      .to(F, { bubble: 1, duration: 0.5, ease: 'none' }, 1.45);
     // windows wider than 16:9 leave a margin beside the 1920 stage: the figure keeps to the window's real left edge
     const fig = $('heroFig');
     const hugLeft = () => {
