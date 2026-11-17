@@ -250,6 +250,10 @@
   /* outside of the cover: the leather, its stitching on the outer edge */
   .abFront { width: 829px; top: 6px; height: 1182px; border-radius: 16px; transform: scaleX(-1); transform-origin: 414.5px 50%;
     background: #262524 url(assets/about/leather.webp) 0 0 / 100% 100% no-repeat; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28); }
+  /* the cover is the F1 card from the main page (it's what was clicked): the card, the right way round, no leather */
+  .abFront { transform: none; background: url(assets/photo/desk-f1.webp) center / contain no-repeat; box-shadow: none; border-radius: 0;
+    filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.25)); }
+  .abFront::before { display: none; }
   /* inside of the cover: the picture's left half (the face is 1038 wide, the picture's left half 841) */
   .abBack { transform: rotateY(180deg); background-position: 197px 0; }
   .abStrap { display: none; }
