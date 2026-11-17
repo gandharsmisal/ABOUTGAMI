@@ -818,9 +818,6 @@
       <!-- each prop is placed by JS (translate / rotate / scale about its own centre) for each scroll step -->
       <g id="hpPhone" data-open="contact"><image class="hprop" href="assets/photo/contact-phone-off.webp" x="532.8" y="494" width="86.4" height="180" style="filter: sepia(0.2) saturate(1.15) brightness(1.03) drop-shadow(0 2px 4px rgba(40, 32, 18, 0.2))"></image></g>
       <g id="hpCup" data-open="contact"><image class="hprop" href="assets/photo/hero-cup-bright-hq.webp" x="462.3" y="424.3" width="178.3" height="159.3"></image></g>
-      <g id="hpBook" data-open="about">
-        <image class="hprop" href="assets/photo/hero-notebook-sharp-hq.webp" x="1261.5" y="405.5" width="221" height="267"></image>
-      </g>
       <g id="hpLaptop" data-open="work">
         <image class="hprop" href="assets/photo/hero-laptop-code-hq.webp" x="772" y="335" width="374" height="360"></image>
         <!-- on the laptop step its screen shows the Work page -->
@@ -831,6 +828,9 @@
           <linearGradient id="heroScreenGlare" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.16"></stop><stop offset="0.45" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
           <rect x="795" y="372" width="327" height="198" fill="url(#heroScreenShade)"></rect><rect x="795" y="372" width="327" height="198" fill="url(#heroScreenGlare)"></rect>
         </g>
+      </g>
+      <g id="hpBook" data-open="about">
+        <image class="hprop" href="assets/photo/hero-notebook-sharp-hq.webp" x="1261.5" y="405.5" width="221" height="267"></image>
       </g>
     </g>
     </g>
@@ -2733,7 +2733,7 @@
     { hpLaptop: [968, 845, -2, 1.2], hpCup: [460.6, 346.1, 4, 1.03], hpPhone: [480, 430, 4, 1.03], hpBook: [1515, 365, -7, 1.35], ly: -195 },   // (first view, laid out round the side objects)
     { hpLaptop: [960, 600, 0, 1.2], hpCup: [360.6, -48.9, 0, 1.03], hpPhone: [380, 35, 0, 1.03], hpBook: [1950, 645, 8, 1.35], ly: -440 },
     { hpLaptop: [-105, 530, 15, 1.2], hpCup: [1915.6, 306.1, 0, 1.03], hpPhone: [1935, 390, 0, 1.03], hpBook: [958, 528, 2, 1.35], ly: 60 },
-    { hpLaptop: [1700, 1190, 0, 1.2], hpCup: [1022.6, 586.1, 2, 1.03], hpPhone: [1042, 670, 2, 1.03], hpBook: [560, -50, 2, 1.35], ly: -360 }
+    { hpLaptop: [-17, 1207, 0, 1.2], hpCup: [1022.6, 586.1, 2, 1.03], hpPhone: [1042, 670, 2, 1.03], hpBook: [560, -50, 2, 1.35], ly: -360 }
   ];
   const DESK_DESK = {   // (kept clear of the logo, the menu and the figure in the corners)
     paper:      [[540, 55, -12],  [1130, 55, 8],    [1150, 1060, -6], [1880, 430, 14]],
@@ -2917,11 +2917,7 @@
             P = P.concat((await pts(document.querySelector('#hpCup image'), PROPS.hpCup[0], PROPS.hpCup[1], s.hpCup[3] * 1.155 * 1.1)).map(([u, v]) => [u + ox, v + oy])); }
           if (!P.length) continue;
           const [X, Y] = turned(P, r), first = ['hpLaptop', 'hpBook', 'hpPhone'].filter(m => m !== FOC[i])[0] === k;
-          // (top-left / bottom-right corner, about a third in; at the notebook stop the other way round - top-right /
-          // bottom-left - so the mug and phone move to a new place at every stop)
-          const flip = i === 2, swapX = i === 3;   // (mug stop: the laptop across on the right, so it crosses the middle)
-          const right = swapX ? first : (first !== flip ? flip : !flip);
-          const [nx, ny] = [swapX && first ? X0 + (X1 - X0) * 0.82 - q(X, 0.5) : right ? X1 - q(X, 0.38) : X0 - q(X, 0.62), (swapX ? !first : first !== flip) ? Y0 - 40 - q(Y, 0.66) : Y1 + 40 - q(Y, 0.34)];   // (mug stop: the laptop down at the bottom)
+          const [nx, ny] = first ? [X0 - q(X, 0.62), Y0 - 40 - q(Y, 0.66)] : [X1 - q(X, 0.38), Y1 + 40 - q(Y, 0.34)];   // (top-left / bottom-right corner, about a third in)
           const dx = nx - x, dy = ny - y;
           s[k] = [nx, ny, r, sc];
           if (k === 'hpPhone') s.hpCup = [s.hpCup[0] + dx, s.hpCup[1] + dy, s.hpCup[2], s.hpCup[3]];
@@ -2990,11 +2986,6 @@
       const drift = cam.pos - cam.lag[id];                                  // how far it trails: it tilts and lifts as it floats
       r += drift * 7; y -= Math.abs(drift) * 18; y += Math.sin(cam.t * 0.9 + BOB[id]) * 2.2;
       if (id === 'hpCup') x -= SLIDE * cam.lift;                           // slid along the table, never lifted
-      {   // on the way between stops every object swings in across the middle, then out to its next place (desktop and phones)
-        const lg = cam.lag[id === 'hpCup' ? 'hpPhone' : id], fr = lg - Math.floor(lg), b = !isMobMain() && id === 'hpLaptop' ? Math.pow(Math.sin(Math.PI * fr), 1.2) * 0.75 : 0;   // (desktop: the laptop crosses through the middle on its way; the rest go straight)   // (phones: straight to and from the laptop stop; desktop crosses on every move)
-        const CM = { hpLaptop: [-120, 150], hpBook: [140, -140], hpPhone: [150, 120], hpCup: [150, 120] }[id];
-        x += (960 + CM[0] - x) * b; y += (540 + CM[1] - y) * b;
-      }
       P[id] = [x, y, r, s];
     }
     for (const id in TURN) {
@@ -3013,15 +3004,13 @@
       $(id).setAttribute('transform', `translate(${x} ${y}) rotate(${r}) scale(${s * (isMobMain() ? 1.155 : 0.95)}) translate(${-c[0]} ${-c[1]})`);   // (phones: 15.5% bigger)
     }
     for (const n in DESK) {
-      const p = cam.lag.desk, [x0, y0, r, ds] = between(p, i => { let [x, y, rr, s = 1] = DESK[n][i];
-        // every move it settles on the opposite side to where it was (left / right swap each stop), crossing the middle
-        { const side0 = Math.sign(DESK[n][0][0] - 960) || 1, want = i % 2 ? -side0 : side0; if (i && Math.sign(x - 960) !== want) { x = 1920 - x; rr = -rr; } }
+      const p = cam.lag.desk, [x0, y0, r, ds] = between(p, i => { const [x, y, rr, s = 1] = DESK[n][i];
         return [x + (x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0), y + (y < 150 ? -cam.ey : y > 930 ? cam.ey : 0), rr, s]; });
       const frac = p - Math.floor(p), spin = SPIN[n] * 360 * smooth(frac);   // one whole turn per move (so it lands at the same angle), slow at the start and the end
       // on the way between stops they travel through the middle, close together as a loose group, then out to their next
       // places (strongest halfway, none at the stops)
       const CL = { paper: [-190, -70], sketchbook: [190, -90], camera: [250, 100], scissors: [-230, 120], marker: [20, 170] }[n] || [0, 0];
-      const bump = 0, mk = isMobMain() ? 0.55 : 0.8;   // (no swing: straight to the next place)
+      const bump = Math.pow(Math.sin(Math.PI * frac), 1.4) * 0.62, mk = isMobMain() ? 0.7 : 1;
       const x1 = x0 + (960 + CL[0] * mk - x0) * bump, y1 = y0 + (560 + CL[1] * mk - y0) * bump;
       $('dk-' + n).setAttribute('transform', `translate(${x1} ${y1}) rotate(${r + spin}) scale(${(isMobMain() ? 1.27 : 0.95 * ({ sketchbook: 1.1, marker: 1.3, scissors: 1.2, camera: 0.8 }[n] || 1)) * ds})`);
       // desktop, first view: the pencil lies apart from the sketchbook and the scissors apart from the film; at the other stops they come together
