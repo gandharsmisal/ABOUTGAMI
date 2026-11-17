@@ -232,8 +232,9 @@
   .abBg::before, .ctBg::before { content: ""; position: absolute; inset: 0; opacity: 0.5; background-image: var(--grain); }
   .abBg::after, .ctBg::after { content: ""; position: absolute; inset: 0; background-image: var(--mottle); }   /* the coarser mottle */
   .abStage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
-  #abStage { filter: sepia(0.08) saturate(0.55) brightness(1.05) contrast(0.97); }
-  /* the open book: a real sketchbook scan, cream pages sewn at the gutter (assets/about/book.webp, 1879 x 1194 on the stage, the spine at x 841),
+  /* the book's pages toned (not the F1 card cover: it keeps the colour it has on the main page) */
+  .abHalf, .abBack, .abLeafFace, #abRings, #abArrow { filter: sepia(0.08) saturate(0.55) brightness(1.05) contrast(0.97); }
+  /* the open book: a real sketchbook scan, cream pages sewn at the gutter (assets/about/book-sharp.webp, 1879 x 1194 on the stage, the spine at x 841),
      split at the spine so its cover can turn; the pages are the picture's own, the writing laid on top */
   .abShadow { position: absolute; left: 70px; top: 60px; width: 1590px; height: 1090px; border-radius: 12px; opacity: 0; pointer-events: none;
     box-shadow: 0 34px 70px rgba(40, 32, 18, 0.42), 0 8px 16px rgba(40, 32, 18, 0.25); }
@@ -241,10 +242,10 @@
     box-shadow: 0 0 70px rgba(45, 38, 26, 0.36), 0 8px 14px rgba(40, 32, 18, 0.18); }
   .abBook { position: absolute; left: 0; top: 0; width: 1879px; height: 1194px; perspective: 3000px;
     perspective-origin: 841px 597px; }
-  .abHalf, .abFace { position: absolute; top: 0; height: 1194px; background: url(assets/about/book.webp) no-repeat;
+  .abHalf, .abFace { position: absolute; top: 0; height: 1194px; background: url(assets/about/book-sharp.webp) no-repeat;
     background-size: 1879px 1194px; }
   .abHalfR, .abCover { left: 841px; width: 1038px; }
-  .abHalfR { background-position: -841px 0; filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.22)); }
+  .abHalfR { background-position: -841px 0; filter: sepia(0.08) saturate(0.55) brightness(1.05) contrast(0.97) drop-shadow(0 16px 26px rgba(0, 0, 0, 0.22)); }
   .abCover { position: absolute; top: 0; height: 1194px; transform-origin: 0 50%; transform-style: preserve-3d; }
   .abFace { left: 0; width: 1038px; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
   /* outside of the cover: the leather, its stitching on the outer edge */
@@ -269,8 +270,8 @@
   .abCopy .tear { padding: 9px; background: linear-gradient(rgba(150, 140, 148, 0.24), rgba(150, 140, 148, 0.24)), url(assets/about/paper-white.jpg) center / cover; }
   .abCopy img { display: block; object-fit: cover; }
   .abCopy .tear.noTear { clip-path: none !important; }   /* (a clean rectangle of photocopy paper round it, no torn edge) */
-  .abHalfR::before { -webkit-mask: url(assets/about/book.webp) -841px 0 / 1879px 1194px no-repeat; mask: url(assets/about/book.webp) -841px 0 / 1879px 1194px no-repeat; }
-  .abBack::before { -webkit-mask: url(assets/about/book.webp) 197px 0 / 1879px 1194px no-repeat; mask: url(assets/about/book.webp) 197px 0 / 1879px 1194px no-repeat; }
+  .abHalfR::before { -webkit-mask: url(assets/about/book-sharp.webp) -841px 0 / 1879px 1194px no-repeat; mask: url(assets/about/book-sharp.webp) -841px 0 / 1879px 1194px no-repeat; }
+  .abBack::before { -webkit-mask: url(assets/about/book-sharp.webp) 197px 0 / 1879px 1194px no-repeat; mask: url(assets/about/book-sharp.webp) 197px 0 / 1879px 1194px no-repeat; }
   /* the pages: the picture's paper; the writing sits in a 712 x 900 block, centred down the page */
   .abPage { position: absolute; top: 71px; width: 712px; height: 1061px; overflow: hidden;
     font: 400 26px/1.28 "Gandhar Hand", "Indie Flower", var(--hand); color: #2A2A2A; }
@@ -293,7 +294,7 @@
   .abBook.flat .abBack { transform: translateX(-1038px); }
   .abBook.flat.p2 .abLeafFront { display: none; }
   .abBook.flat.p2 .abLeafBack { display: block; transform: translateX(-786px); }
-  .abLeaf .abPage { top: 0; left: 0; width: 706px; background: url(assets/about/book.webp) no-repeat; background-size: 1879px 1194px; }
+  .abLeaf .abPage { top: 0; left: 0; width: 706px; background: url(assets/about/book-sharp.webp) no-repeat; background-size: 1879px 1194px; }
   .abLeafFront .abPage { background-position: -881px -71px; }   /* the same paper as the page it lies on */
   .abLeafBack .abPage { background-position: -95px -71px; }
   .abArrow { position: absolute; left: 1606px; top: 520px; width: 112px; height: 86px; overflow: visible; opacity: 0;
@@ -2547,7 +2548,7 @@
       abStage.style.transform = `translate(${ox}px, ${oy}px) scale(${k})`;
       return { k, ox, oy };
     }
-    const vw = innerWidth, vh = innerHeight, k = Math.min((vh - AB_TOP - AB_BOTTOM) / 1194, (vw - 60) / 1879) * 0.98;
+    const vw = innerWidth, vh = innerHeight, k = Math.min((vh - AB_TOP - AB_BOTTOM) / 1194, (vw - 60) / 1879) * 0.88;   /* (a little smaller) */
     const ox = (vw - 1879 * k) / 2, oy = AB_TOP + (vh - AB_TOP - AB_BOTTOM - 1194 * k) / 2;
     abStage.style.transform = `translate(${ox}px, ${oy}px) scale(${k})`;
     return { k, ox, oy };
