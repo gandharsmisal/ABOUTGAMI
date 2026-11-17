@@ -3061,6 +3061,13 @@
       // one after another overlap into one steady speed, so a run of notches is a continuous glide with no pulse per notch.
       // A light follow on top rounds it off. (Measured: speed varies 0-5% between notches, against 7-28% before, and it
       // comes to rest sooner after the last notch.)
+      // when the scrolling stops, the objects don't stop with it: they carry on a little with the speed they had (a bit
+      // further the faster you scrolled) and ease softly to rest - no jump to a stop
+      if (!cam.kGl && cam.kIn && performance.now() - cam.kIn > 110) {
+        cam.kGl = true;
+        const more = Math.max(-0.22, Math.min(0.22, (cam.kSpd || 0) * 0.2));
+        if (Math.abs(more) > 1e-4) { cam.target += more; cam.pd = 1100; cam.pOut = true; cam.kv = 0.2; }
+      }
       { const now = performance.now(); cam.pulses = cam.pulses || []; if (cam.pB === undefined) cam.pB = cam.target;
         let sum = 0; for (const p of cam.pulses) sum += p.a;
         const extra = cam.target - (cam.pB + sum); if (Math.abs(extra) > 1e-9) cam.pulses.push({ a: extra, t: now, d: cam.pd || 320, out: !!cam.pOut });
@@ -3147,6 +3154,7 @@
     const now = performance.now(), touch = self.event && self.event.type.startsWith('touch');
     if (KJ) { if (touch) { cam.target -= self.deltaY * 0.0022; cam.kv = 0.3; cam.pd = 90; cam.pOut = false; } else {
       cam.target += self.deltaY * 0.0008;   // (wheel and trackpad alike, as the reference)
+      { const v = self.deltaY * 0.0008 / Math.max(16, Math.min(120, now - (cam.kIn || 0))) * 1000; cam.kSpd = now - (cam.kIn || 0) > 300 ? v : cam.kSpd * 0.6 + v * 0.4; cam.kIn = now; cam.kGl = false; }   // (how fast you're scrolling, in stops a second)
       cam.kv = 0.2; cam.pd = 900; cam.pOut = true; } return; }   // (the reference: ~1250px of wheel or ~450px of swipe per stop)
     // a finger works like the wheel: it moves things as far and as fast as it moves (a slow, small drag a little, a quick
     // swipe further, gliding on after it lifts), with the same slow pick-up at the start and the soft landing on an object
