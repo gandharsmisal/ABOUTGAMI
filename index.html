@@ -2554,7 +2554,7 @@
       abStage.style.transform = `translate(${ox}px, ${oy}px) scale(${k})`;
       return { k, ox, oy };
     }
-    const vw = innerWidth, vh = innerHeight, k = Math.min((vh - AB_TOP - AB_BOTTOM) / 1194, (vw - 60) / 1879) * 0.8;   /* (the size settled on) */
+    const vw = innerWidth, vh = innerHeight, k = Math.min((vh - AB_TOP - AB_BOTTOM) / 1194, (vw - 60) / 1879) * 0.96;   /* (big: nearly the full height between the menu and the bottom) */
     const ox = (vw - 1879 * k) / 2, oy = AB_TOP + (vh - AB_TOP - AB_BOTTOM - 1194 * k) / 2;
     abStage.style.transform = `translate(${ox}px, ${oy}px) scale(${k})`;
     return { k, ox, oy };
