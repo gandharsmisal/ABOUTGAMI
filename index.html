@@ -1388,7 +1388,7 @@
   // Fewer, longer strides: each walk covers the same ground, at the same speed, in fewer bigger steps (stride
   // lengthened to match, so the planted foot never slides). Steps drawn per step of the walk's path:
   // door walk 9 -> 6, work/about walks 2/3 as many, mug walks 20 -> 12.
-  const GAIT_INTRO = 2 / 3, GAIT_WORK = 2 / 3, GAIT_MUG = 0.6, GAIT_INTO = 6 / 7;   // walking into the cover: 6 steps
+  const GAIT_INTRO = 0.5, GAIT_WORK = 2 / 3, GAIT_MUG = 0.6, GAIT_INTO = 6 / 7;   // walking into the cover: 6 steps
   // One walking pace everywhere: every walk takes TEMPO steps per wheel notch, so its length follows from its steps
   // (no walk is quicker or slower than another). REAL_NOTCH = timeline steps per real wheel notch at WHEEL.
   const REAL_NOTCH = NOTCH * WHEEL / 1.2, TEMPO = 0.48;   // 0.36 needed too much scrolling for the walks
@@ -1460,7 +1460,7 @@
   // must travel 2 * D per step for the planted foot not to slide. Knees bend toward the direction of
   // travel (dir -1 = walking left, toes pointing left). All sizes scale with k (1 at scale 1.94).
   const WALK = { hip: 12, drop: 37 * 1.18, D: 22, lift: 10, bone: 22.6, toe: 5 };
-  function gaitLegs(u, stride, bx, by, k, dir, stepD = WALK.D) {
+  function gaitLegs(u, stride, bx, by, k, dir, stepD = WALK.D, liftK = 1) {   // (liftK < 1: feet barely leave the floor - a gliding walk)
     return [0, 1].map(side => {
       const hx = bx + (side ? 1 : -1) * WALK.hip * k, hy = by;
       const p = (((u + side) % 2) + 2) % 2;                       // 0..1 stance, 1..2 swing
@@ -1469,7 +1469,7 @@
       if (p < 1) { off = dir * (D - 2 * D * p); lift = 0; }                         // front -> back
       // swing: on the ground the foot travels 4 D on a sine curve, so it peels off and sets down at rest (no snap
       // between stance and swing); relative to the hip that is the same -D -> +D, through 0 at mid-swing
-      else { const q = p - 1; off = dir * (2 * D * (1 - Math.cos(Math.PI * q)) - 2 * D * q - D); lift = Math.sin(Math.PI * q) * WALK.lift * k * stride; }
+      else { const q = p - 1; off = dir * (2 * D * (1 - Math.cos(Math.PI * q)) - 2 * D * q - D); lift = Math.sin(Math.PI * q) * WALK.lift * k * stride * liftK; }
       const ax = hx + off, ay = hy + WALK.drop * k - lift;
       // two-bone knee, bending toward the direction of travel
       const vx = ax - hx, vy = ay - hy, d = Math.min(Math.hypot(vx, vy), 2 * WALK.bone * k - 0.01);
@@ -1607,7 +1607,7 @@
     el.doorway.setAttribute('width', 96 + 2000 * open);
     el.doorway.setAttribute('height', 663 + 1000 * open);
     // natural walk; legs scale with the body (perspective), stride sized to how far it travels per step
-    const legs = gaitLegs(S.u * GAIT_INTRO, S.stride, S.bx, S.by, 0.7 * s, -1, 13 / GAIT_INTRO);
+    const legs = gaitLegs(S.u * GAIT_INTRO, S.stride, S.bx, S.by, 0.7 * s, -1, 13 / GAIT_INTRO, 0.35);   // (gliding: low, smooth steps)
     setPts(el.leg0, legs[0]);
     setPts(el.leg1, legs[1]);
 
@@ -1638,7 +1638,7 @@
   // still in the doorway first); the last step slows into the stop
   const WALK0 = 0.5;                                                       // the door has swung open (swing 0.5)
   tl.to(S, { stride: 1, duration: 0.3, ease: 'sine.out' }, WALK0);
-  const INTRO_WALK = walkT(STOP * GAIT_INTRO) * 0.343;                    // walk out of the door to the lamp (6 steps), brisker: it plays by itself on "click to enter"
+  const INTRO_WALK = walkT(STOP * 2 / 3) * 0.343 * 1.03;   // (3% slower than before; fewer, longer steps)                    // walk out of the door to the lamp (6 steps), brisker: it plays by itself on "click to enter"
   tl.to(S, { u: STOP, duration: INTRO_WALK, ease: 'none' }, WALK0);
   tl.to(S, { stride: 0, duration: 0.5, ease: 'sine.inOut' }, WALK0 + INTRO_WALK - 0.5);   // comes to a stop, as in the other walks
   // the lamp slides down from the top as it walks (frame 28, step 8)
