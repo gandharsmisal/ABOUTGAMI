@@ -2950,7 +2950,7 @@
     CAM = mob ? CAM_MOB : CAM_DESK; DESK = mob ? DESK_MOB : DESK_DESK;
     if (mob) {                                                    // the phone's window on the stage
       const b = mobBox(); $('heroSvg').setAttribute('viewBox', `${b.x} ${b.y} ${b.w} ${b.h}`);
-      cam.ex = 0; cam.ey = 0; cam.cy = b.y + b.h / 2;            // (the phone layout already reaches its edges; the middle of its view)
+      cam.ex = 0; cam.ey = 0; cam.cy = b.y + b.h / 2; cam.box = [b.x, b.y, b.x + b.w, b.y + b.h];            // (the phone layout already reaches its edges; the middle of its view)
       // the notes sit under the object in the middle (their arrows were drawn for the desktop layout)
       [1, 2, 3].forEach(i => { const g = $(NOTES[i]), n = CAM[i].note; if (!g || !n) return;
         let a = g.querySelector('.hnMobArrow'); if (a) a.remove();
@@ -2971,7 +2971,7 @@
           ` M${ax} ${ay} L${tx} ${ty} L${bx} ${by}`);
         g.appendChild(a); });
     } else {
-      $('heroSvg').setAttribute('viewBox', '0 0 1920 1080'); cam.cy = 540;
+      $('heroSvg').setAttribute('viewBox', '0 0 1920 1080'); cam.cy = 540; cam.box = [0, 0, 1920, 1080];
       const desk = { hnLaptop: 'translate(-129 -89)', hnBook: 'translate(85 0)', hnMug: 'translate(43 -170)' };
       for (const k in desk) $(k).setAttribute('transform', desk[k]);
       document.querySelectorAll('#hnLaptop text, #hnBook text, #hnMug text').forEach(tx => { if (tx._y0 !== undefined) tx.setAttribute('y', tx._y0); });
@@ -2988,6 +2988,12 @@
     for (let k = 1; k <= i; k++) { const d = raw(k).slice(); let fx = false, fy = false;
       if (focusAt !== k && focusAt !== k - 1) { fx = Math.sign(d[0] - 960) === Math.sign(prev[0] - 960); fy = Math.sign(d[1] - cy) === Math.sign(prev[1] - cy); }
       if (fx) d[0] = 1920 - d[0]; if (fy) d[1] = 2 * cy - d[1];
+      // then slid along its own edge (keeping how far in it sits) so the straight line from where it was passes right
+      // through the middle of the view - in through the centre and straight on out, never changing direction
+      if (focusAt !== k && focusAt !== k - 1) { const B = cam.box || [0, 0, 1920, 1080], hw = (B[2] - B[0]) / 2, hh = (B[3] - B[1]) / 2;
+        const side = Math.abs(d[0] - 960) / hw > Math.abs(d[1] - cy) / hh;
+        if (side && Math.abs(960 - prev[0]) > 1) { const s = (d[0] - 960) / (960 - prev[0]), y = cy + s * (cy - prev[1]), H = B[3] - B[1]; d[1] = Math.max(B[1] + H * 0.17, Math.min(B[1] + H * (d[0] < 960 ? 0.6 : 0.85), y)); }   // (clear of the logo / menu above and the figure below left)
+        else if (!side && Math.abs(cy - prev[1]) > 1) { const s = (d[1] - cy) / (cy - prev[1]), x = 960 + s * (960 - prev[0]), W = B[2] - B[0]; d[0] = Math.max(B[0] + W * 0.16, Math.min(B[0] + W * (d[1] < cy ? 0.73 : 0.85), x)); } }   // (clear of the logo and the menu along the top, the figure along the bottom)
       prev = d; fl = [fx, fy]; }
     return { p: prev, fl }; };
   const placeOf = (i, id) => {
@@ -3018,7 +3024,7 @@
     { const CLM = { hpLaptop: [0, 40], hpBook: [-210, -60], hpPhone: [220, -50] }, mk = isMobMain() ? 0.7 : 1;
       for (const id of ['hpLaptop', 'hpBook', 'hpPhone']) {
         const p = cam.lag[id], a = Math.floor(p), fr = KJ ? p4(p - a) : p - a, A = at(mod(a), id), B = at(mod(a + 1), id);
-        const V = vee(A, B, [960 + CLM[id][0] * mk, 560 + CLM[id][1] * mk], fr), dx = V[0] - (A[0] + (B[0] - A[0]) * fr), dy = V[1] - (A[1] + (B[1] - A[1]) * fr);   // (straight in to the middle, straight out - the angle never changes)
+        const dx = 0, dy = 0;   // (one straight line from place to place, through the middle - no turn)
         P[id][0] += dx; P[id][1] += dy;
         if (id === 'hpPhone') { P.hpCup[0] += dx; P.hpCup[1] += dy; } } }
     for (const id in TURN) {
@@ -3044,7 +3050,7 @@
       // on the way between stops they travel through the middle, close together as a loose group, then out to their next
       // places (strongest halfway, none at the stops)
       const CL = { paper: [-190, -70], sketchbook: [190, -90], camera: [250, 100], scissors: [-230, 120], marker: [20, 170] }[n] || [0, 0];
-      const mk = isMobMain() ? 0.7 : 1, a0 = Math.floor(p), [x1, y1] = vee(dAt(mod(a0)), dAt(mod(a0 + 1)), [960 + CL[0] * mk, 560 + CL[1] * mk], frac);   // (straight in to the middle, straight out - the angle never changes)
+      const a0 = Math.floor(p), A0 = dAt(mod(a0)), B0 = dAt(mod(a0 + 1)), x1 = A0[0] + (B0[0] - A0[0]) * frac, y1 = A0[1] + (B0[1] - A0[1]) * frac;   // (one straight line through the middle - no turn)
       $('dk-' + n).setAttribute('transform', `translate(${x1} ${y1}) rotate(${DESK[n][0][2]}) scale(${(isMobMain() ? 1.27 : 0.95 * ({ sketchbook: 1.1, marker: 1.3, scissors: 1.2, camera: 0.8 }[n] || 1)) * ds})`);
       // desktop, first view: the pencil lies apart from the sketchbook and the scissors apart from the film; at the other stops they come together
       const sp = SPLIT[n]; if (sp) { const k = isMobMain() ? 0 : between(p, i => [i === 0 ? 1 : 0])[0];
