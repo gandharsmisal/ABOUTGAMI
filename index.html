@@ -3175,7 +3175,7 @@
     // normal swipe all the way there (soft landing); swiping again soon after goes a little quicker
     onRelease: self => {
       if (!mainActive() || !(self.event && self.event.type.startsWith('touch'))) return;
-      if (KJ) { cam.target += Math.max(-0.5, Math.min(0.5, -self.velocityY * 0.0022 * 0.03)); cam.kv = 0.08; return; }   // (lifting: a soft glide on, gentler than the reference's)   // (no extra from the flick speed: a swipe moves exactly as far as the finger went, so equal swipes travel equally; it then settles softly)   // (the reference: a flick adds a little, at most one stop)
+      if (KJ) { cam.target += Math.max(-1, Math.min(1, -self.velocityY * 0.0022 * 0.05)); cam.kv = 0.06; return; }   // (the reference: a flick adds a little, at most one stop)   // (no extra from the flick speed: a swipe moves exactly as far as the finger went, so equal swipes travel equally; it then settles softly)   // (the reference: a flick adds a little, at most one stop)
       const dist = Math.abs(cam.tSum || 0), dir = Math.sign(cam.tSum || 0), now = performance.now();
       if (dist < 14 || !dir) return;
       const quick = now - (cam.tRel || -1e9) < 900; cam.tRel = now;
@@ -3191,7 +3191,7 @@
     onChangeY: self => {
     if (!mainActive()) return;
     const now = performance.now(), touch = self.event && self.event.type.startsWith('touch');
-    if (KJ) { if (touch) { cam.target -= self.deltaY * 0.0022; cam.kv = 0.3;   /* (follows the finger closely) */ } else {
+    if (KJ) { if (touch) { cam.target -= self.deltaY * 0.0022; cam.kv = 0.16;   /* (the reference) */ } else {
       // a trackpad (its steps aren't whole mouse notches, or they're small) moves at less than half the wheel's rate
       const ev0 = self.event || {}, pad = (ev0.wheelDeltaY !== undefined && ev0.wheelDeltaY % 120 !== 0) || Math.abs(self.deltaY) < 30, notches = Math.max(1, Math.round(Math.abs(self.deltaY) / (Math.abs(ev0.deltaY) || Math.abs(self.deltaY) || 1))), dS = self.deltaY * 0.0008 * (pad ? 0.42 : 1);   // (a mouse: every notch exactly 1/12 of the way, so 12 notches land exactly on the next stop)
       cam.kPad = pad;
