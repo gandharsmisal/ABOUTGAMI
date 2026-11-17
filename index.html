@@ -3069,7 +3069,10 @@
       // further the faster you scrolled) and ease softly to rest - no jump to a stop
       if (!cam.kGl && cam.kIn && performance.now() - cam.kIn > 110) {
         cam.kGl = true;
-        const more = Math.max(-0.08, Math.min(0.08, (cam.kSpd || 0) * 0.07));   // (a short glide: about a notch at most)
+        let more = Math.max(-0.08, Math.min(0.08, (cam.kSpd || 0) * 0.07));   // (a short glide: about a notch at most)
+        // near a stop the glide is very small (a touch at most), and it never carries past the stop
+        { const r = Math.round(cam.target), d = Math.abs(cam.target - r); more *= 0.12 + 0.88 * Math.min(1, d / 0.35);
+          const nx = more > 0 ? Math.ceil(cam.target - 1e-9) : Math.floor(cam.target + 1e-9); if (more > 0 ? cam.target + more > nx : cam.target + more < nx) more = nx - cam.target; }
         if (Math.abs(more) > 1e-4) { cam.target += more; cam.pd = 1100; cam.pOut = true; cam.kv = 0.2; }
       }
       { const now = performance.now(); cam.pulses = cam.pulses || []; if (cam.pB === undefined) cam.pB = cam.target;
