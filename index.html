@@ -2997,7 +2997,30 @@
         else if (!side && Math.abs(cy - prev[1]) > 1) { const s = (d[1] - cy) / (cy - prev[1]), x = 960 + s * (960 - prev[0]), W = B[2] - B[0]; d[0] = Math.max(B[0] + W * 0.16, Math.min(B[0] + W * (d[1] < cy ? 0.73 : 0.85), x)); } }   // (clear of the logo and the menu along the top, the figure along the bottom)
       prev = d; fl = [fx, fy]; }
     return { p: prev, fl }; };
+  // phones, at the stops: as the reference - everything not in focus in a row along the top and a row along the bottom,
+  // spread evenly across, each showing the same depth into the view. Each stop the rows swap (top <-> bottom) and the
+  // order runs the other way, so every object still settles on the opposite side to where it was.
+  const MOB_ROWS = { 1: { top: ['camera', 'scissors', 'sketchbook'], bot: ['hpPhone', 'paper', 'marker', 'hpBook'] },
+                     2: { top: ['marker', 'paper', 'hpPhone'], bot: ['sketchbook', 'hpLaptop', 'scissors', 'camera'] },
+                     3: { top: ['camera', 'scissors', 'hpLaptop', 'sketchbook'], bot: ['hpBook', 'paper', 'marker'] } };
+  const MOB_ROW_K = 0.62;   // (the laptop, notebook and mug in a row: smaller, so they sit with the side objects)
+  const mobBoxOf = (i, id) => {   // its turned box on the phone (as drawn)
+    const side = !id.startsWith('hp'), im = document.querySelector(side ? '#dk-' + id + ' image' : '#' + id + ' image');
+    const r = (side ? DESK[id][0][2] : CAM[0][id][2]) * Math.PI / 180;
+    const k = side ? 1.27 * (id === 'camera' ? 1.3 : 1) : CAM[i][id][3] * MOB_ROW_K * 1.155 * (id === 'hpLaptop' ? 1 : 1.1);
+    let w = (+(im && im.getAttribute('width')) || 200) * k, h = (+(im && im.getAttribute('height')) || 200) * k;
+    if (id === 'hpPhone') w *= 2;   // (the mug beside it)
+    return [Math.abs(w * Math.cos(r)) + Math.abs(h * Math.sin(r)), Math.abs(w * Math.sin(r)) + Math.abs(h * Math.cos(r))]; };
+  const mobSlot = (i, id) => {
+    const R = MOB_ROWS[i], top = R.top.includes(id), row = top ? R.top : R.bot, j = row.indexOf(id), B = cam.box;
+    const W = B[2] - B[0], H = B[3] - B[1], [bw, bh] = mobBoxOf(i, id), show = Math.min(H * 0.15, bh * 0.62);
+    const x = B[0] + W * (j + 0.5) / row.length, y = top ? B[1] + show - bh / 2 : B[3] - show + bh / 2;
+    return [x, y, id.startsWith('hp') ? CAM[0][id][2] : DESK[id][0][2], id.startsWith('hp') ? CAM[i][id][3] * MOB_ROW_K : 1]; };
+  const onMobRow = (i, id) => isMobMain() && i >= 1 && cam.box && MOB_ROWS[i] && (MOB_ROWS[i].top.includes(id) || MOB_ROWS[i].bot.includes(id));
   const placeOf = (i, id) => {
+    if (onMobRow(i, id === 'hpCup' ? 'hpPhone' : id)) {
+      if (id !== 'hpCup') return mobSlot(i, id);
+      const p = mobSlot(i, 'hpPhone'); return [p[0] + (CAM[i].hpCup[0] - CAM[i].hpPhone[0]) * MOB_ROW_K, p[1] + (CAM[i].hpCup[1] - CAM[i].hpPhone[1]) * MOB_ROW_K, CAM[i].hpCup[2], CAM[i].hpCup[3] * MOB_ROW_K]; }
     if (id !== 'hpCup') return oppo(k => CAM[k][id], i, FOCUS[id]).p;
     const { fl } = oppo(k => CAM[k].hpPhone, i, FOCUS.hpPhone), d = CAM[i].hpCup.slice(), cy = cam.cy || 540;   // (the mug goes where the phone goes)
     if (fl[0]) d[0] = 1920 - d[0]; if (fl[1]) d[1] = 2 * cy - d[1]; return d; };
@@ -3044,7 +3067,7 @@
       $(id).setAttribute('transform', `translate(${x} ${y}) rotate(${r}) scale(${s * (isMobMain() ? 1.155 : 0.95)}) translate(${-c[0]} ${-c[1]})`);   // (phones: 15.5% bigger)
     }
     for (const n in DESK) {
-      const dAt = i => { const [x, y, rr, s = 1] = oppo(k => DESK[n][k], i, -1).p;
+      const dAt = i => { const [x, y, rr, s = 1] = onMobRow(i, n) ? mobSlot(i, n) : oppo(k => DESK[n][k], i, -1).p;
         return [x + (x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0), y + (y < 150 ? -cam.ey : y > 930 ? cam.ey : 0), rr, s]; };
       const p = cam.lag.desk, [, , r, ds] = between(p, dAt);
       const frac = KJ ? p4(p - Math.floor(p)) : p - Math.floor(p), spin = SPIN[n] * 360 * (KJ ? frac : smooth(frac));   // (the reference: every object on the same power4.inOut curve - they rest at each stop, rush between)   // one whole turn per move (so it lands at the same angle), slow at the start and the end
