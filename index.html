@@ -3151,7 +3151,7 @@
     // normal swipe all the way there (soft landing); swiping again soon after goes a little quicker
     onRelease: self => {
       if (!mainActive() || !(self.event && self.event.type.startsWith('touch'))) return;
-      if (KJ) { cam.target += Math.max(-1, Math.min(1, -self.velocityY * 0.0032 * 0.02)); cam.kv = 0.06; return; }   // (the reference: a flick adds a little, at most one stop)
+      if (KJ) { cam.kv = 0.12; return; }   // (no extra from the flick speed: a swipe moves exactly as far as the finger went, so equal swipes travel equally; it then settles softly)   // (the reference: a flick adds a little, at most one stop)
       const dist = Math.abs(cam.tSum || 0), dir = Math.sign(cam.tSum || 0), now = performance.now();
       if (dist < 14 || !dir) return;
       const quick = now - (cam.tRel || -1e9) < 900; cam.tRel = now;
