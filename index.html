@@ -819,7 +819,7 @@
       <!-- each prop 1.2x, spread apart and set down a little off-square (own height and tilt) so they look dropped there -->
       <!-- each prop is placed by JS (translate / rotate / scale about its own centre) for each scroll step -->
       <g id="hpPhone" data-open="contact"><image class="hprop" href="assets/photo/contact-phone-off.webp" x="532.8" y="494" width="86.4" height="180" style="filter: sepia(0.2) saturate(1.15) brightness(1.03) drop-shadow(0 2px 4px rgba(40, 32, 18, 0.2))"></image></g>
-      <g id="hpCup" data-open="contact"><image class="hprop" href="assets/photo/hero-cup-bright-hq.webp" x="462.3" y="424.3" width="178.3" height="159.3"></image></g>
+      <g id="hpCup" data-open="contact" style="display: none"><image class="hprop" href="assets/photo/hero-cup-bright-hq.webp" x="462.3" y="424.3" width="178.3" height="159.3"></image></g>
       <g id="hpLaptop" data-open="work">
         <image class="hprop" href="assets/photo/hero-laptop-code-hq.webp" x="772" y="335" width="374" height="360"></image>
         <!-- on the laptop step its screen shows the Work page -->
@@ -2735,7 +2735,7 @@
     { hpLaptop: [975, 262, -2, 1.2], hpCup: [460.6, 346.1, 4, 1.03], hpPhone: [480, 430, 4, 1.03], hpBook: [1515, 365, -7, 1.35], ly: -195 },   // (first view, laid out round the side objects)
     { hpLaptop: [960, 600, 0, 1.2], hpCup: [360.6, -48.9, 0, 1.03], hpPhone: [380, 35, 0, 1.03], hpBook: [1380, 1030, 8, 1.35], ly: -440 },
     { hpLaptop: [-105, 530, 15, 1.2], hpCup: [1915.6, 306.1, 0, 1.03], hpPhone: [1935, 390, 0, 1.03], hpBook: [958, 528, 2, 1.35], ly: 60 },
-    { hpLaptop: [1520, 1207, 0, 1.2], hpCup: [1022.6, 586.1, 2, 1.03], hpPhone: [1042, 670, 2, 1.03], hpBook: [560, -50, 2, 1.35], ly: -360 }
+    { hpLaptop: [1520, 1207, 0, 1.2], hpCup: [1022.6, 586.1, 2, 1.03], hpPhone: [962, 670, 2, 1.03], hpBook: [560, -50, 2, 1.35], ly: -360 }
   ];
   const DESK_DESK = {   // (kept clear of the logo, the menu and the figure in the corners)
     paper:      [[540, 55, -12],  [1130, 55, 8],    [1150, 1060, -6], [1880, 430, 14]],
@@ -2974,7 +2974,7 @@
         g.appendChild(a); });
     } else {
       $('heroSvg').setAttribute('viewBox', '0 0 1920 1080'); cam.cy = 540; cam.box = [0, 0, 1920, 1080];
-      const desk = { hnLaptop: 'translate(-129 -89)', hnBook: 'translate(85 0)', hnMug: 'translate(43 -170)' };
+      const desk = { hnLaptop: 'translate(-129 -89)', hnBook: 'translate(85 0)', hnMug: 'translate(-37 -170)' };
       for (const k in desk) $(k).setAttribute('transform', desk[k]);
       document.querySelectorAll('#hnLaptop text, #hnBook text, #hnMug text').forEach(tx => { if (tx._y0 !== undefined) tx.setAttribute('y', tx._y0); });
       const hb = hero.getBoundingClientRect(), k = Math.min(hb.width / 1920, hb.height / 1080) || 1;
@@ -3010,7 +3010,7 @@
     const r = (side ? DESK[id][0][2] : CAM[0][id][2]) * Math.PI / 180;
     const k = side ? 1.27 * (id === 'camera' ? 1.3 : 1) : CAM[i][id][3] * MOB_ROW_K * 1.155 * (id === 'hpLaptop' ? 1 : 1.1);
     let w = (+(im && im.getAttribute('width')) || 200) * k, h = (+(im && im.getAttribute('height')) || 200) * k;
-    if (id === 'hpPhone') w *= 2;   // (the mug beside it)
+    if (id === 'hpPhone') w *= 1.15;   // (a little bigger; no mug any more)
     return [Math.abs(w * Math.cos(r)) + Math.abs(h * Math.sin(r)), Math.abs(w * Math.sin(r)) + Math.abs(h * Math.cos(r))]; };
   const mobSlot = (i, id) => {
     const R = MOB_ROWS[i], top = R.top.includes(id), row = top ? R.top : R.bot, j = row.indexOf(id), B = cam.box;
@@ -3061,7 +3061,7 @@
       P[id][2] += spin;
     }
     // desktop: each object's size matched to the reference desk (the mug keeps its place on the phone)
-    const SZ = isMobMain() ? { hpBook: 1.1, hpPhone: 1.1, hpCup: 1.1 } : { hpLaptop: 1, hpBook: 0.95, hpPhone: 1, hpCup: 1 };   // (the notebook and the mug and phone a little bigger)
+    const SZ = isMobMain() ? { hpBook: 1.1, hpPhone: 1.27, hpCup: 1.1 } : { hpLaptop: 1, hpBook: 0.95, hpPhone: 1.15, hpCup: 1 };   /* (the phone a little bigger, the mug gone) */   // (the notebook and the mug and phone a little bigger)
     if (SZ.hpPhone) { P.hpCup[0] = P.hpPhone[0] + (P.hpCup[0] - P.hpPhone[0]) * SZ.hpPhone; P.hpCup[1] = P.hpPhone[1] + (P.hpCup[1] - P.hpPhone[1]) * SZ.hpPhone; }
     for (const id in PROPS) {
       const [x, y, r, s0] = P[id], c = PROPS[id], s = s0 * (SZ[id] || 1);
