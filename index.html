@@ -2758,7 +2758,7 @@
     scissors:   [[25, 400, 20],   [380, 1065, -25], [1880, 690, 30],  [960, 1065, -15]],
     marker:     [[1100, 1060, 70], [840, 55, -60],   [1320, 55, 100],  [1180, 55, -80]]
   }, SPIN = { paper: 1, camera: -1, sketchbook: 1, scissors: -1, marker: 1 };
-  const SPLIT = { sketchbook: [95, -5, 8, 75, 0], scissors: [-40, -150, 12, 35, -43] };   /* (the scissors a little lower and to the left of the film) */   // (first view: the pencil down level with the phone, the scissors under the notebook)   // [dx, dy, turn, about x, about y] of the pencil / the scissors on the first view
+  const SPLIT = { sketchbook: [26, 2, 8, 75, 0], scissors: [76, -55, 12, 35, -43] };   /* (the scissors a little lower and to the left of the film) */   // (first view: the pencil down level with the phone, the scissors under the notebook)   // [dx, dy, turn, about x, about y] of the pencil / the scissors on the first view
   // the side objects sit on the page's edges, half on and half off (each centred on its nearest edge), or as much
   // inside as DESK_INSIDE says. Desktop, first view: every one wholly inside the frame, drawn at DESK0_SCALE so they fit
   // round the laptop, the mug and the notebook (they grow back to full size as they move to the next step)
@@ -2884,6 +2884,23 @@
     // the order, as the reference: overview -> the side objects in the middle -> the main objects in the middle -> overview
     { const a = CAM_DESK[1]; CAM_DESK[1] = CAM_DESK[2]; CAM_DESK[2] = a; for (const n in DESK_DESK) { const b = DESK_DESK[n][1]; DESK_DESK[n][1] = DESK_DESK[n][2]; DESK_DESK[n][2] = b; } }
     CAM_DESK.length = 3; for (const n in DESK_DESK) DESK_DESK[n].length = 3;
+    // desktop: every object where the reference has its counterpart at each stop, measured on the reference site (its
+    // place across the view, its own turn as it goes - big turns, as there - and one size throughout)
+    //   laptop=laptop, phone=phone, F1 card=f1, grid=paper, brown papers=notebook, film+scissors=film, marker=edding, camera=rubber band
+    const L3 = {   // [overview, side objects in the middle, main objects in the middle]: [x, y, turn]
+      hpLaptop: [[1039, 744, -2], [1708, 60, 5], [961, 474, 2]],
+      hpPhone: [[628, 283, 4], [1695, 1065, 164], [715, 526, 362]],   // (upright again in the middle)
+      hpBook: [[1476, 331, -6], [238, 1048, -196], [1285, 536, -113]] };
+    for (const k in L3) for (let i = 0; i < 3; i++) { const [x, y, r] = L3[k][i]; CAM_DESK[i][k] = [x, y, r, CAM_DESK[i][k][3]]; }
+    for (let i = 0; i < 3; i++) CAM_DESK[i].hpCup = CAM_DESK[i].hpPhone.slice();
+    CAM_DESK[0].ly = -255; CAM_DESK[1].ly = -463; CAM_DESK[2].ly = -5;
+    const S3 = {
+      paper: [[1098, 248, -8], [849, 525, -78], [517, -66, 8]],
+      sketchbook: [[178, 212, -8], [985, 585, -18], [1440, -77, 12]],
+      scissors: [[1806, 760, -13], [1105, 520, -233], [285, 1167, -93]],
+      marker: [[218, 549, -22], [1175, 640, 8], [629, 1118, -42]],
+      camera: [[1860, 331, 6], [1190, 430, 136], [1339, 1111, 21]] };   // (the cluster spread a little so each shows)
+    for (const n in S3) for (let i = 0; i < 3; i++) DESK_DESK[n][i] = [S3[n][i][0], S3[n][i][1], S3[n][i][2], 1];
     // phones (the phone's view: at(0..1, 0..1))
     const at = (rx, ry) => [460 + 1000 * rx, -365 + 1810 * ry], c = CAM_MOB[0], sc = k => c[k][3];
     const m1 = {}, m2 = {};
@@ -3112,6 +3129,7 @@
     }
     for (const n in DESK) {
       const dAt = i => { const [x, y, rr, s = 1] = onMobRow(i, n) ? mobSlot(i, n) : DESK[n][i];
+        if (!i) return [x, y, rr, s];   // (the overview: placed in the view as laid out, not pushed out to wide screens' edges)
         return [x + (x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0), y + (y < 150 ? -cam.ey : y > 930 ? cam.ey : 0), rr, s]; };
       const p = cam.lag.desk, [, , r, ds] = between(p, dAt);
       const frac = KJ ? p4(p - Math.floor(p)) : p - Math.floor(p), spin = SPIN[n] * 360 * (KJ ? frac : smooth(frac));   // (the reference: every object on the same power4.inOut curve - they rest at each stop, rush between)   // one whole turn per move (so it lands at the same angle), slow at the start and the end
