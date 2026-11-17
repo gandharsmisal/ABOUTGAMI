@@ -3003,22 +3003,21 @@
   const FOCUS = { hpLaptop: 1, hpBook: 2, hpPhone: 3, hpCup: 3 };
   const oppo = (raw, i, focusAt) => { const cy = cam.cy || 540; let prev = raw(0).slice(), fl = [false, false];
     for (let k = 1; k <= i; k++) { const d = raw(k).slice(); let fx = false, fy = false;
-      if (focusAt !== k && focusAt !== k - 1) { fx = Math.sign(d[0] - 960) === Math.sign(prev[0] - 960); fy = Math.sign(d[1] - cy) === Math.sign(prev[1] - cy); }
+      // as the reference, short moves: each settles at the nearest of its spots - its own place or a mirror image of it
+      // (left/right, top/bottom) - to where it was, so nothing has to cross the whole screen
+      if (focusAt !== k && focusAt !== k - 1) { let best = Infinity;
+        for (const [ax, ay] of [[false, false], [true, false], [false, true], [true, true]]) {
+          const x = ax ? 1920 - d[0] : d[0], y = ay ? 2 * cy - d[1] : d[1], dd = Math.hypot(x - prev[0], y - prev[1]);
+          if (dd < best - 1) { best = dd; fx = ax; fy = ay; } } }
       if (fx) d[0] = 1920 - d[0]; if (fy) d[1] = 2 * cy - d[1];
-      // then slid along its own edge (keeping how far in it sits) so the straight line from where it was passes right
-      // through the middle of the view - in through the centre and straight on out, never changing direction
-      if (focusAt !== k && focusAt !== k - 1) { const B = cam.box || [0, 0, 1920, 1080], hw = (B[2] - B[0]) / 2, hh = (B[3] - B[1]) / 2;
-        const side = Math.abs(d[0] - 960) / hw > Math.abs(d[1] - cy) / hh;
-        if (side && Math.abs(960 - prev[0]) > 1) { const s = (d[0] - 960) / (960 - prev[0]), y = cy + s * (cy - prev[1]), H = B[3] - B[1]; d[1] = Math.max(B[1] + H * 0.17, Math.min(B[1] + H * (d[0] < 960 ? 0.6 : 0.85), y)); }   // (clear of the logo / menu above and the figure below left)
-        else if (!side && Math.abs(cy - prev[1]) > 1) { const s = (d[1] - cy) / (cy - prev[1]), x = 960 + s * (960 - prev[0]), W = B[2] - B[0]; d[0] = Math.max(B[0] + W * 0.16, Math.min(B[0] + W * (d[1] < cy ? 0.73 : 0.85), x)); } }   // (clear of the logo and the menu along the top, the figure along the bottom)
       prev = d; fl = [fx, fy]; }
     return { p: prev, fl }; };
   // phones, at the stops: as the reference - everything not in focus in a row along the top and a row along the bottom,
   // spread evenly across, each showing the same depth into the view. Each stop the rows swap (top <-> bottom) and the
   // order runs the other way, so every object still settles on the opposite side to where it was.
   const MOB_ROWS = { 1: { top: ['camera', 'scissors', 'sketchbook'], bot: ['hpPhone', 'paper', 'marker', 'hpBook'] },
-                     2: { top: ['marker', 'paper', 'hpPhone'], bot: ['sketchbook', 'hpLaptop', 'scissors', 'camera'] },
-                     3: { top: ['camera', 'scissors', 'hpLaptop', 'sketchbook'], bot: ['hpBook', 'paper', 'marker'] } };
+                     2: { top: ['camera', 'scissors', 'sketchbook', 'hpLaptop'], bot: ['hpPhone', 'paper', 'marker'] },
+                     3: { top: ['camera', 'scissors', 'sketchbook', 'hpLaptop'], bot: ['paper', 'marker', 'hpBook'] } };   // (each keeps its row and order: short moves, as the reference)
   const MOB_K = 0.88;   // (phones: every object a little smaller)
   const MOB_ROW_K = 1;   // (the laptop, notebook and mug keep their size in the rows)
   const mobBoxOf = (i, id) => {   // its turned box on the phone (as drawn)
@@ -3050,7 +3049,7 @@
     return u < 0.5 ? [A[0] + (Mx - A[0]) * u * 2, A[1] + (My - A[1]) * u * 2] : [Mx + (B[0] - Mx) * (u * 2 - 1), My + (B[1] - My) * (u * 2 - 1)]; };
   const between = (p, f, lin) => { const a = Math.floor(p), u = KJ ? p4(p - a) : lin ? p - a : smooth(p - a),   /* (main objects on the same gentle curve as the side objects' travel - same pace) */ A = f(mod(a)), B = f(mod(a + 1)); return A.map((v, j) => v + (B[j] - v) * u); };
   // the notebook and the phone turn once round on each move (the mug, riding on the phone, turns with it round the phone)
-  const TURN = { hpBook: -1, hpPhone: 1, hpCup: 1 };   /* (the laptop doesn't spin) */   // (each spins one whole turn on the way, landing at its same angle)
+  const TURN = {};   /* (no spinning, as the reference) */   // (each spins one whole turn on the way, landing at its same angle)
   function camDraw() {
     const P = {};
     for (const id in PROPS) {
@@ -3092,7 +3091,7 @@
       // places (strongest halfway, none at the stops)
       const CL = { paper: [-190, -70], sketchbook: [190, -90], camera: [250, 100], scissors: [-230, 120], marker: [20, 170] }[n] || [0, 0];
       const a0 = Math.floor(p), A0 = dAt(mod(a0)), B0 = dAt(mod(a0 + 1)), x1 = A0[0] + (B0[0] - A0[0]) * frac, y1 = A0[1] + (B0[1] - A0[1]) * frac;   // (one straight line through the middle - no turn)
-      $('dk-' + n).setAttribute('transform', `translate(${x1} ${y1}) rotate(${DESK[n][0][2] + spin}) scale(${(isMobMain() ? 1.27 * MOB_K * (n === 'camera' ? 1.3 : 1) : 0.95 * ({ sketchbook: 1.1, marker: 1.3, scissors: 1.2, camera: 1.05 }[n] || 1)) * ds})`);
+      $('dk-' + n).setAttribute('transform', `translate(${x1} ${y1}) rotate(${DESK[n][0][2]}) scale(${(isMobMain() ? 1.27 * MOB_K * (n === 'camera' ? 1.3 : 1) : 0.95 * ({ sketchbook: 1.1, marker: 1.3, scissors: 1.2, camera: 1.05 }[n] || 1)) * ds})`);
       // desktop, first view: the pencil lies apart from the sketchbook and the scissors apart from the film; at the other stops they come together
       const sp = SPLIT[n]; if (sp) { const k = isMobMain() ? 0 : between(p, i => [i === 0 ? 1 : 0])[0];
         $('dkp-' + n).setAttribute('transform', `translate(${sp[0] * k} ${sp[1] * k})`); }
