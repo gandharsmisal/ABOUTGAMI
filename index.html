@@ -2982,7 +2982,7 @@
   const at = (i, id) => { let [x, y, r, s] = CAM[i][id];
     if (i) { x += x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0; y += y < 150 ? -cam.ey : y > 930 ? cam.ey : 0; }   // peeking props stay at the real edges
     return [x, y, r, s]; };
-  const between = (p, f) => { const a = Math.floor(p), u = (KJ ? p4 : smooth)(p - a), A = f(mod(a)), B = f(mod(a + 1)); return A.map((v, j) => v + (B[j] - v) * u); };
+  const between = (p, f) => { const a = Math.floor(p), u = smooth(p - a),   /* (main objects on the same gentle curve as the side objects' travel - same pace) */ A = f(mod(a)), B = f(mod(a + 1)); return A.map((v, j) => v + (B[j] - v) * u); };
   // the notebook and the phone turn once round on each move (the mug, riding on the phone, turns with it round the phone)
   const TURN = {};
   function camDraw() {
