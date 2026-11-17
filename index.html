@@ -290,6 +290,10 @@
   /* open and still: the same picture without 3D, so the writing and photos are drawn sharp */
   .abBook.flat { perspective: none; }
   .abBook.flat .abCover, .abBook.flat .abLeaf { transform: none !important; transform-style: flat; }
+  /* once it lies open: no 3D at all, so the browser draws the pages, words and photos crisply at their real size
+     (3D layers are drawn as pictures and then scaled, which softens them) */
+  .abBook.flat .abFace, .abBook.flat .abLeafFace { backface-visibility: visible; -webkit-backface-visibility: visible; }
+  #abStage { -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; }
   .abBook.flat .abFront, .abBook.flat .abLeafBack { display: none; }
   .abBook.flat .abBack { transform: translateX(-1038px); }
   .abBook.flat.p2 .abLeafFront { display: none; }
