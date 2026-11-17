@@ -2944,7 +2944,7 @@
   const mod = a => ((a % NS) + NS) % NS, smooth = x => x * x * (3 - 2 * x);
   // the reference site's scroll: the wheel / finger moves a target, the view chases it by a fixed share each frame, and
   // between two stops everything moves on a strong ease-in-out (power4.inOut) - no stopping, no snapping
-  const KJ = true, p4 = x => x < 0.5 ? 4 * x ** 3 : 1 - 4 * (1 - x) ** 3;   // (a gentler in-out than the reference's: the objects ease to a natural rest at each stop - the same moves as before, only slowing in and out of each stop)
+  const KJ = true, p4 = x => x < 0.5 ? 16 * x ** 5 : 1 - 16 * (1 - x) ** 5;   // (the reference's power4.inOut)   // (a gentler in-out than the reference's: the objects ease to a natural rest at each stop - the same moves as before, only slowing in and out of each stop)
   const edges = () => {
     const mob = isMobMain();
     CAM = mob ? CAM_MOB : CAM_DESK; DESK = mob ? DESK_MOB : DESK_DESK;
@@ -2982,7 +2982,7 @@
   const at = (i, id) => { let [x, y, r, s] = CAM[i][id];
     if (i) { x += x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0; y += y < 150 ? -cam.ey : y > 930 ? cam.ey : 0; }   // peeking props stay at the real edges
     return [x, y, r, s]; };
-  const between = (p, f, lin) => { const a = Math.floor(p), u = KJ ? (lin ? p4(p - a) : smooth(p4(p - a))) : lin ? p - a : smooth(p - a),   /* (main objects on the same gentle curve as the side objects' travel - same pace) */ A = f(mod(a)), B = f(mod(a + 1)); return A.map((v, j) => v + (B[j] - v) * u); };
+  const between = (p, f, lin) => { const a = Math.floor(p), u = KJ ? p4(p - a) : lin ? p - a : smooth(p - a),   /* (main objects on the same gentle curve as the side objects' travel - same pace) */ A = f(mod(a)), B = f(mod(a + 1)); return A.map((v, j) => v + (B[j] - v) * u); };
   // the notebook and the phone turn once round on each move (the mug, riding on the phone, turns with it round the phone)
   const TURN = {};
   function camDraw() {
@@ -3020,7 +3020,7 @@
     for (const n in DESK) {
       const p = cam.lag.desk, [x0, y0, r, ds] = between(p, i => { const [x, y, rr, s = 1] = DESK[n][i];
         return [x + (x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0), y + (y < 150 ? -cam.ey : y > 930 ? cam.ey : 0), rr, s]; });
-      const frac = KJ ? p4(p - Math.floor(p)) : p - Math.floor(p), spin = SPIN[n] * 360 * smooth(frac);   // (the reference: every object on the same power4.inOut curve - they rest at each stop, rush between)   // one whole turn per move (so it lands at the same angle), slow at the start and the end
+      const frac = KJ ? p4(p - Math.floor(p)) : p - Math.floor(p), spin = SPIN[n] * 360 * (KJ ? frac : smooth(frac));   // (the reference: every object on the same power4.inOut curve - they rest at each stop, rush between)   // one whole turn per move (so it lands at the same angle), slow at the start and the end
       // on the way between stops they travel through the middle, close together as a loose group, then out to their next
       // places (strongest halfway, none at the stops)
       const CL = { paper: [-190, -70], sketchbook: [190, -90], camera: [250, 100], scissors: [-230, 120], marker: [20, 170] }[n] || [0, 0];
@@ -3055,14 +3055,9 @@
     const f = Math.min(3, dt / 16.67);                                      // frame-rate independent easing
     cam.t = time;
     if (KJ) {                                                               // (the reference: chase the target, nothing else)
-      // every notch (or bit of a swipe) becomes its own short glide - easing in and out over ~0.4 s - and overlapping glides
-      // add up, so a run of notches is one continuous smooth motion with no step at each notch and no long heavy tail
-      { const now = performance.now(); cam.pulses = cam.pulses || []; if (cam.pB === undefined) cam.pB = cam.target;
-        let sum = 0; for (const p of cam.pulses) sum += p.a;
-        const extra = cam.target - (cam.pB + sum); if (Math.abs(extra) > 1e-9) cam.pulses.push({ a: extra, t: now, d: cam.pd || 650 });
-        let e = cam.pB;
-        cam.pulses = cam.pulses.filter(p => { const u = Math.min(1, (now - p.t) / p.d); if (u >= 1) { cam.pB += p.a; e += p.a; return false; } e += p.a * (0.5 - 0.5 * Math.cos(Math.PI * u)); return true; });
-        cam.pos = e; }
+      // exactly as the reference: every frame the view moves a fixed share of the way to the target (7% wheel / trackpad,
+      // 16% finger, 6% after a flick)
+      { const e = cam.target - cam.pos; if (Math.abs(e) > 5e-5) cam.pos += e * (cam.kv || 0.07); else cam.pos = cam.target; }
       for (const q in LAG) cam.lag[q] = cam.pos;
       cam.catching = false;
       const r = Math.round(cam.pos), near = Math.abs(cam.pos - r) < 0.1 && Math.abs(cam.target - r) < 0.12;   // (on the curve an object looks at rest well before exactly on it)
@@ -3142,11 +3137,7 @@
     if (!mainActive()) return;
     const now = performance.now(), touch = self.event && self.event.type.startsWith('touch');
     if (KJ) { if (touch) { cam.target -= self.deltaY * 0.0022; cam.kv = 0.16; cam.pd = 220; } else {
-      // a trackpad (small, smooth deltas) counted out in mouse notches: every 100px of its swipe is one notch, so it moves
-      // exactly as the wheel does
-      const ev = self.event || {}, dy = self.deltaY, pad = ev.deltaMode === 0 && (Math.abs(dy) < 50 || (ev.wheelDeltaY && ev.wheelDeltaY % 120 !== 0) || dy % 1 !== 0);
-      if (pad) { cam.target += dy * 0.0008; cam.pd = 260; }   // (a trackpad exactly as on the reference: every pixel of the swipe and its coasting moves it, chased at the same rate - no notches, nothing ignored)
-      else { cam.target += dy * 0.0008; cam.pd = 420; }
+      cam.target += self.deltaY * 0.0008;   // (wheel and trackpad alike, as the reference)
       cam.kv = 0.07; } return; }   // (the reference: ~1250px of wheel or ~450px of swipe per stop)
     // a finger works like the wheel: it moves things as far and as fast as it moves (a slow, small drag a little, a quick
     // swipe further, gliding on after it lifts), with the same slow pick-up at the start and the soft landing on an object
