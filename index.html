@@ -118,9 +118,10 @@
   /* desktop: "back" as one of the menu's pills - the same height, type and fill (its hover is the menu's beige) */
   @media (min-width: 601px) {
     #pageBack { min-height: 36px; padding: 0 18px 0 14px; box-sizing: border-box; font: 600 16px/1 "Noto Serif JP", serif; text-transform: lowercase;
-      background-color: #EAE0C5; background-image: var(--mottle), var(--grain); background-size: 120px, 180px; }   /* (a beige pill like the menu's; olive on hover) */
+      background-color: #EAE0C5; background-image: var(--mottle), var(--grain); background-size: 120px, 180px; transition: background-color 0.18s ease; }   /* (a beige pill like the menu's; olive on hover) */
+    #pageBack:hover, #pageBack:focus-visible { background-color: #C2B287; }   /* (the same hover fill as the menu's pills) */
   }
-  html.ab-open #pageBack, html.ct-open #pageBack { display: inline-flex; }
+  html.ab-open #pageBack, html.ct-open #pageBack, html.wk-open #pageBack { display: inline-flex; }
   /* phones: on the book and the phone, "close" stands where the menu was (as in a case study); no menu, no back */
   @media (max-width: 600px) {
     html.ab-open #pageBack, html.ct-open #pageBack, html.ab-open #menuBtn, html.ct-open #menuBtn { display: none !important; }
@@ -175,7 +176,7 @@
     #caseClose svg { width: 17px; height: 17px; }
     #caseClose path { stroke: #141210; stroke-width: 2.6px; }
   }
-  html.in-case #menu, html.in-case #menuBtn { display: none !important; }
+  html.in-case #menu, html.in-case #menuBtn, html.in-case #pageBack { display: none !important; }
   #csLoader { position: fixed; inset: 0; z-index: 45; display: none; place-items: center; background: var(--paper); }
   #csLoader::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: var(--grain); opacity: 0.6; }
   #csLoader svg { width: min(56vw, 340px); overflow: visible; }
@@ -2437,7 +2438,7 @@
     if (window.heroStandUp) window.heroStandUp();
     if (!intro.entered) skipToMain();
     workLayout();
-    work.open = true;
+    work.open = true; document.documentElement.classList.add('wk-open');   // (shows "back" beside the menu)
     W.fat = W.pressure = 0;
     work.shown = -1;
     loadWork().then(() => { brushReset(WORK[W.cur]); spreadIn(); workRender(); });
@@ -2446,7 +2447,7 @@
   }
   function closeWork() {
     if (!work.open) return;
-    work.open = false;
+    work.open = false; document.documentElement.classList.remove('wk-open');
     gsap.to(workPage, { autoAlpha: 0, duration: 0.35, ease: 'sine.inOut' });
   }
   workPage.tabIndex = -1;
@@ -2559,14 +2560,14 @@
       if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) abTurnSide(dx < 0 ? 1 : 0);
     }, { passive: true });
   }
-  $('pageBack').addEventListener('click', () => { if (contact.open) closeContact(); else closeAbout(); });
+  $('pageBack').addEventListener('click', () => { if (work.open) closeWork(); else if (contact.open) closeContact(); else closeAbout(); });
   // beside the menu: just left of its first item ("work"), or of the "menu" button on a phone
   function pageBackAt() {
     const btn = $('menuBtn'), useBtn = btn && getComputedStyle(btn).display !== 'none', ref = useBtn ? btn : document.querySelector('#menu-list > button');
     if (!ref) return; const r = ref.getBoundingClientRect(); if (!r.width) return;
     const b = $('pageBack'); b.style.right = (innerWidth - r.left + (useBtn ? 2 : 10)) + 'px'; b.style.top = (r.top + r.height / 2) + 'px';
   }
-  new MutationObserver(() => { if (/ab-open|ct-open/.test(document.documentElement.className)) requestAnimationFrame(pageBackAt); })
+  new MutationObserver(() => { if (/ab-open|ct-open|wk-open/.test(document.documentElement.className)) requestAnimationFrame(pageBackAt); })
     .observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   addEventListener('resize', pageBackAt);
   function openAbout() {
