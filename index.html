@@ -3131,7 +3131,13 @@
     onChangeY: self => {
     if (!mainActive()) return;
     const now = performance.now(), touch = self.event && self.event.type.startsWith('touch');
-    if (KJ) { if (touch) { cam.target -= self.deltaY * 0.0022; cam.kv = 0.16; } else { cam.target += self.deltaY * 0.0008; cam.kv = 0.07; } return; }   // (the reference: ~1250px of wheel or ~450px of swipe per stop)
+    if (KJ) { if (touch) { cam.target -= self.deltaY * 0.0022; cam.kv = 0.16; } else {
+      // a trackpad (small, smooth deltas) counted out in mouse notches: every 100px of its swipe is one notch, so it moves
+      // exactly as the wheel does
+      const ev = self.event || {}, dy = self.deltaY, pad = ev.deltaMode === 0 && (Math.abs(dy) < 50 || (ev.wheelDeltaY && ev.wheelDeltaY % 120 !== 0) || dy % 1 !== 0);
+      if (pad) { cam.padAcc = (cam.padAcc || 0) + dy; while (Math.abs(cam.padAcc) >= 100) { const s = Math.sign(cam.padAcc); cam.target += s * 100 * 0.0008; cam.padAcc -= s * 100; } }
+      else cam.target += dy * 0.0008;
+      cam.kv = 0.07; } return; }   // (the reference: ~1250px of wheel or ~450px of swipe per stop)
     // a finger works like the wheel: it moves things as far and as fast as it moves (a slow, small drag a little, a quick
     // swipe further, gliding on after it lifts), with the same slow pick-up at the start and the soft landing on an object
     if (touch) cam.tSum = (cam.tSum || 0) - self.deltaY;
