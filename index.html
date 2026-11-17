@@ -2730,7 +2730,7 @@
   const PROPS = { hpLaptop: [959, 515], hpCup: [551.5, 504], hpPhone: [576, 584], hpBook: [1372, 539] };   // each image's own centre
   // per step, each prop's [x, y, rotation, scale] (of its centre, on the 1920 x 1080 page), the line's offset and the note
   const CAM_DESK = [   // (each object keeps one size at every step)
-    { hpLaptop: [968, 845, -2, 1.2], hpCup: [460.6, 346.1, 4, 1.03], hpPhone: [480, 430, 4, 1.03], hpBook: [1515, 365, -7, 1.35], ly: -195 },   // (first view, laid out round the side objects)
+    { hpLaptop: [975, 215, -2, 1.2], hpCup: [460.6, 346.1, 4, 1.03], hpPhone: [480, 430, 4, 1.03], hpBook: [1515, 365, -7, 1.35], ly: -195 },   // (first view, laid out round the side objects)
     { hpLaptop: [960, 600, 0, 1.2], hpCup: [360.6, -48.9, 0, 1.03], hpPhone: [380, 35, 0, 1.03], hpBook: [1950, 645, 8, 1.35], ly: -440 },
     { hpLaptop: [-105, 530, 15, 1.2], hpCup: [1915.6, 306.1, 0, 1.03], hpPhone: [1935, 390, 0, 1.03], hpBook: [958, 528, 2, 1.35], ly: 60 },
     { hpLaptop: [1520, 1207, 0, 1.2], hpCup: [1022.6, 586.1, 2, 1.03], hpPhone: [1042, 670, 2, 1.03], hpBook: [560, -50, 2, 1.35], ly: -360 }
@@ -2748,7 +2748,7 @@
   // round the laptop, the mug and the notebook (they grow back to full size as they move to the next step)
   const DESK_INSIDE = {}, DESK0_SCALE = 1;
   // desktop, first view: every side object wholly inside the frame at full size, each where it was placed by hand
-  const DESK0 = isMobMain() ? null : {"scissors":[1630,810,-13],"paper":[980,163],"camera":[1780,290],"sketchbook":[220,230],"marker":[390,760]};
+  const DESK0 = isMobMain() ? null : {"scissors":[1630,810,-13],"paper":[968,845],"camera":[1780,290],"sketchbook":[220,230],"marker":[390,760]};
   for (const n in DESK_DESK) DESK_DESK[n] = DESK_DESK[n].map(([x, y, r], step) => {
     if (step !== 0) {                                                        // desktop, the other stops: further out - 35% inside the frame (its turned box), on its nearest edge
       if (isMobMain()) return [x, y, r];
