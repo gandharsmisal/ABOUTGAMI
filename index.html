@@ -117,15 +117,15 @@
   #pageBack .csNextArrow path { stroke-width: 2.6px; }
   /* desktop: "back" as one of the menu's pills - the same height, type and fill (its hover is the menu's beige) */
   @media (min-width: 601px) {
-    #pageBack { min-height: 36px; padding: 0 18px 0 14px; box-sizing: border-box; font: 600 16px/1 "Noto Serif JP", serif; text-transform: lowercase;
+    #pageBack { min-height: 52px; padding: 0 24px 0 18px; box-sizing: border-box; font: 600 20px/1 "Noto Serif JP", serif; text-transform: lowercase;
       background-color: #EAE0C5; background-image: var(--mottle), var(--grain); background-size: 120px, 180px; transition: background-color 0.18s ease; }   /* (a beige pill like the menu's; olive on hover) */
     #pageBack:hover, #pageBack:focus-visible { background-color: #C2B287; }   /* (the same hover fill as the menu's pills) */
   }
   html.ab-open #pageBack, html.ct-open #pageBack, html.wk-open #pageBack { display: inline-flex; }
   /* phones: on the book and the phone, "close" stands where the menu was (as in a case study); no menu, no back */
   @media (max-width: 600px) {
-    html.ab-open #pageBack, html.ct-open #pageBack, html.ab-open #menuBtn, html.ct-open #menuBtn { display: none !important; }
-    html.ab-open #caseClose, html.ct-open #caseClose { display: inline-flex; }
+    html.ab-open #pageBack, html.ct-open #pageBack, html.wk-open #pageBack, html.ab-open #menuBtn, html.ct-open #menuBtn, html.wk-open #menuBtn { display: none !important; }
+    html.ab-open #caseClose, html.ct-open #caseClose, html.wk-open #caseClose { display: inline-flex; }   /* (the Work page too: "close" where the menu was) */
   }
   @media (max-width: 600px) { #pageBack { font-size: 20px; padding: 8px 10px; } }
   .case::-webkit-scrollbar { display: none; }
@@ -412,7 +412,7 @@
   .csTitle { filter: url(#crayon); }
   .wipPaper h2 { filter: url(#pencil); }
   /* the menu is written in a fine pen: solid ink, thin lines */
-  #menu .label { font-family: "Noto Serif JP", serif; font-weight: 600; font-size: 16px; }
+  #menu .label { font-family: "Noto Serif JP", serif; font-weight: 600; font-size: 20px; }
   #menu .pill-icon { filter: url(#crayon); }   /* written in crayon, like the headings */
   .abMess { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
   .abMess text { font-family: "Gandhar Hand", "Indie Flower", var(--hand); fill: #48484C; }
@@ -494,11 +494,11 @@
      difference blend flips it), with the old scribbled underline on hover. Each icon acts on hover: the hammer
      hammers, the eyes follow the mouse, the heart pops. */
   #menu {
-    position: fixed; z-index: 50; top: calc(env(safe-area-inset-top, 0px) + 18px); right: 36px;
-    height: 48px; display: flex; align-items: center;
+    position: fixed; z-index: 50; top: calc(env(safe-area-inset-top, 0px) + 28px); right: 34px;
+    height: 54px; display: flex; align-items: center;
     color: #141210;
   }
-  #menu-list { display: flex; align-items: center; gap: 12px; }
+  #menu-list { display: flex; align-items: center; gap: 13px; }
   /* phones: the menu button and its drawer (the row of words is not shown there) */
   #menuBtn, #drawer, #drawerShade { display: none; }
   .mPill { display: inline-flex; align-items: center; gap: 10px; border: 0; border-radius: 999px; cursor: pointer; color: #141210;
@@ -532,15 +532,15 @@
   }
   /* menu items as beige pills: a dark hand-drawn icon and the word in Noto Serif JP */
   #menu button {
-    position: relative; display: inline-flex; align-items: center; gap: 9px;
-    min-height: 36px; padding: 0 20px 0 15px; border: 0; border-radius: 999px; color: inherit; cursor: pointer;
+    position: relative; display: inline-flex; align-items: center; gap: 12px;
+    min-height: 52px; padding: 0 24px 0 20px;   /* (the reference's size: taller pills, bigger words and icons) */ border: 0; border-radius: 999px; color: inherit; cursor: pointer;
     background-color: #EAE0C5; background-image: var(--mottle), var(--grain); background-size: 120px, 180px; transition: background-color 0.18s ease;
-    font: 600 16px/1 "Noto Serif JP", serif; text-transform: lowercase; letter-spacing: 0;
+    font: 600 20px/1 "Noto Serif JP", serif; text-transform: lowercase; letter-spacing: 0;
     -webkit-tap-highlight-color: transparent;
   }
   #menu button:focus-visible { outline: none; }
   #menu .label { position: relative; }
-  #menu .pill-icon { width: 24px; height: 24px; flex: none; overflow: visible; }
+  #menu .pill-icon { width: 28px; height: 28px; flex: none; overflow: visible; }
   #menu button:hover, #menu button:focus-visible { background-color: #C2B287; }   /* (hover: the warm olive of "back") */
   /* the hover as on Next / back: the olive with a heavier mottled texture over it (blotches and grain, darker in patches) */
   #menu button { isolation: isolate; }
@@ -4845,7 +4845,7 @@
     return true;
   }
   $('caseClose').addEventListener('click', () => {               // back to the Work page (or, on a phone, off the book / the phone)
-    if (caseOpen) closeCase(); else if (contact.open) closeContact(); else if (about.open) closeAbout(); });
+    if (caseOpen) closeCase(); else if (contact.open) closeContact(); else if (about.open) closeAbout(); else if (work.open) closeWork(); });
   // "Next" / "Previous" at the end of a case study: straight into that project's case study when it has one (the Work
   // page behind is moved to it too); otherwise back on the Work page, which then moves on to that project
   document.querySelectorAll('.csNext').forEach(b => b.addEventListener('click', () => {
