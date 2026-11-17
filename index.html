@@ -2907,8 +2907,8 @@
       for (const n in DESK_MOB) { const P = await pts(document.querySelector(`#dk-${n} image`), 0, 0, 1.27); if (!P.length) continue;
         for (let i = 1; i < DESK_MOB[n].length; i++) { const r = DESK_MOB[n][i][2], sl = SLOTS[i], [X, Y] = turned(P, r);
           const top = sl.top[n] !== undefined, cx = X0 + (X1 - X0) * (top ? sl.top[n] : sl.bot[n]) - q(X, 0.5);
-          const DEPTH = 290;   // (how far each reaches into the view, the same for big and small)
-          DESK_MOB[n][i] = [cx, top ? mb.y + DEPTH - q(Y, 0.97) : mb.y + mb.h - DEPTH - q(Y, 0.03), r]; } }
+          const DEPTH = 245;   // (how far each reaches into the view, the same for big and small - measured on its bulk, not a thin tip)
+          DESK_MOB[n][i] = [cx, top ? mb.y + DEPTH - q(Y, 0.85) : mb.y + mb.h - DEPTH - q(Y, 0.15), r]; } }
       const FOC = [null, 'hpLaptop', 'hpBook', 'hpPhone'];
       for (let i = 1; i < CAM_MOB.length; i++) { const s = CAM_MOB[i];
         for (const k of ['hpLaptop', 'hpBook', 'hpPhone']) { if (k === FOC[i]) continue;
