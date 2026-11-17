@@ -3082,13 +3082,11 @@
       // comes to rest sooner after the last notch.)
       // when the scrolling stops, the objects don't stop with it: they carry on a little with the speed they had (a bit
       // further the faster you scrolled) and ease softly to rest - no jump to a stop
-      if (!cam.kGl && cam.kIn && performance.now() - cam.kIn > 110) {
+      if (!cam.kGl && cam.kIn && performance.now() - cam.kIn > 250) {
         cam.kGl = true;
-        let more = Math.max(-0.15, Math.min(0.15, (cam.kSpd || 0) * 0.13));   // (a short glide: about a notch at most)
-        // near a stop the glide is very small (a touch at most), and it never carries past the stop
-        { const r = Math.round(cam.target), d = Math.abs(cam.target - r); more *= Math.max(0, Math.min(1, (d - 0.15) / 0.25));   // (none at all near a stop: it stays there)
-          const nx = more > 0 ? Math.ceil(cam.target - 1e-9) : Math.floor(cam.target + 1e-9); if (more > 0 ? cam.target + more > nx : cam.target + more < nx) more = nx - cam.target; }
-        if (Math.abs(more) > 1e-4) { cam.target += more; cam.pd = 1100; cam.pOut = true; cam.kv = 0.2; }
+        // the wheel stays exactly where its notches put it (12 notches = one stop); a trackpad, which can stop anywhere, glides
+        // softly on to the nearest stop
+        if (cam.kPad && Math.abs(cam.target - Math.round(cam.target)) > 1e-6) { cam.target = Math.round(cam.target); cam.pd = 900; cam.pOut = true; cam.kv = 0.2; }
       }
       { const now = performance.now(); cam.pulses = cam.pulses || []; if (cam.pB === undefined) cam.pB = cam.target;
         let sum = 0; for (const p of cam.pulses) sum += p.a;
@@ -3176,7 +3174,8 @@
     const now = performance.now(), touch = self.event && self.event.type.startsWith('touch');
     if (KJ) { if (touch) { cam.target -= self.deltaY * 0.0022; cam.kv = 0.3; cam.pd = 90; cam.pOut = false; } else {
       // a trackpad (its steps aren't whole mouse notches, or they're small) moves at less than half the wheel's rate
-      const ev0 = self.event || {}, pad = (ev0.wheelDeltaY !== undefined && ev0.wheelDeltaY % 120 !== 0) || Math.abs(self.deltaY) < 30, dS = self.deltaY * 0.0008 * (pad ? 0.42 : 1);
+      const ev0 = self.event || {}, pad = (ev0.wheelDeltaY !== undefined && ev0.wheelDeltaY % 120 !== 0) || Math.abs(self.deltaY) < 30, notches = Math.max(1, Math.round(Math.abs(self.deltaY) / (Math.abs(ev0.deltaY) || Math.abs(self.deltaY) || 1))), dS = pad ? self.deltaY * 0.0008 * 0.42 : Math.sign(self.deltaY) * notches / 12;   // (a mouse: every notch exactly 1/12 of the way, so 12 notches land exactly on the next stop)
+      cam.kPad = pad;
       cam.target += dS;
       { const v = dS / Math.max(16, Math.min(120, now - (cam.kIn || 0))) * 1000; cam.kSpd = now - (cam.kIn || 0) > 300 ? v : cam.kSpd * 0.6 + v * 0.4; cam.kIn = now; cam.kGl = false; }   // (how fast you're scrolling, in stops a second)
       cam.kv = 0.2; cam.pd = 900; cam.pOut = true; } return; }   // (the reference: ~1250px of wheel or ~450px of swipe per stop)
