@@ -3018,11 +3018,12 @@
   const MOB_ROWS = { 1: { top: ['camera', 'scissors', 'sketchbook'], bot: ['hpPhone', 'paper', 'marker', 'hpBook'] },
                      2: { top: ['marker', 'paper', 'hpPhone'], bot: ['sketchbook', 'hpLaptop', 'scissors', 'camera'] },
                      3: { top: ['camera', 'scissors', 'hpLaptop', 'sketchbook'], bot: ['hpBook', 'paper', 'marker'] } };
+  const MOB_K = 0.88;   // (phones: every object a little smaller)
   const MOB_ROW_K = 1;   // (the laptop, notebook and mug keep their size in the rows)
   const mobBoxOf = (i, id) => {   // its turned box on the phone (as drawn)
     const side = !id.startsWith('hp'), im = document.querySelector(side ? '#dk-' + id + ' image' : '#' + id + ' image');
     const r = (side ? DESK[id][0][2] : CAM[0][id][2]) * Math.PI / 180;
-    const k = side ? 1.27 * (id === 'camera' ? 1.3 : 1) : CAM[i][id][3] * MOB_ROW_K * 1.155 * (id === 'hpLaptop' ? 1 : 1.1);
+    const k = (side ? 1.27 * (id === 'camera' ? 1.3 : 1) : CAM[i][id][3] * MOB_ROW_K * 1.155 * (id === 'hpLaptop' ? 1 : 1.1)) * MOB_K;
     let w = (+(im && im.getAttribute('width')) || 200) * k, h = (+(im && im.getAttribute('height')) || 200) * k;
     if (id === 'hpPhone') w *= 1.32;   // (bigger; no mug on it any more)
     return [Math.abs(w * Math.cos(r)) + Math.abs(h * Math.sin(r)), Math.abs(w * Math.sin(r)) + Math.abs(h * Math.cos(r))]; };
@@ -3079,7 +3080,7 @@
     if (SZ.hpPhone) { P.hpCup[0] = P.hpPhone[0] + (P.hpCup[0] - P.hpPhone[0]) * SZ.hpPhone; P.hpCup[1] = P.hpPhone[1] + (P.hpCup[1] - P.hpPhone[1]) * SZ.hpPhone; }
     for (const id in PROPS) {
       const [x, y, r, s0] = P[id], c = PROPS[id], s = s0 * (SZ[id] || 1);
-      $(id).setAttribute('transform', `translate(${x} ${y}) rotate(${r}) scale(${s * (isMobMain() ? 1.155 : 0.95)}) translate(${-c[0]} ${-c[1]})`);   // (phones: 15.5% bigger)
+      $(id).setAttribute('transform', `translate(${x} ${y}) rotate(${r}) scale(${s * (isMobMain() ? 1.155 * MOB_K : 0.95)}) translate(${-c[0]} ${-c[1]})`);   // (phones: 15.5% bigger)
     }
     for (const n in DESK) {
       const dAt = i => { const [x, y, rr, s = 1] = onMobRow(i, n) ? mobSlot(i, n) : oppo(k => DESK[n][k], i, -1).p;
@@ -3090,7 +3091,7 @@
       // places (strongest halfway, none at the stops)
       const CL = { paper: [-190, -70], sketchbook: [190, -90], camera: [250, 100], scissors: [-230, 120], marker: [20, 170] }[n] || [0, 0];
       const a0 = Math.floor(p), A0 = dAt(mod(a0)), B0 = dAt(mod(a0 + 1)), x1 = A0[0] + (B0[0] - A0[0]) * frac, y1 = A0[1] + (B0[1] - A0[1]) * frac;   // (one straight line through the middle - no turn)
-      $('dk-' + n).setAttribute('transform', `translate(${x1} ${y1}) rotate(${DESK[n][0][2] + spin}) scale(${(isMobMain() ? 1.27 * (n === 'camera' ? 1.3 : 1) : 0.95 * ({ sketchbook: 1.1, marker: 1.3, scissors: 1.2, camera: 1.05 }[n] || 1)) * ds})`);
+      $('dk-' + n).setAttribute('transform', `translate(${x1} ${y1}) rotate(${DESK[n][0][2] + spin}) scale(${(isMobMain() ? 1.27 * MOB_K * (n === 'camera' ? 1.3 : 1) : 0.95 * ({ sketchbook: 1.1, marker: 1.3, scissors: 1.2, camera: 1.05 }[n] || 1)) * ds})`);
       // desktop, first view: the pencil lies apart from the sketchbook and the scissors apart from the film; at the other stops they come together
       const sp = SPLIT[n]; if (sp) { const k = isMobMain() ? 0 : between(p, i => [i === 0 ? 1 : 0])[0];
         $('dkp-' + n).setAttribute('transform', `translate(${sp[0] * k} ${sp[1] * k})`); }
