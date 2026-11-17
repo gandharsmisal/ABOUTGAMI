@@ -69,7 +69,8 @@
     stroke: var(--pen); stroke-width: 0.4px; }
   #heroProps > g { pointer-events: auto; cursor: pointer; }
   /* the grid paper and the camera toned down to sit like the other printed pieces (softer contrast, less colour, warm) */
-  #dk-paper image, #dk-camera image { filter: saturate(0.68) contrast(0.84) brightness(1.04) sepia(0.14); }
+  #dk-paper image { filter: saturate(0.68) contrast(0.84) brightness(1.04) sepia(0.14); }
+  #dk-camera image { filter: saturate(0.6) contrast(0.76) brightness(1.07) sepia(0.14); }   /* (the camera softer still) */
   #heroDecor { pointer-events: none; }
   #heroScreen { display: none; }   /* (the laptop keeps its own screen: no Work page shown on it) */
   .deskBit image { filter: none; }   /* (no live shadow filter: lighter to draw while everything moves) */
@@ -829,7 +830,7 @@
     <g id="heroProps">
       <!-- each prop 1.2x, spread apart and set down a little off-square (own height and tilt) so they look dropped there -->
       <!-- each prop is placed by JS (translate / rotate / scale about its own centre) for each scroll step -->
-      <g id="hpPhone" data-open="contact"><image class="hprop" href="assets/photo/contact-phone-off.webp" x="532.8" y="494" width="86.4" height="180" style="filter: sepia(0.2) saturate(1.15) brightness(1.03) drop-shadow(0 2px 4px rgba(40, 32, 18, 0.2))"></image></g>
+      <g id="hpPhone" data-open="contact"><image class="hprop" href="assets/photo/contact-phone-off.webp" x="532.8" y="494" width="86.4" height="180" style="filter: sepia(0.2) saturate(0.95) contrast(0.9) brightness(1.06) drop-shadow(0 2px 4px rgba(40, 32, 18, 0.2))"></image></g>
       <g id="hpCup" data-open="contact" style="display: none"><image class="hprop" href="assets/photo/hero-cup-bright-hq.webp" x="462.3" y="424.3" width="178.3" height="159.3"></image></g>
       <g id="hpLaptop" data-open="work">
         <image class="hprop" href="assets/photo/hero-laptop-code-hq.webp" x="772" y="335" width="374" height="360"></image>
