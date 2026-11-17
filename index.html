@@ -2746,7 +2746,7 @@
   const PROPS = { hpLaptop: [959, 515], hpCup: [551.5, 504], hpPhone: [576, 584], hpBook: [1372, 539] };   // each image's own centre
   // per step, each prop's [x, y, rotation, scale] (of its centre, on the 1920 x 1080 page), the line's offset and the note
   const CAM_DESK = [   // (each object keeps one size at every step)
-    { hpLaptop: [975, 300, -2, 1.2], hpCup: [460.6, 296.1, 4, 1.03], hpPhone: [480, 380, 4, 1.03], hpBook: [1515, 365, -7, 1.35], ly: -165 },   // (first view, laid out round the side objects)
+    { hpLaptop: [1037, 744, -2, 1.2], hpCup: [627, 283, 4, 1.03], hpPhone: [627, 283, 4, 1.03], hpBook: [1475, 331, -6, 1.35], ly: -255 },   // (first view: laid out as the reference's overview)   // (first view, laid out round the side objects)
     { hpLaptop: [960, 600, 0, 1.2], hpCup: [360.6, -48.9, 0, 1.03], hpPhone: [380, 35, 0, 1.03], hpBook: [1380, 1030, 8, 1.35], ly: -440 },
     { hpLaptop: [-105, 530, 15, 1.2], hpCup: [1915.6, 306.1, 0, 1.03], hpPhone: [1935, 390, 0, 1.03], hpBook: [958, 528, 2, 1.35], ly: 60 },
     { hpLaptop: [1520, 1207, 0, 1.2], hpCup: [1022.6, 586.1, 2, 1.03], hpPhone: [962, 670, 2, 1.03], hpBook: [560, -50, 2, 1.35], ly: -360 }
@@ -2758,13 +2758,13 @@
     scissors:   [[25, 400, 20],   [380, 1065, -25], [1880, 690, 30],  [960, 1065, -15]],
     marker:     [[1100, 1060, 70], [840, 55, -60],   [1320, 55, 100],  [1180, 55, -80]]
   }, SPIN = { paper: 1, camera: -1, sketchbook: 1, scissors: -1, marker: 1 };
-  const SPLIT = { sketchbook: [55, 240, 8, 75, 0], scissors: [-230, -88, 12, 35, -43] };   /* (the scissors a little lower and to the left of the film) */   // (first view: the pencil down level with the phone, the scissors under the notebook)   // [dx, dy, turn, about x, about y] of the pencil / the scissors on the first view
+  const SPLIT = { sketchbook: [95, -5, 8, 75, 0], scissors: [-40, -150, 12, 35, -43] };   /* (the scissors a little lower and to the left of the film) */   // (first view: the pencil down level with the phone, the scissors under the notebook)   // [dx, dy, turn, about x, about y] of the pencil / the scissors on the first view
   // the side objects sit on the page's edges, half on and half off (each centred on its nearest edge), or as much
   // inside as DESK_INSIDE says. Desktop, first view: every one wholly inside the frame, drawn at DESK0_SCALE so they fit
   // round the laptop, the mug and the notebook (they grow back to full size as they move to the next step)
   const DESK_INSIDE = {}, DESK0_SCALE = 1;
   // desktop, first view: every side object wholly inside the frame at full size, each where it was placed by hand
-  const DESK0 = isMobMain() ? null : {"scissors":[1630,870,-13],"paper":[968,845],"camera":[1780,290],"sketchbook":[220,230],"marker":[390,760]};
+  const DESK0 = isMobMain() ? null : {"scissors":[1770,790,-13],"paper":[1097,250,-8],"camera":[1625,235,6],"sketchbook":[297,232,-8],"marker":[300,560,-22]};
   for (const n in DESK_DESK) DESK_DESK[n] = DESK_DESK[n].map(([x, y, r], step) => {
     if (step !== 0) {                                                        // desktop, the other stops: further out - 35% inside the frame (its turned box), on its nearest edge
       if (isMobMain()) return [x, y, r];
@@ -2870,20 +2870,28 @@
   // the side objects at the edges, 2 the side objects together in the middle with the laptop, phone and card at the edges
   {
     // desktop
-    CAM_DESK[1] = { hpLaptop: [960, 650, 0, 1.2], hpPhone: [640, 680, -6, 1.03], hpCup: [640, 680, -6, 1.03], hpBook: [1290, 660, 6, 1.35], ly: -440 };
-    CAM_DESK[2] = { hpLaptop: [960, 1215, 3, 1.2], hpPhone: [1932, 430, -8, 1.03], hpCup: [1932, 430, -8, 1.03], hpBook: [-30, 420, 10, 1.35], ly: -440 };
-    const CLUSTER = { paper: [905, 610, -10], sketchbook: [745, 660, 12], scissors: [1075, 665, -22], camera: [1150, 560, 10], marker: [975, 735, 38] };
+    // (1) the laptop in the middle, the phone to its left, the card lying sideways to its right; the words under them
+    CAM_DESK[1] = { hpLaptop: [963, 470, 0, 1.2], hpPhone: [645, 530, -4, 1.03], hpCup: [645, 530, -4, 1.03], hpBook: [1380, 535, 92, 1.35], ly: -10 };
+    // (2) the side objects together in the middle under the words; the laptop off the top-right corner, the card bottom
+    // left, the phone bottom right
+    CAM_DESK[2] = { hpLaptop: [1985, 55, -160, 1.2], hpPhone: [1935, 1060, -32, 1.03], hpCup: [1935, 1060, -32, 1.03], hpBook: [35, 1010, 10, 1.35], ly: -465 };
+    const CLUSTER = { paper: [905, 510, -10], sketchbook: [745, 560, 12], scissors: [1075, 565, -22], camera: [1150, 460, 10], marker: [975, 635, 38] };
     for (const n in DESK_DESK) DESK_DESK[n][2] = CLUSTER[n];
-    CAM_DESK.length = 3; for (const n in DESK_DESK) DESK_DESK[n].length = 3;
+    // (3) the main objects back in the middle (as 1), then on round to the overview
+    // (1) as the reference: the side objects peek in along the top and the bottom edges, about a third of each showing
+    Object.assign(DESK_DESK.paper, { 1: [400, -55, -6] }); Object.assign(DESK_DESK.camera, { 1: [1250, -95, 8] });
+    Object.assign(DESK_DESK.sketchbook, { 1: [300, 1135, 6] }); Object.assign(DESK_DESK.marker, { 1: [960, 1095, 62] }); Object.assign(DESK_DESK.scissors, { 1: [1600, 1170, -14] });
+    CAM_DESK[3] = JSON.parse(JSON.stringify(CAM_DESK[1])); for (const n in DESK_DESK) DESK_DESK[n][3] = DESK_DESK[n][1].slice();
+    CAM_DESK.length = 4; for (const n in DESK_DESK) DESK_DESK[n].length = 4;
     // phones (the phone's view: at(0..1, 0..1))
     const at = (rx, ry) => [460 + 1000 * rx, -365 + 1810 * ry], c = CAM_MOB[0], sc = k => c[k][3];
     const m1 = {}, m2 = {};
     [['hpLaptop', 0.5, 0.52, 0], ['hpPhone', 0.2, 0.74, -6], ['hpBook', 0.74, 0.76, 6]].forEach(([k, x, y, r]) => { const [px, py] = at(x, y); m1[k] = [px, py, r, sc(k)]; });
     m1.hpCup = m1.hpPhone.slice(); m1.ly = (-365 + 1810 * 0.25) - 751;
     ['hpLaptop', 'hpPhone', 'hpBook'].forEach(k => { m2[k] = CAM_MOB[1][k].slice(); }); m2.hpCup = m2.hpPhone.slice(); m2.ly = (-365 + 1810 * 0.27) - 751;   // (placed in the rows)
-    CAM_MOB[1] = m1; CAM_MOB[2] = m2; CAM_MOB.length = 3;
+    CAM_MOB[1] = m1; CAM_MOB[2] = m2; CAM_MOB[3] = JSON.parse(JSON.stringify(m1)); CAM_MOB.length = 4;
     const MCL = { paper: [0.42, 0.5, -10], sketchbook: [0.3, 0.6, 12], scissors: [0.64, 0.6, -22], camera: [0.66, 0.46, 10], marker: [0.5, 0.7, 38] };
-    for (const n in DESK_MOB) { const [x, y] = at(MCL[n][0], MCL[n][1]); DESK_MOB[n][2] = [x, y, MCL[n][2]]; DESK_MOB[n].length = 3; }
+    for (const n in DESK_MOB) { const [x, y] = at(MCL[n][0], MCL[n][1]); DESK_MOB[n][2] = [x, y, MCL[n][2]]; DESK_MOB[n][3] = DESK_MOB[n][1].slice(); DESK_MOB[n].length = 4; }
   }
   // desktop, the stops: the side objects measured on their drawn pixels as well, about a third of each in view (as the
   // reference), along the top kept clear of the logo and the menu
@@ -2942,7 +2950,7 @@
                       2: { top: { camera: 0.34, scissors: 0.58 }, bot: { paper: 0.3, marker: 0.55, sketchbook: 0.8 } },
                       3: { top: { sketchbook: 0.34, marker: 0.58 }, bot: { scissors: 0.3, paper: 0.55, camera: 0.8 } } };
       for (const n in DESK_MOB) { const P = await pts(document.querySelector(`#dk-${n} image`), 0, 0, 1.27); if (!P.length) continue;
-        for (let i = 1; i < DESK_MOB[n].length; i++) { if (i === 2) continue;   /* (stop 2: they sit together in the middle) */ const r = DESK_MOB[n][i][2], sl = SLOTS[i], [X, Y] = turned(P, r);
+        for (let i = 1; i < DESK_MOB[n].length; i++) { if (i !== 1) continue;   /* (stop 2: they sit together in the middle) */ const r = DESK_MOB[n][i][2], sl = SLOTS[i], [X, Y] = turned(P, r);
           if (sl.top[n] === undefined && sl.bot[n] === undefined) continue;
           const top = sl.top[n] !== undefined, cx = X0 + (X1 - X0) * (top ? sl.top[n] : sl.bot[n]) - q(X, 0.5);
           const DEPTH = 245;   // (how far each reaches into the view, the same for big and small - measured on its bulk, not a thin tip)
@@ -2966,7 +2974,7 @@
   })();
   // the desk's pictures decoded up front (the bigger, sharper ones made the first move stutter while they were decoded)
   document.querySelectorAll('#heroProps image, #heroDecor image').forEach(im => { const p = new Image(); p.src = im.getAttribute('href'); if (p.decode) p.decode().catch(() => {}); });
-  const NOTES = [null, null, null], NS = CAM.length, SLIDE = 125;   // how far the mug slides off the phone
+  const NOTES = [null, null, null, null], NS = CAM.length, SLIDE = 125;   // how far the mug slides off the phone
   /* The scroll is in the visitor's hands: the wheel / finger moves a target along the steps (about 4 notches a step),
      the canvas follows it softly and every prop trails a little behind at its own pace, tilting as it drifts, so
      they float rather than slide. When the scrolling stops it settles on the nearest step (leaning the way it was
@@ -3035,7 +3043,7 @@
   // phones, at the stops: as the reference - everything not in focus in a row along the top and a row along the bottom,
   // spread evenly across, each showing the same depth into the view. Each stop the rows swap (top <-> bottom) and the
   // order runs the other way, so every object still settles on the opposite side to where it was.
-  const MOB_ROWS = { 1: { top: ['camera', 'scissors', 'sketchbook'], bot: ['paper', 'marker'] }, 2: { top: ['hpBook', 'hpPhone'], bot: ['hpLaptop'] } };   // (three stops)
+  const MOB_ROWS = { 1: { top: ['camera', 'scissors', 'sketchbook'], bot: ['paper', 'marker'] }, 2: { top: ['hpBook', 'hpPhone'], bot: ['hpLaptop'] }, 3: { top: ['camera', 'scissors', 'sketchbook'], bot: ['paper', 'marker'] } };   // (stop 3 as stop 1)
   const MOB_ROWS_OLD = { 1: { top: ['camera', 'scissors', 'sketchbook'], bot: ['hpPhone', 'paper', 'marker', 'hpBook'] },
                      2: { top: ['hpLaptop', 'sketchbook', 'scissors', 'camera'], bot: ['marker', 'paper', 'hpPhone'] },
                      3: { top: ['camera', 'scissors', 'sketchbook', 'hpLaptop'], bot: ['hpBook', 'paper', 'marker'] } };   // (each keeps its row; the order flips each stop, so it crosses to the other side)
