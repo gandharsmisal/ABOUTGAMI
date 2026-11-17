@@ -4356,23 +4356,28 @@
       { area: [330, 20815, 340, 20825], fill: '#2A2A2A', dx: 1026, dy: 110 },
       // the research question's two dotted lines ran through the text: into the gaps beside and above it
       // (the first sits in the gap between "…stays silent" and "And that got me thinking about", ending just above the latter)
-      { area: [440, 5105, 452, 5115], fill: '#1F9C7F', dx: -152, sx: 1.036, sy: 0.5 },
+      { area: [440, 5105, 452, 5115], fill: '#1F9C7F', hide: true },   // (redrawn below: up, and over to the right)
       { area: [440, 5580, 452, 5592], fill: '#1F9C7F', dy: -72 },
+      // "→ If Cybersmart were a person…" under the research question: down to the size of the rest of the text
+      { area: [815, 5418, 830, 5430], fill: '#2A2A2A', scale: 0.72 },
       // the dotted line from the quote down to the takeaways: removed
       { area: [360, 23490, 370, 23500], fill: '#38BAA4', hide: true }
     ]
   };
   // dotted connector lines drawn by the page (design units): a dot at each end, like the design's own
   const CASE_LINES = {
-    caseCyber: []
+    caseCyber: [
+      // from just under "…stays silent", across and down onto "And that got me thinking about" (its right-hand end)
+      { d: 'M347 5054 L347 5095 L1095 5095 L1095 5180', color: '#1F9C7F' }
+    ]
   };
   function dottedLine(svg, { d, color }) {
     const NS = 'http://www.w3.org/2000/svg', g = document.createElementNS(NS, 'g'), p = document.createElementNS(NS, 'path');
     p.setAttribute('d', d); p.setAttribute('fill', 'none'); p.setAttribute('stroke', color); p.setAttribute('stroke-width', '1.6');
-    p.setAttribute('stroke-dasharray', '.1 4.5'); p.setAttribute('stroke-linecap', 'round');
+    p.setAttribute('stroke-dasharray', '5 4'); p.setAttribute('stroke-linecap', 'butt');   // (dashed, like the design's own connector below it)
     g.appendChild(p); svg.appendChild(g);
     const L = p.getTotalLength();
-    [0, L].forEach(at => { const pt = p.getPointAtLength(at), c = document.createElementNS(NS, 'circle');
+    [L].forEach(at => { const pt = p.getPointAtLength(at), c = document.createElementNS(NS, 'circle');
       c.setAttribute('cx', pt.x); c.setAttribute('cy', pt.y); c.setAttribute('r', 3.5); c.setAttribute('fill', color); g.appendChild(c); });
   }
   // The sketches' objects (speech bubbles, tags, boxes, speakers, notes...) are filled white, as some already were in
