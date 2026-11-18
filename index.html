@@ -2902,9 +2902,9 @@
     CAM_DESK[0].ly = -210; CAM_DESK[1].ly = -463; CAM_DESK[2].ly = -11;
     const S3 = {
       paper: [[1098, 248, -8], [849, 525, -78], [330, -60, 8]],
-      sketchbook: [[178, 360, -8], [985, 585, -18], [1640, -70, 12]],
+      sketchbook: [[178, 360, -8], [985, 585, -118], [1640, -70, 42]],   // (bigger turns, as the rest)
       scissors: [[1806, 760, -13], [1105, 520, -233], [1800, 1120, -93]],
-      marker: [[218, 700, -22], [1175, 640, 8], [411, 1100, -42]],
+      marker: [[218, 700, -22], [1175, 640, 118], [411, 1100, -112]],   // (bigger turns, as the rest)
       camera: [[1860, 331, 6], [1190, 430, 136], [1535, 1110, 21]] };   // (the cluster spread a little so each shows)
     for (const n in S3) for (let i = 0; i < 3; i++) DESK_DESK[n][i] = [S3[n][i][0], S3[n][i][1], S3[n][i][2], 1];
     // phones (the phone's view: at(0..1, 0..1))
@@ -2927,7 +2927,7 @@
       const PH = CAM_MOB[2].hpPhone[3], BK = CAM_MOB[2].hpBook[3];
       for (let i = 0; i < 3; i++) { CAM_MOB[i].hpPhone[3] = PH; CAM_MOB[i].hpCup[3] = PH; CAM_MOB[i].hpBook[3] = BK; } }
 
-    const MCL = { paper: [0.42, 0.46, -10], sketchbook: [0.32, 0.55, 12], scissors: [0.6, 0.56, -22], camera: [0.63, 0.43, 10], marker: [0.52, 0.62, 38] };   // (the cluster under the words, as the reference)
+    const MCL = { paper: [0.42, 0.46, -10], sketchbook: [0.32, 0.55, -98], scissors: [0.6, 0.56, -22], camera: [0.63, 0.43, 10], marker: [0.52, 0.62, 128] };   // (the cluster under the words, as the reference)
     const MOV = { sketchbook: [0.2, 0.14, -8], paper: [0.6, 0.12, -6], camera: [0.92, 0.33, 10], marker: [0.07, 0.55, -20], scissors: [0.8, 0.8, -13] };   // (overview: round the edges, as the reference)
     for (const n in MOV) { const [x, y] = at(MOV[n][0], MOV[n][1]); DESK_MOB[n][0] = [x, y, MOV[n][2]]; }
     for (const n in DESK_MOB) { const [x, y] = at(MCL[n][0], MCL[n][1]); DESK_MOB[n][2] = DESK_MOB[n][1]; DESK_MOB[n][1] = [x, y, MCL[n][2]]; DESK_MOB[n].length = 3; }
