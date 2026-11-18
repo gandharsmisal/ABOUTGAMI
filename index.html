@@ -1801,7 +1801,7 @@
         `M ${hx - 2.5} ${854 + hy} C ${hx - 6} ${840 + hy}, ${hx - 8} ${818 + hy}, ${hx - 6} ${810 + hy} C ${hx - 4} ${801 + hy}, ${hx + 4} ${801 + hy}, ${hx + 6} ${810 + hy} C ${hx + 8} ${818 + hy}, ${hx + 6} ${840 + hy}, ${hx + 2.5} ${854 + hy} ` +
         `M ${hx - 2.5} ${854 + hy} Q ${(hx + bx - wb) / 2 - bow} ${(854 + hy + by) / 2}, ${bx - wb} ${by} L ${bx + wb} ${by} L ${hx + 2.5} ${854 + hy}`);   // the body starts right at the neck (5 wide, left open)
       // as the reference (and the intro): flipbook legs at ~2 steps a second, each pose held ~0.2 s, a natural stride; the body glides on between steps
-      const uw = Math.floor(u * 0.227 / 0.4) * 0.4;
+      const uw = Math.floor(u * 0.318 / 0.4) * 0.4;   /* (2 steps a second over the 1.4 s walk) */
       const legs = gaitLegs(uw, F.stride, x, BY, K, 1, WALK.D, 0.6);
       if (s > 0) {
         const G = GROUND, kick = q * Math.max(0, Math.sin(t * 0.7 + 1)) ** 6 * 3;   // now and then a foot taps
@@ -1845,10 +1845,10 @@
     }
     const walkIn = gsap.timeline({ paused: true, onUpdate: figFrame })
       // (a brisker walk than the intro figure: ~6.3 steps a second)
-      .fromTo(F, { x: X0, stride: 1, arm: 0, bubble: 0 }, { x: HX, duration: 1.0, ease: 'none' }, 0)
-      .to(F, { stride: 0, duration: 0.24, ease: 'sine.inOut' }, 0.78)
-      .to(F, { arm: 1, duration: 0.4, ease: 'sine.inOut' }, 1.1)
-      .to(F, { bubble: 1, duration: 0.5, ease: 'none' }, 1.55);
+      .fromTo(F, { x: X0, stride: 1, arm: 0, bubble: 0 }, { x: HX, duration: 1.4, ease: 'none' }, 0)
+      .to(F, { stride: 0, duration: 0.3, ease: 'sine.inOut' }, 1.1)
+      .to(F, { arm: 1, duration: 0.4, ease: 'sine.inOut' }, 1.5)
+      .to(F, { bubble: 1, duration: 0.5, ease: 'none' }, 1.95);
     // windows wider than 16:9 leave a margin beside the 1920 stage: the figure keeps to the window's real left edge
     const fig = $('heroFig');
     const hugLeft = () => {
