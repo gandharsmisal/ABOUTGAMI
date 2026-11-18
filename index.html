@@ -1390,7 +1390,7 @@
   // Fewer, longer strides: each walk covers the same ground, at the same speed, in fewer bigger steps (stride
   // lengthened to match, so the planted foot never slides). Steps drawn per step of the walk's path:
   // door walk 9 -> 6, work/about walks 2/3 as many, mug walks 20 -> 12.
-  const GAIT_INTRO = 0.39, GAIT_WORK = 2 / 3, GAIT_MUG = 0.6, GAIT_INTO = 6 / 7;   // walking into the cover: 6 steps
+  const GAIT_INTRO = 0.317, GAIT_WORK = 2 / 3, GAIT_MUG = 0.6, GAIT_INTO = 6 / 7;   // walking into the cover: 6 steps
   // One walking pace everywhere: every walk takes TEMPO steps per wheel notch, so its length follows from its steps
   // (no walk is quicker or slower than another). REAL_NOTCH = timeline steps per real wheel notch at WHEEL.
   const REAL_NOTCH = NOTCH * WHEEL / 1.2, TEMPO = 0.48;   // 0.36 needed too much scrolling for the walks
@@ -1641,7 +1641,7 @@
   // still in the doorway first); the last step slows into the stop
   const WALK0 = 0.5;                                                       // the door has swung open (swing 0.5)
   tl.to(S, { stride: 1, duration: 0.3, ease: 'sine.out' }, WALK0);
-  const INTRO_WALK = 1.6 / 0.48;   /* (to the lamp in ~1.6 s) */   // (the reference's slow, even walk: ~2.5 s at the intro's 0.48 s a step)   // (3% slower than before; fewer, longer steps)                    // walk out of the door to the lamp (6 steps), brisker: it plays by itself on "click to enter"
+  const INTRO_WALK = 1.3 / 0.48;   /* (to the lamp in ~1.3 s) */   // (the reference's slow, even walk: ~2.5 s at the intro's 0.48 s a step)   // (3% slower than before; fewer, longer steps)                    // walk out of the door to the lamp (6 steps), brisker: it plays by itself on "click to enter"
   tl.to(S, { u: STOP, duration: INTRO_WALK, ease: 'none' }, WALK0);
   tl.to(S, { stride: 0, duration: 0.5, ease: 'sine.inOut' }, WALK0 + INTRO_WALK - 0.5);   // comes to a stop, as in the other walks
   // the lamp slides down from the top as it walks (frame 28, step 8)
