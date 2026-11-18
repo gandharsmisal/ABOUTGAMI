@@ -2905,7 +2905,7 @@
     const at = (rx, ry) => [460 + 1000 * rx, -365 + 1810 * ry], c = CAM_MOB[0], sc = k => c[k][3];
     const m1 = {}, m2 = {};
     // as the reference's phone screen: the laptop in the middle, the phone left and the card right of it, sized to fit side by side; the words under them
-    [['hpLaptop', 0.5, 0.47, 0, 0.91], ['hpPhone', 0.25, 0.52, 0, 0.82], ['hpBook', 0.83, 0.51, -9, 0.8]]   /* (straight; the phone smaller, the card bigger, both closer in) */.forEach(([k, x, y, r, f]) => { const [px, py] = at(x, y); m1[k] = [px, py, r, sc(k) * f]; });
+    [['hpLaptop', 0.43, 0.47, 0, 0.91], ['hpPhone', 0.15, 0.52, 0, 0.82], ['hpBook', 0.8, 0.51, -9, 0.9]]   /* (straight; the phone smaller, the card bigger, both closer in) */.forEach(([k, x, y, r, f]) => { const [px, py] = at(x, y); m1[k] = [px, py, r, sc(k) * f]; });
     m1.hpCup = m1.hpPhone.slice(); m1.ly = (-365 + 1810 * 0.7) - 751;
     ['hpLaptop', 'hpPhone', 'hpBook'].forEach(k => { m2[k] = CAM_MOB[1][k].slice(); }); m2.hpCup = m2.hpPhone.slice(); m2.ly = (-365 + 1810 * 0.27) - 751;   // (placed in the rows)
     CAM_MOB[1] = m2; CAM_MOB[2] = m1; CAM_MOB.length = 3;   // (side objects first, then the main objects)
