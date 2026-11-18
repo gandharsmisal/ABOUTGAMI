@@ -214,6 +214,7 @@
      scrolls in a loop and the scroll scrubs a grunge-mask spread from one project to the next ---------- */
   #workPage { position: fixed; inset: 0; z-index: 30; overflow: hidden; touch-action: none;
     background: transparent; visibility: hidden; opacity: 0; color-scheme: light; }   /* (the desk shows behind, its objects at the edges) */
+  @media (max-width: 820px) and (max-aspect-ratio: 85/100) { #workPage { background: var(--paper); } }   /* (phones: as before - the page covers the desk) */
   .wpSticky { position: absolute; inset: 0; overflow: hidden; }
   .wpStage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
   .wpStage svg, .wpStage canvas { position: absolute; left: 0; top: 0; overflow: visible; }
@@ -2462,7 +2463,7 @@
     work.shown = -1;
     loadWork().then(() => { brushReset(WORK[W.cur]); spreadIn(); workRender(); });
     if (window.heroSideline) window.heroSideline(true);
-    gsap.to(workPage, { autoAlpha: 1, duration: 0.3, ease: 'sine.out', delay: window.heroSideline ? 0.6 : 0 });   // (the page comes in once the objects are out at the edges)   // (the desk's objects move out to the edges, as the reference)
+    gsap.to(workPage, { autoAlpha: 1, duration: 0.3, ease: 'sine.out', delay: window.heroSideline && !isMob() ? 0.6 : 0 });   // (the page comes in once the objects are out at the edges)   // (the desk's objects move out to the edges, as the reference)
     workPage.focus({ preventScroll: true });
   }
   function closeWork() {
@@ -3119,7 +3120,7 @@
   const between = (p, f, lin) => { const a = Math.floor(p), u = KJ ? p4(p - a) : lin ? p - a : smooth(p - a),   /* (main objects on the same gentle curve as the side objects' travel - same pace) */ A = f(mod(a)), B = f(mod(a + 1)); return A.map((v, j) => v + (B[j] - v) * u); };
   // the notebook and the phone turn once round on each move (the mug, riding on the phone, turns with it round the phone)
   const TURN = {};   /* (no extra spin: they turn between their layouts' angles, as the reference) */   // (each spins one whole turn on the way, landing at its same angle)
-  window.heroSideline = on => (gsap.to(cam, { side: on ? 1 : 0, duration: on ? 0.9 : 0.7, ease: 'power3.inOut', overwrite: true }));   /* (as the reference: out 0.9 s, back 0.7 s, power3.inOut) */
+  window.heroSideline = on => isMobMain() ? (cam.side = 0, null) : (gsap.to(cam, { side: on ? 1 : 0, duration: on ? 0.9 : 0.7, ease: 'power3.inOut', overwrite: true }));   /* (as the reference: out 0.9 s, back 0.7 s, power3.inOut) */
   function camDraw() {
     const P = {};
     for (const id in PROPS) {
