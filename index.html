@@ -3148,7 +3148,12 @@
     // the Work page open (cam.side 0 -> 1): everything moves out to the edges, as the reference - the main objects to their
     // places at the side-objects stop, the side objects to theirs at the main-objects stop
     const SD = cam.side || 0;
-    if (SD) for (const id in PROPS) { const E = at(1, id === 'hpCup' ? 'hpPhone' : id); for (let j = 0; j < 3; j++) P[id][j] += (E[j] - P[id][j]) * SD; }
+    // desktop: where each sits round the Work page, as the reference - only a sliver of each showing at the edges
+    const WSIDE = isMobMain() ? null : {
+      hpPhone: [1950, 660, -8], hpCup: [1950, 660, -8], hpBook: [-70, 250, 10],
+      paper: [300, -75, -6], sketchbook: [1660, -95, 8], marker: [440, 1135, 30], camera: [1500, 1150, 12], scissors: [1800, 1110, -20] };
+    if (WSIDE) for (const k in WSIDE) { const v = WSIDE[k]; WSIDE[k] = [v[0] + (v[0] < 300 ? -cam.ex : v[0] > 1620 ? cam.ex : 0), v[1] + (v[1] < 150 ? -cam.ey : v[1] > 930 ? cam.ey : 0), v[2]]; }   // (at the window's real edges)
+    if (SD) for (const id in PROPS) { if (id === 'hpLaptop') continue;   /* (not the laptop: clicking it, you go into it) */ const E = WSIDE ? WSIDE[id] : at(1, id === 'hpCup' ? 'hpPhone' : id); for (let j = 0; j < 3; j++) P[id][j] += (E[j] - P[id][j]) * SD; }
     // desktop: each object's size matched to the reference desk (the mug keeps its place on the phone)
     const SZ = isMobMain() ? { hpBook: 1.0, hpPhone: 1.45, hpCup: 1.1 } : { hpLaptop: 1, hpBook: 0.86, hpPhone: 1.32, hpCup: 1 };   /* (the F1 card a little smaller) */   /* (the phone a little bigger, the mug gone) */   // (the notebook and the mug and phone a little bigger)
     if (SZ.hpPhone) { P.hpCup[0] = P.hpPhone[0] + (P.hpCup[0] - P.hpPhone[0]) * SZ.hpPhone; P.hpCup[1] = P.hpPhone[1] + (P.hpCup[1] - P.hpPhone[1]) * SZ.hpPhone; }
@@ -3166,7 +3171,7 @@
       // places (strongest halfway, none at the stops)
       const CL = { paper: [-190, -70], sketchbook: [190, -90], camera: [250, 100], scissors: [-230, 120], marker: [20, 170] }[n] || [0, 0];
       const a0 = Math.floor(p), A0 = dAt(mod(a0)), B0 = dAt(mod(a0 + 1)); let x1 = A0[0] + (B0[0] - A0[0]) * frac, y1 = A0[1] + (B0[1] - A0[1]) * frac, r = rr0;
-      if (SD) { const E = dAt(2); x1 += (E[0] - x1) * SD; y1 += (E[1] - y1) * SD; r += (E[2] - r) * SD; }   // (out to the edges while Work is open)   // (one straight line through the middle - no turn)
+      if (SD) { const E = WSIDE ? WSIDE[n] : dAt(2); x1 += (E[0] - x1) * SD; y1 += (E[1] - y1) * SD; r += (E[2] - r) * SD; }   // (out to the edges while Work is open)   // (one straight line through the middle - no turn)
       $('dk-' + n).setAttribute('transform', `translate(${x1} ${y1}) rotate(${r}) scale(${(isMobMain() ? 1.27 * MOB_K * (n === 'camera' ? 1.3 : 1) : 0.95 * ({ sketchbook: 1.1, marker: 1.3, scissors: 1.2, camera: 1.05 }[n] || 1)) * ds})`);
       // desktop, first view: the pencil lies apart from the sketchbook and the scissors apart from the film; at the other stops they come together
       const sp = SPLIT[n]; if (sp) { const k = isMobMain() ? 0 : between(p, i => [i === 0 ? 1 : 0])[0];
