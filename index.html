@@ -1800,7 +1800,9 @@
       body.setAttribute('d',
         `M ${hx - 2.5} ${854 + hy} C ${hx - 6} ${840 + hy}, ${hx - 8} ${818 + hy}, ${hx - 6} ${810 + hy} C ${hx - 4} ${801 + hy}, ${hx + 4} ${801 + hy}, ${hx + 6} ${810 + hy} C ${hx + 8} ${818 + hy}, ${hx + 6} ${840 + hy}, ${hx + 2.5} ${854 + hy} ` +
         `M ${hx - 2.5} ${854 + hy} Q ${(hx + bx - wb) / 2 - bow} ${(854 + hy + by) / 2}, ${bx - wb} ${by} L ${bx + wb} ${by} L ${hx + 2.5} ${854 + hy}`);   // the body starts right at the neck (5 wide, left open)
-      const legs = gaitLegs(u, F.stride, x, BY, K, 1);
+      // as the reference (and the intro): flipbook legs at ~2 steps a second, each pose held ~0.2 s, a natural stride; the body glides on between steps
+      const uw = Math.floor(u * 0.227 / 0.4) * 0.4;
+      const legs = gaitLegs(uw, F.stride, x, BY, K, 1, WALK.D, 0.6);
       if (s > 0) {
         const G = GROUND, kick = q * Math.max(0, Math.sin(t * 0.7 + 1)) ** 6 * 3;   // now and then a foot taps
         // halfway: the legs drawn in straight under the body, feet still where they stood
