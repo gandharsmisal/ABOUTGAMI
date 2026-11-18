@@ -3179,7 +3179,7 @@
     }
     $('heroLineMove').setAttribute('transform', `translate(0 ${between(cam.lag.line, i => [CAM[i].ly])[0]})`);
     $('heroLineMove').style.opacity = 1 - SD;
-    $('hpLaptop').style.opacity = 1 - SD;   // (the Work page is inside the laptop: it isn't there round it)   // (the words go while Work is open)
+    $('hpLaptop').style.opacity = Math.max(0, 1 - SD * 12);   /* (gone almost at once) */   // (the Work page is inside the laptop: it isn't there round it)   // (the words go while Work is open)
     const step = mod(Math.round(cam.pos)), near = Math.max(0, 1 - Math.abs(cam.pos - Math.round(cam.pos)) * 5);
   }
   let mugTl = null;
