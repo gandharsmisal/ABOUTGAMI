@@ -2615,7 +2615,7 @@
     gsap.set(aboutPage, { autoAlpha: 1 });
     document.documentElement.classList.add('in-about');
     if (nb) nb.style.opacity = 0;
-    about.tl = gsap.timeline({ onStart() { this.timeScale(OPEN_PACE); } })
+    about.tl = gsap.timeline({ onStart() { this.timeScale(BOOK_PACE); } })
       .to('#aboutPage .abBg', { opacity: 1, duration: 0.6, ease: 'sine.inOut' }, 0.1)
       .to(abBook, { x: 0, y: 0, scale: 1, rotation: 0, duration: 0.95, ease: 'power3.inOut' }, 0)             // comes over from the desk...
       .to('#abCover', { rotationY: -180, duration: 0.85, ease: 'power2.inOut' }, 0.12)                           // ...opening as it comes
@@ -2652,7 +2652,7 @@
     // on the second spread the page turns back first, then the cover closes
     const back = about.page ? 0.75 : 0;
     if (about.page) { about.page = 0; gsap.to('#abLeaf', { rotationY: 0, duration: back, ease: 'power2.inOut', overwrite: true }); gsap.to('#abArrow', { opacity: 0, duration: 0.2 }); }
-    gsap.delayedCall(back / OPEN_PACE, () => tl.timeScale(OPEN_PACE).reverse());   // closes at the same pace it opened
+    gsap.delayedCall(back / BOOK_PACE, () => tl.timeScale(BOOK_PACE).reverse());   // closes at the same pace it opened
     return true;
   }
   aboutPage.addEventListener('click', e => {
@@ -3020,7 +3020,7 @@
      going), and that step's note and figure appear. */
   // everything moves a little quicker (it felt heavy) - the main page's glide, the book and the phone opening
   const PACE = 1.5;
-  const OPEN_PACE = 2.1;   // (the notebook and the phone open and close lighter and quicker than before - 1.5)
+  const OPEN_PACE = 2.1, BOOK_PACE = 2.9;   /* (the notebook lighter still) */   // (the notebook and the phone open and close lighter and quicker than before - 1.5)
   const cam = { pos: 0, target: 0, vel: 0, lastIn: 0, catching: false, absorb: false, absorbSeen: false, lag: {}, lift: 0, shown: null, ex: 0, ey: 0, t: 0 };
   // the mug and the phone travel together (same pace, same bob)
   const LAG = { hpLaptop: 0.075, hpBook: 0.062, hpCup: 0.07, hpPhone: 0.07, line: 0.07, desk: 0.06 }, BOB = { hpLaptop: 0, hpBook: 2.1, hpCup: 4.2, hpPhone: 4.2 };
