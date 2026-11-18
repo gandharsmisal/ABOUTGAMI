@@ -1390,7 +1390,7 @@
   // Fewer, longer strides: each walk covers the same ground, at the same speed, in fewer bigger steps (stride
   // lengthened to match, so the planted foot never slides). Steps drawn per step of the walk's path:
   // door walk 9 -> 6, work/about walks 2/3 as many, mug walks 20 -> 12.
-  const GAIT_INTRO = 0.39, GAIT_WORK = 2 / 3, GAIT_MUG = 0.6, GAIT_INTO = 6 / 7;   // walking into the cover: 6 steps
+  const GAIT_INTRO = 0.29, GAIT_WORK = 2 / 3, GAIT_MUG = 0.6, GAIT_INTO = 6 / 7;   // walking into the cover: 6 steps
   // One walking pace everywhere: every walk takes TEMPO steps per wheel notch, so its length follows from its steps
   // (no walk is quicker or slower than another). REAL_NOTCH = timeline steps per real wheel notch at WHEEL.
   const REAL_NOTCH = NOTCH * WHEEL / 1.2, TEMPO = 0.48;   // 0.36 needed too much scrolling for the walks
@@ -1609,7 +1609,7 @@
     el.doorway.setAttribute('width', 96 + 2000 * open);
     el.doorway.setAttribute('height', 663 + 1000 * open);
     // natural walk; legs scale with the body (perspective), stride sized to how far it travels per step
-    const PQ = 0.54, ph = Math.floor(S.u * GAIT_INTRO / PQ) * PQ;   // (flipbook legs: one pose held ~0.2 s, then the next)
+    const PQ = 0.4, ph =   /* (as the reference: the legs at 2 steps a second, each pose held 0.2 s - slow stop-motion, while the body travels quicker) */ Math.floor(S.u * GAIT_INTRO / PQ) * PQ;   // (flipbook legs: one pose held ~0.2 s, then the next)
     const legs = gaitLegs(ph, S.stride, S.bx, S.by, 0.7 * s, -1, 13 / GAIT_INTRO, 0.35);   // (gliding: low, smooth steps)
     setPts(el.leg0, legs[0]);
     setPts(el.leg1, legs[1]);
