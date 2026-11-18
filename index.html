@@ -1607,7 +1607,8 @@
     el.doorway.setAttribute('width', 96 + 2000 * open);
     el.doorway.setAttribute('height', 663 + 1000 * open);
     // natural walk; legs scale with the body (perspective), stride sized to how far it travels per step
-    const legs = gaitLegs(S.u * GAIT_INTRO, S.stride, S.bx, S.by, 0.7 * s, -1, 13 / GAIT_INTRO, 0.35);   // (gliding: low, smooth steps)
+    const PQ = 0.28, ph = Math.floor(S.u * GAIT_INTRO / PQ) * PQ;   // (flipbook legs: one pose held ~0.2 s, then the next)
+    const legs = gaitLegs(ph, S.stride, S.bx, S.by, 0.7 * s, -1, 13 / GAIT_INTRO, 0.35);   // (gliding: low, smooth steps)
     setPts(el.leg0, legs[0]);
     setPts(el.leg1, legs[1]);
 
@@ -1638,7 +1639,7 @@
   // still in the doorway first); the last step slows into the stop
   const WALK0 = 0.5;                                                       // the door has swung open (swing 0.5)
   tl.to(S, { stride: 1, duration: 0.3, ease: 'sine.out' }, WALK0);
-  const INTRO_WALK = walkT(STOP * 2 / 3) * 0.343 * 1.03;   // (3% slower than before; fewer, longer steps)                    // walk out of the door to the lamp (6 steps), brisker: it plays by itself on "click to enter"
+  const INTRO_WALK = 2.5 / 0.48;   // (the reference's slow, even walk: ~2.5 s at the intro's 0.48 s a step)   // (3% slower than before; fewer, longer steps)                    // walk out of the door to the lamp (6 steps), brisker: it plays by itself on "click to enter"
   tl.to(S, { u: STOP, duration: INTRO_WALK, ease: 'none' }, WALK0);
   tl.to(S, { stride: 0, duration: 0.5, ease: 'sine.inOut' }, WALK0 + INTRO_WALK - 0.5);   // comes to a stop, as in the other walks
   // the lamp slides down from the top as it walks (frame 28, step 8)
