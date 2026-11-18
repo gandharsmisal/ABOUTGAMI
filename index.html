@@ -3119,7 +3119,7 @@
   const between = (p, f, lin) => { const a = Math.floor(p), u = KJ ? p4(p - a) : lin ? p - a : smooth(p - a),   /* (main objects on the same gentle curve as the side objects' travel - same pace) */ A = f(mod(a)), B = f(mod(a + 1)); return A.map((v, j) => v + (B[j] - v) * u); };
   // the notebook and the phone turn once round on each move (the mug, riding on the phone, turns with it round the phone)
   const TURN = {};   /* (no extra spin: they turn between their layouts' angles, as the reference) */   // (each spins one whole turn on the way, landing at its same angle)
-  window.heroSideline = on => gsap.to(cam, { side: on ? 1 : 0, duration: on ? 0.7 : 0.6, ease: 'power3.inOut', overwrite: true });
+  window.heroSideline = on => (cam.lapOff = !!on, $('hpLaptop').style.opacity = on ? 0 : 1, gsap.to(cam, { side: on ? 1 : 0, duration: on ? 0.7 : 0.6, ease: 'power3.inOut', overwrite: true }));
   function camDraw() {
     const P = {};
     for (const id in PROPS) {
@@ -3179,7 +3179,7 @@
     }
     $('heroLineMove').setAttribute('transform', `translate(0 ${between(cam.lag.line, i => [CAM[i].ly])[0]})`);
     $('heroLineMove').style.opacity = 1 - SD;
-    $('hpLaptop').style.opacity = Math.max(0, 1 - SD * 12);   /* (gone almost at once) */   // (the Work page is inside the laptop: it isn't there round it)   // (the words go while Work is open)
+    $('hpLaptop').style.opacity = cam.lapOff ? 0 : 1;   /* (gone at once as Work opens, back at once as it closes) */   // (the Work page is inside the laptop: it isn't there round it)   // (the words go while Work is open)
     const step = mod(Math.round(cam.pos)), near = Math.max(0, 1 - Math.abs(cam.pos - Math.round(cam.pos)) * 5);
   }
   let mugTl = null;
