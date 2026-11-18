@@ -1942,7 +1942,7 @@
     whiteTween.reversed(false).progress(1); S.white = 1; render();
     heroShow();
   }
-  $('logo').addEventListener('click', e => { e.preventDefault(); setMenu(false); closeAbout(true); closeContact(true); camGo(0, true); closeCase(); closeWork(); skipToMain(); });
+  $('logo').addEventListener('click', e => { e.preventDefault(); setMenu(false); closeAbout(true); closeContact(true); closeCase(); closeWork(); skipToMain(); });   // (the main page stays where it was scrolled to - no jump back to the overview)
 
   $('stage').addEventListener('click', () => { if (!intro.entered) enterSite(); });
   addEventListener('keydown', e => {
