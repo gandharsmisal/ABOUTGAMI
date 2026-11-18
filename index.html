@@ -2468,7 +2468,7 @@
   function closeWork() {
     if (!work.open) return;
     work.open = false; document.documentElement.classList.remove('wk-open');
-    gsap.to(workPage, { autoAlpha: 0, duration: 0.35, ease: 'sine.inOut' });
+    gsap.to(workPage, { autoAlpha: 0, duration: 0.2, ease: 'sine.out' });   // (as the reference: the page goes at once, the objects slide back 0.7 s)
     if (window.heroSideline) window.heroSideline(false);
   }
   workPage.tabIndex = -1;
