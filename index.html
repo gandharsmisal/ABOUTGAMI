@@ -2461,8 +2461,8 @@
     W.fat = W.pressure = 0;
     work.shown = -1;
     loadWork().then(() => { brushReset(WORK[W.cur]); spreadIn(); workRender(); });
-    gsap.to(workPage, { autoAlpha: 1, duration: 0.45, ease: 'sine.out' });
-    if (window.heroSideline) window.heroSideline(true);   // (the desk's objects move out to the edges, as the reference)
+    if (window.heroSideline) window.heroSideline(true);
+    gsap.to(workPage, { autoAlpha: 1, duration: 0.3, ease: 'sine.out', delay: window.heroSideline ? 0.4 : 0 });   // (the page comes in once the objects are out at the edges)   // (the desk's objects move out to the edges, as the reference)
     workPage.focus({ preventScroll: true });
   }
   function closeWork() {
@@ -3119,7 +3119,7 @@
   const between = (p, f, lin) => { const a = Math.floor(p), u = KJ ? p4(p - a) : lin ? p - a : smooth(p - a),   /* (main objects on the same gentle curve as the side objects' travel - same pace) */ A = f(mod(a)), B = f(mod(a + 1)); return A.map((v, j) => v + (B[j] - v) * u); };
   // the notebook and the phone turn once round on each move (the mug, riding on the phone, turns with it round the phone)
   const TURN = {};   /* (no extra spin: they turn between their layouts' angles, as the reference) */   // (each spins one whole turn on the way, landing at its same angle)
-  window.heroSideline = on => (cam.lapOff = !!on, $('hpLaptop').style.opacity = on ? 0 : 1, gsap.to(cam, { side: on ? 1 : 0, duration: on ? 0.7 : 0.6, ease: 'power3.inOut', overwrite: true }));
+  window.heroSideline = on => (cam.lapOff = !!on, $('hpLaptop').style.opacity = on ? 0 : 1, gsap.to(cam, { side: on ? 1 : 0, duration: on ? 0.45 : 0.5, ease: 'power3.inOut', overwrite: true }));   /* (quick) */
   function camDraw() {
     const P = {};
     for (const id in PROPS) {
