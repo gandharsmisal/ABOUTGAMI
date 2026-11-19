@@ -168,16 +168,16 @@
   #caseClose:hover .badge { transform: rotate(90deg); }
   /* desktop: "close" as one of the menu's pills - beige, the cross and the word in Noto Serif JP; olive with texture on hover */
   @media (min-width: 601px) {
-    #caseClose { height: 36px; top: calc(env(safe-area-inset-top, 0px) + 24px); gap: 8px; padding: 0 18px 0 13px; border-radius: 999px; isolation: isolate;
+    #caseClose { height: 44px; top: calc(env(safe-area-inset-top, 0px) + 24px); right: 34px; gap: 10px; padding: 0 21px 0 17px; border-radius: 999px; isolation: isolate;   /* (the menu pills' size) */
       background-color: #EAE0C5; background-image: var(--mottle), var(--grain); background-size: 120px, 180px; transition: background-color 0.3s ease;
-      font: 600 16px/1 "Noto Serif JP", serif; text-transform: lowercase; letter-spacing: 0; color: #141210; }
+      font: 600 18px/1 "Noto Serif JP", serif; text-transform: lowercase; letter-spacing: 0; color: #141210; }
     #caseClose::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
       background-image: var(--mottle), var(--grain), var(--mottle); background-size: 90px, 140px, 210px; mix-blend-mode: multiply; opacity: 0; transition: opacity 0.3s ease; }
     #caseClose:hover, #caseClose:focus-visible { background-color: #C2B287; }
     #caseClose:hover::before, #caseClose:focus-visible::before { opacity: 0.55; }
     #caseClose .badge, #caseClose:hover .badge, #caseClose:focus-visible .badge { width: 20px; height: 20px; background: none; }
     #caseClose .badge::before { display: none; }
-    #caseClose svg { width: 17px; height: 17px; }
+    #caseClose svg { width: 19px; height: 19px; }
     #caseClose path { stroke: #141210; stroke-width: 2.6px; }
   }
   html.in-case #menu, html.in-case #menuBtn, html.in-case #pageBack { display: none !important; }
