@@ -4832,6 +4832,7 @@
       const el = els[0];
       let b; try { b = el.getBBox(); } catch (e) { return; }
       if (b.height < 150) return;                                 // icons and avatars stay put
+      if (b.width < 360 && b.height < 360) return;                 // small UI pieces (cards, chips) stay whole - no zoom, no crop
       const t0 = use.getAttribute('transform') || '';
       const drift = self => {
         const vh = page.clientHeight, h = el.getBoundingClientRect().height || 1;
