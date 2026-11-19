@@ -4241,6 +4241,28 @@
     };
     requestAnimationFrame(tick);
   }
+  // a band of a case study's design taken out (design units, top to bottom): what lies inside is hidden, everything below
+  // moves up to close the gap, and the page gets that much shorter
+  const CASE_CUTS = {
+    caseCyber: { desk: [17710, 19249] }   // (phones: not yet - their layout is rebuilt differently)   // (the second "Dashboard - system feedback" and "Project overview" were the same as the first)
+  };
+  function cutBand(page, svg, y0, y1) {
+    const cut = y1 - y0, NS = 'http://www.w3.org/2000/svg';
+    const walk = el => {
+      if (/^(defs|mask|clipPath|pattern|linearGradient|radialGradient|filter|style|title)$/i.test(el.tagName)) return;
+      let b; try { b = el.getBBox(); } catch (e) { return; }
+      if (!b.width && !b.height) return;
+      const top = b.y, bot = b.y + b.height;
+      if (bot <= y0) return;
+      if (top >= y1) { const g = document.createElementNS(NS, 'g'); g.setAttribute('transform', 'translate(0 ' + (-cut) + ')'); el.parentNode.insertBefore(g, el); g.appendChild(el); return; }
+      if (top >= y0 - 1 && bot <= y1 + 1) { el.setAttribute('display', 'none'); return; }
+      if (el.tagName.toLowerCase() === 'g') Array.from(el.children).forEach(walk);
+    };
+    Array.from(svg.children).forEach(walk);
+    const vb = svg.getAttribute('viewBox').split(/[ ,]+/).map(Number); vb[3] -= cut; svg.setAttribute('viewBox', vb.join(' '));
+    (page._lazy || []).forEach(L => { if (L.y0 >= y1) { L.y0 -= cut; L.y1 -= cut; } });
+    return cut;
+  }
   function loadCaseDoc(page) {
     if (page._doc) return page._doc;
     const holder = page.querySelector('.csDocHolder');
@@ -4270,6 +4292,9 @@
       lazyLoad(page);
       if (!mob) (CASE_TWEAKS[page.id] || []).forEach(t => tweak(svg, t));
       if (!mob) (CASE_LINES[page.id] || []).forEach(l => dottedLine(svg, l));
+      { const C = CASE_CUTS[page.id], band = C && (mob ? C.mob : C.desk);
+        if (band) { const cut = cutBand(page, svg, band[0], band[1]);
+          if (!mob) { const m = holder.style.getPropertyValue('--doc-ratio').match(/([\d.]+)\s*\/\s*([\d.]+)/); if (m) holder.style.setProperty('--doc-ratio', m[1] + ' / ' + (+m[2] - cut * 1250 / 1400)); } } }
       sketchFill(svg);
       backdropGrain(svg, page.id);
       if (mob) {
