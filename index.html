@@ -1349,7 +1349,7 @@
   <div id="drawerList"></div>
 </aside>
 <!-- the GA.MI logo, top left (white ink, flipped dark on the white scenes like the menu) -->
-<a id="logo" href="#" aria-label="GA.MI - back to the start"><img src="assets/logo.png" alt="GA.MI" width="312" height="106"></a>
+<a id="logo" href="#" aria-label="GANDHAR - back to the start"><img src="assets/logo-gandhar.png" alt="GANDHAR" width="494" height="106"></a>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -4292,9 +4292,6 @@
       lazyLoad(page);
       if (!mob) (CASE_TWEAKS[page.id] || []).forEach(t => tweak(svg, t));
       if (!mob) (CASE_LINES[page.id] || []).forEach(l => dottedLine(svg, l));
-      if (page.id === 'caseCyber') ['pattern7_cs', 'pattern8_cs', 'pattern9_cs'].forEach(id => {   // the three content cards: their pictures' empty margin cropped off, the card filling its frame to the edges
-        const u = svg.getElementById(id) && svg.getElementById(id).querySelector('use'); if (u) u.setAttribute('transform', 'translate(.5 .48) scale(1.1) translate(-.5 -.48) ' + (u.getAttribute('transform') || ''));
-      });
       { const C = CASE_CUTS[page.id], band = C && (mob ? C.mob : C.desk);
         if (band) { const cut = cutBand(page, svg, band[0], band[1]);
           if (!mob) { const m = holder.style.getPropertyValue('--doc-ratio').match(/([\d.]+)\s*\/\s*([\d.]+)/); if (m) holder.style.setProperty('--doc-ratio', m[1] + ' / ' + (+m[2] - cut * 1250 / 1400)); } } }
@@ -4835,7 +4832,6 @@
       const el = els[0];
       let b; try { b = el.getBBox(); } catch (e) { return; }
       if (b.height < 150) return;                                 // icons and avatars stay put
-      if (b.width < 360 && b.height < 360) return;                 // small UI pieces (cards, chips) stay whole - no zoom, no crop
       const t0 = use.getAttribute('transform') || '';
       const drift = self => {
         const vh = page.clientHeight, h = el.getBoundingClientRect().height || 1;
