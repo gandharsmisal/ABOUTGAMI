@@ -2117,22 +2117,23 @@
     figSvg.style.opacity = o; figSvg.style.visibility = hero.style.visibility;   // the figure (own layer) goes with it
   }
   whiteTween.eventCallback('onReverseComplete', heroReset);
-  // MORPH (experiment): when the lamp is pulled, the intro's drawn outlines - the door frame, the open door, the lamp
-  // shade and its cord - lift off, bend and glide smoothly into the outlines of the desk objects (every frame, a soft
-  // ease, the hand-drawn wobble fixed so the lines don't flicker); as they land the sketched objects fade in under them.
+  // MORPH (experiment): when the lamp is pulled, the intro's own drawings - the door frame, the teal door, the lamp
+  // shade, its cord and the figure - turn into the desk objects. The real drawings are swapped (unseen) for copies of
+  // the same shapes and colours, which then travel on curved paths, stretch, turn and change colour into each
+  // object's shape; where they land, the sketched objects take over.
   const morph = (() => {
-    const NS = 'http://www.w3.org/2000/svg', N = 36, DUR = 2.1;
+    const NS = 'http://www.w3.org/2000/svg', N = 40, DUR = 2.2;
     const svg = document.createElementNS(NS, 'svg');
     svg.setAttribute('id', 'morphSvg');
     svg.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;overflow:visible;display:none';
     document.body.appendChild(svg);
     const pt = (m, x, y) => [m.a * x + m.c * y + m.e, m.b * x + m.d * y + m.f];
-    const polyOf = (el, pts) => { const m = el.getScreenCTM(); return m ? pts.map(p => pt(m, p[0], p[1])) : null; };
+    const polyOf = (el, pts) => { const m = el && el.getScreenCTM(); return m ? pts.map(p => pt(m, p[0], p[1])) : null; };
     const boxOf = (im, inset = 0.1) => {
       const x = +im.getAttribute('x'), y = +im.getAttribute('y'), w = +im.getAttribute('width'), h = +im.getAttribute('height');
       return polyOf(im, [[x + w * inset, y + h * inset], [x + w * (1 - inset), y + h * inset], [x + w * (1 - inset), y + h * (1 - inset)], [x + w * inset, y + h * (1 - inset)]]);
     };
-    // the same shape as N points spaced evenly round its outline, starting from its top-left-most corner
+    // the same shape as N points spaced evenly round its outline, starting from its top-left-most point
     const resample = poly => {
       let s = 0; poly.forEach((p, i) => { if (p[0] + p[1] < poly[s][0] + poly[s][1]) s = i; });
       const P = poly.slice(s).concat(poly.slice(0, s)); P.push(P[0]);
@@ -2141,46 +2142,60 @@
       for (let i = 0; i < N; i++) { const d = L[L.length - 1] * i / N; while (L[k + 1] < d) k++; const f = (d - L[k]) / ((L[k + 1] - L[k]) || 1); out.push([P[k][0] + (P[k + 1][0] - P[k][0]) * f, P[k][1] + (P[k + 1][1] - P[k][1]) * f]); }
       return out;
     };
+    const mid = P => [P.reduce((q, p) => q + p[0], 0) / P.length, P.reduce((q, p) => q + p[1], 0) / P.length];
+    const hex = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)), mixC = (a, b, u) => { const A = hex(a), B = hex(b); return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * u)).join(',') + ')'; };
     let running = false, done = null;
     function start() {
-      // where the intro's lines are now (on screen)
-      const dO = document.getElementById('doorOpenImg'), sh = document.getElementById('shadeImg'), cd = document.getElementById('cordImg');
-      const frame = polyOf(dO, [[895, 664], [895, 400], [1025, 400], [1025, 664]]), leaf = polyOf(dO, [[1009, 411], [1095, 394], [1095, 678], [1009, 659]]);
+      const dO = document.getElementById('doorOpenImg'), sh = document.getElementById('shadeImg'), cd = document.getElementById('cordImg'), fig = document.getElementById('figure');
       const sx = +sh.getAttribute('x'), sy = +sh.getAttribute('y'), sw = +sh.getAttribute('width'), shh = +sh.getAttribute('height');
-      const shade = polyOf(sh, [[sx + sw * 0.47, sy + shh * 0.12], [sx + sw * 0.53, sy + shh * 0.12], [sx + sw * 0.95, sy + shh * 0.82], [sx + sw * 0.05, sy + shh * 0.82]]);
-      const cord = boxOf(cd, 0);
-      const SRC = [leaf, cord, frame, shade].filter(Boolean);
-      // where the desk objects will be
-      const T = ['#hpLaptop .hprop', '#hpPhone .hprop', '#hpBook .hprop', '#dk-paper > image', '#dk-marker > image', '#dk-scissors > image', '#dk-sketchbook > image', '#dk-camera > image']
-        .map(q => document.querySelector(q)).filter(e => e && e.closest('g').style.display !== 'none' && boxOf(e, 0.14));
+      // the intro's drawings, as shapes on screen with their own colours (fill, how solid, outline)
+      const SRC = [
+        { p: polyOf(dO, [[1009, 411], [1095, 394], [1095, 678], [1009, 659]]), fill: '#16a596', fo: 0.9 },                 // the teal door
+        { p: polyOf(fig, [[-9, 0], [9, 0], [1.6, -112], [5.5, -132], [3, -144], [-3, -144], [-5.5, -132], [-1.6, -112]]), fill: '#000000', fo: 1 },   // the figure
+        { p: polyOf(dO, [[895, 664], [895, 400], [1025, 400], [1025, 664]]), fill: '#000000', fo: 0 },                     // the door frame
+        { p: polyOf(sh, [[sx + sw * 0.46, sy + shh * 0.04], [sx + sw * 0.54, sy + shh * 0.04], [sx + sw * 0.55, sy + shh * 0.16], [sx + sw * 0.8, sy + shh * 0.3], [sx + sw * 0.95, sy + shh * 0.82], [sx + sw * 0.6, sy + shh * 0.96], [sx + sw * 0.4, sy + shh * 0.96], [sx + sw * 0.05, sy + shh * 0.82], [sx + sw * 0.2, sy + shh * 0.3], [sx + sw * 0.45, sy + shh * 0.16]]), fill: '#262b52', fo: 0.95 },   // the lamp shade
+        { p: boxOf(cd, 0), fill: '#f3f1ea', fo: 0.6 }                                                                       // the cord
+      ].filter(s => s.p);
+      // the desk objects they become (with each one's main colour)
+      const T = [['#hpLaptop .hprop', '#1d2547'], ['#hpPhone .hprop', '#1f3a2c'], ['#hpBook .hprop', '#d8d2c3'], ['#dk-paper > image', '#d8d2c3'],
+        ['#dk-marker > image', '#2b2b2b'], ['#dk-scissors > image', '#6b3f1e'], ['#dk-sketchbook > image', '#8a6f55'], ['#dk-camera > image', '#3d3a37']]
+        .map(([q, c]) => ({ el: document.querySelector(q), c })).filter(o => o.el && o.el.closest('g').style.display !== 'none' && boxOf(o.el, 0.14));
       if (!SRC.length || !T.length) return false;
-      const shapes = T.map((t, i) => ({ el: t, a: resample(SRC[i % SRC.length]), b: resample(boxOf(t, 0.14)), d: 0.07 * (i % 4), jit: [0, 1].map(() => Array.from({ length: N }, () => [(Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2])), w: [1.5 + Math.random() * 0.3, 2 + Math.random() * 0.3] }));
+      const shapes = T.map((t, i) => {
+        const s = SRC[i % SRC.length], a = resample(s.p);
+        return { el: t.el, a, ca: mid(a), c0: s.fill, c1: t.c, fo0: s.fo, d: 0.06 * (i % 5), arc: (i % 2 ? 1 : -1) * (90 + 40 * (i % 3)), spin: (i % 2 ? 1 : -1) * 0.5,
+          jit: Array.from({ length: N }, () => [(Math.random() - 0.5) * 1.6, (Math.random() - 0.5) * 1.6]) };
+      });
+      // swap the real drawings for the copies (same place, same look) - nothing fades
+      document.getElementById('boilG').style.visibility = 'hidden';
       svg.innerHTML = ''; svg.style.display = 'block'; svg.style.opacity = 1;
-      const paths = shapes.map(() => [0, 1].map(() => { const p = document.createElementNS(NS, 'path'); p.setAttribute('fill', 'none'); p.setAttribute('stroke', '#f3f1ea'); p.setAttribute('stroke-linecap', 'round'); p.setAttribute('stroke-linejoin', 'round'); p.setAttribute('filter', 'url(#crayonLine)'); svg.appendChild(p); return p; }));
+      const els = shapes.map(() => { const p = document.createElementNS(NS, 'path'); p.setAttribute('stroke', '#f3f1ea'); p.setAttribute('stroke-width', '1.6'); p.setAttribute('stroke-linejoin', 'round'); p.setAttribute('filter', 'url(#crayonLine)'); svg.appendChild(p); return p; });
       running = true;
       const ease = x => x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2, t0 = performance.now();
       const draw = () => {
         const tt = Math.min(1, (performance.now() - t0) / 1000 / DUR);
         shapes.forEach((s, i) => {
-          const live = boxOf(s.el, 0.14); if (live) s.b = resample(live);                 // (follows the object to wherever it settles)
-          const u = ease(Math.min(1, Math.max(0, (tt - s.d) / (1 - 0.21))));
-          const cx = s.a.reduce((q, p) => q + p[0], 0) / N * (1 - u) + s.b.reduce((q, p) => q + p[0], 0) / N * u;
-          const cy = s.a.reduce((q, p) => q + p[1], 0) / N * (1 - u) + s.b.reduce((q, p) => q + p[1], 0) / N * u;
-          paths[i].forEach((p, k) => {
-            let d = '';
-            for (let n = 0; n <= N; n++) {
-              const A = s.a[n % N], Bp = s.b[n % N], x = A[0] + (Bp[0] - A[0]) * u, y = A[1] + (Bp[1] - A[1]) * u;
-              const bend = Math.sin(Math.PI * u) * (9 + 6 * Math.sin(n * 0.7 + i * 1.3)), dx = x - cx, dy = y - cy, r = Math.hypot(dx, dy) || 1;   // (bows out on the way)
-              const jt = s.jit[k][n % N]; d += (n ? ' L' : 'M') + (x + dx / r * bend + jt[0]).toFixed(1) + ' ' + (y + dy / r * bend + jt[1]).toFixed(1);
-            }
-            p.setAttribute('d', d); p.setAttribute('stroke-width', s.w[k].toFixed(2)); p.setAttribute('stroke-opacity', k ? 0.5 : 0.95);
-          });
+          const live = boxOf(s.el, 0.14), b = resample(live), cb = mid(b);
+          const u = ease(Math.min(1, Math.max(0, (tt - s.d) / (1 - 0.24))));
+          // the middle travels on a curve; the shape turns a little on the way and stretches from its old outline to the new
+          const dx = cb[0] - s.ca[0], dy = cb[1] - s.ca[1], L = Math.hypot(dx, dy) || 1, k = Math.sin(Math.PI * u) * s.arc;
+          const cx = s.ca[0] + dx * u - dy / L * k, cy = s.ca[1] + dy * u + dx / L * k, rot = Math.sin(Math.PI * u) * s.spin, cr = Math.cos(rot), sr = Math.sin(rot);
+          let d = '';
+          for (let n = 0; n < N; n++) {
+            const ax = s.a[n][0] - s.ca[0], ay = s.a[n][1] - s.ca[1], bx = b[n][0] - cb[0], by = b[n][1] - cb[1];
+            const x = ax + (bx - ax) * u, y = ay + (by - ay) * u;
+            d += (n ? ' L' : 'M') + (cx + x * cr - y * sr + s.jit[n][0]).toFixed(1) + ' ' + (cy + x * sr + y * cr + s.jit[n][1]).toFixed(1);
+          }
+          els[i].setAttribute('d', d + ' Z');
+          els[i].setAttribute('fill', mixC(s.c0, s.c1, u));
+          els[i].setAttribute('fill-opacity', (s.fo0 + (0.9 - s.fo0) * u).toFixed(2));
         });
         if (tt < 1) requestAnimationFrame(draw);
-        else {                                                  // landed: the sketched objects take over
+        else {                                                  // landed: the sketched objects take over from the shapes
           running = false; const f = done; done = null;
-          if (f) { f(); for (const el of [document.getElementById('hero'), document.getElementById('figSvg')]) gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'sine.inOut' }); }
-          gsap.to(svg, { opacity: 0, duration: 0.8, ease: 'sine.inOut', onComplete: () => { svg.style.display = 'none'; svg.innerHTML = ''; } });
+          if (f) { f(); for (const el of [document.getElementById('hero'), document.getElementById('figSvg')]) gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.45, ease: 'sine.out' }); }
+          gsap.to(svg, { opacity: 0, duration: 0.45, ease: 'sine.in', onComplete: () => { svg.style.display = 'none'; svg.innerHTML = ''; } });
+          setTimeout(() => { document.getElementById('boilG').style.visibility = ''; }, 600);   // (the intro behind is dark again by then)
         }
       };
       draw();
