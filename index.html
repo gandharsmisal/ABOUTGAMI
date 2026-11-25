@@ -54,6 +54,8 @@
     vector-effect: non-scaling-stroke;
   }
   #scene .solid { fill: var(--ink); }
+  #scene .sketch .sk { fill: none; stroke: #f3f1ea; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; filter: url(#crayonLine); }
+  #scene .sketch .hatch { fill: none; stroke-linecap: round; }
   #label text { font-family: "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); font-size: 24px; fill: var(--line); letter-spacing: 0.08em; }
   #label text { fill: #fff; filter: url(#pencil); }   /* ("click to enter" in white pencil: grainy, slightly broken strokes) */
   /* before the visitor clicks: no scrolling, the whole door scene is the button */
@@ -767,10 +769,17 @@
         <feBlend in="SourceGraphic" in2="specks" mode="multiply" result="grained"></feBlend>
         <feComposite in="grained" in2="SourceGraphic" operator="in"></feComposite>
       </filter>
+      <!-- line boil: the whole drawing is nudged by a soft noise whose seed steps through 3 values (see the boil script),
+           so every line shimmers like a redrawn hand-drawn frame even when nothing moves -->
+      <filter id="boilFx" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence id="boilNoise" type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="1" result="n"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      </filter>
       <!-- while it stands in the doorway the figure is kept inside the door frame; the clip opens as it steps out -->
       <clipPath id="doorwayClip" clipPathUnits="userSpaceOnUse"><rect id="doorwayClipRect" x="901" y="0" width="118" height="663"></rect></clipPath>
     </defs>
 
+    <g id="boilG" filter="url(#boilFx)">
     <!-- "click to enter" under the door; fades as the door opens -->
     <g id="label">
       <text id="enterText" x="960" y="716" text-anchor="middle">click to enter</text>
@@ -780,7 +789,7 @@
     <g id="doorBack">
       <rect x="911" y="416" width="98" height="247" fill="#000"></rect>
       <!-- the open door (assets/door-open.png): its doorway lined up with the closed door's; swapped in as it opens -->
-      <image id="doorOpenImg" filter="url(#grainFx)" href="assets/door-open.png" x="891.3" y="385.6" width="211.3" height="297.2" opacity="0" preserveAspectRatio="none"></image>
+      <g id="doorOpenImg" class="sketch" opacity="0"></g>
     </g>
 
     <!-- figure -->
@@ -795,7 +804,7 @@
     <!-- door panel (in front of the figure) -->
     <g id="doorFront">
       <!-- the closed door (assets/door-closed.webp): doorway 911-1009 x 416-663, the figure behind it; swapped out as it opens -->
-      <image id="doorClosedImg" filter="url(#grainFx)" href="assets/door-closed.webp" x="880.8" y="386.1" width="158.2" height="295.6" preserveAspectRatio="none"></image>
+      <g id="doorClosedImg" class="sketch"></g>
       <polygon id="panel" class="ln solid" points="1020,416 900,416 900,663 1020,663" style="display:none"></polygon>
       <circle id="knob" cx="911" cy="541" r="3.5" fill="#fff" style="display:none"></circle>
     </g>
@@ -812,10 +821,90 @@
     <!-- arm -->
     <path id="arm" class="ln" d="M 0 0" style="visibility:hidden"></path>
 
+    </g>
+
     <!-- light: the room turns white -->
     <rect id="whiteout" x="-2000" y="-2000" width="6000" height="6000" fill="#F5F1E6" opacity="0"></rect>
   </svg>
 </section>
+<script>
+  // THE DOOR, HAND-DRAWN: white crayon outlines (each line drawn twice, a little off, overshooting its corners) and the
+  // door leaf shaded with dark navy scribbles, like a sketched storyboard frame. Drawn once from a seeded random, so it
+  // looks the same every visit; the boil below makes it shimmer.
+  (() => {
+    const NS = 'http://www.w3.org/2000/svg';
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647, j = a => (rnd() - 0.5) * 2 * a;
+    const mk = (tag, at, p) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); p.appendChild(e); return e; };
+    let clipN = 0;
+    // one pencil line from a to b: slightly bowed, overshooting, drawn twice
+    const line = (g, a, b, passes = 2) => {
+      let d = '';
+      for (let i = 0; i < passes; i++) {
+        const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+        const o0 = 1 + rnd() * 3, o1 = 1 + rnd() * 3, w = 0.9 + i * 0.5;
+        const x0 = a[0] - ux * o0 + j(w), y0 = a[1] - uy * o0 + j(w), x1 = b[0] + ux * o1 + j(w), y1 = b[1] + uy * o1 + j(w);
+        const bow = j(Math.min(2.2, L * 0.015));
+        d += 'M' + x0.toFixed(1) + ' ' + y0.toFixed(1) + ' Q' + ((x0 + x1) / 2 - uy * bow).toFixed(1) + ' ' + ((y0 + y1) / 2 + ux * bow).toFixed(1) + ' ' + x1.toFixed(1) + ' ' + y1.toFixed(1);
+      }
+      mk('path', { d, class: 'sk' }, g);
+    };
+    const poly = (g, pts, close = true) => { for (let i = 0; i < pts.length - (close ? 0 : 1); i++) line(g, pts[i], pts[(i + 1) % pts.length]); };
+    // dark scribble shading inside a shape: dense, slightly wavy strokes at one slant
+    const hatch = (g, pts, ang, gap, col, op, wd) => {
+      const id = 'skc' + (++clipN), cp = mk('clipPath', { id }, g); mk('polygon', { points: pts.map(p => p.join(',')).join(' ') }, cp);
+      const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+      const c = Math.cos(ang), s = Math.sin(ang), R = Math.hypot(x1 - x0, y1 - y0) + 20, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+      let d = '';
+      for (let k = -R / 2; k < R / 2; k += gap * (0.6 + rnd() * 0.8)) {
+        const px = cx - s * k, py = cy + c * k, h = R / 2;
+        const ax = px - c * h, ay = py - s * h, bx = px + c * h, by = py + s * h;
+        d += 'M' + (ax + j(1)).toFixed(1) + ' ' + (ay + j(1)).toFixed(1) + ' Q' + (px + j(1.6)).toFixed(1) + ' ' + (py + j(1.6)).toFixed(1) + ' ' + (bx + j(1)).toFixed(1) + ' ' + (by + j(1)).toFixed(1);
+      }
+      mk('path', { d, class: 'hatch', stroke: col, 'stroke-opacity': op, 'stroke-width': wd, 'clip-path': 'url(#' + id + ')' }, g);
+    };
+    const fillShape = (g, pts) => mk('polygon', { points: pts.map(p => p.join(',')).join(' '), fill: '#05060a' }, g);
+    const shade = (g, pts) => { fillShape(g, pts); hatch(g, pts, -1.2, 2.1, '#2a2f52', 0.95, 1.6); hatch(g, pts, -1.05, 4.2, '#555c8c', 0.55, 1); hatch(g, pts, 0.5, 7, '#1c2040', 0.6, 1.2); };
+    const frame = g => {
+      // the frame: an outer and an inner outline, lightly shaded between them, and the floor line
+      hatch(g, [[895, 400], [1025, 400], [1025, 664], [1009, 664], [1009, 416], [911, 416], [911, 664], [895, 664]], -1.15, 3.2, '#3a4068', 0.5, 1);
+      poly(g, [[895, 664], [895, 400], [1025, 400], [1025, 664]], false);
+      poly(g, [[911, 663], [911, 416], [1009, 416], [1009, 663]], false);
+      line(g, [889, 665], [1032, 664]);
+      line(g, [903, 408], [1017, 408], 1);
+    };
+    // closed: the leaf fills the doorway, two inset panels, the lever handle
+    const C = document.getElementById('doorClosedImg');
+    frame(C);
+    const leaf = [[911, 416], [1009, 416], [1009, 663], [911, 663]];
+    shade(C, leaf); poly(C, leaf);
+    poly(C, [[923, 428], [990, 428], [990, 598], [923, 598]]);
+    poly(C, [[923, 614], [992, 614], [992, 642], [923, 642]]);
+    line(C, [997, 527], [997, 544]); line(C, [997, 531], [979, 531]);
+    // open: the doorway is dark, the leaf swung out to the right in perspective
+    const O = document.getElementById('doorOpenImg');
+    frame(O);
+    const lf = [[1009, 411], [1095, 394], [1095, 678], [1009, 659]];
+    shade(O, lf); poly(O, lf);
+    line(O, [1095, 394], [1101, 396], 1); line(O, [1101, 396], [1101, 676], 1); line(O, [1101, 676], [1095, 678], 1);
+    poly(O, [[1019, 424], [1077, 413], [1077, 600], [1019, 597]]);
+    poly(O, [[1019, 612], [1080, 615], [1080, 650], [1019, 641]]);
+    line(O, [1086, 522], [1086, 540]); line(O, [1086, 526], [1071, 528]);
+  })();
+
+  // LINE BOIL: three frames, swapped 10 times a second, for everything drawn on the intro (the door, the figure,
+  // the lamp, "click to enter", the logo) - so nothing is ever fully still while the door scene is up
+  (() => {
+    const noise = document.getElementById('boilNoise'), html = document.documentElement;
+    const SEEDS = [1, 2, 3]; let f = 0, on = null;
+    setInterval(() => {
+      const intro = html.classList.contains('intro-locked') || !html.classList.contains('app-mode');
+      const logo = document.querySelector('#logo img');
+      if (intro !== on && logo) { on = intro; if (logo) logo.style.filter = intro ? 'url(#pencil) url(#boilFx) opacity(0.82)' : ''; }
+      if (!intro || document.hidden) return;
+      f = (f + 1) % 3; noise.setAttribute('seed', SEEDS[f]);
+    }, 100);
+  })();
+</script>
 
 <!-- ======================= MAIN PAGE (after the lamp is pulled) ======================= -->
 <!-- Laid out on the 1920x1080 design (Keyframes/New folder/1.jpg): mug on a phone, the laptop, the notebook, the
