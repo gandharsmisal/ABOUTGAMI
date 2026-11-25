@@ -2117,91 +2117,120 @@
     figSvg.style.opacity = o; figSvg.style.visibility = hero.style.visibility;   // the figure (own layer) goes with it
   }
   whiteTween.eventCallback('onReverseComplete', heroReset);
-  // MORPH (experiment): when the lamp is pulled, the intro's own drawings - the door frame, the teal door, the lamp
-  // shade, its cord and the figure - turn into the desk objects. The real drawings are swapped (unseen) for copies of
-  // the same shapes and colours, which then travel on curved paths, stretch, turn and change colour into each
-  // object's shape; where they land, the sketched objects take over.
+  // MORPH (experiment): hand-drawn, frame by frame "on twos" (a new drawing every 1/12 s, each one boiled - every line
+  // redrawn a little differently). When the lamp is pulled:
+  //  - the door's outline bends and flattens into the laptop (10 drawings), its bottom edge pinned where the door stood,
+  //    then the laptop slides to its place on the desk (6 drawings);
+  //  - the lamp's lines (and the figure's) unravel into a scribble (10), the scribble flies apart to where each other
+  //    object will be (6), and each scribble redraws itself as that object's outline (10).
+  // Then the sketched desk takes over.
   const morph = (() => {
-    const NS = 'http://www.w3.org/2000/svg', N = 40, DUR = 2.2;
+    const NS = 'http://www.w3.org/2000/svg', FRAME = 1000 / 12, N = 48;
     const svg = document.createElementNS(NS, 'svg');
     svg.setAttribute('id', 'morphSvg');
     svg.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;overflow:visible;display:none';
     document.body.appendChild(svg);
     const pt = (m, x, y) => [m.a * x + m.c * y + m.e, m.b * x + m.d * y + m.f];
     const polyOf = (el, pts) => { const m = el && el.getScreenCTM(); return m ? pts.map(p => pt(m, p[0], p[1])) : null; };
-    const boxOf = (im, inset = 0.1) => {
-      const x = +im.getAttribute('x'), y = +im.getAttribute('y'), w = +im.getAttribute('width'), h = +im.getAttribute('height');
-      return polyOf(im, [[x + w * inset, y + h * inset], [x + w * (1 - inset), y + h * inset], [x + w * (1 - inset), y + h * (1 - inset)], [x + w * inset, y + h * (1 - inset)]]);
-    };
-    // the same shape as N points spaced evenly round its outline, starting from its top-left-most point
-    const resample = poly => {
-      let s = 0; poly.forEach((p, i) => { if (p[0] + p[1] < poly[s][0] + poly[s][1]) s = i; });
-      const P = poly.slice(s).concat(poly.slice(0, s)); P.push(P[0]);
-      const L = [0]; for (let i = 1; i < P.length; i++) L.push(L[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
+    const inBox = (im, pts) => { const x = +im.getAttribute('x'), y = +im.getAttribute('y'), w = +im.getAttribute('width'), h = +im.getAttribute('height'); return polyOf(im, pts.map(p => [x + p[0] * w, y + p[1] * h])); };
+    const lenOf = P => { let L = 0; for (let i = 1; i < P.length; i++) L += Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]); return L; };
+    // n points evenly along a line (closed: back to its start)
+    const along = (pts, n, closed) => {
+      const P = closed ? pts.concat([pts[0]]) : pts.slice(), L = [0];
+      for (let i = 1; i < P.length; i++) L.push(L[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
       const out = []; let k = 0;
-      for (let i = 0; i < N; i++) { const d = L[L.length - 1] * i / N; while (L[k + 1] < d) k++; const f = (d - L[k]) / ((L[k + 1] - L[k]) || 1); out.push([P[k][0] + (P[k + 1][0] - P[k][0]) * f, P[k][1] + (P[k + 1][1] - P[k][1]) * f]); }
+      for (let i = 0; i < n; i++) { const d = L[L.length - 1] * i / (closed ? n : n - 1); while (k < L.length - 2 && L[k + 1] < d) k++; const f = (d - L[k]) / ((L[k + 1] - L[k]) || 1); out.push([P[k][0] + (P[k + 1][0] - P[k][0]) * f, P[k][1] + (P[k + 1][1] - P[k][1]) * f]); }
       return out;
     };
-    const mid = P => [P.reduce((q, p) => q + p[0], 0) / P.length, P.reduce((q, p) => q + p[1], 0) / P.length];
-    const hex = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)), mixC = (a, b, u) => { const A = hex(a), B = hex(b); return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * u)).join(',') + ')'; };
-    let running = false, done = null;
+    const ring = (n = 16) => Array.from({ length: n }, (_, i) => [0.5 + 0.5 * Math.cos(i / n * 6.283), 0.5 + 0.5 * Math.sin(i / n * 6.283)]);
+    const R = (c, rx, ry) => ring().map(p => [c[0] + (p[0] - 0.5) * 2 * rx, c[1] + (p[1] - 0.5) * 2 * ry]);
+    // each desk object's outline (in its picture's box, 0-1), the lines its sketch is built from
+    const SHAPES = {
+      laptop: ['#hpLaptop .hprop', [[[0.03, 0.03], [0.97, 0.02], [0.92, 0.56], [0.10, 0.56]], [[0.10, 0.56], [0.92, 0.56], [0.88, 0.99], [0.13, 0.99]]],
+        [[[0.07, 0.06], [0.93, 0.05], [0.89, 0.52], [0.13, 0.52]], [[0.22, 0.62], [0.82, 0.62], [0.81, 0.82], [0.23, 0.82]], [[0.34, 0.85], [0.66, 0.85], [0.66, 0.97], [0.34, 0.97]]]],
+      phone: ['#hpPhone .hprop', [[[0.04, 0.015], [0.95, 0.02], [0.95, 0.98], [0.04, 0.975]], [[0.10, 0.06], [0.90, 0.06], [0.90, 0.50], [0.10, 0.50]]]],
+      f1: ['#hpBook .hprop', [[[0.04, 0.03], [0.97, 0.05], [0.95, 0.97], [0.02, 0.95]], [[0.58, 0.44], [0.65, 0.46], [0.50, 0.94], [0.42, 0.92]], [[0.30, 0.33], [0.29, 0.13], [0.46, 0.12]]]],
+      paper: ['#dk-paper > image', [[[0.05, 0.47], [0.70, 0.03], [0.94, 0.52], [0.28, 0.97]], [[0.16, 0.42], [0.72, 0.10], [0.78, 0.22], [0.22, 0.54]], [[0.24, 0.62], [0.80, 0.30], [0.86, 0.42], [0.30, 0.74]]]],
+      marker: ['#dk-marker > image', [[[0.29, 0.14], [0.37, 0.12], [0.82, 0.92], [0.74, 0.94]], [[0.42, 0.33], [0.50, 0.31]]]],
+      scissors: ['#dk-scissors > image', [[[0.10, 0.77], [0.68, 0.40], [0.76, 0.54], [0.15, 0.91]], [[0.40, 0.79], [0.90, 0.56], [0.95, 0.69], [0.44, 0.89]], [[0.56, 0.28], [0.62, 0.33], [0.37, 0.93], [0.34, 0.91]], R([0.645, 0.14], 0.075, 0.062), R([0.775, 0.205], 0.07, 0.06)]],
+      book: ['#dk-sketchbook > image', [[[0.05, 0.10], [0.50, 0.01], [0.61, 0.86], [0.20, 0.99]], [[0.82, 0.10], [0.86, 0.12], [0.64, 0.92], [0.60, 0.90]]]],
+      camera: ['#dk-camera > image', [[[0.36, 0.79], [0.74, 0.76], [0.76, 0.94], [0.38, 0.97]], R([0.60, 0.865], 0.08, 0.064), [[0.40, 0.80], [0.35, 0.60], [0.33, 0.36], [0.45, 0.24], [0.58, 0.30], [0.50, 0.42], [0.43, 0.33], [0.55, 0.30], [0.66, 0.56], [0.74, 0.78]]]]
+    };
+    const CLOSED = l => l.length >= 4 && Math.hypot(l[0][0] - l[l.length - 1][0], l[0][1] - l[l.length - 1][1]) > 0.01 && l.length !== 10 && l.length !== 3 && l.length !== 2;
+    let running = false, done = null, timer = null;
+    const ease = x => x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2;
     function start() {
       const dO = document.getElementById('doorOpenImg'), sh = document.getElementById('shadeImg'), cd = document.getElementById('cordImg'), fig = document.getElementById('figure');
+      const lapEl = document.querySelector(SHAPES.laptop[0]);
+      if (!dO || !sh || !lapEl || !dO.getScreenCTM()) return false;
+      // the door: its open leaf and its frame, as closed outlines
+      const leaf = polyOf(dO, [[1009, 411], [1095, 394], [1095, 678], [1009, 659]]), frame = polyOf(dO, [[895, 400], [1025, 400], [1025, 664], [895, 664]]);
+      const doorBottom = [(frame[2][0] + frame[3][0]) / 2, (frame[2][1] + frame[3][1]) / 2];
+      // the lamp (shade, cord) and the figure: the lines that will unravel
       const sx = +sh.getAttribute('x'), sy = +sh.getAttribute('y'), sw = +sh.getAttribute('width'), shh = +sh.getAttribute('height');
-      // the intro's drawings, as shapes on screen with their own colours (fill, how solid, outline)
-      const SRC = [
-        { p: polyOf(dO, [[1009, 411], [1095, 394], [1095, 678], [1009, 659]]), fill: '#16a596', fo: 0.9 },                 // the teal door
-        { p: polyOf(fig, [[-9, 0], [9, 0], [1.6, -112], [5.5, -132], [3, -144], [-3, -144], [-5.5, -132], [-1.6, -112]]), fill: '#000000', fo: 1 },   // the figure
-        { p: polyOf(dO, [[895, 664], [895, 400], [1025, 400], [1025, 664]]), fill: '#000000', fo: 0 },                     // the door frame
-        { p: polyOf(sh, [[sx + sw * 0.46, sy + shh * 0.04], [sx + sw * 0.54, sy + shh * 0.04], [sx + sw * 0.55, sy + shh * 0.16], [sx + sw * 0.8, sy + shh * 0.3], [sx + sw * 0.95, sy + shh * 0.82], [sx + sw * 0.6, sy + shh * 0.96], [sx + sw * 0.4, sy + shh * 0.96], [sx + sw * 0.05, sy + shh * 0.82], [sx + sw * 0.2, sy + shh * 0.3], [sx + sw * 0.45, sy + shh * 0.16]]), fill: '#262b52', fo: 0.95 },   // the lamp shade
-        { p: boxOf(cd, 0), fill: '#f3f1ea', fo: 0.6 }                                                                       // the cord
-      ].filter(s => s.p);
-      // the desk objects they become (with each one's main colour)
-      const T = [['#hpLaptop .hprop', '#1d2547'], ['#hpPhone .hprop', '#1f3a2c'], ['#hpBook .hprop', '#d8d2c3'], ['#dk-paper > image', '#d8d2c3'],
-        ['#dk-marker > image', '#2b2b2b'], ['#dk-scissors > image', '#6b3f1e'], ['#dk-sketchbook > image', '#8a6f55'], ['#dk-camera > image', '#3d3a37']]
-        .map(([q, c]) => ({ el: document.querySelector(q), c })).filter(o => o.el && o.el.closest('g').style.display !== 'none' && boxOf(o.el, 0.14));
-      if (!SRC.length || !T.length) return false;
-      const shapes = T.map((t, i) => {
-        const s = SRC[i % SRC.length], a = resample(s.p);
-        return { el: t.el, a, ca: mid(a), c0: s.fill, c1: t.c, fo0: s.fo, d: 0.06 * (i % 5), arc: (i % 2 ? 1 : -1) * (90 + 40 * (i % 3)), spin: (i % 2 ? 1 : -1) * 0.5,
-          jit: Array.from({ length: N }, () => [(Math.random() - 0.5) * 1.6, (Math.random() - 0.5) * 1.6]) };
-      });
-      // swap the real drawings for the copies (same place, same look) - nothing fades
-      document.getElementById('boilG').style.visibility = 'hidden';
+      const shade = polyOf(sh, [[sx + sw * 0.46, sy + shh * 0.04], [sx + sw * 0.54, sy + shh * 0.04], [sx + sw * 0.55, sy + shh * 0.16], [sx + sw * 0.8, sy + shh * 0.3], [sx + sw * 0.95, sy + shh * 0.82], [sx + sw * 0.05, sy + shh * 0.82], [sx + sw * 0.2, sy + shh * 0.3], [sx + sw * 0.45, sy + shh * 0.16]]);
+      const cx0 = +cd.getAttribute('x') + +cd.getAttribute('width') / 2, cordL = polyOf(cd, [[cx0, +cd.getAttribute('y') + +cd.getAttribute('height') * 0.55], [cx0, +cd.getAttribute('y') + +cd.getAttribute('height')]]);
+      const figL = fig && fig.getScreenCTM() ? polyOf(fig, [[-9, 0], [9, 0], [1.6, -112], [5.5, -132], [3, -144], [-3, -144], [-5.5, -132], [-1.6, -112]]) : null;
+      const lampLines = [[shade, true], [cordL, false]].concat(figL ? [[figL, true]] : []).map(([p, c]) => along(p, N, c));
+      const lampMid = [shade.reduce((q, p) => q + p[0], 0) / shade.length, shade.reduce((q, p) => q + p[1], 0) / shade.length + 30];
+      // a scribble: a few loose loops round a point
+      const scribble = (c, r) => { const s = Math.random() * 6, out = []; for (let i = 0; i < N; i++) { const a = s + i / N * 6.283 * 3.2, rr = r * (0.45 + 0.55 * Math.abs(Math.sin(i * 0.37 + s))) ; out.push([c[0] + Math.cos(a) * rr + (Math.random() - 0.5) * r * 0.5, c[1] + Math.sin(a) * rr * 0.75 + (Math.random() - 0.5) * r * 0.4]); } return out; };
+      const ballL = lampLines.map(() => scribble(lampMid, 46));
+      const others = ['phone', 'f1', 'paper', 'marker', 'scissors', 'book', 'camera'].map(k => ({ el: document.querySelector(SHAPES[k][0]), lines: SHAPES[k][1] })).filter(o => o.el && o.el.closest('g').style.display !== 'none' && o.el.getScreenCTM());
+      const flyBalls = others.map(() => scribble([0, 0], 30));
+      document.getElementById('boilG').style.visibility = 'hidden';          // the copies take over (same lines, same place)
       svg.innerHTML = ''; svg.style.display = 'block'; svg.style.opacity = 1;
-      const els = shapes.map(() => { const p = document.createElementNS(NS, 'path'); p.setAttribute('stroke', '#f3f1ea'); p.setAttribute('stroke-width', '1.6'); p.setAttribute('stroke-linejoin', 'round'); p.setAttribute('filter', 'url(#crayonLine)'); svg.appendChild(p); return p; });
       running = true;
-      const ease = x => x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2, t0 = performance.now();
-      const draw = () => {
-        const tt = Math.min(1, (performance.now() - t0) / 1000 / DUR);
-        shapes.forEach((s, i) => {
-          const live = boxOf(s.el, 0.14), b = resample(live), cb = mid(b);
-          const u = ease(Math.min(1, Math.max(0, (tt - s.d) / (1 - 0.24))));
-          // the middle travels on a curve; the shape turns a little on the way and stretches from its old outline to the new
-          const dx = cb[0] - s.ca[0], dy = cb[1] - s.ca[1], L = Math.hypot(dx, dy) || 1, k = Math.sin(Math.PI * u) * s.arc;
-          const cx = s.ca[0] + dx * u - dy / L * k, cy = s.ca[1] + dy * u + dx / L * k, rot = Math.sin(Math.PI * u) * s.spin, cr = Math.cos(rot), sr = Math.sin(rot);
-          let d = '';
-          for (let n = 0; n < N; n++) {
-            const ax = s.a[n][0] - s.ca[0], ay = s.a[n][1] - s.ca[1], bx = b[n][0] - cb[0], by = b[n][1] - cb[1];
-            const x = ax + (bx - ax) * u, y = ay + (by - ay) * u;
-            d += (n ? ' L' : 'M') + (cx + x * cr - y * sr + s.jit[n][0]).toFixed(1) + ' ' + (cy + x * sr + y * cr + s.jit[n][1]).toFixed(1);
-          }
-          els[i].setAttribute('d', d + ' Z');
-          els[i].setAttribute('fill', mixC(s.c0, s.c1, u));
-          els[i].setAttribute('fill-opacity', (s.fo0 + (0.9 - s.fo0) * u).toFixed(2));
+      // one boiled pencil line through points (closed or not, only the first `part` of its length drawn)
+      const J = 1.4;
+      const line = (P, closed, part = 1, op = 1, w = 1.6) => {
+        let Q = closed ? P.concat([P[0]]) : P;
+        if (part < 1) { const L = lenOf(Q) * part; let acc = 0, out = [Q[0]]; for (let i = 1; i < Q.length && acc < L; i++) { const s = Math.hypot(Q[i][0] - Q[i - 1][0], Q[i][1] - Q[i - 1][1]); if (acc + s > L) { const f = (L - acc) / s; out.push([Q[i - 1][0] + (Q[i][0] - Q[i - 1][0]) * f, Q[i - 1][1] + (Q[i][1] - Q[i - 1][1]) * f]); } else out.push(Q[i]); acc += s; } Q = out; }
+        if (Q.length < 2) return '';
+        let d = ''; Q.forEach((p, i) => { d += (i ? ' L' : 'M') + (p[0] + (Math.random() - 0.5) * 2 * J).toFixed(1) + ' ' + (p[1] + (Math.random() - 0.5) * 2 * J).toFixed(1); });
+        return `<path d="${d}" fill="none" stroke="#f3f1ea" stroke-width="${(w * (0.85 + Math.random() * 0.3)).toFixed(2)}" stroke-opacity="${op.toFixed(2)}" stroke-linecap="round" stroke-linejoin="round"/>`;
+      };
+      const mix = (A, B, u) => A.map((p, i) => [p[0] + (B[i][0] - p[0]) * u, p[1] + (B[i][1] - p[1]) * u]);
+      const bendIt = (P, u, amp) => { const k = Math.sin(Math.PI * u) * amp; return P.map((p, i) => [p[0] + Math.sin(i / P.length * 6.283 * 2) * k, p[1] - Math.abs(Math.sin(i / P.length * 6.283)) * k * 0.6]); };
+      let f = 0; const LAST = 27;
+      const step = () => {
+        // where the laptop and the others are right now (they may still be settling)
+        const lapLines = SHAPES.laptop[1].map(l => inBox(lapEl, l)), lapExtra = SHAPES.laptop[2].map(l => inBox(lapEl, l));
+        const lapBottom = [(lapLines[1][2][0] + lapLines[1][3][0]) / 2, (lapLines[1][2][1] + lapLines[1][3][1]) / 2];
+        let out = '';
+        // DOOR -> LAPTOP: bend + flatten with the bottom pinned (drawings 0-9), then slide into place (10-15)
+        const uA = ease(Math.min(1, f / 9)), uB = ease(Math.min(1, Math.max(0, (f - 10) / 5)));
+        const off = [(doorBottom[0] - lapBottom[0]) * (1 - uB), (doorBottom[1] - lapBottom[1]) * (1 - uB)];
+        const T = lapLines.map(l => along(l.map(p => [p[0] + off[0], p[1] + off[1]]), N, true));
+        const S = [along(leaf, N, true), along(frame, N, true)];
+        [0, 1].forEach(i => { out += line(bendIt(mix(S[i], T[i], uA), uA, 16), true, 1, 1, 1.7); });
+        if (f >= 8) lapExtra.forEach(l => { out += line(l.map(p => [p[0] + off[0], p[1] + off[1]]), true, Math.min(1, (f - 8) / 7), 0.85, 1.2); });
+        // LAMP -> SCRIBBLE (0-9) -> FLY APART (10-15) -> REDRAW AS THE OBJECTS (16-25)
+        if (f <= 10) {
+          const u = ease(Math.min(1, f / 9));
+          lampLines.forEach((L, i) => { out += line(mix(L, ballL[i], u), false, 1, 1, 1.5); });
+        }
+        if (f >= 10) others.forEach((o, i) => {
+          const lines = o.lines.map(l => inBox(o.el, l)), pts = lines.flat(), c = [pts.reduce((q, p) => q + p[0], 0) / pts.length, pts.reduce((q, p) => q + p[1], 0) / pts.length];
+          const uF = ease(Math.min(1, Math.max(0, (f - 10) / 5))), at = [lampMid[0] + (c[0] - lampMid[0]) * uF, lampMid[1] + (c[1] - lampMid[1]) * uF - Math.sin(Math.PI * uF) * 60];
+          const uR = Math.min(1, Math.max(0, (f - 16 - (i % 3)) / 8));
+          const ball = flyBalls[i].map(p => [at[0] + p[0] * (1 - uR), at[1] + p[1] * (1 - uR)]);
+          if (uR < 1) out += line(ball, false, 1, 1 - uR * 0.8, 1.4);
+          if (uR > 0) lines.forEach((l, k) => { out += line(l, CLOSED(o.lines[k]), Math.min(1, uR * 1.15), 1, 1.5); });
         });
-        if (tt < 1) requestAnimationFrame(draw);
-        else {                                                  // landed: the sketched objects take over from the shapes
-          running = false; const f = done; done = null;
-          if (f) { f(); for (const el of [document.getElementById('hero'), document.getElementById('figSvg')]) gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.45, ease: 'sine.out' }); }
-          gsap.to(svg, { opacity: 0, duration: 0.45, ease: 'sine.in', onComplete: () => { svg.style.display = 'none'; svg.innerHTML = ''; } });
-          setTimeout(() => { document.getElementById('boilG').style.visibility = ''; }, 600);   // (the intro behind is dark again by then)
+        svg.innerHTML = `<g filter="url(#crayonLine)">${out}</g>`;
+        if (f < LAST) { f++; timer = setTimeout(step, FRAME); /* (12 drawings a second = on twos) */ }
+        else {                                                  // drawn: the sketched desk takes over
+          running = false; const fn = done; done = null;
+          if (fn) { fn(); for (const el of [document.getElementById('hero'), document.getElementById('figSvg')]) gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.35, ease: 'sine.out' }); }
+          gsap.to(svg, { opacity: 0, duration: 0.35, ease: 'sine.in', onComplete: () => { svg.style.display = 'none'; svg.innerHTML = ''; } });
+          setTimeout(() => { document.getElementById('boilG').style.visibility = ''; }, 500);
         }
       };
-      draw();
+      step();
       return true;
     }
-    return { start, get running() { return running; }, then(f) { done = f; } };
+    return { start, get running() { return running; }, then(fn) { done = fn; } };
   })();
   whiteTween.eventCallback('onStart', () => { if (intro.tween && !morph.running) morph.start(); });
   whiteTween.eventCallback('onComplete', () => { if (morph.running) morph.then(heroShow); else heroShow(); });
