@@ -745,6 +745,14 @@
     #menu { right: 16px; }
     #logo { left: 16px; }
   }
+  /* EXPERIMENT: the main page as the intro's dark room, lit by the lamp - a soft warm spot in the middle; the line,
+     notes and figure in light crayon */
+  #hero { background: radial-gradient(ellipse 48% 58% at 50% 54%, rgba(255, 224, 160, 0.17) 0%, rgba(255, 214, 140, 0.075) 38%, rgba(255, 214, 140, 0) 72%), #000; }
+  #hero, #figSvg { --pen: #ece8dc; }
+  #hero .hsolid, #figSvg .hsolid { fill: #000; }
+  #figSvg .hpen, #hero .hpen { stroke: #ece8dc; }
+  #heroLine .hword { fill: #ece8dc; }
+  @media (min-width: 821px), (min-aspect-ratio: 85/100) { #workPage { --pen: #ece8dc; } #workPage .wpFrame { stroke: #ece8dc; } }   /* (the Work page sits on the dark desk on desktop) */
 </style>
 </head>
 <body>
@@ -829,7 +837,8 @@
     </g>
 
     <!-- light: the room turns white -->
-    <rect id="whiteout" x="-2000" y="-2000" width="6000" height="6000" fill="#F5F1E6" opacity="0"></rect>
+    <radialGradient id="lampSpot" gradientUnits="userSpaceOnUse" cx="960" cy="583" r="760" gradientTransform="translate(960 583) scale(1 1.12) translate(-960 -583)"><stop offset="0" stop-color="#2b261b"></stop><stop offset="0.38" stop-color="#13110c"></stop><stop offset="0.75" stop-color="#000"></stop></radialGradient>
+    <rect id="whiteout" x="-2000" y="-2000" width="6000" height="6000" fill="url(#lampSpot)" opacity="0"></rect>
   </svg>
 </section>
 <script>
@@ -1046,6 +1055,186 @@
     </g>
   </svg>
 </section>
+<script>
+  // THE DESK, HAND-DRAWN (experiment): every object picture on the main page is swapped for a raw crayon sketch drawn
+  // in the same box - white wobbly outlines gone over twice, colours coloured in with loose strokes that leave gaps and
+  // spill a little - so all the placing, turning and scrolling stays exactly as it was. Seeded: the same every visit.
+  (() => {
+    const f1 = v => v.toFixed(1);
+    const sketch = (w, h, seedN, draw) => {
+      let seed = seedN; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647, j = a => (rnd() - 0.5) * 2 * a;
+      const B = p => [p[0] * w, p[1] * h];
+      let clipN = 0, defs = '', body = '';
+      const wob = (pts, a) => { let o = [j(a), j(a)], d = ''; pts.forEach((p, i) => { o = [(o[0] + j(a * 0.6)) * 0.8, (o[1] + j(a * 0.6)) * 0.8]; d += (i ? ' L' : 'M') + f1(p[0] + o[0]) + ' ' + f1(p[1] + o[1]); }); return d; };
+      const seg = (a, b, n) => { n = n || Math.max(3, Math.round(Math.hypot(b[0] - a[0], b[1] - a[1]) / 8)); return Array.from({ length: n + 1 }, (_, i) => [a[0] + (b[0] - a[0]) * i / n, a[1] + (b[1] - a[1]) * i / n]); };
+      // white crayon line through normalised points, gone over 2 times, running a little past its ends
+      const ink = (pts, o = {}) => {
+        const P = pts.map(B), col = o.col || '#f3f1ea', wd = o.w || 1.6, a = o.a == null ? 0.9 : o.a, passes = o.passes || 2;
+        for (let i = 0; i < passes; i++) {
+          let all = [];
+          for (let k = 0; k < P.length - 1; k++) all = all.concat(seg(P[k], P[k + 1]).slice(k ? 1 : 0));
+          if (o.close) all = all.concat(seg(P[P.length - 1], P[0]).slice(1));
+          if (!o.close && all.length > 1) { const s = all[0], s2 = all[1], e = all[all.length - 1], e2 = all[all.length - 2], ov = 1 + rnd() * 3.5, n1 = Math.hypot(s[0] - s2[0], s[1] - s2[1]) || 1, n2 = Math.hypot(e[0] - e2[0], e[1] - e2[1]) || 1;
+            all[0] = [s[0] + (s[0] - s2[0]) / n1 * ov, s[1] + (s[1] - s2[1]) / n1 * ov]; all[all.length - 1] = [e[0] + (e[0] - e2[0]) / n2 * ov, e[1] + (e[1] - e2[1]) / n2 * ov]; }
+          body += `<path d="${wob(all.map(p => [p[0] + j(0.8), p[1] + j(0.8)]), a)}" fill="none" stroke="${col}" stroke-width="${f1(wd * (0.7 + rnd() * 0.6))}" stroke-opacity="${(o.op || 1) * (0.65 + rnd() * 0.35)}" stroke-linecap="round" stroke-linejoin="round"/>`;
+        }
+      };
+      const box = (q, o) => ink(q, Object.assign({ close: true }, o));
+      // loose crayon colouring inside a shape (normalised points): strokes at one slant, uneven, with gaps, spilling
+      const fill = (pts, cols, o = {}) => {
+        const P = pts.map(B), id = 'c' + (++clipN), sp = o.spill == null ? 1.5 : o.spill;
+        defs += `<clipPath id="${id}"><polygon points="${P.map(p => f1(p[0] + j(sp)) + ',' + f1(p[1] + j(sp))).join(' ')}"/></clipPath>`;
+        const xs = P.map(p => p[0]), ys = P.map(p => p[1]), cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+        const R = Math.hypot(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)) / 2 + 4;
+        let ang = o.ang == null ? -1.2 : o.ang, gap = o.gap || 1.8, wd = o.w || 1.8, op = o.op || [0.35, 0.95], s = '';
+        const bk = {}, put = (col, sw, opv, d) => { const k = col + '|' + f1(Math.round(sw * 2) / 2) + '|' + (Math.round(opv * 4) / 4).toFixed(2); bk[k] = (bk[k] || '') + d; };
+        for (let k = -R; k < R; k += gap * (0.6 + rnd() * 0.9)) {
+          if (rnd() < 0.06) continue;
+          ang += j(0.02); const c = Math.cos(ang), sn = Math.sin(ang);
+          const px = cx - sn * k, py = cy + c * k, h0 = R * (0.6 + rnd() * 0.45), h1 = R * (0.6 + rnd() * 0.45);
+          const a = [px - c * h0, py - sn * h0], b = [px + c * h1, py + sn * h1];
+          let t0 = rnd() * 0.1; const col = cols[Math.floor(rnd() * cols.length)], sw = wd * (0.55 + rnd() * 0.9);
+          while (t0 < 1) { const t1 = Math.min(1, t0 + 0.18 + rnd() * 0.4), pa = [a[0] + (b[0] - a[0]) * t0, a[1] + (b[1] - a[1]) * t0], pb = [a[0] + (b[0] - a[0]) * t1, a[1] + (b[1] - a[1]) * t1], bend = j(2.2), mx = (pa[0] + pb[0]) / 2 - sn * bend, my = (pa[1] + pb[1]) / 2 + c * bend;
+            put(col, sw * (0.8 + rnd() * 0.4), op[0] + rnd() * (op[1] - op[0]), `M${f1(pa[0] + j(0.8))} ${f1(pa[1] + j(0.8))}Q${f1(mx)} ${f1(my)} ${f1(pb[0] + j(0.8))} ${f1(pb[1] + j(0.8))}`);
+            t0 = t1 + (rnd() < 0.3 ? 0.03 + rnd() * 0.08 : -0.02); }
+          continue;
+          s += `<path d="${wob(seg(a, b), 0.7)}" stroke="${cols[Math.floor(rnd() * cols.length)]}" stroke-width="${f1(wd * (0.55 + rnd() * 0.9))}" stroke-opacity="${(op[0] + rnd() * (op[1] - op[0])).toFixed(2)}" fill="none" stroke-linecap="round"/>`;
+        }
+        for (const k in bk) { const [c2, w2, o2] = k.split('|'); s += `<path d="${bk[k]}" stroke="${c2}" stroke-width="${w2}" stroke-opacity="${o2}" fill="none" stroke-linecap="round"/>`; }
+        body += `<g clip-path="url(#${id})">${s}</g>`;
+      };
+      // a strip along a centre line a -> b, w wide (normalised to the box's width): its four corners
+      const strip = (a, b, wid) => { const A = B(a), Bb = B(b), L = Math.hypot(Bb[0] - A[0], Bb[1] - A[1]), nx = -(Bb[1] - A[1]) / L * wid / 2, ny = (Bb[0] - A[0]) / L * wid / 2; return [[A[0] + nx, A[1] + ny], [Bb[0] + nx, Bb[1] + ny], [Bb[0] - nx, Bb[1] - ny], [A[0] - nx, A[1] - ny]].map(p => [p[0] / w, p[1] / h]); };
+      const at = (q, u, v) => { const a = [q[0][0] + (q[1][0] - q[0][0]) * u, q[0][1] + (q[1][1] - q[0][1]) * u], b = [q[3][0] + (q[2][0] - q[3][0]) * u, q[3][1] + (q[2][1] - q[3][1]) * u]; return [a[0] + (b[0] - a[0]) * v, a[1] + (b[1] - a[1]) * v]; };
+      const sub = (q, u0, v0, u1, v1) => [at(q, u0, v0), at(q, u1, v0), at(q, u1, v1), at(q, u0, v1)];
+      const ring = (c, rx, ry, n = 20) => Array.from({ length: n }, (_, i) => [c[0] + rx * Math.cos(i / n * 6.283), c[1] + ry * Math.sin(i / n * 6.283)]);
+      draw({ ink, box, fill, strip, at, sub, ring, rnd, j });
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><defs>${defs}` +
+        `<filter id="cr" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="${seedN % 97}" result="n"/>` +
+        `<feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2 0 0 0 1.7" result="wx"/><feComposite in="SourceGraphic" in2="wx" operator="in"/></filter></defs><g filter="url(#cr)">${body}</g></svg>`;
+    };
+    const PALE = ['#ece7da', '#d8d2c3', '#f5f1e6', '#c4bdac'];
+    const ART = {
+      // the grid paper of little framed scribbles
+      'desk-grid-hq': [471.1, 370.8, 101, ({ ink, box, fill, at, sub, rnd, j }) => {
+        const q = [[0.05, 0.47], [0.70, 0.03], [0.94, 0.52], [0.28, 0.97]];
+        box(q.map(p => [p[0] + 0.012, p[1] + 0.02]), { op: 0.5, passes: 1 });            // (the sheet under it)
+        fill(q, PALE, { ang: -0.6, op: [0.45, 0.9], gap: 1.7, w: 2.2 });
+        for (let r = 0; r < 3; r++) for (let c = 0; c < 7; c++) {
+          const cell = sub(q, 0.1 + c * 0.115, 0.12 + r * 0.27, 0.1 + c * 0.115 + 0.09, 0.12 + r * 0.27 + 0.2);
+          if (r === 2 || (r === 1 && c > 3)) fill(cell, ['#1b1b1b', '#2f2f2f', '#444'], { op: [0.35, 0.8], gap: 1.6, w: 1.4, ang: 0.8 });
+          box(cell, { col: '#0c0c0c', w: 3, op: 1, passes: 2, a: 0.5 });
+          ink([cell[0], cell[2]], { col: '#1a1a1a', w: 1.4, op: 0.85, passes: 1 }); ink([cell[1], cell[3]], { col: '#1a1a1a', w: 1.4, op: 0.85, passes: 1 });
+        }
+        box(q, { w: 1.8 });
+      }],
+      'desk-marker-hq': [196, 241.3, 202, ({ ink, box, fill, strip, sub }) => {
+        const q = strip([0.33, 0.13], [0.78, 0.93], 24);
+        fill(sub(q, 0, 0, 0.28, 1), ['#161616', '#2b2b2b', '#3a3a3a'], { ang: 1.0, gap: 1.4 });
+        fill(sub(q, 0.28, 0, 1, 1), PALE, { ang: 1.0, gap: 1.4, op: [0.45, 0.9] });
+        for (let k = 0; k < 5; k++) ink([sub(q, 0.4 + k * 0.1, 0.25, 0.45 + k * 0.1, 0.75)[0], sub(q, 0.4 + k * 0.1, 0.25, 0.45 + k * 0.1, 0.75)[2]], { col: '#3d63b0', w: 1.4, passes: 1, op: 0.8 });
+        box(q, { w: 1.7 }); ink([sub(q, 0.28, 0, 1, 1)[0], sub(q, 0.28, 0, 1, 1)[3]], { w: 1.4 });
+      }],
+      // two film strips
+      'desk-scissors-film-hq': [304.5, 365.4, 303, ({ ink, box, fill, strip, at, sub }) => {
+        const film = (a, b, wd) => {
+          const q = strip(a, b, wd);
+          fill(q, ['#6b3f1e', '#8a5228', '#3a2412', '#5a341a'], { ang: Math.atan2(b[1] - a[1], b[0] - a[0]) * 0 + 0.9, gap: 1.6 });
+          for (let k = 0; k < 4; k++) { const f = sub(q, 0.08 + k * 0.23, 0.2, 0.08 + k * 0.23 + 0.17, 0.8); fill(f, ['#1c120a', '#2a1a0e'], { gap: 1.3, op: [0.4, 0.85] }); box(f, { col: '#d9c3a3', w: 0.8, passes: 1, op: 0.5 }); }
+          for (let k = 0; k < 16; k++) { ink([at(q, k / 16 + 0.01, 0.07), at(q, k / 16 + 0.03, 0.07)], { w: 1.4, passes: 1 }); ink([at(q, k / 16 + 0.01, 0.93), at(q, k / 16 + 0.03, 0.93)], { w: 1.4, passes: 1 }); }
+          box(q, { w: 1.7 });
+        };
+        film([0.42, 0.84], [0.93, 0.62], 44);
+        film([0.12, 0.84], [0.72, 0.47], 50);
+      }],
+      'desk-scissors-blade-hq': [304.5, 365.4, 404, ({ ink, box, fill, ring }) => {
+        const blades = [[0.56, 0.28], [0.62, 0.33], [0.37, 0.93], [0.34, 0.91]];
+        fill(blades, ['#cfd3d6', '#aeb4b8', '#e8eaec'], { ang: 1.1, gap: 1.5, op: [0.2, 0.6] });
+        box(blades, { w: 1.6 }); ink([[0.58, 0.31], [0.355, 0.92]], { w: 1, passes: 1, op: 0.7 });
+        box(ring([0.645, 0.14], 0.075, 0.075), { w: 1.8 }); box(ring([0.645, 0.14], 0.045, 0.045), { w: 1.1, passes: 1 });
+        box(ring([0.775, 0.205], 0.07, 0.072), { w: 1.8 }); box(ring([0.775, 0.205], 0.042, 0.043), { w: 1.1, passes: 1 });
+        ink([[0.64, 0.21], [0.59, 0.29]], { w: 1.6 }); ink([[0.74, 0.27], [0.62, 0.33]], { w: 1.6 });
+        box(ring([0.58, 0.39], 0.012, 0.01, 8), { w: 1.2, passes: 1 });
+      }],
+      // the sketchbook (brown card cover) and its pencil
+      'desk-sketchbook-book-v2': [362.5, 284.2, 505, ({ ink, box, fill }) => {
+        const q = [[0.05, 0.10], [0.50, 0.01], [0.61, 0.86], [0.20, 0.99]];
+        fill(q, ['#a2866b', '#8a6f55', '#b89a7c', '#6e5641'], { ang: -1.35, gap: 1.7 });
+        fill([[0.34, 0.33], [0.40, 0.32], [0.39, 0.58], [0.33, 0.6]], ['#4a6fb0', '#2f4f8f'], { ang: 1.6, gap: 1.2, op: [0.4, 0.9] });
+        box(q, { w: 1.8 }); ink([[0.52, 0.04], [0.63, 0.84]], { w: 1.1, passes: 1, op: 0.7 });
+      }],
+      'desk-sketchbook-pencil-hq': [362.5, 284.2, 606, ({ ink, box, fill, strip, sub }) => {
+        const q = strip([0.845, 0.13], [0.625, 0.88], 13);
+        fill(sub(q, 0.07, 0, 0.78, 1), ['#8d8f93', '#a5a8ad', '#6f7176'], { ang: 1.9, gap: 1.2 });
+        fill(sub(q, 0.78, 0, 1, 1), ['#c7352f', '#e04a40', '#9e2722'], { ang: 1.9, gap: 1.1 });
+        fill(sub(q, 0, 0.2, 0.07, 0.8), ['#e6c9a0'], { gap: 1, op: [0.4, 0.8] });
+        box(q, { w: 1.4 }); ink([sub(q, 0.07, 0, 1, 1)[0], sub(q, 0.07, 0, 1, 1)[3]], { w: 1, passes: 1 });
+      }],
+      'desk-camera-print': [366.8, 455.3, 707, ({ ink, box, fill, ring }) => {
+        const strap = [[0.40, 0.80], [0.36, 0.64], [0.32, 0.47], [0.33, 0.33], [0.40, 0.26], [0.50, 0.24], [0.58, 0.30], [0.55, 0.40], [0.45, 0.42], [0.42, 0.33], [0.50, 0.28], [0.60, 0.40], [0.66, 0.56], [0.72, 0.68], [0.74, 0.78]];
+        const sm = []; for (let k = 0; k < strap.length - 1; k++) { const p0 = strap[Math.max(0, k - 1)], p1 = strap[k], p2 = strap[k + 1], p3 = strap[Math.min(strap.length - 1, k + 2)]; for (let s = 0; s < 6; s++) { const u = s / 6, u2 = u * u, u3 = u2 * u; sm.push([0, 1].map(d => 0.5 * (2 * p1[d] + (-p0[d] + p2[d]) * u + (2 * p0[d] - 5 * p1[d] + 4 * p2[d] - p3[d]) * u2 + (-p0[d] + 3 * p1[d] - 3 * p2[d] + p3[d]) * u3))); } } sm.push(strap[strap.length - 1]);
+        ink(sm, { col: '#b5574a', w: 5, a: 1.2, passes: 3, op: 0.85 }); ink(sm, { w: 0.9, passes: 1, op: 0.6 });
+        const body = [[0.36, 0.79], [0.74, 0.76], [0.76, 0.94], [0.38, 0.97]];
+        fill(body, ['#2a2a2a', '#3d3a37', '#1a1a1a', '#55504a'], { ang: -0.1, gap: 1.6 });
+        fill([[0.36, 0.79], [0.74, 0.76], [0.745, 0.80], [0.365, 0.83]], ['#c9c4bb', '#e2ddd3'], { gap: 1.2, op: [0.3, 0.7] });
+        box(body, { w: 1.8 });
+        fill(ring([0.60, 0.865], 0.08, 0.064), ['#141a33', '#0c1022', '#26305a'], { gap: 1.3 });
+        box(ring([0.60, 0.865], 0.08, 0.064), { w: 1.7 }); box(ring([0.60, 0.865], 0.045, 0.036), { w: 1.2, passes: 1 });
+        box([[0.40, 0.81], [0.48, 0.805], [0.485, 0.86], [0.405, 0.865]], { w: 1.2, passes: 1 });
+      }],
+      // the old phone with the cracked screen
+      'contact-phone-off': [86.4, 180, 808, ({ ink, box, fill, rnd, j }) => {
+        const q = [[0.04, 0.015], [0.95, 0.02], [0.95, 0.98], [0.04, 0.975]];
+        fill(q, ['#1f3a2c', '#16261d', '#2c4a38', '#0f1a14'], { ang: 1.4, gap: 1.1, w: 1.2 });
+        const sc = [[0.10, 0.06], [0.90, 0.06], [0.90, 0.50], [0.10, 0.50]];
+        fill(sc, ['#0d1420', '#141c2c', '#070a10'], { ang: 1.4, gap: 0.9, w: 1.1 });
+        box(q, { w: 1.2, a: 0.5 }); box(sc, { w: 0.9, a: 0.4, passes: 1 });
+        const cr = (p, a, n) => { if (!n) return; let q2 = p, d = 0; for (let k = 0; k < 3; k++) { const L = 0.06 + rnd() * 0.06; const nq = [q2[0] + Math.cos(a) * L * 0.6, q2[1] + Math.sin(a) * L * 0.3]; if (nq[0] < 0.11 || nq[0] > 0.89 || nq[1] < 0.07 || nq[1] > 0.49) break; ink([q2, nq], { w: 0.6, passes: 1, op: 0.85, a: 0.2 }); q2 = nq; a += j(0.6); if (rnd() < 0.5) cr(q2, a + j(1.4), n - 1); } };
+        for (let k = 0; k < 6; k++) cr([0.55, 0.26], k * 1.05 + j(0.3), 3);
+        box([[0.40, 0.55], [0.62, 0.55], [0.62, 0.635], [0.40, 0.635]], { w: 0.8, a: 0.3, passes: 1 });
+        for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) ink([[0.16 + c * 0.28, 0.69 + r * 0.07], [0.27 + c * 0.28, 0.69 + r * 0.07]], { w: 0.8, a: 0.25, passes: 1, op: 0.8 });
+        ink([[0.14, 0.58], [0.26, 0.58]], { w: 0.7, a: 0.2, passes: 1 }); ink([[0.74, 0.58], [0.86, 0.58]], { w: 0.7, a: 0.2, passes: 1 });
+      }],
+      // the laptop: navy screen with lines of code, grey body, keys and trackpad
+      'hero-laptop-code-hq': [374, 360, 909, ({ ink, box, fill, sub, at, rnd }) => {
+        const lid = [[0.03, 0.03], [0.97, 0.02], [0.92, 0.56], [0.10, 0.56]], scr = [[0.07, 0.06], [0.93, 0.05], [0.89, 0.52], [0.13, 0.52]];
+        const base = [[0.10, 0.56], [0.92, 0.56], [0.88, 0.99], [0.13, 0.99]];
+        fill(lid, ['#3a3e48', '#4a4f5c'], { ang: 0.1, gap: 1.8, op: [0.3, 0.7] });
+        fill(scr, ['#141a33', '#0c1022', '#1d2547', '#0a0d1a'], { ang: 1.45, gap: 1.6 });
+        const CODE = ['#16a596', '#e9e4d6', '#d98c4a', '#8a90c0', '#e9e4d6'];
+        for (let r = 0; r < 18; r++) { let u = 0.06 + (r % 4) * 0.03; while (u < 0.7 && rnd() < 0.85) { const L = 0.04 + rnd() * 0.12; ink([at(scr, u, 0.08 + r * 0.048), at(scr, Math.min(0.9, u + L), 0.08 + r * 0.048)], { col: CODE[Math.floor(rnd() * CODE.length)], w: 1.3, a: 0.3, passes: 1, op: 0.75 }); u += L + 0.03; } }
+        fill(base, ['#4a4f5c', '#5b6070', '#3a3e48', '#6b7080'], { ang: -0.05, gap: 1.8, op: [0.3, 0.8] });
+        const kb = [[0.22, 0.62], [0.82, 0.62], [0.81, 0.82], [0.23, 0.82]];
+        fill(kb, ['#1e2027', '#2a2c34'], { gap: 1.5, op: [0.4, 0.85] });
+        for (let r = 1; r < 5; r++) ink([at(kb, 0, r / 5), at(kb, 1, r / 5)], { w: 0.7, passes: 1, op: 0.45, a: 0.4 });
+        for (let c = 1; c < 12; c++) ink([at(kb, c / 12, 0), at(kb, c / 12, 1)], { w: 0.7, passes: 1, op: 0.4, a: 0.4 });
+        box(lid, { w: 1.8 }); box(scr, { w: 1.2, passes: 1 }); box(base, { w: 1.8 }); box(kb, { w: 1.2, passes: 1 });
+        box([[0.34, 0.85], [0.66, 0.85], [0.66, 0.97], [0.34, 0.97]], { w: 1.3 });
+      }],
+      // the F1 card: pale card, "F1" in marker, the orange strip, a small note in the corner
+      'desk-f1': [229.5, 300, 1010, ({ ink, box, fill, strip }) => {
+        const q = [[0.04, 0.03], [0.97, 0.05], [0.95, 0.97], [0.02, 0.95]];
+        fill(q, PALE, { ang: -1.3, gap: 1.6, op: [0.45, 0.9], w: 2.2 });
+        const bar = strip([0.61, 0.45], [0.45, 0.93], 24);
+        fill(bar, ['#c8794f', '#b0603b', '#d98c64', '#8f4a2c'], { ang: 1.9, gap: 1.4 });
+        box(bar, { w: 1.2, passes: 1, op: 0.7 });
+        const M = { col: '#1e1e1e', w: 4.2, a: 0.8 };
+        ink([[0.30, 0.33], [0.29, 0.13], [0.46, 0.12]], M); ink([[0.29, 0.22], [0.42, 0.215]], M);
+        ink([[0.52, 0.17], [0.59, 0.11], [0.585, 0.34]], M);
+        ink([[0.78, 0.82], [0.84, 0.78], [0.80, 0.90], [0.87, 0.88]], { col: '#3b4f7a', w: 1.6, passes: 1 });
+        box(q, { w: 1.8 });
+      }]
+    };
+    const url = s => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+    document.querySelectorAll('#hero image').forEach(im => {
+      const href = im.getAttribute('href') || '', key = Object.keys(ART).find(k => href.includes(k + '.'));
+      if (!key) return;
+      const [w, h, s, fn] = ART[key];
+      im.setAttribute('href', url(sketch(w, h, s, fn)));
+      im.removeAttribute('style');                       // (no photo filters or shadows on a drawing)
+    });
+  })();
+</script>
 
 </div>
 
