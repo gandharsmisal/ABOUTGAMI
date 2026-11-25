@@ -54,7 +54,7 @@
     vector-effect: non-scaling-stroke;
   }
   #scene .solid { fill: var(--ink); }
-  #scene .sketch .sk { fill: none; stroke: #f3f1ea; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; filter: url(#crayonLine); }
+  #scene .sketch .sk { fill: none; stroke: #f3f1ea; stroke-linecap: round; stroke-linejoin: round; filter: url(#crayonLine); }
   #scene .sketch .hatch { fill: none; stroke-linecap: round; }
   #label text { font-family: "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); font-size: 24px; fill: var(--line); letter-spacing: 0.08em; }
   #label text { fill: #fff; filter: url(#pencil); }   /* ("click to enter" in white pencil: grainy, slightly broken strokes) */
@@ -775,6 +775,11 @@
         <feTurbulence id="boilNoise" type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="1" result="n"></feTurbulence>
         <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
       </filter>
+      <!-- the figure's own boil: stronger and finer, so its thin lines visibly redraw as it walks -->
+      <filter id="boilFig" x="-30%" y="-10%" width="160%" height="120%">
+        <feTurbulence id="boilFigNoise" type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="4" result="n"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      </filter>
       <!-- while it stands in the doorway the figure is kept inside the door frame; the clip opens as it steps out -->
       <clipPath id="doorwayClip" clipPathUnits="userSpaceOnUse"><rect id="doorwayClipRect" x="901" y="0" width="118" height="663"></rect></clipPath>
     </defs>
@@ -794,9 +799,9 @@
 
     <!-- figure -->
     <g id="walker" clip-path="url(#doorwayClip)">
-      <polyline id="leg0" class="ln"></polyline>
-      <polyline id="leg1" class="ln"></polyline>
-      <g id="figure">
+      <g filter="url(#boilFig)"><polyline id="leg0" class="ln"></polyline>
+      <polyline id="leg1" class="ln"></polyline></g>
+      <g id="figure" filter="url(#boilFig)">
         <path class="ln solid" d="M -1.1 -112.8 L -9 0 L 9 0 L 1.1 -112.8 M 0 -112.8 C 2.5 -120 6.5 -131 5 -137.5 C 3.5 -144.5 -3.5 -144.5 -5 -137.5 C -6.5 -131 -2.5 -120 0 -112.8 Z"></path>
       </g>
     </g>
@@ -819,7 +824,7 @@
     </g>
 
     <!-- arm -->
-    <path id="arm" class="ln" d="M 0 0" style="visibility:hidden"></path>
+    <g filter="url(#boilFig)"><path id="arm" class="ln" d="M 0 0" style="visibility:hidden"></path></g>
 
     </g>
 
@@ -828,80 +833,99 @@
   </svg>
 </section>
 <script>
-  // THE DOOR, HAND-DRAWN: white crayon outlines (each line drawn twice, a little off, overshooting its corners) and the
-  // door leaf shaded with dark navy scribbles, like a sketched storyboard frame. Drawn once from a seeded random, so it
-  // looks the same every visit; the boil below makes it shimmer.
+  // THE DOOR, HAND-DRAWN AND RAW: wobbly crayon lines gone over 2-3 times (each pass a bit off, some only part of the
+  // way, running past the corners), uneven pressure, corners that don't quite meet, and the leaf shaded with loose
+  // back-and-forth navy scribbles that miss and spill over the edges. Seeded, so it is the same drawing every visit.
   (() => {
     const NS = 'http://www.w3.org/2000/svg';
-    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647, j = a => (rnd() - 0.5) * 2 * a;
+    let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647, j = a => (rnd() - 0.5) * 2 * a;
     const mk = (tag, at, p) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); p.appendChild(e); return e; };
+    const f1 = v => v.toFixed(1);
     let clipN = 0;
-    // one pencil line from a to b: slightly bowed, overshooting, drawn twice
-    const line = (g, a, b, passes = 2) => {
-      let d = '';
-      for (let i = 0; i < passes; i++) {
-        const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
-        const o0 = 1 + rnd() * 3, o1 = 1 + rnd() * 3, w = 0.9 + i * 0.5;
-        const x0 = a[0] - ux * o0 + j(w), y0 = a[1] - uy * o0 + j(w), x1 = b[0] + ux * o1 + j(w), y1 = b[1] + uy * o1 + j(w);
-        const bow = j(Math.min(2.2, L * 0.015));
-        d += 'M' + x0.toFixed(1) + ' ' + y0.toFixed(1) + ' Q' + ((x0 + x1) / 2 - uy * bow).toFixed(1) + ' ' + ((y0 + y1) / 2 + ux * bow).toFixed(1) + ' ' + x1.toFixed(1) + ' ' + y1.toFixed(1);
+    // a corner point, nudged so nothing is ruler-straight
+    const P = (x, y, a = 3.5) => [x + j(a), y + j(a)];
+    // one wobbly pass from a to b: the hand drifts sideways as it goes
+    const pass = (a, b, wob, o0, o1, t0 = 0, t1 = 1) => {
+      const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+      const sx = a[0] + dx * t0 - ux * o0, sy = a[1] + dy * t0 - uy * o0, ex = a[0] + dx * t1 + ux * o1, ey = a[1] + dy * t1 + uy * o1;
+      const n = Math.max(2, Math.round(Math.hypot(ex - sx, ey - sy) / 9)); let off = j(wob), d = '';
+      for (let i = 0; i <= n; i++) {
+        const t = i / n; off += j(wob * 0.7); off *= 0.85;
+        const x = sx + (ex - sx) * t - uy * off, y = sy + (ey - sy) * t + ux * off;
+        d += (i ? ' L' : 'M') + f1(x) + ' ' + f1(y);
       }
-      mk('path', { d, class: 'sk' }, g);
+      return d;
+    };
+    const line = (g, a, b, passes = 2 + (rnd() < 0.5 ? 1 : 0)) => {
+      for (let i = 0; i < passes; i++) {
+        const part = i > 0 && rnd() < 0.5, t0 = part ? rnd() * 0.35 : 0, t1 = part ? 0.6 + rnd() * 0.4 : 1;
+        const d = pass([a[0] + j(1.6), a[1] + j(1.6)], [b[0] + j(1.6), b[1] + j(1.6)], 2.3, rnd() < 0.3 ? -2 : 1 + rnd() * 6, rnd() < 0.3 ? -2 : 1 + rnd() * 6, t0, t1);
+        mk('path', { d, class: 'sk', 'stroke-width': f1(1 + rnd() * 1.1), 'stroke-opacity': (0.6 + rnd() * 0.4).toFixed(2) }, g);
+      }
     };
     const poly = (g, pts, close = true) => { for (let i = 0; i < pts.length - (close ? 0 : 1); i++) line(g, pts[i], pts[(i + 1) % pts.length]); };
-    // dark scribble shading inside a shape: dense, slightly wavy strokes at one slant
-    const hatch = (g, pts, ang, gap, col, op, wd) => {
-      const id = 'skc' + (++clipN), cp = mk('clipPath', { id }, g); mk('polygon', { points: pts.map(p => p.join(',')).join(' ') }, cp);
-      const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
-      const c = Math.cos(ang), s = Math.sin(ang), R = Math.hypot(x1 - x0, y1 - y0) + 20, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
-      let d = '';
-      for (let k = -R / 2; k < R / 2; k += gap * (0.6 + rnd() * 0.8)) {
-        const px = cx - s * k, py = cy + c * k, h = R / 2;
-        const ax = px - c * h, ay = py - s * h, bx = px + c * h, by = py + s * h;
-        d += 'M' + (ax + j(1)).toFixed(1) + ' ' + (ay + j(1)).toFixed(1) + ' Q' + (px + j(1.6)).toFixed(1) + ' ' + (py + j(1.6)).toFixed(1) + ' ' + (bx + j(1)).toFixed(1) + ' ' + (by + j(1)).toFixed(1);
+    // a rough edge for the shading's clip: the shape's outline, bumped outwards and inwards so the scribbles miss and spill
+    const roughen = (pts, a) => { const out = []; for (let i = 0; i < pts.length; i++) { const p = pts[i], q = pts[(i + 1) % pts.length], n = Math.max(2, Math.round(Math.hypot(q[0] - p[0], q[1] - p[1]) / 14)); for (let k = 0; k < n; k++) { const t = k / n; out.push([p[0] + (q[0] - p[0]) * t + j(a), p[1] + (q[1] - p[1]) * t + j(a)]); } } return out; };
+    // loose scribble: the pen goes back and forth at a slant, drifting in angle, skipping now and then
+    const scribble = (g, pts, ang, gap, col, op, wd, spill = 3) => {
+      const id = 'skc' + (++clipN), cp = mk('clipPath', { id }, g); mk('polygon', { points: roughen(pts, spill).map(p => p.map(f1).join(',')).join(' ') }, cp);
+      const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]), cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+      const R = Math.hypot(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)) / 2 + 12;
+      let d = '', k = -R, dir = 1, a = ang;
+      while (k < R) {
+        a += j(0.05); const c = Math.cos(a), s = Math.sin(a), h = R * (0.75 + rnd() * 0.35);
+        const px = cx - s * k, py = cy + c * k;
+        const ax = px - c * h * dir, ay = py - s * h * dir, bx = px + c * h * dir, by = py + s * h * dir;
+        if (rnd() < 0.12) d += ' M' + f1(ax) + ' ' + f1(ay); else d += (d ? ' L' : 'M') + f1(ax) + ' ' + f1(ay);
+        d += ' Q' + f1(px + j(3)) + ' ' + f1(py + j(3)) + ' ' + f1(bx + j(2)) + ' ' + f1(by + j(2));
+        k += gap * (0.5 + rnd() * 1.1); dir = -dir;
       }
-      mk('path', { d, class: 'hatch', stroke: col, 'stroke-opacity': op, 'stroke-width': wd, 'clip-path': 'url(#' + id + ')' }, g);
+      mk('path', { d, class: 'hatch', stroke: col, 'stroke-opacity': op, 'stroke-width': wd, 'stroke-linejoin': 'round', 'clip-path': 'url(#' + id + ')', filter: 'url(#crayonLine)' }, g);
     };
-    const fillShape = (g, pts) => mk('polygon', { points: pts.map(p => p.join(',')).join(' '), fill: '#05060a' }, g);
-    const shade = (g, pts) => { fillShape(g, pts); hatch(g, pts, -1.2, 2.1, '#2a2f52', 0.95, 1.6); hatch(g, pts, -1.05, 4.2, '#555c8c', 0.55, 1); hatch(g, pts, 0.5, 7, '#1c2040', 0.6, 1.2); };
+    const darken = (g, pts) => mk('polygon', { points: roughen(pts, 2).map(p => p.map(f1).join(',')).join(' '), fill: '#04050a' }, g);
+    const shade = (g, pts) => {
+      darken(g, pts);
+      scribble(g, pts, -1.25, 3.4, '#262b4d', 0.9, 2.3, 6);
+      scribble(g, pts, -0.95, 6.5, '#4c5384', 0.55, 1.3, 8);
+      scribble(g, pts, 0.45, 11, '#8a90c0', 0.25, 0.9, 9);
+    };
     const frame = g => {
-      // the frame: an outer and an inner outline, lightly shaded between them, and the floor line
-      hatch(g, [[895, 400], [1025, 400], [1025, 664], [1009, 664], [1009, 416], [911, 416], [911, 664], [895, 664]], -1.15, 3.2, '#3a4068', 0.5, 1);
-      poly(g, [[895, 664], [895, 400], [1025, 400], [1025, 664]], false);
-      poly(g, [[911, 663], [911, 416], [1009, 416], [1009, 663]], false);
-      line(g, [889, 665], [1032, 664]);
-      line(g, [903, 408], [1017, 408], 1);
+      const o = [P(895, 664), P(895, 400), P(1025, 400), P(1025, 664)], i = [P(911, 663, 1.5), P(911, 416, 1.5), P(1009, 416, 1.5), P(1009, 663, 1.5)];
+      scribble(g, [[895, 400], [1025, 400], [1025, 664], [1009, 664], [1009, 416], [911, 416], [911, 664], [895, 664]], -1.1, 5, '#3a4068', 0.45, 1.2, 3);
+      poly(g, o, false); poly(g, i, false);
+      line(g, P(884, 665), P(1036, 664));
+      line(g, P(902, 408), P(1018, 407), 1);
     };
-    // closed: the leaf fills the doorway, two inset panels, the lever handle
+    // closed: the leaf in the doorway, two inset panels, the lever handle
     const C = document.getElementById('doorClosedImg');
     frame(C);
     const leaf = [[911, 416], [1009, 416], [1009, 663], [911, 663]];
-    shade(C, leaf); poly(C, leaf);
-    poly(C, [[923, 428], [990, 428], [990, 598], [923, 598]]);
-    poly(C, [[923, 614], [992, 614], [992, 642], [923, 642]]);
-    line(C, [997, 527], [997, 544]); line(C, [997, 531], [979, 531]);
-    // open: the doorway is dark, the leaf swung out to the right in perspective
+    shade(C, leaf); poly(C, leaf.map(p => P(p[0], p[1], 1.5)));
+    poly(C, [P(923, 429), P(990, 427), P(991, 598), P(922, 597)]);
+    poly(C, [P(923, 614), P(992, 613), P(992, 642), P(923, 642)]);
+    line(C, P(997, 526, 1), P(997, 545, 1)); line(C, P(997, 531, 1), P(978, 532, 1));
+    // open: the doorway dark, the leaf swung out to the right in perspective
     const O = document.getElementById('doorOpenImg');
     frame(O);
     const lf = [[1009, 411], [1095, 394], [1095, 678], [1009, 659]];
-    shade(O, lf); poly(O, lf);
-    line(O, [1095, 394], [1101, 396], 1); line(O, [1101, 396], [1101, 676], 1); line(O, [1101, 676], [1095, 678], 1);
-    poly(O, [[1019, 424], [1077, 413], [1077, 600], [1019, 597]]);
-    poly(O, [[1019, 612], [1080, 615], [1080, 650], [1019, 641]]);
-    line(O, [1086, 522], [1086, 540]); line(O, [1086, 526], [1071, 528]);
+    shade(O, lf); poly(O, lf.map(p => P(p[0], p[1], 1.5)));
+    line(O, P(1095, 394), P(1101, 397), 1); line(O, P(1101, 397), P(1101, 676)); line(O, P(1101, 676), P(1095, 678), 1);
+    poly(O, [P(1019, 424), P(1077, 413), P(1077, 600), P(1019, 597)]);
+    poly(O, [P(1019, 612), P(1080, 615), P(1080, 650), P(1019, 641)]);
+    line(O, P(1086, 521, 1), P(1086, 541, 1)); line(O, P(1086, 526, 1), P(1070, 528, 1));
   })();
 
   // LINE BOIL: three frames, swapped 10 times a second, for everything drawn on the intro (the door, the figure,
   // the lamp, "click to enter", the logo) - so nothing is ever fully still while the door scene is up
   (() => {
-    const noise = document.getElementById('boilNoise'), html = document.documentElement;
+    const noise = document.getElementById('boilNoise'), figNoise = document.getElementById('boilFigNoise'), html = document.documentElement;
     const SEEDS = [1, 2, 3]; let f = 0, on = null;
     setInterval(() => {
       const intro = html.classList.contains('intro-locked') || !html.classList.contains('app-mode');
       const logo = document.querySelector('#logo img');
       if (intro !== on && logo) { on = intro; if (logo) logo.style.filter = intro ? 'url(#pencil) url(#boilFx) opacity(0.82)' : ''; }
       if (!intro || document.hidden) return;
-      f = (f + 1) % 3; noise.setAttribute('seed', SEEDS[f]);
+      f = (f + 1) % 3; noise.setAttribute('seed', SEEDS[f]); figNoise.setAttribute('seed', 4 + f);
     }, 100);
   })();
 </script>
