@@ -934,18 +934,54 @@
     thin(O, P(1084, 532, 0.8), P(1072, 533, 0.8), 1);
   })();
 
-  // LINE BOIL: three frames, swapped 10 times a second, for everything drawn on the intro (the door, the figure,
-  // the lamp, "click to enter", the logo) - so nothing is ever fully still while the door scene is up
+  // THE LAMP, HAND-DRAWN: the shade and cord pictures are swapped for raw sketches in the same boxes (so the lamp is
+  // still placed and pulled exactly as before) - white crayon outlines, the dome coloured in with dark navy crayon,
+  // the bulb in pale warm crayon. Seeded: the same drawing every visit.
   (() => {
-    const noise = document.getElementById('boilNoise'), figNoise = document.getElementById('boilFigNoise'), html = document.documentElement;
-    const SEEDS = [1, 2, 3]; let f = 0, on = null;
-    setInterval(() => {
-      const intro = html.classList.contains('intro-locked') || !html.classList.contains('app-mode');
-      const logo = document.querySelector('#logo img');
-      if (intro !== on && logo) { on = intro; if (logo) logo.style.filter = intro ? 'url(#pencil) url(#boilFx) opacity(0.82)' : ''; }
-      if (!intro || document.hidden) return;
-      f = (f + 1) % 3; noise.setAttribute('seed', SEEDS[f]); figNoise.setAttribute('seed', 4 + f);
-    }, 100);
+    let seed = 23; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647, j = a => (rnd() - 0.5) * 2 * a, f1 = v => v.toFixed(1);
+    const bez = (p0, p1, p2, p3, t) => { const u = 1 - t; return [u*u*u*p0[0] + 3*u*u*t*p1[0] + 3*u*t*t*p2[0] + t*t*t*p3[0], u*u*u*p0[1] + 3*u*u*t*p1[1] + 3*u*t*t*p2[1] + t*t*t*p3[1]]; };
+    // a wobbly pass along a list of points
+    const wob = (pts, a) => { let ox = j(a), oy = j(a), d = ''; pts.forEach((p, i) => { ox = (ox + j(a * 0.6)) * 0.8; oy = (oy + j(a * 0.6)) * 0.8; d += (i ? ' L' : 'M') + f1(p[0] + ox) + ' ' + f1(p[1] + oy); }); return d; };
+    const curve = (p0, p1, p2, p3, n = 24) => Array.from({ length: n + 1 }, (_, i) => bez(p0, p1, p2, p3, i / n));
+    const seg = (a, b, n = 8) => Array.from({ length: n + 1 }, (_, i) => [a[0] + (b[0] - a[0]) * i / n, a[1] + (b[1] - a[1]) * i / n]);
+    const ink = (pts, w, a, passes = 2) => { let s = ''; for (let i = 0; i < passes; i++) s += `<path d="${wob(pts, a)}" fill="none" stroke="#f3f1ea" stroke-width="${f1(w * (0.75 + rnd() * 0.5))}" stroke-opacity="${(0.7 + rnd() * 0.3).toFixed(2)}" stroke-linecap="round" stroke-linejoin="round"/>`; return s; };
+    const CRAYON = (id, fr) => `<filter id="${id}" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="${fr}" numOctaves="2" seed="5" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2.2 0 0 0 1.7" result="w"/><feComposite in="SourceGraphic" in2="w" operator="in"/></filter>`;
+
+    // the shade, in its picture's 810 x 564 box (stem top at 410,10; the bulb ends near y 540)
+    const L = [62, 452], T = [410, 86], R = [770, 452];
+    const domeL = curve(L, [72, 300], [250, 108], T), domeR = curve(T, [570, 108], [752, 300], R);
+    const dome = `M${L} C72,300 250,108 410,86 C570,108 752,300 770,452 L785,470 L40,470 Z`;
+    let fill = '';
+    for (let x = 30; x < 800; x += 7 + rnd() * 6) {                      // dark navy coloured in, top to bottom, fanning out
+      const top = [410 + (x - 410) * 0.12 + j(10), 70 + j(10)], bot = [x + j(12), 470 + j(18)], mid = [(top[0] + bot[0]) / 2 + j(14), (top[1] + bot[1]) / 2];
+      if (rnd() < 0.07) continue;
+      const cols = ['#1d2140', '#262b52', '#363c6c', '#111326', '#4a5185'];
+      fill += `<path d="M${f1(top[0])} ${f1(top[1] + rnd() * 60)} Q${f1(mid[0])} ${f1(mid[1])} ${f1(bot[0])} ${f1(bot[1] - rnd() * 40)}" stroke="${cols[Math.floor(rnd() * cols.length)]}" stroke-width="${f1(7 + rnd() * 12)}" stroke-opacity="${(0.45 + rnd() * 0.5).toFixed(2)}" fill="none" stroke-linecap="round"/>`;
+    }
+    let bulb = '';
+    for (let y = 452; y < 545; y += 5 + rnd() * 5) {                       // the lit rim and bulb, pale warm crayon
+      const x0 = y > 488 ? 330 + j(8) : 40 + j(14), x1 = y > 488 ? 492 + j(8) : 785 + j(14);
+      bulb += `<path d="${wob(seg([x0, y], [x1, y + j(6)], 10), 4)}" stroke="${rnd() < 0.6 ? '#f1e3b2' : '#d8bf7c'}" stroke-width="${f1(6 + rnd() * 8)}" stroke-opacity="${(0.4 + rnd() * 0.5).toFixed(2)}" fill="none" stroke-linecap="round"/>`;
+    }
+    const shade = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 810 564" preserveAspectRatio="none"><defs>${CRAYON('c', 0.06)}` +
+      `<clipPath id="d"><path d="${dome}"/></clipPath><clipPath id="b"><path d="M36 450 L790 458 L792 492 L495 492 C488 548 336 548 330 492 L34 490 Z"/></clipPath></defs>` +
+      `<g filter="url(#c)"><g clip-path="url(#d)">${fill}</g><g clip-path="url(#b)">${bulb}</g>` +
+      ink(domeL.concat(domeR.slice(1)), 13, 7) + ink(seg([40, 455], [786, 462], 12), 12, 6) + ink(seg([44, 488], [784, 492], 12), 10, 6, 1) +
+      ink(curve([332, 490], [338, 548], [486, 548], [492, 490], 14), 11, 5) +
+      ink([[380, 86], [378, 18], [442, 16], [444, 86]], 12, 5) + `</g></svg>`;
+    // the cord: one wobbly crayon line down a narrow strip (stretched to length like the old picture)
+    const cord = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 636" preserveAspectRatio="none"><defs>${CRAYON('c', 0.35)}</defs>` +
+      `<g filter="url(#c)">${ink(seg([15, -4], [15, 640], 30), 13, 2.5, 2)}</g></svg>`;
+    const url = s => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+    for (const [id, s] of [['shadeImg', shade], ['cordImg', cord]]) { const e = document.getElementById(id); e.removeAttribute('filter'); e.setAttribute('href', url(s)); }
+  })();
+
+  // REDRAWN FRAMES (no shimmer): the lines are re-drawn - a new one of 3 versions - only on a stop-motion frame where
+  // something moved (see render); while nothing moves the drawing stays perfectly still
+  (() => {
+    const noise = document.getElementById('boilNoise'), figNoise = document.getElementById('boilFigNoise');
+    let f = 0;
+    window.__redraw = () => { f = (f + 1) % 3; noise.setAttribute('seed', 1 + f); figNoise.setAttribute('seed', 4 + f); };
   })();
 </script>
 
@@ -1766,6 +1802,23 @@
 
     // light
     el.whiteout.setAttribute('opacity', S.white);
+  }
+
+  // STOP-MOTION: however often the animation asks, the intro shows a new drawing at most 8 times a second (each one
+  // held ~125 ms), and a drawing in which something moved gets its lines redrawn
+  {
+    const drawNow = render, HOLD = 125;
+    let last = -1e9, wait = null, key = '';
+    const frame = () => {
+      wait = null; last = performance.now(); drawNow();
+      const k = [S.u, S.swing, S.lamp, S.pull, S.reach, S.white, S.label, S.stride].map(v => (+v || 0).toFixed(3)).join();
+      if (k !== key) { if (key && window.__redraw) window.__redraw(); key = k; }
+    };
+    render = function () {
+      const since = performance.now() - last;
+      if (since >= HOLD) { if (wait) { clearTimeout(wait); wait = null; } frame(); }
+      else if (!wait) wait = setTimeout(frame, HOLD - since);
+    };
   }
 
   const tl = gsap.timeline({ defaults: { duration: 1 } });
