@@ -745,14 +745,6 @@
     #menu { right: 16px; }
     #logo { left: 16px; }
   }
-  /* EXPERIMENT: the main page as the intro's dark room, lit by the lamp - a soft warm spot in the middle; the line,
-     notes and figure in light crayon */
-  #hero { background: radial-gradient(ellipse 48% 58% at 50% 54%, rgba(255, 224, 160, 0.17) 0%, rgba(255, 214, 140, 0.075) 38%, rgba(255, 214, 140, 0) 72%), #000; }
-  #hero, #figSvg { --pen: #ece8dc; }
-  #hero .hsolid, #figSvg .hsolid { fill: #000; }
-  #figSvg .hpen, #hero .hpen { stroke: #ece8dc; }
-  #heroLine .hword { fill: #ece8dc; }
-  @media (min-width: 821px), (min-aspect-ratio: 85/100) { #workPage { --pen: #ece8dc; } #workPage .wpFrame { stroke: #ece8dc; } }   /* (the Work page sits on the dark desk on desktop) */
 </style>
 </head>
 <body>
@@ -837,8 +829,7 @@
     </g>
 
     <!-- light: the room turns white -->
-    <radialGradient id="lampSpot" gradientUnits="userSpaceOnUse" cx="960" cy="583" r="760" gradientTransform="translate(960 583) scale(1 1.12) translate(-960 -583)"><stop offset="0" stop-color="#2b261b"></stop><stop offset="0.38" stop-color="#13110c"></stop><stop offset="0.75" stop-color="#000"></stop></radialGradient>
-    <rect id="whiteout" x="-2000" y="-2000" width="6000" height="6000" fill="url(#lampSpot)" opacity="0"></rect>
+    <rect id="whiteout" x="-2000" y="-2000" width="6000" height="6000" fill="#F5F1E6" opacity="0"></rect>
   </svg>
 </section>
 <script>
@@ -1069,7 +1060,7 @@
       const seg = (a, b, n) => { n = n || Math.max(3, Math.round(Math.hypot(b[0] - a[0], b[1] - a[1]) / 8)); return Array.from({ length: n + 1 }, (_, i) => [a[0] + (b[0] - a[0]) * i / n, a[1] + (b[1] - a[1]) * i / n]); };
       // white crayon line through normalised points, gone over 2 times, running a little past its ends
       const ink = (pts, o = {}) => {
-        const P = pts.map(B), col = o.col || '#f3f1ea', wd = o.w || 1.6, a = o.a == null ? 0.9 : o.a, passes = o.passes || 2;
+        const P = pts.map(B), col = o.col || '#2b2926', wd = o.w || 1.6, a = o.a == null ? 0.9 : o.a, passes = o.passes || 2;
         for (let i = 0; i < passes; i++) {
           let all = [];
           for (let k = 0; k < P.length - 1; k++) all = all.concat(seg(P[k], P[k + 1]).slice(k ? 1 : 0));
@@ -1141,7 +1132,7 @@
           const q = strip(a, b, wd);
           fill(q, ['#6b3f1e', '#8a5228', '#3a2412', '#5a341a'], { ang: Math.atan2(b[1] - a[1], b[0] - a[0]) * 0 + 0.9, gap: 1.6 });
           for (let k = 0; k < 4; k++) { const f = sub(q, 0.08 + k * 0.23, 0.2, 0.08 + k * 0.23 + 0.17, 0.8); fill(f, ['#1c120a', '#2a1a0e'], { gap: 1.3, op: [0.4, 0.85] }); box(f, { col: '#d9c3a3', w: 0.8, passes: 1, op: 0.5 }); }
-          for (let k = 0; k < 16; k++) { ink([at(q, k / 16 + 0.01, 0.07), at(q, k / 16 + 0.03, 0.07)], { w: 1.4, passes: 1 }); ink([at(q, k / 16 + 0.01, 0.93), at(q, k / 16 + 0.03, 0.93)], { w: 1.4, passes: 1 }); }
+          for (let k = 0; k < 16; k++) { ink([at(q, k / 16 + 0.01, 0.07), at(q, k / 16 + 0.03, 0.07)], { col: '#f3f1ea', w: 1.4, passes: 1 }); ink([at(q, k / 16 + 0.01, 0.93), at(q, k / 16 + 0.03, 0.93)], { col: '#f3f1ea', w: 1.4, passes: 1 }); }
           box(q, { w: 1.7 });
         };
         film([0.42, 0.84], [0.93, 0.62], 44);
@@ -1173,13 +1164,13 @@
       'desk-camera-print': [366.8, 455.3, 707, ({ ink, box, fill, ring }) => {
         const strap = [[0.40, 0.80], [0.36, 0.64], [0.32, 0.47], [0.33, 0.33], [0.40, 0.26], [0.50, 0.24], [0.58, 0.30], [0.55, 0.40], [0.45, 0.42], [0.42, 0.33], [0.50, 0.28], [0.60, 0.40], [0.66, 0.56], [0.72, 0.68], [0.74, 0.78]];
         const sm = []; for (let k = 0; k < strap.length - 1; k++) { const p0 = strap[Math.max(0, k - 1)], p1 = strap[k], p2 = strap[k + 1], p3 = strap[Math.min(strap.length - 1, k + 2)]; for (let s = 0; s < 6; s++) { const u = s / 6, u2 = u * u, u3 = u2 * u; sm.push([0, 1].map(d => 0.5 * (2 * p1[d] + (-p0[d] + p2[d]) * u + (2 * p0[d] - 5 * p1[d] + 4 * p2[d] - p3[d]) * u2 + (-p0[d] + 3 * p1[d] - 3 * p2[d] + p3[d]) * u3))); } } sm.push(strap[strap.length - 1]);
-        ink(sm, { col: '#b5574a', w: 5, a: 1.2, passes: 3, op: 0.85 }); ink(sm, { w: 0.9, passes: 1, op: 0.6 });
+        ink(sm, { col: '#b5574a', w: 5, a: 1.2, passes: 3, op: 0.85 }); 
         const body = [[0.36, 0.79], [0.74, 0.76], [0.76, 0.94], [0.38, 0.97]];
         fill(body, ['#2a2a2a', '#3d3a37', '#1a1a1a', '#55504a'], { ang: -0.1, gap: 1.6 });
         fill([[0.36, 0.79], [0.74, 0.76], [0.745, 0.80], [0.365, 0.83]], ['#c9c4bb', '#e2ddd3'], { gap: 1.2, op: [0.3, 0.7] });
         box(body, { w: 1.8 });
         fill(ring([0.60, 0.865], 0.08, 0.064), ['#141a33', '#0c1022', '#26305a'], { gap: 1.3 });
-        box(ring([0.60, 0.865], 0.08, 0.064), { w: 1.7 }); box(ring([0.60, 0.865], 0.045, 0.036), { w: 1.2, passes: 1 });
+        box(ring([0.60, 0.865], 0.08, 0.064), { w: 1.7 }); box(ring([0.60, 0.865], 0.045, 0.036), { col: '#f3f1ea', w: 1.2, passes: 1 });
         box([[0.40, 0.81], [0.48, 0.805], [0.485, 0.86], [0.405, 0.865]], { w: 1.2, passes: 1 });
       }],
       // the old phone with the cracked screen
@@ -1188,12 +1179,12 @@
         fill(q, ['#1f3a2c', '#16261d', '#2c4a38', '#0f1a14'], { ang: 1.4, gap: 1.1, w: 1.2 });
         const sc = [[0.10, 0.06], [0.90, 0.06], [0.90, 0.50], [0.10, 0.50]];
         fill(sc, ['#0d1420', '#141c2c', '#070a10'], { ang: 1.4, gap: 0.9, w: 1.1 });
-        box(q, { w: 1.2, a: 0.5 }); box(sc, { w: 0.9, a: 0.4, passes: 1 });
-        const cr = (p, a, n) => { if (!n) return; let q2 = p, d = 0; for (let k = 0; k < 3; k++) { const L = 0.06 + rnd() * 0.06; const nq = [q2[0] + Math.cos(a) * L * 0.6, q2[1] + Math.sin(a) * L * 0.3]; if (nq[0] < 0.11 || nq[0] > 0.89 || nq[1] < 0.07 || nq[1] > 0.49) break; ink([q2, nq], { w: 0.6, passes: 1, op: 0.85, a: 0.2 }); q2 = nq; a += j(0.6); if (rnd() < 0.5) cr(q2, a + j(1.4), n - 1); } };
+        box(q, { w: 1.2, a: 0.5 }); box(sc, { col: '#f3f1ea', w: 0.9, a: 0.4, passes: 1 });
+        const cr = (p, a, n) => { if (!n) return; let q2 = p, d = 0; for (let k = 0; k < 3; k++) { const L = 0.06 + rnd() * 0.06; const nq = [q2[0] + Math.cos(a) * L * 0.6, q2[1] + Math.sin(a) * L * 0.3]; if (nq[0] < 0.11 || nq[0] > 0.89 || nq[1] < 0.07 || nq[1] > 0.49) break; ink([q2, nq], { col: '#f3f1ea', w: 0.6, passes: 1, op: 0.85, a: 0.2 }); q2 = nq; a += j(0.6); if (rnd() < 0.5) cr(q2, a + j(1.4), n - 1); } };
         for (let k = 0; k < 6; k++) cr([0.55, 0.26], k * 1.05 + j(0.3), 3);
-        box([[0.40, 0.55], [0.62, 0.55], [0.62, 0.635], [0.40, 0.635]], { w: 0.8, a: 0.3, passes: 1 });
-        for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) ink([[0.16 + c * 0.28, 0.69 + r * 0.07], [0.27 + c * 0.28, 0.69 + r * 0.07]], { w: 0.8, a: 0.25, passes: 1, op: 0.8 });
-        ink([[0.14, 0.58], [0.26, 0.58]], { w: 0.7, a: 0.2, passes: 1 }); ink([[0.74, 0.58], [0.86, 0.58]], { w: 0.7, a: 0.2, passes: 1 });
+        box([[0.40, 0.55], [0.62, 0.55], [0.62, 0.635], [0.40, 0.635]], { col: '#f3f1ea', w: 0.8, a: 0.3, passes: 1 });
+        for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) ink([[0.16 + c * 0.28, 0.69 + r * 0.07], [0.27 + c * 0.28, 0.69 + r * 0.07]], { col: '#f3f1ea', w: 0.8, a: 0.25, passes: 1, op: 0.8 });
+        ink([[0.14, 0.58], [0.26, 0.58]], { col: '#f3f1ea', w: 0.7, a: 0.2, passes: 1 }); ink([[0.74, 0.58], [0.86, 0.58]], { col: '#f3f1ea', w: 0.7, a: 0.2, passes: 1 });
       }],
       // the laptop: navy screen with lines of code, grey body, keys and trackpad
       'hero-laptop-code-hq': [374, 360, 909, ({ ink, box, fill, sub, at, rnd }) => {
@@ -1206,8 +1197,8 @@
         fill(base, ['#4a4f5c', '#5b6070', '#3a3e48', '#6b7080'], { ang: -0.05, gap: 1.8, op: [0.3, 0.8] });
         const kb = [[0.22, 0.62], [0.82, 0.62], [0.81, 0.82], [0.23, 0.82]];
         fill(kb, ['#1e2027', '#2a2c34'], { gap: 1.5, op: [0.4, 0.85] });
-        for (let r = 1; r < 5; r++) ink([at(kb, 0, r / 5), at(kb, 1, r / 5)], { w: 0.7, passes: 1, op: 0.45, a: 0.4 });
-        for (let c = 1; c < 12; c++) ink([at(kb, c / 12, 0), at(kb, c / 12, 1)], { w: 0.7, passes: 1, op: 0.4, a: 0.4 });
+        for (let r = 1; r < 5; r++) ink([at(kb, 0, r / 5), at(kb, 1, r / 5)], { col: '#f3f1ea', w: 0.7, passes: 1, op: 0.45, a: 0.4 });
+        for (let c = 1; c < 12; c++) ink([at(kb, c / 12, 0), at(kb, c / 12, 1)], { col: '#f3f1ea', w: 0.7, passes: 1, op: 0.4, a: 0.4 });
         box(lid, { w: 1.8 }); box(scr, { w: 1.2, passes: 1 }); box(base, { w: 1.8 }); box(kb, { w: 1.2, passes: 1 });
         box([[0.34, 0.85], [0.66, 0.85], [0.66, 0.97], [0.34, 0.97]], { w: 1.3 });
       }],
