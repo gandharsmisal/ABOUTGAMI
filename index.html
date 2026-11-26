@@ -2121,12 +2121,12 @@
   // MORPH (experiment): the intro's own drawings turn into the desk's drawings - no outlines, no scribbles, no fade-in.
   // When the lamp is pulled, each intro drawing (the open door, the lamp shade, its cord, the figure) is taken as it is
   // and carried, on a curve, to where a desk object lies - stretching, turning and taking that object's size - while
-  // it melts - goes soft and runny like wet paint - and flows into that object's drawing. Where it lands it already IS the
+  // it turns on its edge like a card seen in perspective; edge-on it becomes that object's drawing and turns back round. Where it lands it already IS the
   // object (same picture, same place), so the desk simply takes over. Drawn on twos (12 a second), boiled.
   //  door -> laptop, phone, About book, grid paper   lamp shade -> camera, sketchbook
   //  cord -> pencil, marker, scissors                 figure -> film strip
   const morph = (() => {
-    const NS = 'http://www.w3.org/2000/svg', DUR = 2.1, STAG = 0.06;
+    const NS = 'http://www.w3.org/2000/svg', FRAME = 1000 / 12, DUR = 1.7, STAG = 0.07;
     const svg = document.createElementNS(NS, 'svg');
     svg.setAttribute('id', 'morphSvg');
     svg.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;overflow:visible;display:none';
@@ -2164,7 +2164,7 @@
         const te = q(t); if (!te || !te.getScreenCTM() || te.closest('g').style.display === 'none') return null;
         let S = SRC[s](); if (used[s]) S = { node: S.node.cloneNode(true), base: S.base, M: S.M }; used[s] = 1;   // (one drawing can split into several)
         const T = imagePiece(te), g = document.createElementNS(NS, 'g'), fid = 'mw' + i;
-        g.innerHTML = `<filter id="${fid}" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.011" numOctaves="2" seed="${3 + i}" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="0" result="b"/><feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0" result="goo"/><feComposite in="d" in2="goo" operator="atop"/></filter>`;
+        g.innerHTML = `<filter id="${fid}" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="1" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3.5" xChannelSelector="R" yChannelSelector="G"/></filter>`;
         const gs = document.createElementNS(NS, 'g'), gt = document.createElementNS(NS, 'g'); gs.appendChild(S.node); gt.appendChild(T.node);
         const body = document.createElementNS(NS, 'g'); body.setAttribute('filter', `url(#${fid})`); body.appendChild(gs); body.appendChild(gt); g.appendChild(body);
         svg.appendChild(g);
@@ -2175,27 +2175,23 @@
       document.getElementById('boilG').style.visibility = 'hidden';            // the copies take over, unseen (same pictures, same places)
       svg.style.display = 'block'; svg.style.opacity = 1;
       running = true;
-      const t0 = performance.now(), total = DUR + STAG * pieces.length;
+      let f = 0; const total = Math.ceil((DUR + STAG * pieces.length) * 12);
       const step = () => {
-        const tt = (performance.now() - t0) / 1000;
+        const tt = f / 12;
         pieces.forEach((p, i) => {
           const u = ease(Math.min(1, Math.max(0, (tt - p.d) / DUR)));
           const dx = p.pT.cx - p.pS.cx, dy = p.pT.cy - p.pS.cy, L = Math.hypot(dx, dy) || 1, k = Math.sin(Math.PI * u) * p.arc;
           const P = { cx: p.pS.cx + dx * u - dy / L * k, cy: p.pS.cy + dy * u + dx / L * k, r: p.pS.r + p.dr * u, sx: p.pS.sx + (p.pT.sx - p.pS.sx) * u, sy: p.pS.sy + (p.pT.sy - p.pS.sy) * u };
-          const W = fromPose(P);
+          const th = Math.PI * u, cs = Math.cos(th), sn = Math.sin(th), side = i % 2 ? 1 : -1;
+          const turn = [Math.max(0.02, Math.abs(cs)), sn * 0.22 * side * Math.sign(cs || 1), 0, 1 + 0.1 * sn, 0, 0];      // (narrowing, sheared like a card seen turning)
+          const W = mul(mul(fromPose(P), [1, 0, 0, 1, 0.5, 0.5]), mul(turn, [1, 0, 0, 1, -0.5, -0.5]));
           p.gs.setAttribute('transform', 'matrix(' + mul(mul(W, inv(p.S.M)), p.S.base).join(' ') + ')');
           p.gt.setAttribute('transform', 'matrix(' + mul(mul(W, inv(p.T.M)), p.T.base).join(' ') + ')');
-          p.gs.setAttribute('opacity', (1 - smooth(0.3, 0.7, u)).toFixed(3));
-          p.gt.setAttribute('opacity', smooth(0.3, 0.7, u).toFixed(3));
-          // melting: the drawing goes soft and runny (a slow, big warp, blurred and pulled together like wet paint) at the
-          // middle of the change, and sets again, crisp, as it lands
-          const w = Math.sin(Math.PI * u) ** 1.3;
-          p.disp.setAttribute('scale', (w * 85).toFixed(1));
-          p.turb.setAttribute('baseFrequency', (0.009 + 0.006 * u).toFixed(4));
-          p.blur.setAttribute('stdDeviation', (w * 7).toFixed(2));
-          p.goo.setAttribute('values', '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 ' + (1 + 17 * w).toFixed(2) + ' ' + (-7 * w).toFixed(2));
+          p.gs.setAttribute('opacity', u < 0.5 ? 1 : 0);                                    // (the swap happens edge-on - unseen)
+          p.gt.setAttribute('opacity', u < 0.5 ? 0 : 1);
+          p.turb.setAttribute('seed', 1 + (f % 3));                                          // boiled: redrawn each drawing
         });
-        if (tt < total) requestAnimationFrame(step);
+        if (f < total) { f++; setTimeout(step, FRAME); }
         else {                                                  // every drawing is now the desk object itself, in place
           running = false; const fn = done; done = null; if (fn) fn();
           requestAnimationFrame(() => requestAnimationFrame(() => { svg.style.display = 'none'; svg.innerHTML = ''; document.getElementById('boilG').style.visibility = ''; }));
