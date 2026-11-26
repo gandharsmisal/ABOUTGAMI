@@ -3664,7 +3664,7 @@
   // twos - a new drawing 12 times a second, not 60 - and each drawing places every object a hair differently, as if
   // redrawn by hand. The places and the paths are exactly the same; at rest nothing jumps.
   const HANDJIT = id => { const s = cam.jseed || 0; if (!s) return [0, 0, 0]; let h = 0; for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) | 0; const f = k => { const v = Math.sin(s * 12.9898 + h * 0.737 + k * 78.233) * 43758.5453; return (v - Math.floor(v)) * 2 - 1; };
-    return [f(1) * 1.3, f(2) * 1.3, f(3) * 0.45]; };
+    return [f(1) * 0.5, f(2) * 0.5, f(3) * 0.15]; };   // (only a hair)
   function camDraw() {
     const P = {};
     for (const id in PROPS) {
@@ -5835,7 +5835,7 @@
     const make = (im, el) => {
       const W = im.naturalWidth, H = im.naturalHeight, c = document.createElement('canvas'); c.width = W; c.height = H;
       const g = c.getContext('2d'); g.drawImage(im, 0, 0); const src = g.getImageData(0, 0, W, H), s = src.data;
-      const A = Math.max(2.5, Math.max(W, H) / 170), CELL = Math.max(16, Math.round(Math.max(W, H) / 22)), gw = Math.ceil(W / CELL) + 2, gh = Math.ceil(H / CELL) + 2;
+      const A = Math.max(1.1, Math.max(W, H) / 380),   /* (a gentle shimmer) */ CELL = Math.max(16, Math.round(Math.max(W, H) / 22)), gw = Math.ceil(W / CELL) + 2, gh = Math.ceil(H / CELL) + 2;
       const one = () => {
         const nx = Float32Array.from({ length: gw * gh }, () => (Math.random() - 0.5) * 2 * A), ny = Float32Array.from({ length: gw * gh }, () => (Math.random() - 0.5) * 2 * A);
         const out = g.createImageData(W, H), o = out.data;
