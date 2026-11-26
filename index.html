@@ -751,7 +751,11 @@
   #hero .hsolid, #figSvg .hsolid { fill: #000; }
   #figSvg .hpen, #hero .hpen { stroke: #ece8dc; }
   #heroLine .hword { fill: #ece8dc; }
-  #figSvg #hfBubbleFill { fill: #fff; } #figSvg #heroScroll { fill: #111; }   /* (the "scroll" bubble: white, black writing) */
+  #figSvg #hfBubbleFill { fill: #f2cf5e; filter: url(#crayon); } #figSvg #heroScroll { fill: #111; }   /* (the "scroll" bubble coloured in with yellow crayon, black writing) */
+  /* the character (intro and main page): the same figure, in a thicker, waxier crayon line */
+  #scene #figure .ln, #scene #leg0, #scene #leg1, #scene #arm { stroke-width: 1.7; filter: url(#crayon); }
+  #figSvg .hpen { stroke-width: 2.6px; } #heroFig .hpen { filter: url(#crayon); }
+  @media (max-width: 600px) { #figSvg .hpen { stroke-width: 2px; } }
   @media (min-width: 821px), (min-aspect-ratio: 85/100) { #workPage { --pen: #ece8dc; } #workPage .wpFrame { stroke: #ece8dc; } }
 </style>
 </head>
@@ -810,7 +814,7 @@
       <g filter="url(#boilFig)"><polyline id="leg0" class="ln"></polyline>
       <polyline id="leg1" class="ln"></polyline></g>
       <g id="figure" filter="url(#boilFig)">
-        <image href="assets/drawn/figure.webp" x="-22.5" y="-144" width="45" height="144" preserveAspectRatio="none"></image>   <!-- (Gandhar's own drawing of the figure) -->
+        <path class="ln solid" d="M -1.1 -112.8 L -9 0 L 9 0 L 1.1 -112.8 M 0 -112.8 C 2.5 -120 6.5 -131 5 -137.5 C 3.5 -144.5 -3.5 -144.5 -5 -137.5 C -6.5 -131 -2.5 -120 0 -112.8 Z"></path>
       </g>
     </g>
 
@@ -1549,8 +1553,7 @@
          arm, and a hand-drawn speech bubble with "scroll" appears beside the hand (paths set in JS) -->
     <polyline id="hfLeg0" class="hpen"></polyline>
     <polyline id="hfLeg1" class="hpen"></polyline>
-    <path id="hfBody" class="hpen hsolid" d="M 0 0" style="display:none"></path>
-    <image id="hfBodyImg" href="assets/drawn/figure.webp" x="0" y="0" width="1" height="1" preserveAspectRatio="none"></image>   <!-- (Gandhar's own drawing of the figure) -->
+    <path id="hfBody" class="hpen hsolid" d="M 0 0"></path>
     <path id="hfArm" class="hpen" d="M 0 0" style="visibility:hidden"></path>
     <g id="hfBubble" style="opacity:0" transform="translate(67.5 -22)">   <!-- its tail just above the raised hand (moves with HX) -->
       <path id="hfBubbleFill" class="hsolid" style="opacity:0" d="M 166 796 C 158 777, 181 760, 216 759 C 255 758, 284 770, 282 790 C 280 809, 251 820, 213 820 C 196 820, 183 817, 174 812 C 168 818, 160 823, 151 826 C 158 820, 163 813, 165 808 C 162 804, 163 800, 166 796"></path>   <!-- paper inside the cloud, so nothing shows through -->
@@ -2325,7 +2328,6 @@
       body.setAttribute('d',
         `M ${hx - 2.5} ${854 + hy} C ${hx - 6} ${840 + hy}, ${hx - 8} ${818 + hy}, ${hx - 6} ${810 + hy} C ${hx - 4} ${801 + hy}, ${hx + 4} ${801 + hy}, ${hx + 6} ${810 + hy} C ${hx + 8} ${818 + hy}, ${hx + 6} ${840 + hy}, ${hx + 2.5} ${854 + hy} ` +
         `M ${hx - 2.5} ${854 + hy} Q ${(hx + bx - wb) / 2 - bow} ${(854 + hy + by) / 2}, ${bx - wb} ${by} L ${bx + wb} ${by} L ${hx + 2.5} ${854 + hy}`);   // the body starts right at the neck (5 wide, left open)
-      { const top = 800 + hy, hgt = by - top, w = hgt * 119 / 381, bi = document.getElementById('hfBodyImg'); bi.setAttribute('x', ((hx + bx) / 2 - w / 2).toFixed(1)); bi.setAttribute('y', top.toFixed(1)); bi.setAttribute('width', w.toFixed(1)); bi.setAttribute('height', hgt.toFixed(1)); }   // (the drawing, head to base)
       // as the reference (and the intro): flipbook legs at ~2 steps a second, each pose held ~0.2 s, a natural stride; the body glides on between steps
       const uw = Math.floor(u * 0.318 / 0.4) * 0.4;   /* (2 steps a second over the 1.4 s walk) */
       const legs = gaitLegs(uw, F.stride, x, BY, K, 1, WALK.D, 0.6);
