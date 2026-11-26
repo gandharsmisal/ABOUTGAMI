@@ -3660,6 +3660,11 @@
   // the notebook and the phone turn once round on each move (the mug, riding on the phone, turns with it round the phone)
   const TURN = {};   /* (no extra spin: they turn between their layouts' angles, as the reference) */   // (each spins one whole turn on the way, landing at its same angle)
   window.heroSideline = on => isMobMain() ? (cam.side = 0, null) : (gsap.to(cam, { side: on ? 1 : 0, duration: on ? 0.9 : 0.7, ease: 'power3.inOut', overwrite: true }));   /* (as the reference: out 0.9 s, back 0.7 s, power3.inOut) */
+  // HAND-DRAWN MOTION (experiment, as the animation references): while the desk travels between stops it is drawn on
+  // twos - a new drawing 12 times a second, not 60 - and each drawing places every object a hair differently, as if
+  // redrawn by hand. The places and the paths are exactly the same; at rest nothing jumps.
+  const HANDJIT = id => { const s = cam.jseed || 0; if (!s) return [0, 0, 0]; let h = 0; for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) | 0; const f = k => { const v = Math.sin(s * 12.9898 + h * 0.737 + k * 78.233) * 43758.5453; return (v - Math.floor(v)) * 2 - 1; };
+    return [f(1) * 1.3, f(2) * 1.3, f(3) * 0.45]; };
   function camDraw() {
     const P = {};
     for (const id in PROPS) {
@@ -3699,7 +3704,7 @@
     if (SZ.hpPhone) { P.hpCup[0] = P.hpPhone[0] + (P.hpCup[0] - P.hpPhone[0]) * SZ.hpPhone; P.hpCup[1] = P.hpPhone[1] + (P.hpCup[1] - P.hpPhone[1]) * SZ.hpPhone; }
     for (const id in PROPS) {
       const [x, y, r, s0] = P[id], c = PROPS[id], s = s0 * (SZ[id] || 1);
-      $(id).setAttribute('transform', `translate(${x} ${y}) rotate(${r}) scale(${s * (isMobMain() ? 1.155 * MOB_K : 0.95)}) translate(${-c[0]} ${-c[1]})`);   // (phones: 15.5% bigger)
+      const hj = HANDJIT(id); $(id).setAttribute('transform', `translate(${x + hj[0]} ${y + hj[1]}) rotate(${r + hj[2]}) scale(${s * (isMobMain() ? 1.155 * MOB_K : 0.95)}) translate(${-c[0]} ${-c[1]})`);   // (phones: 15.5% bigger)
     }
     for (const n in DESK) {
       const dAt = i => { const [x, y, rr, s = 1] = onMobRow(i, n) ? mobSlot(i, n) : DESK[n][i];
@@ -3712,7 +3717,7 @@
       const CL = { paper: [-190, -70], sketchbook: [190, -90], camera: [250, 100], scissors: [-230, 120], marker: [20, 170] }[n] || [0, 0];
       const a0 = Math.floor(p), A0 = dAt(mod(a0)), B0 = dAt(mod(a0 + 1)); let x1 = A0[0] + (B0[0] - A0[0]) * frac, y1 = A0[1] + (B0[1] - A0[1]) * frac, r = rr0;
       if (SD) { const E = WSIDE ? WSIDE[n] : dAt(2); x1 += (E[0] - x1) * SD; y1 += (E[1] - y1) * SD; r += (E[2] - r) * SD; }   // (out to the edges while Work is open)   // (one straight line through the middle - no turn)
-      $('dk-' + n).setAttribute('transform', `translate(${x1} ${y1}) rotate(${r}) scale(${(isMobMain() ? 1.27 * MOB_K * (n === 'camera' ? 1.3 : 1) : 0.95 * ({ sketchbook: 1.1, marker: 1.3, scissors: 1.2, camera: 1.05 }[n] || 1)) * ds})`);
+      const hj = HANDJIT(n); $('dk-' + n).setAttribute('transform', `translate(${x1 + hj[0]} ${y1 + hj[1]}) rotate(${r + hj[2]}) scale(${(isMobMain() ? 1.27 * MOB_K * (n === 'camera' ? 1.3 : 1) : 0.95 * ({ sketchbook: 1.1, marker: 1.3, scissors: 1.2, camera: 1.05 }[n] || 1)) * ds})`);
       // desktop, first view: the pencil lies apart from the sketchbook and the scissors apart from the film; at the other stops they come together
       const sp = SPLIT[n]; if (sp) { const k = isMobMain() ? 0 : between(p, i => [i === 0 ? 1 : 0])[0];
         $('dkp-' + n).setAttribute('transform', `translate(${sp[0] * k} ${sp[1] * k})`); }
@@ -3751,13 +3756,18 @@
       // comes to rest sooner after the last notch.)
       // exactly as the reference: every frame the view moves a fixed share of the way to the target (7% wheel / trackpad,
       // 16% finger, 6% after a flick) - nothing else
+      const moving = Math.abs(cam.target - cam.pos) > 5e-5;
       { const e = cam.target - cam.pos; if (Math.abs(e) > 5e-5) cam.pos += e * (cam.kv || 0.07); else cam.pos = cam.target; }
       for (const q in LAG) cam.lag[q] = cam.pos;
       cam.catching = false;
       const r = Math.round(cam.pos), near = Math.abs(cam.pos - r) < 0.1 && Math.abs(cam.target - r) < 0.12;   // (on the curve an object looks at rest well before exactly on it)
       if (near && cam.shown !== mod(r)) showNote(mod(r));
       else if (!near && cam.shown !== null && Math.abs(cam.pos - r) > 0.14) hideNotes();
-      camDraw(); return;
+      // on twos while moving (a new drawing 12 times a second, each one redrawn a little); every frame otherwise
+      const step12 = Math.floor(time * 12);
+      if (moving) { if (step12 !== cam.step12) { cam.step12 = step12; cam.jseed = 1 + Math.random() * 999; camDraw(); } }
+      else { if (cam.jseed) { cam.jseed = 0; } camDraw(); }
+      return;
     }
     const arrived = Math.abs(cam.target - cam.pos) < 0.04 && Object.entries(cam.lag).every(([k, v]) => k === 'desk' || Math.abs(cam.target - v) < 0.06);   // (the notes don't wait for the side objects)
     if (cam.catching && arrived) {
