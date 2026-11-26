@@ -2118,110 +2118,107 @@
     figSvg.style.opacity = o; figSvg.style.visibility = hero.style.visibility;   // the figure (own layer) goes with it
   }
   whiteTween.eventCallback('onReverseComplete', heroReset);
-  // MORPH (experiment): the intro scatters itself and the pieces take the desk's shape. When the lamp is pulled, the
-  // door, the lamp shade, its cord and the figure crack into rough-edged pieces of their own drawings; the pieces all
-  // gather into one tumbling heap in the middle; there each one flips over (edge-on, unseen) and comes round as a piece
-  // of a desk drawing; then from the heap they fly out and fit together into the laptop, phone, books, camera... - landing as the objects themselves.
-  // Drawn on twos (12 a second), boiled.
+  // MORPH (experiment): the intro's drawings reshape into the desk's drawings. When the lamp is pulled, each intro
+  // drawing (the open door, the lamp shade, its cord, the figure) is stretched over a soft mesh that bends like paper;
+  // as it travels, the mesh pulls it, continuously, into a desk object's shape and angle, and that object's drawing grows
+  // out of the same mesh - so the crayon lines reshape from one thing into the other (a true morph: warp + blend, no
+  // pieces, no flips, no fade-in). The door splits into the laptop, phone, About book and grid paper; the shade into the
+  // camera and sketchbook; the cord into the pencil, marker and scissors; the figure into the film. On twos, boiled.
   const morph = (() => {
-    const NS = 'http://www.w3.org/2000/svg', FRAME = 1000 / 12;
-    const svg = document.createElementNS(NS, 'svg');
-    svg.setAttribute('id', 'morphSvg');
-    svg.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;overflow:visible;display:none';
-    document.body.appendChild(svg);
-    const st = document.createElement('style');
-    st.textContent = '#morphSvg .ln{fill:none;stroke:#fff;stroke-width:0.9;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;filter:url(#crayonLine)}#morphSvg .solid{fill:#000}';
-    document.head.appendChild(st);
+    const FRAME = 1000 / 12, DUR = 2.0, STAG = 0.08, G = 7;
+    const cv = document.createElement('canvas');
+    cv.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;display:none';
+    document.body.appendChild(cv);
     const mul = (m, n) => [m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1], m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3], m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]];
-    const inv = m => { const d = m[0] * m[3] - m[1] * m[2]; return [m[3] / d, -m[1] / d, -m[2] / d, m[0] / d, (m[2] * m[5] - m[3] * m[4]) / d, (m[1] * m[4] - m[0] * m[5]) / d]; };
     const of = M => [M.a, M.b, M.c, M.d, M.e, M.f];
-    const pose = M => { const sx = Math.hypot(M[0], M[1]), r = Math.atan2(M[1], M[0]); return { cx: M[0] * 0.5 + M[2] * 0.5 + M[4], cy: M[1] * 0.5 + M[3] * 0.5 + M[5], r, sx, sy: (M[0] * M[3] - M[1] * M[2]) / sx }; };
-    const fromPose = p => { const c = Math.cos(p.r), s = Math.sin(p.r); return mul([c * p.sx, s * p.sx, -s * p.sy, c * p.sy, p.cx, p.cy], [1, 0, 0, 1, -0.5, -0.5]); };
-    const lerpP = (a, b, u) => { let dr = b.r - a.r; while (dr > Math.PI) dr -= 2 * Math.PI; while (dr < -Math.PI) dr += 2 * Math.PI; return { cx: a.cx + (b.cx - a.cx) * u, cy: a.cy + (b.cy - a.cy) * u, r: a.r + dr * u, sx: a.sx + (b.sx - a.sx) * u, sy: a.sy + (b.sy - a.sy) * u }; };
+    const ap = (m, x, y) => [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]];
     const attr = (e, k) => +e.getAttribute(k) || 0;
-    let running = false, done = null, clipN = 0;
-    // cut a drawing (an element, in its own coordinates x,y,w,h) into cols x rows rough-edged pieces
-    const cut = (el, x, y, w, h, cols, rows, lineArt) => {
-      const base = of(el.parentNode.getScreenCTM()), own = of(el.getScreenCTM()), out = [];
-      const jag = (x0, y0, x1, y1) => { const P = [], n = 3, j = () => (Math.random() - 0.5) * Math.min(x1 - x0, y1 - y0) * 0.18;
-        for (let i = 0; i < n; i++) P.push([x0 + (x1 - x0) * i / n, y0 + j()]); for (let i = 0; i < n; i++) P.push([x1 + j(), y0 + (y1 - y0) * i / n]);
-        for (let i = 0; i < n; i++) P.push([x1 - (x1 - x0) * i / n, y1 + j()]); for (let i = 0; i < n; i++) P.push([x0 + j(), y1 - (y1 - y0) * i / n]); return P; };
-      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
-        const tx = x + w * c / cols, ty = y + h * r / rows, tw = w / cols, th = h / rows, id = 'mc' + (++clipN);
-        const g = document.createElementNS(NS, 'g');
-        const pad = Math.min(tw, th) * 0.12;
-        g.innerHTML = `<clipPath id="${id}"><polygon points="${jag(tx - pad, ty - pad, tx + tw + pad, ty + th + pad).map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ')}"/></clipPath>`;
-        const cl = el.cloneNode(true); cl.removeAttribute('id'); if (cl.querySelectorAll) cl.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
-        cl.removeAttribute('clip-path');
-        if (!lineArt) { cl.removeAttribute('class'); cl.removeAttribute('filter'); cl.removeAttribute('opacity'); }
-        const holder = document.createElementNS(NS, 'g'); holder.setAttribute('clip-path', `url(#${id})`); holder.appendChild(cl); g.appendChild(holder);
-        out.push({ node: g, base, M: mul(own, [tw, 0, 0, th, tx, ty]) });
+    const unitM = el => mul(of(el.getScreenCTM()), [attr(el, 'width'), 0, 0, attr(el, 'height'), attr(el, 'x'), attr(el, 'y')]);   // unit square -> on screen
+    const load = src => new Promise(res => {
+      if (src.startsWith('data:image/svg+xml')) {             // (a drawing made as SVG needs a size of its own to be painted)
+        let s = decodeURIComponent(src.slice(src.indexOf(',') + 1));
+        const vb = s.match(/viewBox="([-\d.]+) ([-\d.]+) ([\d.]+) ([\d.]+)"/), head = s.slice(0, s.indexOf('>'));
+        if (vb && !/\swidth=/.test(head)) {
+          const k = Math.max(1, 600 / Math.max(+vb[3], +vb[4]));
+          s = s.replace('<svg ', '<svg width="' + Math.round(vb[3] * k) + '" height="' + Math.round(vb[4] * k) + '" ');
+          src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+        }
       }
-      return out;
+      const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src;
+    });
+    const href = el => el.getAttribute('href') || el.getAttribute('xlink:href');
+    const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+    const ease = x => x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2;
+    // draw one picture warped onto a mesh: P[j][i] = where its (i/G, j/G) point is on screen
+    const warp = (g, im, P, alpha) => {
+      if (!im || alpha <= 0.003) return; g.globalAlpha = alpha; const W = im.naturalWidth || im.width, H = im.naturalHeight || im.height;
+      const tri = (s0, s1, s2, d0, d1, d2) => {
+        const den = (s1[0] - s0[0]) * (s2[1] - s0[1]) - (s2[0] - s0[0]) * (s1[1] - s0[1]); if (!den) return;
+        const a = ((d1[0] - d0[0]) * (s2[1] - s0[1]) - (d2[0] - d0[0]) * (s1[1] - s0[1])) / den, c = ((d2[0] - d0[0]) * (s1[0] - s0[0]) - (d1[0] - d0[0]) * (s2[0] - s0[0])) / den;
+        const b = ((d1[1] - d0[1]) * (s2[1] - s0[1]) - (d2[1] - d0[1]) * (s1[1] - s0[1])) / den, d = ((d2[1] - d0[1]) * (s1[0] - s0[0]) - (d1[1] - d0[1]) * (s2[0] - s0[0])) / den;
+        const cx = (d0[0] + d1[0] + d2[0]) / 3, cy = (d0[1] + d1[1] + d2[1]) / 3, gr = p => [p[0] + (p[0] - cx) * 0.04 + Math.sign(p[0] - cx) * 0.6, p[1] + (p[1] - cy) * 0.04 + Math.sign(p[1] - cy) * 0.6];   // (a hair bigger: no seams)
+        const e0 = gr(d0), e1 = gr(d1), e2 = gr(d2);
+        g.save(); g.beginPath(); g.moveTo(e0[0], e0[1]); g.lineTo(e1[0], e1[1]); g.lineTo(e2[0], e2[1]); g.closePath(); g.clip();
+        g.transform(a, b, c, d, d0[0] - a * s0[0] - c * s0[1], d0[1] - b * s0[0] - d * s0[1]); g.drawImage(im, 0, 0); g.restore();
+      };
+      for (let j = 0; j < G; j++) for (let i = 0; i < G; i++) {
+        const s = (x, y) => [x / G * W, y / G * H];
+        tri(s(i, j), s(i + 1, j), s(i, j + 1), P[j][i], P[j][i + 1], P[j + 1][i]);
+        tri(s(i + 1, j), s(i + 1, j + 1), s(i, j + 1), P[j][i + 1], P[j + 1][i + 1], P[j + 1][i]);
+      }
+      g.globalAlpha = 1;
     };
-    const imgCut = (im, cols, rows) => cut(im, attr(im, 'x'), attr(im, 'y'), attr(im, 'width'), attr(im, 'height'), cols, rows);
-    const ease = x => x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2, out3 = x => 1 - (1 - x) ** 3, in2 = x => x * x;
+    let running = false, done = null;
     function start() {
       const q = s => document.querySelector(s);
       const door = q('#doorOpenImg image'), shade = q('#shadeImg'), cord = q('#cordImg'), walker = q('#walker');
       if (!door || !shade || !cord || !door.getScreenCTM()) return false;
-      // the intro, cracked into pieces
-      const wb = walker.getBBox(), figG = document.createElementNS(NS, 'g');
-      const figWrap = walker.cloneNode(true); figWrap.removeAttribute('clip-path');
-      const SRC = { door: imgCut(door, 4, 6), shade: imgCut(shade, 4, 3), cord: imgCut(cord, 1, 7), fig: cut(walker, wb.x, wb.y, wb.width, wb.height, 2, 5, true) };
-      // the desk, as pieces (where each will land)
-      const T = [['#hpLaptop .hprop', 'door', 4, 4], ['#hpPhone .hprop', 'door', 2, 4], ['#hpBook .hprop', 'door', 3, 3], ['#dk-paper > image', 'door', 4, 3],
-        ['#dk-camera > image', 'shade', 3, 4], ['#dk-sketchbook > image', 'shade', 3, 3], ['#dkp-sketchbook image', 'cord', 1, 5], ['#dk-marker > image', 'cord', 3, 3],
-        ['#dkp-scissors image', 'cord', 3, 3], ['#dk-scissors > image', 'fig', 3, 3]];
-      const pieces = [];
-      const W0 = innerWidth, H0 = innerHeight;
-      T.forEach(([sel, from, c, r]) => {
-        const te = q(sel); if (!te || !te.getScreenCTM() || te.closest('g').style.display === 'none') return;
-        imgCut(te, c, r).forEach((tp, k) => {
-          const pool = SRC[from], sp = pool[(k * 7 + pieces.length) % pool.length];
-          const sNode = sp.used ? sp.node.cloneNode(true) : sp.node; sp.used = 1;
-          const pS = pose(sp.M), pT = pose(tp.M);
-          // where it flies to: all the pieces gather into one tumbling heap in the middle of the screen
-          const ang = Math.random() * 6.283, dist = Math.sqrt(Math.random()) * Math.min(W0, H0) * 0.13;
-          const sc = Math.min(pS.sx, pT.sx) * 0.85, scy = Math.min(pS.sy, pT.sy) * 0.85;                    // (a little smaller in the heap)
-          const pR = { cx: W0 * 0.5 + Math.cos(ang) * dist, cy: H0 * 0.5 + Math.sin(ang) * dist * 0.8, r: pS.r + (Math.random() - 0.5) * 5, sx: sc, sy: scy };
-          const g = document.createElementNS(NS, 'g'), gs = document.createElementNS(NS, 'g'), gt = document.createElementNS(NS, 'g');
-          gs.appendChild(sNode); gt.appendChild(tp.node); g.appendChild(gs); g.appendChild(gt);
-          pieces.push({ g, gs, gt, S: sp, Tp: tp, pS, pR, pT, d0: Math.random() * 0.25, d1: Math.random() * 0.3, flip: Math.random() < 0.5 ? 1 : -1 });
-        });
-      });
-      if (!pieces.length) return false;
-      const root = document.createElementNS(NS, 'g');
-      root.innerHTML = `<filter id="mBoil" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="1"/><feDisplacementMap in="SourceGraphic" scale="3" xChannelSelector="R" yChannelSelector="G"/></filter>`;
-      const layer = document.createElementNS(NS, 'g'); layer.setAttribute('filter', 'url(#mBoil)'); pieces.forEach(p => layer.appendChild(p.g)); root.appendChild(layer);
-      svg.innerHTML = ''; svg.appendChild(root);
-      const turb = root.querySelector('feTurbulence');
-      document.getElementById('boilG').style.visibility = 'hidden';            // the pieces take over, unseen (same drawing, same place)
-      svg.style.display = 'block'; svg.style.opacity = 1;
+      // the figure as a picture (its lines, white), with its place on screen
+      const wb = walker.getBBox(), wc = walker.cloneNode(true); wc.removeAttribute('clip-path'); wc.removeAttribute('id'); wc.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+      const figSrc = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${wb.x} ${wb.y} ${wb.width} ${wb.height}" width="${Math.round(wb.width * 4)}" height="${Math.round(wb.height * 4)}"><style>.ln{fill:none;stroke:#f3f1ea;stroke-width:0.9;stroke-linecap:round;stroke-linejoin:round}.solid{fill:#000}</style>${new XMLSerializer().serializeToString(wc)}</svg>`);
+      const figM = mul(of(walker.parentNode.getScreenCTM()), [wb.width, 0, 0, wb.height, wb.x, wb.y]);
+      const SRC = { door: [href(door), unitM(door)], shade: [href(shade), unitM(shade)], cord: [href(cord), unitM(cord)], fig: [figSrc, figM] };
+      const PAIRS = [['door', '#hpLaptop .hprop'], ['door', '#hpPhone .hprop'], ['door', '#hpBook .hprop'], ['door', '#dk-paper > image'],
+        ['shade', '#dk-camera > image'], ['shade', '#dk-sketchbook > image'], ['cord', '#dkp-sketchbook image'], ['cord', '#dk-marker > image'], ['cord', '#dkp-scissors image'], ['fig', '#dk-scissors > image']];
+      const seen = {};
+      const pairs = PAIRS.map(([s, t], i) => { const te = q(t); if (!te || !te.getScreenCTM() || te.closest('g').style.display === 'none') return null;
+        const first = !seen[s]; seen[s] = 1; return { s, srcHref: SRC[s][0], MS: SRC[s][1], te, tHref: href(te), MT: unitM(te), d: i * STAG, first, arc: (i % 2 ? 1 : -1) * (40 + 22 * (i % 3)), ph: Math.random() * 6 }; }).filter(Boolean);
+      if (!pairs.length) return false;
       running = true;
-      const OUT = 0.8, IN = 1.1, HOLD = 0.35;                                   // gather into the heap, tumble there (flip), build out
-      let f = 0; const total = Math.ceil((OUT + HOLD + IN + 0.6) * 12);
-      const step = () => {
-        const tt = f / 12;
-        pieces.forEach(p => {
-          const a = Math.min(1, Math.max(0, (tt - p.d0) / OUT)), b = Math.min(1, Math.max(0, (tt - p.d0 - OUT - HOLD - p.d1) / IN));
-          const P = b > 0 ? lerpP(p.pR, p.pT, ease(b)) : lerpP(p.pS, p.pR, out3(a));
-          // the flip: edge-on at the turn between flying out and flying in - that is where it changes drawing
-          const h = Math.min(1, Math.max(0, (tt - p.d0 - OUT * 0.75) / (HOLD + OUT * 0.25 + p.d1 + IN * 0.25))), cs = Math.cos(Math.PI * h);
-          const turn = [Math.max(0.03, Math.abs(cs)), Math.sin(Math.PI * h) * 0.25 * p.flip, 0, 1, 0, 0];
-          const W = mul(mul(fromPose(P), [1, 0, 0, 1, 0.5, 0.5]), mul(turn, [1, 0, 0, 1, -0.5, -0.5]));
-          p.gs.setAttribute('transform', 'matrix(' + mul(mul(W, inv(p.S.M)), p.S.base).join(' ') + ')');
-          p.gt.setAttribute('transform', 'matrix(' + mul(mul(W, inv(p.Tp.M)), p.Tp.base).join(' ') + ')');
-          p.gs.setAttribute('opacity', h < 0.5 ? 1 : 0); p.gt.setAttribute('opacity', h < 0.5 ? 0 : 1);
-        });
-        turb.setAttribute('seed', 1 + (f % 3));
-        if (f < total) { f++; setTimeout(step, FRAME); }
-        else {                                                  // every piece is in place: the desk itself takes over
-          running = false; const fn = done; done = null; if (fn) fn();
-          requestAnimationFrame(() => requestAnimationFrame(() => { svg.style.display = 'none'; svg.innerHTML = ''; document.getElementById('boilG').style.visibility = ''; }));
-        }
-      };
-      step();
+      Promise.all(pairs.map(p => Promise.all([load(p.srcHref), load(p.tHref)]))).then(ims => {
+        ims.forEach((x, i) => { pairs[i].imS = x[0]; pairs[i].imT = x[1]; });
+        const dpr = Math.min(2, devicePixelRatio || 1); cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
+        const g = cv.getContext('2d'); g.imageSmoothingQuality = 'high';
+        document.getElementById('boilG').style.visibility = 'hidden';            // the warped copies take over (same drawings, same places)
+        cv.style.display = 'block';
+        let f = 0; const total = Math.ceil((DUR + STAG * pairs.length) * 12);
+        const step = () => {
+          const tt = f / 12;
+          g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.width, cv.height); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+          pairs.forEach(p => {
+            const u = ease(Math.min(1, Math.max(0, (tt - p.d) / DUR))), bend = Math.sin(Math.PI * u);
+            // the mesh: each point slides from its place on the intro drawing to its place on the desk drawing, along a
+            // curve, flexing like paper on the way, and boiling a touch every drawing
+            const c0 = ap(p.MS, 0.5, 0.5), c1 = ap(p.MT, 0.5, 0.5), dx = c1[0] - c0[0], dy = c1[1] - c0[1], L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L;
+            const P = [];
+            for (let j = 0; j <= G; j++) { const row = []; for (let i = 0; i <= G; i++) {
+              const a = ap(p.MS, i / G, j / G), b = ap(p.MT, i / G, j / G);
+              const flex = bend * (p.arc + 22 * Math.sin(Math.PI * i / G * 1.5 + p.ph) * Math.sin(Math.PI * j / G + p.ph * 0.5));
+              const jit = u > 0 && u < 1 ? 1.1 : 0;
+              row.push([a[0] + (b[0] - a[0]) * u + nx * flex + (Math.random() - 0.5) * 2 * jit, a[1] + (b[1] - a[1]) * u + ny * flex + (Math.random() - 0.5) * 2 * jit]);
+            } P.push(row); }
+            const mix = smooth(0.18, 0.82, u);                                   // the old drawing gives way as the new one grows in
+            const sA = (1 - mix) * (p.first ? 1 : Math.min(1, u * 6));            // (copies of a split drawing only show once they part)
+            warp(g, p.imS, P, sA); warp(g, p.imT, P, mix);
+          });
+          if (f < total) { f++; setTimeout(step, FRAME); }
+          else {                                                // each drawing is now the desk object, in place: the desk takes over
+            running = false; const fn = done; done = null; if (fn) fn();
+            requestAnimationFrame(() => requestAnimationFrame(() => { cv.style.display = 'none'; document.getElementById('boilG').style.visibility = ''; }));
+          }
+        };
+        step();
+      });
       return true;
     }
     return { start, get running() { return running; }, then(fn) { done = fn; } };
