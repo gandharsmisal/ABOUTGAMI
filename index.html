@@ -2119,9 +2119,9 @@
   }
   whiteTween.eventCallback('onReverseComplete', heroReset);
   // MORPH (experiment): the intro scatters itself and the pieces take the desk's shape. When the lamp is pulled, the
-  // door, the lamp shade, its cord and the figure crack into rough-edged pieces of their own drawings; the pieces fly
-  // apart, tumbling; each one flips over in the air (edge-on, unseen) and comes round as a piece of a desk drawing;
-  // then they fly in and fit together into the laptop, phone, books, camera... - landing as the objects themselves.
+  // door, the lamp shade, its cord and the figure crack into rough-edged pieces of their own drawings; the pieces all
+  // gather into one tumbling heap in the middle; there each one flips over (edge-on, unseen) and comes round as a piece
+  // of a desk drawing; then from the heap they fly out and fit together into the laptop, phone, books, camera... - landing as the objects themselves.
   // Drawn on twos (12 a second), boiled.
   const morph = (() => {
     const NS = 'http://www.w3.org/2000/svg', FRAME = 1000 / 12;
@@ -2181,10 +2181,10 @@
           const pool = SRC[from], sp = pool[(k * 7 + pieces.length) % pool.length];
           const sNode = sp.used ? sp.node.cloneNode(true) : sp.node; sp.used = 1;
           const pS = pose(sp.M), pT = pose(tp.M);
-          // where it flies to: outward from where it started, scattered over the screen, tumbling
-          const ang = Math.atan2(pS.cy - H0 * 0.5, pS.cx - W0 * 0.5) + (Math.random() - 0.5) * 2.4, dist = 140 + Math.random() * 380;
-          const sc = 0.5 * (pS.sx + pT.sx) / 2 + 0.5 * Math.min(pS.sx, pT.sx), scy = 0.5 * (pS.sy + pT.sy) / 2 + 0.5 * Math.min(pS.sy, pT.sy);
-          const pR = { cx: Math.min(W0 - 40, Math.max(40, (pS.cx + pT.cx) / 2 + Math.cos(ang) * dist)), cy: Math.min(H0 - 40, Math.max(40, (pS.cy + pT.cy) / 2 + Math.sin(ang) * dist * 0.7)), r: pS.r + (Math.random() - 0.5) * 5, sx: sc, sy: scy };
+          // where it flies to: all the pieces gather into one tumbling heap in the middle of the screen
+          const ang = Math.random() * 6.283, dist = Math.sqrt(Math.random()) * Math.min(W0, H0) * 0.13;
+          const sc = Math.min(pS.sx, pT.sx) * 0.85, scy = Math.min(pS.sy, pT.sy) * 0.85;                    // (a little smaller in the heap)
+          const pR = { cx: W0 * 0.5 + Math.cos(ang) * dist, cy: H0 * 0.5 + Math.sin(ang) * dist * 0.8, r: pS.r + (Math.random() - 0.5) * 5, sx: sc, sy: scy };
           const g = document.createElementNS(NS, 'g'), gs = document.createElementNS(NS, 'g'), gt = document.createElementNS(NS, 'g');
           gs.appendChild(sNode); gt.appendChild(tp.node); g.appendChild(gs); g.appendChild(gt);
           pieces.push({ g, gs, gt, S: sp, Tp: tp, pS, pR, pT, d0: Math.random() * 0.25, d1: Math.random() * 0.3, flip: Math.random() < 0.5 ? 1 : -1 });
@@ -2199,7 +2199,7 @@
       document.getElementById('boilG').style.visibility = 'hidden';            // the pieces take over, unseen (same drawing, same place)
       svg.style.display = 'block'; svg.style.opacity = 1;
       running = true;
-      const OUT = 0.85, IN = 1.05, HOLD = 0.15;                                  // fly apart, hang (flip), fly in
+      const OUT = 0.8, IN = 1.1, HOLD = 0.35;                                   // gather into the heap, tumble there (flip), build out
       let f = 0; const total = Math.ceil((OUT + HOLD + IN + 0.6) * 12);
       const step = () => {
         const tt = f / 12;
