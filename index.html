@@ -801,7 +801,7 @@
     <g id="doorBack">
       <rect x="911" y="416" width="98" height="247" fill="#000"></rect>
       <!-- the open door (assets/door-open.png): its doorway lined up with the closed door's; swapped in as it opens -->
-      <g id="doorOpenImg" class="sketch" opacity="0"></g>
+      <g id="doorOpenImg" opacity="0"><image href="assets/drawn/door-open.webp" x="878" y="384" width="228" height="308" preserveAspectRatio="none"></image></g>
     </g>
 
     <!-- figure -->
@@ -816,7 +816,7 @@
     <!-- door panel (in front of the figure) -->
     <g id="doorFront">
       <!-- the closed door (assets/door-closed.webp): doorway 911-1009 x 416-663, the figure behind it; swapped out as it opens -->
-      <g id="doorClosedImg" class="sketch"></g>
+      <g id="doorClosedImg"><rect x="911" y="416" width="98" height="247" fill="#000"></rect><image href="assets/drawn/door.webp" x="880.5" y="394" width="160.6" height="277.8" preserveAspectRatio="none"></image></g>
       <polygon id="panel" class="ln solid" points="1020,416 900,416 900,663 1020,663" style="display:none"></polygon>
       <circle id="knob" cx="911" cy="541" r="3.5" fill="#fff" style="display:none"></circle>
     </g>
@@ -927,6 +927,7 @@
       thin(g, P(886, 665, 1), P(1034, 664, 1));
     };
     // closed: frame, teal leaf, the handle
+    return;                                                // (the door is Gandhar's own drawing now - assets/drawn/door.webp)
     const C = document.getElementById('doorClosedImg');
     frame(C);
     const leaf = [[911, 416], [1009, 416], [1009, 663], [911, 663]];
@@ -1001,19 +1002,19 @@
     <filter id="mainBoil" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence id="mainBoilNoise" type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="1" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="4.5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
     <g id="heroCam">   <!-- the camera: moved and zoomed by the main-page scroll steps (set in JS) -->
     <g id="heroDecor" aria-hidden="true" filter="url(#mainBoil)">   <!-- the rest of the desk, peeking in at the edges (placed in JS) -->
-        <g id="dk-paper" class="deskBit"><image href="assets/drawn/grid.webp" x="-210" y="-193" width="420" height="386"></image></g>
-        <g id="dk-marker" class="deskBit"><image href="assets/drawn/marker.webp" x="-95" y="-120.6" width="190" height="241.3" transform="rotate(18 0 0)"></image></g>
-        <g id="dk-scissors" class="deskBit"><image href="assets/drawn/film.webp" x="-96.6" y="-157.7" width="278" height="292"></image><g id="dkp-scissors"><image href="assets/exact/desk-scissors-blade-hq.webp" x="-152.2" y="-182.7" width="304.5" height="365.4"></image></g></g>
-        <g id="dk-sketchbook" class="deskBit"><image href="assets/drawn/sketchbook.webp" x="-215" y="-142" width="304" height="284"></image><g id="dkp-sketchbook"><image href="assets/drawn/pencil.webp" x="-92.5" y="-39" width="325" height="100" transform="rotate(-86 70 11)"></image></g></g>
-        <g id="dk-camera" class="deskBit"><image href="assets/drawn/camera.webp" x="-100" y="-232" width="235" height="296"></image></g>
+        <g id="dk-paper" class="deskBit"><image href="assets/drawn/grid.webp" x="-150.2" y="-218.2" width="340.8" height="421.1" transform="rotate(80.2 -6.8 -4.5)"></image></g>
+        <g id="dk-marker" class="deskBit"><image href="assets/drawn/marker.webp" x="-95.9" y="-59.1" width="192.4" height="140.3" transform="rotate(105.2 2.9 7.9)"></image></g>
+        <g id="dk-scissors" class="deskBit"><image href="assets/drawn/film.webp" x="-127.7" y="-42.7" width="244.3" height="227.9" transform="rotate(14 -2.2 68.2)"></image><g id="dkp-scissors"><image href="assets/drawn/scissors.webp" x="-114.6" y="-99.6" width="250" height="97.3" transform="rotate(-49.6 14.5 -41.2)"></image></g></g>
+        <g id="dk-sketchbook" class="deskBit"><image href="assets/drawn/sketchbook.webp" x="-163.5" y="-117.5" width="213.8" height="227.2"></image><g id="dkp-sketchbook"><image href="assets/drawn/pencil.webp" x="14.8" y="-164.8" width="115.6" height="323.1" transform="rotate(6.4 74.9 -1.1)"></image></g></g>
+        <g id="dk-camera" class="deskBit"><image href="assets/drawn/camera.webp" x="-81.9" y="-147.3" width="193.2" height="281.9" transform="rotate(4 6.6 1.6)"></image></g>
     </g>
     <g id="heroProps" filter="url(#mainBoil)">
       <!-- each prop 1.2x, spread apart and set down a little off-square (own height and tilt) so they look dropped there -->
       <!-- each prop is placed by JS (translate / rotate / scale about its own centre) for each scroll step -->
-      <g id="hpPhone" data-open="contact"><image class="hprop" href="assets/photo/contact-phone-off.webp" x="532.8" y="494" width="86.4" height="180" style="filter: sepia(0.2) saturate(0.95) contrast(0.9) brightness(1.06) drop-shadow(0 2px 4px rgba(40, 32, 18, 0.2))"></image></g>
+      <g id="hpPhone" data-open="contact"><image href="assets/drawn/phone.webp" x="522.9" y="490.3" width="98.6" height="197.9" transform="rotate(1.4 573.7 583)" class="hprop"></image></g>
       <g id="hpCup" data-open="contact" style="display: none"><image class="hprop" href="assets/photo/hero-cup-bright-hq.webp" x="462.3" y="424.3" width="178.3" height="159.3"></image></g>
       <g id="hpLaptop" data-open="work">
-        <image class="hprop" href="assets/drawn/laptop.webp" x="801.3" y="325" width="315.5" height="380"></image>
+        <image href="assets/drawn/laptop.webp" x="780.9" y="358.2" width="363.6" height="288.6" class="hprop"></image>
         <!-- on the laptop step its screen shows the Work page -->
         <clipPath id="heroScreenClip"><rect x="795" y="372" width="327" height="198" rx="2"></rect></clipPath>
         <g id="heroScreen" clip-path="url(#heroScreenClip)" opacity="0" style="display:none">
@@ -1024,7 +1025,7 @@
         </g>
       </g>
       <g id="hpBook" data-open="about">
-        <image class="hprop" href="assets/photo/desk-f1.webp" x="1257.3" y="389" width="229.5" height="300"></image>
+        <image href="assets/drawn/doc.webp" x="1227" y="425.3" width="287.5" height="218.3" transform="rotate(-42.2 1369.7 541.3)" class="hprop"></image>
       </g>
     </g>
     </g>
@@ -2146,15 +2147,15 @@
     const R = (c, rx, ry) => ring().map(p => [c[0] + (p[0] - 0.5) * 2 * rx, c[1] + (p[1] - 0.5) * 2 * ry]);
     // each desk object's outline (in its picture's box, 0-1), the lines its sketch is built from
     const SHAPES = {
-      laptop: ['#hpLaptop .hprop', [[[0.03, 0.03], [0.42, 0.16], [0.42, 0.86], [0.03, 0.97]], [[0.42, 0.17], [0.97, 0.17], [0.95, 0.80], [0.42, 0.82]]],
-        [[[0.48, 0.24], [0.90, 0.24], [0.88, 0.75], [0.48, 0.76]], [[0.13, 0.38], [0.23, 0.40], [0.23, 0.62], [0.13, 0.62]], [[0.30, 0.20], [0.37, 0.22], [0.37, 0.80], [0.30, 0.82]]]],
-      phone: ['#hpPhone .hprop', [[[0.04, 0.015], [0.95, 0.02], [0.95, 0.98], [0.04, 0.975]], [[0.10, 0.06], [0.90, 0.06], [0.90, 0.50], [0.10, 0.50]]]],
-      f1: ['#hpBook .hprop', [[[0.04, 0.03], [0.97, 0.05], [0.95, 0.97], [0.02, 0.95]], [[0.58, 0.44], [0.65, 0.46], [0.50, 0.94], [0.42, 0.92]], [[0.30, 0.33], [0.29, 0.13], [0.46, 0.12]]]],
-      paper: ['#dk-paper > image', [[[0.05, 0.22], [0.97, 0.05], [0.98, 0.58], [0.10, 0.92]], [[0.12, 0.30], [0.92, 0.14], [0.92, 0.52], [0.16, 0.82]]]],
-      marker: ['#dk-marker > image', [[[0.02, 0.03], [0.14, 0.01], [0.98, 0.93], [0.88, 0.99]], [[0.60, 0.62], [0.70, 0.58]]]],
-      scissors: ['#dk-scissors > image', [[[0.02, 0.08], [0.10, 0.01], [0.99, 0.88], [0.90, 0.97]], [[0.28, 0.28], [0.36, 0.22]], [[0.50, 0.50], [0.58, 0.44]], [[0.70, 0.70], [0.78, 0.64]]]],
-      book: ['#dk-sketchbook > image', [[[0.06, 0.06], [0.98, 0.14], [0.96, 0.92], [0.04, 0.95]], [[0.12, 0.10], [0.94, 0.18], [0.92, 0.86], [0.10, 0.88]]]],
-      camera: ['#dk-camera > image', [[[0.02, 0.10], [0.40, 0.10], [0.42, 0.98], [0.04, 0.98]], R([0.20, 0.55], 0.12, 0.12), [[0.40, 0.25], [0.55, 0.45], [0.62, 0.30], [0.80, 0.10], [0.95, 0.22], [0.85, 0.55], [0.62, 0.70], [0.42, 0.80]]]]
+      laptop: ['#hpLaptop .hprop', [[[0.17, 0.03], [0.82, 0.03], [0.82, 0.55], [0.17, 0.55]], [[0.13, 0.56], [0.86, 0.56], [0.97, 0.95], [0.02, 0.95]]],
+        [[[0.22, 0.08], [0.76, 0.08], [0.76, 0.50], [0.22, 0.50]], [[0.27, 0.62], [0.72, 0.62], [0.74, 0.71], [0.25, 0.71]], [[0.37, 0.78], [0.56, 0.78], [0.56, 0.86], [0.37, 0.86]]]],
+      phone: ['#hpPhone .hprop', [[[0.11, 0.04], [0.92, 0.04], [0.92, 0.90], [0.11, 0.90]], [[0.10, 0.05], [0.86, 0.05], [0.86, 0.45], [0.10, 0.45]]]],
+      f1: ['#hpBook .hprop', [[[0.33, 0.06], [0.97, 0.36], [0.62, 0.97], [0.02, 0.78]]]],
+      paper: ['#dk-paper > image', [[[0.02, 0.07], [0.87, 0.07], [0.87, 0.91], [0.02, 0.91]]]],
+      marker: ['#dk-marker > image', [[[0.07, 0.02], [0.95, 0.02], [0.95, 0.93], [0.07, 0.93]]]],
+      scissors: ['#dk-scissors > image', [[[0.11, 0.07], [0.94, 0.07], [0.94, 0.89], [0.11, 0.89]]]],
+      book: ['#dk-sketchbook > image', [[[0.11, 0.07], [0.96, 0.07], [0.96, 0.94], [0.11, 0.94]]]],
+      camera: ['#dk-camera > image', [[[0.07, 0.10], [0.90, 0.10], [0.90, 0.94], [0.07, 0.94]]]]
     };
     const CLOSED = l => l.length >= 4 && Math.hypot(l[0][0] - l[l.length - 1][0], l[0][1] - l[l.length - 1][1]) > 0.01 && l.length !== 10 && l.length !== 3 && l.length !== 2;
     let running = false, done = null, timer = null;
