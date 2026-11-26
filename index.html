@@ -1874,6 +1874,7 @@
   }
   function drawOn(path, amount) {          // reveal a stroke from its start
     if (amount <= 0.001) { path.style.visibility = 'hidden'; return; }
+    if (amount >= 0.999) { if (path.style.strokeDasharray) { path.style.strokeDasharray = ''; path.style.strokeDashoffset = ''; } path.style.visibility = 'inherit'; return; }   // (fully drawn: nothing to measure - much lighter)
     const len = path.getTotalLength();
     path.style.strokeDasharray = `${len} ${len}`;
     path.style.strokeDashoffset = len * (1 - amount);
@@ -2428,6 +2429,7 @@
     gsap.ticker.add((time, dt) => {                                // the fidget runs on the clock
       if ((F.idle <= 0 && F.down <= 0) || caseOpen) return;            // (paused under a case study)
       F.t += dt / 1000;
+      const st = Math.floor(F.t * 12); if (st === F.st12) return; F.st12 = st;   // (on twos: its pose only changes 12 times a second anyway)
       figFrame();
     });
     heroFigStart = () => { hugLeft(); lowered = false; gsap.killTweensOf(F, 'down,idle,sit,settle'); F.down = F.idle = F.sit = F.settle = 0; walkIn.restart(); };
