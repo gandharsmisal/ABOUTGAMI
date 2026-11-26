@@ -2124,7 +2124,7 @@
   // object's colour is scribbled in. One drawing can send out several threads (the door draws the laptop, phone, book and
   // paper; the lamp the camera and sketchbook; the cord the pencil, marker and scissors; the figure the film).
   const morph = (() => {
-    const NS = 'http://www.w3.org/2000/svg', N = 96, STAG = 0.11, RUN = 1.9, FILL = 0.55;
+    const NS = 'http://www.w3.org/2000/svg', N = 120, STAG = 0.03, RUN = 1.8, FILL = 0.45;
     const svg = document.createElementNS(NS, 'svg');
     svg.setAttribute('id', 'morphSvg');
     svg.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;overflow:visible;display:none';
@@ -2137,13 +2137,15 @@
     const href = el => el.getAttribute('href') || el.getAttribute('xlink:href');
     const ease = x => x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2;
     const clamp01 = x => Math.min(1, Math.max(0, x));
-    const load = src => new Promise(res => {
+    const cache = {};
+    const load = src => cache[src] || (cache[src] = new Promise(res => {
       if (src.startsWith('data:image/svg+xml')) {
         let s = decodeURIComponent(src.slice(src.indexOf(',') + 1)); const vb = s.match(/viewBox="([-\d.]+) ([-\d.]+) ([\d.]+) ([\d.]+)"/), head = s.slice(0, s.indexOf('>'));
         if (vb && !/\swidth=/.test(head)) { const k = Math.max(1, 600 / Math.max(+vb[3], +vb[4])); s = s.replace('<svg ', '<svg width="' + Math.round(vb[3] * k) + '" height="' + Math.round(vb[4] * k) + '" '); src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s); }
       }
       const im = new Image(); if (!src.startsWith('data:')) im.crossOrigin = 'anonymous'; im.onload = () => res(im); im.onerror = () => res(null); im.src = src;
-    });
+    }));
+    addEventListener('load', () => setTimeout(() => document.querySelectorAll('#doorOpenImg image, #shadeImg, #cordImg, #hero image').forEach(el => { const h = el.getAttribute('href'); if (h && !h.startsWith('blob:')) load(h); }), 800));   // (ready before the lamp is pulled)
     const star = pts => {
       const cx = pts.reduce((q, p) => q + p[0], 0) / pts.length, cy = pts.reduce((q, p) => q + p[1], 0) / pts.length, R = new Array(N).fill(0);
       for (const [x, y] of pts) { const a = (Math.atan2(y - cy, x - cx) + Math.PI * 2) % (Math.PI * 2), k = Math.floor(a / (Math.PI * 2) * N) % N, r = Math.hypot(x - cx, y - cy); if (r > R[k]) R[k] = r; }
@@ -2154,11 +2156,16 @@
     const outline = (im, M) => {
       const W = 90, H = Math.max(8, Math.round(90 * im.naturalHeight / im.naturalWidth)), c = document.createElement('canvas'); c.width = W; c.height = H;
       const g = c.getContext('2d'); g.drawImage(im, 0, 0, W, H); let d;
-      try { d = g.getImageData(0, 0, W, H).data; } catch (e) { const B = []; for (let k = 0; k < 40; k++) { const u = k / 40; B.push(ap(M, u, 0.02), ap(M, 0.98, u), ap(M, 1 - u, 0.98), ap(M, 0.02, 1 - u)); } return star(B); }
-      const on = (x, y) => { for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const X = x + dx, Y = y + dy; if (X >= 0 && Y >= 0 && X < W && Y < H && d[(Y * W + X) * 4 + 3] > 50) return true; } return false; };
-      const pts = []; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (on(x, y)) pts.push(ap(M, (x + 0.5) / W, (y + 0.5) / H));
-      return pts.length ? star(pts) : null;
+      try { d = g.getImageData(0, 0, W, H).data; } catch (e) { return shapeOf([ap(M, 0.02, 0.02), ap(M, 0.98, 0.02), ap(M, 0.98, 0.98), ap(M, 0.02, 0.98)]); }
+      const pts = []; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 70) pts.push(ap(M, (x + 0.5) / W, (y + 0.5) / H));
+      return pts.length > 3 ? shapeOf(pts) : null;
     };
+    const hull = pts => { const P = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]), cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lo = [], up = [];
+      for (const p of P) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+      for (let i = P.length - 1; i >= 0; i--) { const p = P[i]; while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); }
+      up.pop(); lo.pop(); return lo.concat(up); };
+    const even = poly => { const P = poly.concat([poly[0]]), L = cum(P), out = []; let k = 1; for (let i = 0; i < N; i++) { const d = L[L.length - 1] * i / N; while (k < L.length - 1 && L[k] < d) k++; const f = (d - L[k - 1]) / ((L[k] - L[k - 1]) || 1); out.push([P[k - 1][0] + (P[k][0] - P[k - 1][0]) * f, P[k - 1][1] + (P[k][1] - P[k - 1][1]) * f]); } return out; };
+    const shapeOf = pts => even(hull(pts));
     const near = (ring, p) => { let b = 0, bd = 1e9; ring.forEach((q, i) => { const d = Math.hypot(q[0] - p[0], q[1] - p[1]); if (d < bd) { bd = d; b = i; } }); return b; };
     const rot = (ring, k) => ring.slice(k).concat(ring.slice(0, k));
     const cum = P => { const L = [0]; for (let i = 1; i < P.length; i++) L.push(L[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1])); return L; };
@@ -2185,8 +2192,8 @@
       running = true;
       Promise.all([...Object.values(SRC).map(o => load(href(o.el)).then(im => { o.im = im; })), ...jobs.map(j => load(j.te.dataset.orig || href(j.te)).then(im => { j.im = im; }))]).then(() => {
         for (const k in SRC) { const o = SRC[k]; o.M = unitM(o.el); o.ring = o.im ? outline(o.im, o.M) : null; }
-        { const M = SRC.cord.M; SRC.cord.ring = star([ap(M, 0.2, 0.7), ap(M, 0.8, 0.7)].concat(Array.from({ length: 30 }, (_, k) => ap(M, 0.5, 0.45 + 0.55 * k / 29)))); }
-        if (figPts) { const dense = []; figPts.forEach((p, i) => { const q2 = figPts[(i + 1) % figPts.length]; for (let k = 0; k < 8; k++) dense.push([p[0] + (q2[0] - p[0]) * k / 8, p[1] + (q2[1] - p[1]) * k / 8]); }); SRC.fig = { ring: star(dense) }; }
+        { const M = SRC.cord.M; SRC.cord.ring = shapeOf([ap(M, 0.1, 0.45), ap(M, 0.9, 0.45), ap(M, 0.9, 1), ap(M, 0.1, 1)]); }
+        if (figPts) { const dense = []; figPts.forEach((p, i) => { const q2 = figPts[(i + 1) % figPts.length]; for (let k = 0; k < 8; k++) dense.push([p[0] + (q2[0] - p[0]) * k / 8, p[1] + (q2[1] - p[1]) * k / 8]); }); SRC.fig = { ring: shapeOf(dense) }; }
         svg.innerHTML = ''; const pics = document.createElementNS(NS, 'g'), lines = document.createElementNS(NS, 'g'); lines.setAttribute('filter', 'url(#crayonLine)'); svg.appendChild(pics); svg.appendChild(lines);
         // a copy of a picture behind a mask (in the picture's parent's units): erase = the mask takes it away where drawn
         const masked = (el, id, erase) => {
@@ -2221,18 +2228,18 @@
         }).filter(Boolean);
         document.getElementById('boilG').style.visibility = 'hidden';          // (the copies take over, unseen)
         svg.style.display = 'block'; svg.style.opacity = 1;
-        const t0 = performance.now(), total = RUN + FILL + 0.3 + STAG * threads.length; let tick = -1, J = [wobble(2), wobble(2.8)];
+        const t0 = performance.now(), total = Math.max(RUN * 0.92 + 0.3, RUN * 0.72 + FILL) + STAG * threads.length + 0.03; let tick = -1, J = [wobble(2), wobble(2.8)];
         const step = () => {
           const tt = (performance.now() - t0) / 1000; if (Math.floor(tt * 12) !== tick) { tick = Math.floor(tt * 12); J = [wobble(2), wobble(2.8)]; }
           threads.forEach(th => {
             const t = tt - th.d, u = ease(clamp01(t / RUN));
-            const head = th.Ls + (th.Lt - th.Ls) * u, tail = Math.max(0, head - th.Ls);   // (the thread is as long as the intro outline was)
+            const head = th.Ls + (th.Lt - th.Ls) * u, tail = Math.min(head, th.Lb * ease(clamp01(t / (RUN * 0.9))));   // (the tail always leaves the intro drawing completely and arrives at the object)
             const seg = slice(th.P, th.L, tail, head);
-            const after = clamp01((t - RUN) / 0.35);
+            const after = clamp01((t - RUN * 0.92) / 0.3);
             th.ls.forEach((p, k) => { p.setAttribute('d', seg.length > 1 ? poly(seg, J[k]) : ''); p.style.opacity = 1 - after; });
             if (th.er) th.er.p.style.strokeDashoffset = th.er.L * (1 - clamp01(tail / th.Ls));
             const onT = clamp01((head - th.Lb) / (th.Lt - th.Lb)); th.band.p.style.strokeDashoffset = th.band.L * (1 - onT);
-            th.fill.p.style.strokeDashoffset = th.fill.L * (1 - clamp01((t - RUN * 0.85) / FILL));
+            th.fill.p.style.strokeDashoffset = th.fill.L * (1 - clamp01((t - RUN * 0.72) / FILL));
           });
           if (tt < total) requestAnimationFrame(step);
           else { running = false; const fn = done; done = null; if (fn) fn();
