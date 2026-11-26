@@ -751,11 +751,9 @@
   #hero .hsolid, #figSvg .hsolid { fill: #000; }
   #figSvg .hpen, #hero .hpen { stroke: #ece8dc; }
   #heroLine .hword { fill: #ece8dc; }
-  #figSvg #hfBubbleFill { fill: #f2cf5e; filter: url(#crayon); } #figSvg #heroScroll { fill: #111; }   /* (the "scroll" bubble coloured in with yellow crayon, black writing) */
-  /* the character (intro and main page): the same figure, in a thicker, waxier crayon line */
-  #scene #figure .ln, #scene #leg0, #scene #leg1, #scene #arm { stroke-width: 1.7; filter: url(#crayon); }
-  #figSvg .hpen { stroke-width: 2.6px; } #heroFig .hpen { filter: url(#crayon); }
-  @media (max-width: 600px) { #figSvg .hpen { stroke-width: 2px; } }
+  /* the character and the "scroll" bubble: as they were, only in a waxier crayon (same lines, same size, same colours) */
+  #scene #figure .ln, #scene #leg0, #scene #leg1, #scene #arm { filter: url(#crayon); }
+  #heroFig .hpen, #figSvg #heroScroll { filter: url(#crayon); }
   @media (min-width: 821px), (min-aspect-ratio: 85/100) { #workPage { --pen: #ece8dc; } #workPage .wpFrame { stroke: #ece8dc; } }
 </style>
 </head>
