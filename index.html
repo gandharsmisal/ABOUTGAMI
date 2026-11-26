@@ -2118,15 +2118,13 @@
     figSvg.style.opacity = o; figSvg.style.visibility = hero.style.visibility;   // the figure (own layer) goes with it
   }
   whiteTween.eventCallback('onReverseComplete', heroReset);
-  // MORPH (experiment): the intro's own drawings turn into the desk's drawings - no outlines, no scribbles, no fade-in.
-  // When the lamp is pulled, each intro drawing (the open door, the lamp shade, its cord, the figure) is taken as it is
-  // and carried, on a curve, to where a desk object lies - stretching, turning and taking that object's size - while
-  // it turns on its edge like a card seen in perspective; edge-on it becomes that object's drawing and turns back round. Where it lands it already IS the
-  // object (same picture, same place), so the desk simply takes over. Drawn on twos (12 a second), boiled.
-  //  door -> laptop, phone, About book, grid paper   lamp shade -> camera, sketchbook
-  //  cord -> pencil, marker, scissors                 figure -> film strip
+  // MORPH (experiment): the intro scatters itself and the pieces take the desk's shape. When the lamp is pulled, the
+  // door, the lamp shade, its cord and the figure crack into rough-edged pieces of their own drawings; the pieces fly
+  // apart, tumbling; each one flips over in the air (edge-on, unseen) and comes round as a piece of a desk drawing;
+  // then they fly in and fit together into the laptop, phone, books, camera... - landing as the objects themselves.
+  // Drawn on twos (12 a second), boiled.
   const morph = (() => {
-    const NS = 'http://www.w3.org/2000/svg', FRAME = 1000 / 12, DUR = 1.7, STAG = 0.07;
+    const NS = 'http://www.w3.org/2000/svg', FRAME = 1000 / 12;
     const svg = document.createElementNS(NS, 'svg');
     svg.setAttribute('id', 'morphSvg');
     svg.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;overflow:visible;display:none';
@@ -2134,65 +2132,91 @@
     const st = document.createElement('style');
     st.textContent = '#morphSvg .ln{fill:none;stroke:#fff;stroke-width:0.9;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;filter:url(#crayonLine)}#morphSvg .solid{fill:#000}';
     document.head.appendChild(st);
-    // matrices: [a b c d e f] as in SVG
     const mul = (m, n) => [m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1], m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3], m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]];
     const inv = m => { const d = m[0] * m[3] - m[1] * m[2]; return [m[3] / d, -m[1] / d, -m[2] / d, m[0] / d, (m[2] * m[5] - m[3] * m[4]) / d, (m[1] * m[4] - m[0] * m[5]) / d]; };
     const of = M => [M.a, M.b, M.c, M.d, M.e, M.f];
-    const rectM = (ctm, x, y, w, h) => mul(of(ctm), [w, 0, 0, h, x, y]);          // the unit square -> this picture on screen
     const pose = M => { const sx = Math.hypot(M[0], M[1]), r = Math.atan2(M[1], M[0]); return { cx: M[0] * 0.5 + M[2] * 0.5 + M[4], cy: M[1] * 0.5 + M[3] * 0.5 + M[5], r, sx, sy: (M[0] * M[3] - M[1] * M[2]) / sx }; };
     const fromPose = p => { const c = Math.cos(p.r), s = Math.sin(p.r); return mul([c * p.sx, s * p.sx, -s * p.sy, c * p.sy, p.cx, p.cy], [1, 0, 0, 1, -0.5, -0.5]); };
+    const lerpP = (a, b, u) => { let dr = b.r - a.r; while (dr > Math.PI) dr -= 2 * Math.PI; while (dr < -Math.PI) dr += 2 * Math.PI; return { cx: a.cx + (b.cx - a.cx) * u, cy: a.cy + (b.cy - a.cy) * u, r: a.r + dr * u, sx: a.sx + (b.sx - a.sx) * u, sy: a.sy + (b.sy - a.sy) * u }; };
     const attr = (e, k) => +e.getAttribute(k) || 0;
-    // a piece: a copy of a drawing, laid out in its own parent's coordinates, and where it sits (unit square -> screen)
-    const imagePiece = im => { const c = im.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('class'); c.removeAttribute('filter'); c.removeAttribute('opacity');
-      return { node: c, base: of(im.parentNode.getScreenCTM()), M: rectM(im.getScreenCTM(), attr(im, 'x'), attr(im, 'y'), attr(im, 'width'), attr(im, 'height')) }; };
-    let running = false, done = null;
-    const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
-    const ease = x => x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2;
+    let running = false, done = null, clipN = 0;
+    // cut a drawing (an element, in its own coordinates x,y,w,h) into cols x rows rough-edged pieces
+    const cut = (el, x, y, w, h, cols, rows, lineArt) => {
+      const base = of(el.parentNode.getScreenCTM()), own = of(el.getScreenCTM()), out = [];
+      const jag = (x0, y0, x1, y1) => { const P = [], n = 3, j = () => (Math.random() - 0.5) * Math.min(x1 - x0, y1 - y0) * 0.18;
+        for (let i = 0; i < n; i++) P.push([x0 + (x1 - x0) * i / n, y0 + j()]); for (let i = 0; i < n; i++) P.push([x1 + j(), y0 + (y1 - y0) * i / n]);
+        for (let i = 0; i < n; i++) P.push([x1 - (x1 - x0) * i / n, y1 + j()]); for (let i = 0; i < n; i++) P.push([x0 + j(), y1 - (y1 - y0) * i / n]); return P; };
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        const tx = x + w * c / cols, ty = y + h * r / rows, tw = w / cols, th = h / rows, id = 'mc' + (++clipN);
+        const g = document.createElementNS(NS, 'g');
+        const pad = Math.min(tw, th) * 0.12;
+        g.innerHTML = `<clipPath id="${id}"><polygon points="${jag(tx - pad, ty - pad, tx + tw + pad, ty + th + pad).map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ')}"/></clipPath>`;
+        const cl = el.cloneNode(true); cl.removeAttribute('id'); if (cl.querySelectorAll) cl.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+        cl.removeAttribute('clip-path');
+        if (!lineArt) { cl.removeAttribute('class'); cl.removeAttribute('filter'); cl.removeAttribute('opacity'); }
+        const holder = document.createElementNS(NS, 'g'); holder.setAttribute('clip-path', `url(#${id})`); holder.appendChild(cl); g.appendChild(holder);
+        out.push({ node: g, base, M: mul(own, [tw, 0, 0, th, tx, ty]) });
+      }
+      return out;
+    };
+    const imgCut = (im, cols, rows) => cut(im, attr(im, 'x'), attr(im, 'y'), attr(im, 'width'), attr(im, 'height'), cols, rows);
+    const ease = x => x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2, out3 = x => 1 - (1 - x) ** 3, in2 = x => x * x;
     function start() {
       const q = s => document.querySelector(s);
-      const door = q('#doorOpenImg image'), shade = q('#shadeImg'), cord = q('#cordImg'), walker = q('#walker'), arm = q('#arm');
+      const door = q('#doorOpenImg image'), shade = q('#shadeImg'), cord = q('#cordImg'), walker = q('#walker');
       if (!door || !shade || !cord || !door.getScreenCTM()) return false;
-      // the figure (with its arm) as one piece
-      const fg = document.createElementNS(NS, 'g'); [walker, arm].forEach(e => { const c = e.cloneNode(true); c.removeAttribute('id'); c.querySelectorAll('[id]').forEach(n => n.removeAttribute('id')); fg.appendChild(c); });
-      let bb = walker.getBBox(); try { const ab = arm.getBBox(); if (ab.width) { const x0 = Math.min(bb.x, ab.x), y0 = Math.min(bb.y, ab.y); bb = { x: x0, y: y0, width: Math.max(bb.x + bb.width, ab.x + ab.width) - x0, height: Math.max(bb.y + bb.height, ab.y + ab.height) - y0 }; } } catch (e) {}
-      const figP = { node: fg, base: of(walker.parentNode.getScreenCTM()), M: rectM(walker.parentNode.getScreenCTM(), bb.x, bb.y, bb.width, bb.height) };
-      const SRC = { door: () => imagePiece(door), shade: () => imagePiece(shade), cord: () => imagePiece(cord), fig: () => figP };
-      const PAIRS = [['door', '#hpLaptop .hprop'], ['door', '#hpPhone .hprop'], ['door', '#hpBook .hprop'], ['door', '#dk-paper > image'],
-        ['shade', '#dk-camera > image'], ['shade', '#dk-sketchbook > image'], ['cord', '#dkp-sketchbook image'], ['cord', '#dk-marker > image'], ['cord', '#dkp-scissors image'], ['fig', '#dk-scissors > image']];
-      const used = {};
-      const pieces = PAIRS.map(([s, t], i) => {
-        const te = q(t); if (!te || !te.getScreenCTM() || te.closest('g').style.display === 'none') return null;
-        let S = SRC[s](); if (used[s]) S = { node: S.node.cloneNode(true), base: S.base, M: S.M }; used[s] = 1;   // (one drawing can split into several)
-        const T = imagePiece(te), g = document.createElementNS(NS, 'g'), fid = 'mw' + i;
-        g.innerHTML = `<filter id="${fid}" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="1" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3.5" xChannelSelector="R" yChannelSelector="G"/></filter>`;
-        const gs = document.createElementNS(NS, 'g'), gt = document.createElementNS(NS, 'g'); gs.appendChild(S.node); gt.appendChild(T.node);
-        const body = document.createElementNS(NS, 'g'); body.setAttribute('filter', `url(#${fid})`); body.appendChild(gs); body.appendChild(gt); g.appendChild(body);
-        svg.appendChild(g);
-        const pS = pose(S.M), pT = pose(T.M); let dr = pT.r - pS.r; while (dr > Math.PI) dr -= 2 * Math.PI; while (dr < -Math.PI) dr += 2 * Math.PI;
-        return { S, T, gs, gt, pS, pT, dr, d: i * STAG, arc: (i % 2 ? 1 : -1) * (40 + 20 * (i % 3)), turb: g.querySelector('feTurbulence'), disp: g.querySelector('feDisplacementMap'), blur: g.querySelector('feGaussianBlur'), goo: g.querySelector('feColorMatrix') };
-      }).filter(Boolean);
+      // the intro, cracked into pieces
+      const wb = walker.getBBox(), figG = document.createElementNS(NS, 'g');
+      const figWrap = walker.cloneNode(true); figWrap.removeAttribute('clip-path');
+      const SRC = { door: imgCut(door, 4, 6), shade: imgCut(shade, 4, 3), cord: imgCut(cord, 1, 7), fig: cut(walker, wb.x, wb.y, wb.width, wb.height, 2, 5, true) };
+      // the desk, as pieces (where each will land)
+      const T = [['#hpLaptop .hprop', 'door', 4, 4], ['#hpPhone .hprop', 'door', 2, 4], ['#hpBook .hprop', 'door', 3, 3], ['#dk-paper > image', 'door', 4, 3],
+        ['#dk-camera > image', 'shade', 3, 4], ['#dk-sketchbook > image', 'shade', 3, 3], ['#dkp-sketchbook image', 'cord', 1, 5], ['#dk-marker > image', 'cord', 3, 3],
+        ['#dkp-scissors image', 'cord', 3, 3], ['#dk-scissors > image', 'fig', 3, 3]];
+      const pieces = [];
+      const W0 = innerWidth, H0 = innerHeight;
+      T.forEach(([sel, from, c, r]) => {
+        const te = q(sel); if (!te || !te.getScreenCTM() || te.closest('g').style.display === 'none') return;
+        imgCut(te, c, r).forEach((tp, k) => {
+          const pool = SRC[from], sp = pool[(k * 7 + pieces.length) % pool.length];
+          const sNode = sp.used ? sp.node.cloneNode(true) : sp.node; sp.used = 1;
+          const pS = pose(sp.M), pT = pose(tp.M);
+          // where it flies to: outward from where it started, scattered over the screen, tumbling
+          const ang = Math.atan2(pS.cy - H0 * 0.5, pS.cx - W0 * 0.5) + (Math.random() - 0.5) * 2.4, dist = 140 + Math.random() * 380;
+          const sc = 0.5 * (pS.sx + pT.sx) / 2 + 0.5 * Math.min(pS.sx, pT.sx), scy = 0.5 * (pS.sy + pT.sy) / 2 + 0.5 * Math.min(pS.sy, pT.sy);
+          const pR = { cx: Math.min(W0 - 40, Math.max(40, (pS.cx + pT.cx) / 2 + Math.cos(ang) * dist)), cy: Math.min(H0 - 40, Math.max(40, (pS.cy + pT.cy) / 2 + Math.sin(ang) * dist * 0.7)), r: pS.r + (Math.random() - 0.5) * 5, sx: sc, sy: scy };
+          const g = document.createElementNS(NS, 'g'), gs = document.createElementNS(NS, 'g'), gt = document.createElementNS(NS, 'g');
+          gs.appendChild(sNode); gt.appendChild(tp.node); g.appendChild(gs); g.appendChild(gt);
+          pieces.push({ g, gs, gt, S: sp, Tp: tp, pS, pR, pT, d0: Math.random() * 0.25, d1: Math.random() * 0.3, flip: Math.random() < 0.5 ? 1 : -1 });
+        });
+      });
       if (!pieces.length) return false;
-      document.getElementById('boilG').style.visibility = 'hidden';            // the copies take over, unseen (same pictures, same places)
+      const root = document.createElementNS(NS, 'g');
+      root.innerHTML = `<filter id="mBoil" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="1"/><feDisplacementMap in="SourceGraphic" scale="3" xChannelSelector="R" yChannelSelector="G"/></filter>`;
+      const layer = document.createElementNS(NS, 'g'); layer.setAttribute('filter', 'url(#mBoil)'); pieces.forEach(p => layer.appendChild(p.g)); root.appendChild(layer);
+      svg.innerHTML = ''; svg.appendChild(root);
+      const turb = root.querySelector('feTurbulence');
+      document.getElementById('boilG').style.visibility = 'hidden';            // the pieces take over, unseen (same drawing, same place)
       svg.style.display = 'block'; svg.style.opacity = 1;
       running = true;
-      let f = 0; const total = Math.ceil((DUR + STAG * pieces.length) * 12);
+      const OUT = 0.85, IN = 1.05, HOLD = 0.15;                                  // fly apart, hang (flip), fly in
+      let f = 0; const total = Math.ceil((OUT + HOLD + IN + 0.6) * 12);
       const step = () => {
         const tt = f / 12;
-        pieces.forEach((p, i) => {
-          const u = ease(Math.min(1, Math.max(0, (tt - p.d) / DUR)));
-          const dx = p.pT.cx - p.pS.cx, dy = p.pT.cy - p.pS.cy, L = Math.hypot(dx, dy) || 1, k = Math.sin(Math.PI * u) * p.arc;
-          const P = { cx: p.pS.cx + dx * u - dy / L * k, cy: p.pS.cy + dy * u + dx / L * k, r: p.pS.r + p.dr * u, sx: p.pS.sx + (p.pT.sx - p.pS.sx) * u, sy: p.pS.sy + (p.pT.sy - p.pS.sy) * u };
-          const th = Math.PI * u, cs = Math.cos(th), sn = Math.sin(th), side = i % 2 ? 1 : -1;
-          const turn = [Math.max(0.02, Math.abs(cs)), sn * 0.22 * side * Math.sign(cs || 1), 0, 1 + 0.1 * sn, 0, 0];      // (narrowing, sheared like a card seen turning)
+        pieces.forEach(p => {
+          const a = Math.min(1, Math.max(0, (tt - p.d0) / OUT)), b = Math.min(1, Math.max(0, (tt - p.d0 - OUT - HOLD - p.d1) / IN));
+          const P = b > 0 ? lerpP(p.pR, p.pT, ease(b)) : lerpP(p.pS, p.pR, out3(a));
+          // the flip: edge-on at the turn between flying out and flying in - that is where it changes drawing
+          const h = Math.min(1, Math.max(0, (tt - p.d0 - OUT * 0.75) / (HOLD + OUT * 0.25 + p.d1 + IN * 0.25))), cs = Math.cos(Math.PI * h);
+          const turn = [Math.max(0.03, Math.abs(cs)), Math.sin(Math.PI * h) * 0.25 * p.flip, 0, 1, 0, 0];
           const W = mul(mul(fromPose(P), [1, 0, 0, 1, 0.5, 0.5]), mul(turn, [1, 0, 0, 1, -0.5, -0.5]));
           p.gs.setAttribute('transform', 'matrix(' + mul(mul(W, inv(p.S.M)), p.S.base).join(' ') + ')');
-          p.gt.setAttribute('transform', 'matrix(' + mul(mul(W, inv(p.T.M)), p.T.base).join(' ') + ')');
-          p.gs.setAttribute('opacity', u < 0.5 ? 1 : 0);                                    // (the swap happens edge-on - unseen)
-          p.gt.setAttribute('opacity', u < 0.5 ? 0 : 1);
-          p.turb.setAttribute('seed', 1 + (f % 3));                                          // boiled: redrawn each drawing
+          p.gt.setAttribute('transform', 'matrix(' + mul(mul(W, inv(p.Tp.M)), p.Tp.base).join(' ') + ')');
+          p.gs.setAttribute('opacity', h < 0.5 ? 1 : 0); p.gt.setAttribute('opacity', h < 0.5 ? 0 : 1);
         });
+        turb.setAttribute('seed', 1 + (f % 3));
         if (f < total) { f++; setTimeout(step, FRAME); }
-        else {                                                  // every drawing is now the desk object itself, in place
+        else {                                                  // every piece is in place: the desk itself takes over
           running = false; const fn = done; done = null; if (fn) fn();
           requestAnimationFrame(() => requestAnimationFrame(() => { svg.style.display = 'none'; svg.innerHTML = ''; document.getElementById('boilG').style.visibility = ''; }));
         }
