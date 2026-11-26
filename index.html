@@ -2144,12 +2144,14 @@
         let s = decodeURIComponent(src.slice(src.indexOf(',') + 1)); const vb = s.match(/viewBox="([-\d.]+) ([-\d.]+) ([\d.]+) ([\d.]+)"/), head = s.slice(0, s.indexOf('>'));
         if (vb && !/\swidth=/.test(head)) { const k = Math.max(1, 600 / Math.max(+vb[3], +vb[4])); s = s.replace('<svg ', '<svg width="' + Math.round(vb[3] * k) + '" height="' + Math.round(vb[4] * k) + '" '); src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s); }
       }
-      const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src;
+      const im = new Image(); if (!src.startsWith('data:')) im.crossOrigin = 'anonymous';   // (the published site serves pictures from another server: ask to read them)
+      im.onload = () => res(im); im.onerror = () => res(null); im.src = src;
     });
     // a drawing's outline: from its middle, how far the crayon reaches in each of N directions (on screen)
     const outline = (im, M) => {
       const W = 90, H = Math.max(8, Math.round(90 * im.naturalHeight / im.naturalWidth)), c = document.createElement('canvas'); c.width = W; c.height = H;
-      const g = c.getContext('2d'); g.drawImage(im, 0, 0, W, H); let d; try { d = g.getImageData(0, 0, W, H).data; } catch (e) { return null; }
+      const g = c.getContext('2d'); g.drawImage(im, 0, 0, W, H); let d;
+      try { d = g.getImageData(0, 0, W, H).data; } catch (e) { const B = []; for (let k = 0; k < 40; k++) { const u = k / 40; B.push(ap(M, u, 0.02), ap(M, 0.98, u), ap(M, 1 - u, 0.98), ap(M, 0.02, 1 - u)); } return star(B); }   // (unreadable: its box)
       const on = (x, y) => { for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const X = x + dx, Y = y + dy; if (X >= 0 && Y >= 0 && X < W && Y < H && d[(Y * W + X) * 4 + 3] > 50) return true; } return false; };
       const pts = []; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (on(x, y)) pts.push(ap(M, (x + 0.5) / W, (y + 0.5) / H));
       return pts.length ? star(pts) : null;
@@ -2181,7 +2183,7 @@
         ['shade', '#dk-camera > image'], ['shade', '#dk-sketchbook > image'], ['cord', '#dkp-sketchbook image'], ['cord', '#dk-marker > image'], ['cord', '#dkp-scissors image'], ['fig', '#dk-scissors > image']];
       const jobs = PAIRS.map(([s, t], i) => { const te = q(t); return te && te.getScreenCTM() && te.closest('g').style.display !== 'none' ? { s, te, i } : null; }).filter(Boolean);
       running = true;
-      Promise.all([...Object.values(SRC).map(o => load(href(o.el)).then(im => { o.im = im; })), ...jobs.map(j => load(href(j.te)).then(im => { j.im = im; }))]).then(() => {
+      Promise.all([...Object.values(SRC).map(o => load(href(o.el)).then(im => { o.im = im; })), ...jobs.map(j => load(j.te.dataset.orig || href(j.te)).then(im => { j.im = im; }))]).then(() => {
         for (const k in SRC) { const o = SRC[k]; o.M = unitM(o.el); o.o = o.im ? outline(o.im, o.M) : null; }
         // the cord: a thin line, its outline a long thin loop; the figure: its body's outline
         { const M = SRC.cord.M; SRC.cord.o = star([ap(M, 0.5, 0.45), ap(M, 0.5, 1), ap(M, 0.2, 0.7), ap(M, 0.8, 0.7)].concat(Array.from({ length: 30 }, (_, k) => ap(M, 0.5, 0.45 + 0.55 * k / 29)))); }
@@ -5790,8 +5792,8 @@
     };
     const begin = async () => {
       for (const el of document.querySelectorAll('#hero image[href^="assets/drawn/"]')) {
-        const im = new Image(); im.src = el.getAttribute('href'); try { await im.decode(); } catch (e) { continue; }
-        await make(im, el); await new Promise(r => setTimeout(r, 60));          // (one at a time, never in the way)
+        const im = new Image(); im.crossOrigin = 'anonymous'; im.src = el.getAttribute('href'); el.dataset.orig = el.getAttribute('href'); try { await im.decode(); } catch (e) { continue; }
+        try { await make(im, el); } catch (e) { /* (a picture that can't be read just doesn't shimmer) */ } await new Promise(r => setTimeout(r, 60));          // (one at a time, never in the way)
       }
     };
     addEventListener('load', () => setTimeout(begin, 1500));
