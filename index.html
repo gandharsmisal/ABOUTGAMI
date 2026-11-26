@@ -2129,6 +2129,8 @@
     svg.setAttribute('id', 'morphSvg');
     svg.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;overflow:visible;display:none';
     document.body.appendChild(svg);
+    const svgL = svg.cloneNode(false); svgL.setAttribute('id', 'morphLines'); svgL.style.zIndex = 41; document.body.appendChild(svgL);   // (the strokes on a layer of their own: moving them never repaints the drawings)
+    svg.style.willChange = svgL.style.willChange = 'transform';
     { const st = document.createElement('style'); st.textContent = '#morphSvg .ln{fill:none;stroke:#fff;stroke-width:0.9;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;filter:url(#crayonLine)}#morphSvg .solid{fill:#000}'; document.head.appendChild(st); }
     const mul = (m, n) => [m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1], m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3], m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]];
     const inv = m => { const d = m[0] * m[3] - m[1] * m[2]; return [m[3] / d, -m[1] / d, -m[2] / d, m[0] / d, (m[2] * m[5] - m[3] * m[4]) / d, (m[1] * m[4] - m[0] * m[5]) / d]; };
@@ -2195,15 +2197,17 @@
         for (const k in SRC) { const o = SRC[k]; o.M = unitM(o.el); o.ring = o.im ? outline(o.im, o.M) : null; }
         { const M = SRC.cord.M; SRC.cord.ring = shapeOf([ap(M, 0.1, 0.45), ap(M, 0.9, 0.45), ap(M, 0.9, 1), ap(M, 0.1, 1)]); }
         if (figPts) { const dense = []; figPts.forEach((p, i) => { const q2 = figPts[(i + 1) % figPts.length]; for (let k = 0; k < 8; k++) dense.push([p[0] + (q2[0] - p[0]) * k / 8, p[1] + (q2[1] - p[1]) * k / 8]); }); SRC.fig = { ring: shapeOf(dense) }; }
-        svg.innerHTML = '<filter id="mBoil" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence id="mBoilN" type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="1"/><feDisplacementMap in="SourceGraphic" scale="3.2" xChannelSelector="R" yChannelSelector="G"/></filter>';
-        const all = document.createElementNS(NS, 'g'); all.setAttribute('filter', 'url(#mBoil)'); svg.appendChild(all);   // (it keeps boiling while it changes)
-        const pics = document.createElementNS(NS, 'g'), lines = document.createElementNS(NS, 'g'); lines.setAttribute('filter', 'url(#crayonLine)'); all.appendChild(pics); all.appendChild(lines);
+        // (light: no live filters - the drawings boil by swapping their ready-made shimmer versions, the strokes by their hand wobble)
+        svg.innerHTML = '';
+        const all = document.createElementNS(NS, 'g'); svg.appendChild(all);
+        const pics = document.createElementNS(NS, 'g'), lines = document.createElementNS(NS, 'g'); all.appendChild(pics); svgL.innerHTML = ''; svgL.appendChild(lines);
+        const boilers = [];
         // a copy of a picture behind a mask (in the picture's parent's units): erase = the mask takes it away where drawn
         const masked = (el, id, erase) => {
           const W = of(el.parentNode.getScreenCTM()), wrap = document.createElementNS(NS, 'g'); wrap.setAttribute('transform', 'matrix(' + W.join(' ') + ')');
           const m = document.createElementNS(NS, 'mask'); m.setAttribute('id', id); m.setAttribute('maskUnits', 'userSpaceOnUse'); m.setAttribute('x', -1e4); m.setAttribute('y', -1e4); m.setAttribute('width', 2e4); m.setAttribute('height', 2e4);
           if (erase) m.innerHTML = '<rect x="-10000" y="-10000" width="20000" height="20000" fill="#fff"/>';
-          wrap.appendChild(m); const c = el.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('clip-path'); if (c.querySelectorAll) c.querySelectorAll('[id]').forEach(n => n.removeAttribute('id')); if (el.tagName.toLowerCase() === 'image') { c.removeAttribute('class'); c.removeAttribute('filter'); c.removeAttribute('opacity'); } c.setAttribute('mask', `url(#${id})`); wrap.appendChild(c); pics.appendChild(wrap);
+          wrap.appendChild(m); const c = el.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('clip-path'); if (c.querySelectorAll) c.querySelectorAll('[id]').forEach(n => n.removeAttribute('id')); if (el.tagName.toLowerCase() === 'image') { c.removeAttribute('class'); c.removeAttribute('filter'); c.removeAttribute('opacity'); } c.setAttribute('mask', `url(#${id})`); wrap.appendChild(c); pics.appendChild(wrap); if (el.__boil) boilers.push([c, el.__boil]);
           const sc = Math.hypot(W[0], W[1]) || 1; return { m, W, sc };
         };
         const addStroke = (mk, P, color, wScreen) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', pathD(local(mk.W, P))); p.setAttribute('fill', 'none'); p.setAttribute('stroke', color); p.setAttribute('stroke-width', wScreen / mk.sc); p.setAttribute('stroke-linecap', 'round'); p.setAttribute('stroke-linejoin', 'round'); mk.m.appendChild(p); const L = p.getTotalLength(); p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L; return { p, L }; };
@@ -2232,23 +2236,28 @@
           return { P, L, Ls, Lb, Lt, band, fill, er, ls, d: n * STAG };
         }).filter(Boolean);
         document.getElementById('boilG').style.visibility = 'hidden';          // (the copies take over, unseen)
-        svg.style.display = 'block'; svg.style.opacity = 1;
+        svg.style.display = 'block'; svg.style.opacity = 1; svgL.style.display = 'block';
         const t0 = performance.now(), total = Math.max(RUN * 0.92 + 0.3, RUN * 0.72 + FILL) + STAG * threads.length + 0.03; let tick = -1, J = [wobble(2), wobble(2.8)];
         const step = () => {
-          const tt = (performance.now() - t0) / 1000; if (Math.floor(tt * 10) !== tick) { tick = Math.floor(tt * 10); J = [wobble(1.6), wobble(2.2)]; const bn = svg.querySelector('#mBoilN'); if (bn) bn.setAttribute('seed', 1 + tick % 3); }
+          const tt = (performance.now() - t0) / 1000; if (Math.floor(tt * 10) !== tick) { tick = Math.floor(tt * 10); J = [wobble(1.8), wobble(2.6)]; for (const [c, u] of boilers) c.setAttribute('href', u[tick % 3]); }
+          const maskNow = Math.floor(tt * 12) !== step.m; step.m = Math.floor(tt * 12);   // (the reveals on twos - 12 a second: much lighter, and hand-drawn)
           threads.forEach(th => {
             const t = tt - th.d, u = ease(clamp01(t / RUN));
             const head = th.Ls + (th.Lt - th.Ls) * u, tail = Math.min(head, th.Lb * ease(clamp01(t / (RUN * 0.9))));   // (the tail always leaves the intro drawing completely and arrives at the object)
             const K = 150 * (1 - u * u), seg = slice(th.P, th.L, Math.max(th.Ls, head - K), head);   // (shrinks to nothing as it arrives: nothing left by the objects)   // (a short stroke, from where it leaves the drawing)
             const after = clamp01((t - RUN * 0.92) / 0.3);
             th.ls.forEach((p, k) => { p.setAttribute('d', seg.length > 1 ? poly(seg, J[k]) : ''); p.style.opacity = 1 - after; });
-            if (th.er) th.er.p.style.strokeDashoffset = th.er.L * (1 - clamp01(tail / th.Ls));
-            const onT = clamp01((head - th.Lb) / (th.Lt - th.Lb)); th.band.p.style.strokeDashoffset = th.band.L * (1 - onT);
-            th.fill.p.style.strokeDashoffset = th.fill.L * (1 - clamp01((t - RUN * 0.72) / FILL));
+            if ((maskNow || tt >= total) && !th.settled) {
+              const eV = clamp01(tail / th.Ls), onT = clamp01((head - th.Lb) / (th.Lt - th.Lb)), fV = clamp01((t - RUN * 0.72) / FILL);
+              if (th.er && th.er.v !== eV) { th.er.v = eV; th.er.p.style.strokeDashoffset = th.er.L * (1 - eV); }
+              if (th.band.v !== onT) { th.band.v = onT; th.band.p.style.strokeDashoffset = th.band.L * (1 - onT); }
+              if (th.fill.v !== fV) { th.fill.v = fV; th.fill.p.style.strokeDashoffset = th.fill.L * (1 - fV); }
+              if (eV === 1 && onT === 1 && fV === 1) th.settled = true;            // (finished: no more redrawing it)
+            }
           });
           if (tt < total) requestAnimationFrame(step);
-          else { running = false; const fn = done; done = null; svg.style.display = 'none'; if (fn) fn();   // (swapped in one go: no frame with both)
-            requestAnimationFrame(() => { svg.innerHTML = ''; document.getElementById('boilG').style.visibility = ''; }); }
+          else { running = false; const fn = done; done = null; svg.style.display = 'none'; svgL.style.display = 'none'; if (fn) fn();   // (swapped in one go: no frame with both)
+            requestAnimationFrame(() => { svg.innerHTML = ''; svgL.innerHTML = ''; document.getElementById('boilG').style.visibility = ''; }); }
         };
         step();
       });
@@ -5812,7 +5821,7 @@
         } }
         g.putImageData(out, 0, 0); return new Promise(r => c.toBlob(bl => r(URL.createObjectURL(bl)), 'image/webp', 0.85));
       };
-      return (async () => { const urls = [el.getAttribute('href')]; for (let n = 0; n < 2; n++) { urls.push(await one()); await new Promise(r => setTimeout(r, 30)); } sets.push({ el, urls }); })();
+      return (async () => { const urls = [el.getAttribute('href')]; for (let n = 0; n < 2; n++) { urls.push(await one()); await new Promise(r => setTimeout(r, 30)); } sets.push({ el, urls }); el.__boil = urls; })();   // (the morph boils with these too)
     };
     const begin = async () => {
       for (const el of document.querySelectorAll('#hero image[href^="assets/drawn/"]')) {
