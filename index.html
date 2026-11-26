@@ -2129,6 +2129,7 @@
     svg.setAttribute('id', 'morphSvg');
     svg.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;overflow:visible;display:none';
     document.body.appendChild(svg);
+    { const st = document.createElement('style'); st.textContent = '#morphSvg .ln{fill:none;stroke:#fff;stroke-width:0.9;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;filter:url(#crayonLine)}#morphSvg .solid{fill:#000}'; document.head.appendChild(st); }
     const mul = (m, n) => [m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1], m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3], m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]];
     const inv = m => { const d = m[0] * m[3] - m[1] * m[2]; return [m[3] / d, -m[1] / d, -m[2] / d, m[0] / d, (m[2] * m[5] - m[3] * m[4]) / d, (m[1] * m[4] - m[0] * m[5]) / d]; };
     const of = M => [M.a, M.b, M.c, M.d, M.e, M.f];
@@ -2200,12 +2201,13 @@
           const W = of(el.parentNode.getScreenCTM()), wrap = document.createElementNS(NS, 'g'); wrap.setAttribute('transform', 'matrix(' + W.join(' ') + ')');
           const m = document.createElementNS(NS, 'mask'); m.setAttribute('id', id); m.setAttribute('maskUnits', 'userSpaceOnUse'); m.setAttribute('x', -1e4); m.setAttribute('y', -1e4); m.setAttribute('width', 2e4); m.setAttribute('height', 2e4);
           if (erase) m.innerHTML = '<rect x="-10000" y="-10000" width="20000" height="20000" fill="#fff"/>';
-          wrap.appendChild(m); const c = el.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('class'); c.removeAttribute('filter'); c.removeAttribute('opacity'); c.setAttribute('mask', `url(#${id})`); wrap.appendChild(c); pics.appendChild(wrap);
+          wrap.appendChild(m); const c = el.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('clip-path'); if (c.querySelectorAll) c.querySelectorAll('[id]').forEach(n => n.removeAttribute('id')); if (el.tagName.toLowerCase() === 'image') { c.removeAttribute('class'); c.removeAttribute('filter'); c.removeAttribute('opacity'); } c.setAttribute('mask', `url(#${id})`); wrap.appendChild(c); pics.appendChild(wrap);
           const sc = Math.hypot(W[0], W[1]) || 1; return { m, W, sc };
         };
         const addStroke = (mk, P, color, wScreen) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', pathD(local(mk.W, P))); p.setAttribute('fill', 'none'); p.setAttribute('stroke', color); p.setAttribute('stroke-width', wScreen / mk.sc); p.setAttribute('stroke-linecap', 'round'); p.setAttribute('stroke-linejoin', 'round'); mk.m.appendChild(p); const L = p.getTotalLength(); p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L; return { p, L }; };
         const span = ring => { const xs = ring.map(p => p[0]), ys = ring.map(p => p[1]); return Math.min(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)); };
         const erasers = {}; for (const k of ['door', 'shade', 'cord']) erasers[k] = { mk: masked(SRC[k].el, 'mE' + k, true) };
+        { const w = q('#walker'); if (w && SRC.fig) erasers.fig = { mk: masked(w, 'mEfig', true) }; }
         const threads = jobs.map((j, n) => {
           const S0 = SRC[j.s] && SRC[j.s].ring, T0 = j.im ? outline(j.im, unitM(j.te)) : null; if (!S0 || !T0) return null;
           const cS = S0.reduce((a, p) => [a[0] + p[0] / N, a[1] + p[1] / N], [0, 0]), cT = T0.reduce((a, p) => [a[0] + p[0] / N, a[1] + p[1] / N], [0, 0]);
@@ -2215,14 +2217,15 @@
           const P = S.concat(bridge, T, [T[0]]), L = cum(P), Ls = L[N], Lb = L[N + 17], Lt = L[L.length - 1];
           // where the head runs round the object, the object's own lines come up (a band along its outline), then the colour is scribbled in
           const mk = masked(j.te, 'mT' + n, false), sz = span(T0);
-          const band = addStroke(mk, T.concat([T[0]]), '#fff', Math.max(14, sz * 0.42));
+          const band = addStroke(mk, T.concat([T[0]]), '#fff', Math.max(30, sz * 1.25));
           const bx = Math.min(...T0.map(p => p[0])), by = Math.min(...T0.map(p => p[1])), bw = Math.max(...T0.map(p => p[0])) - bx, bh = Math.max(...T0.map(p => p[1])) - by;
           const rows = 8, zig = []; for (let i = 0; i <= rows; i++) { zig.push([i % 2 ? bx - bw * 0.1 : bx + bw * 1.1, by + bh * (i + 0.5) / rows]); }
           const fill = addStroke(mk, zig, '#fff', bh / rows * 2.2);
           // the source drawing is taken away where the tail has gone round it (only the first thread from each drawing does this)
           const er = erasers[j.s] && !erasers[j.s].used ? (erasers[j.s].used = 1, j.s === 'cord'
             ? addStroke(erasers.cord.mk, [ap(SRC.cord.M, 0.5, 1.02), ap(SRC.cord.M, 0.5, -0.02)], '#000', 24)        // (the whole cord is pulled up and away)
-            : addStroke(erasers[j.s].mk, S.slice(0, N + 1), '#000', Math.max(18, span(S0) * 0.75))) : null;
+            : j.s === 'fig' ? (() => { const r = q('#walker').getBoundingClientRect(); return addStroke(erasers.fig.mk, [[r.left + r.width / 2, r.top - 6], [r.left + r.width / 2, r.bottom + 6]], '#000', r.width * 1.6 + 30); })()   // (the whole figure, legs too)
+            : addStroke(erasers[j.s].mk, S.slice(0, N + 1), '#000', Math.max(24, span(S0) * 1.35))) : null;   // (wide enough to take the whole drawing)
           const ls = [0, 1].map(k => { const p = document.createElementNS(NS, 'path'); p.setAttribute('fill', 'none'); p.setAttribute('stroke', '#f3f1ea'); p.setAttribute('stroke-width', k ? 1.1 : 1.9); p.setAttribute('stroke-opacity', k ? 0.6 : 0.95); p.setAttribute('stroke-linejoin', 'round'); p.setAttribute('stroke-linecap', 'round'); lines.appendChild(p); return p; });
           return { P, L, Ls, Lb, Lt, band, fill, er, ls, d: n * STAG };
         }).filter(Boolean);
@@ -2234,7 +2237,7 @@
           threads.forEach(th => {
             const t = tt - th.d, u = ease(clamp01(t / RUN));
             const head = th.Ls + (th.Lt - th.Ls) * u, tail = Math.min(head, th.Lb * ease(clamp01(t / (RUN * 0.9))));   // (the tail always leaves the intro drawing completely and arrives at the object)
-            const seg = slice(th.P, th.L, tail, head);
+            const K = 150, seg = slice(th.P, th.L, Math.max(th.Ls, head - K), head);   // (a short stroke, from where it leaves the drawing)
             const after = clamp01((t - RUN * 0.92) / 0.3);
             th.ls.forEach((p, k) => { p.setAttribute('d', seg.length > 1 ? poly(seg, J[k]) : ''); p.style.opacity = 1 - after; });
             if (th.er) th.er.p.style.strokeDashoffset = th.er.L * (1 - clamp01(tail / th.Ls));
