@@ -1002,10 +1002,10 @@
     <filter id="mainBoil" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence id="mainBoilNoise" type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="1" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="4.5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
     <g id="heroCam">   <!-- the camera: moved and zoomed by the main-page scroll steps (set in JS) -->
     <g id="heroDecor" aria-hidden="true" filter="url(#mainBoil)">   <!-- the rest of the desk, peeking in at the edges (placed in JS) -->
-        <g id="dk-paper" class="deskBit"><image href="assets/drawn/grid.webp" x="-150.2" y="-218.2" width="340.8" height="421.1" transform="rotate(80.2 -6.8 -4.5)"></image></g>
+        <g id="dk-paper" class="deskBit"><image href="assets/drawn/doc.webp" x="-201.4" y="-162.5" width="391.8" height="297.5" transform="rotate(3.4 -6.8 -4.5)"></image></g>
         <g id="dk-marker" class="deskBit"><image href="assets/drawn/marker.webp" x="-95.9" y="-59.1" width="192.4" height="140.3" transform="rotate(105.2 2.9 7.9)"></image></g>
         <g id="dk-scissors" class="deskBit"><image href="assets/drawn/film.webp" x="-127.7" y="-42.7" width="244.3" height="227.9" transform="rotate(14 -2.2 68.2)"></image><g id="dkp-scissors"><image href="assets/drawn/scissors.webp" x="-114.6" y="-99.6" width="250" height="97.3" transform="rotate(-49.6 14.5 -41.2)"></image></g></g>
-        <g id="dk-sketchbook" class="deskBit"><image href="assets/drawn/sketchbook.webp" x="-163.5" y="-117.5" width="213.8" height="227.2"></image><g id="dkp-sketchbook"><image href="assets/drawn/pencil.webp" x="14.8" y="-164.8" width="115.6" height="323.1" transform="rotate(6.4 74.9 -1.1)"></image></g></g>
+        <g id="dk-sketchbook" class="deskBit"><image href="assets/drawn/grid.webp" x="-156.5" y="-152.0" width="243.5" height="300.9" transform="rotate(11.7 -54.1 0.8)"></image><g id="dkp-sketchbook"><image href="assets/drawn/pencil.webp" x="14.8" y="-164.8" width="115.6" height="323.1" transform="rotate(6.4 74.9 -1.1)"></image></g></g>
         <g id="dk-camera" class="deskBit"><image href="assets/drawn/camera.webp" x="-81.9" y="-147.3" width="193.2" height="281.9" transform="rotate(4 6.6 1.6)"></image></g>
     </g>
     <g id="heroProps" filter="url(#mainBoil)">
@@ -1025,7 +1025,7 @@
         </g>
       </g>
       <g id="hpBook" data-open="about">
-        <image href="assets/drawn/doc.webp" x="1227" y="425.3" width="287.5" height="218.3" transform="rotate(-42.2 1369.7 541.3)" class="hprop"></image>
+        <image href="assets/drawn/sketchbook.webp" x="1257.4" y="419.8" width="219.6" height="233.3" class="hprop"></image>
       </g>
     </g>
     </g>
@@ -2150,11 +2150,11 @@
       laptop: ['#hpLaptop .hprop', [[[0.17, 0.03], [0.82, 0.03], [0.82, 0.55], [0.17, 0.55]], [[0.13, 0.56], [0.86, 0.56], [0.97, 0.95], [0.02, 0.95]]],
         [[[0.22, 0.08], [0.76, 0.08], [0.76, 0.50], [0.22, 0.50]], [[0.27, 0.62], [0.72, 0.62], [0.74, 0.71], [0.25, 0.71]], [[0.37, 0.78], [0.56, 0.78], [0.56, 0.86], [0.37, 0.86]]]],
       phone: ['#hpPhone .hprop', [[[0.11, 0.04], [0.92, 0.04], [0.92, 0.90], [0.11, 0.90]], [[0.10, 0.05], [0.86, 0.05], [0.86, 0.45], [0.10, 0.45]]]],
-      f1: ['#hpBook .hprop', [[[0.33, 0.06], [0.97, 0.36], [0.62, 0.97], [0.02, 0.78]]]],
-      paper: ['#dk-paper > image', [[[0.02, 0.07], [0.87, 0.07], [0.87, 0.91], [0.02, 0.91]]]],
+      f1: ['#hpBook .hprop', [[[0.11, 0.07], [0.96, 0.07], [0.96, 0.94], [0.11, 0.94]]]],
+      paper: ['#dk-paper > image', [[[0.33, 0.06], [0.97, 0.36], [0.62, 0.97], [0.02, 0.78]]]],
       marker: ['#dk-marker > image', [[[0.07, 0.02], [0.95, 0.02], [0.95, 0.93], [0.07, 0.93]]]],
       scissors: ['#dk-scissors > image', [[[0.11, 0.07], [0.94, 0.07], [0.94, 0.89], [0.11, 0.89]]]],
-      book: ['#dk-sketchbook > image', [[[0.11, 0.07], [0.96, 0.07], [0.96, 0.94], [0.11, 0.94]]]],
+      book: ['#dk-sketchbook > image', [[[0.02, 0.07], [0.87, 0.07], [0.87, 0.91], [0.02, 0.91]]]],
       camera: ['#dk-camera > image', [[[0.07, 0.10], [0.90, 0.10], [0.90, 0.94], [0.07, 0.94]]]]
     };
     const CLOSED = l => l.length >= 4 && Math.hypot(l[0][0] - l[l.length - 1][0], l[0][1] - l[l.length - 1][1]) > 0.01 && l.length !== 10 && l.length !== 3 && l.length !== 2;
