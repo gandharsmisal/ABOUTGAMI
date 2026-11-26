@@ -780,12 +780,12 @@
            so every line shimmers like a redrawn hand-drawn frame even when nothing moves -->
       <filter id="boilFx" x="-5%" y="-5%" width="110%" height="110%">
         <feTurbulence id="boilNoise" type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="1" result="n"></feTurbulence>
-        <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
       </filter>
       <!-- the figure's own boil: stronger and finer, so its thin lines visibly redraw as it walks -->
       <filter id="boilFig" x="-30%" y="-10%" width="160%" height="120%">
         <feTurbulence id="boilFigNoise" type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="4" result="n"></feTurbulence>
-        <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="3" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
       </filter>
       <!-- while it stands in the doorway the figure is kept inside the door frame; the clip opens as it steps out -->
       <clipPath id="doorwayClip" clipPathUnits="userSpaceOnUse"><rect id="doorwayClipRect" x="901" y="0" width="118" height="663"></rect></clipPath>
@@ -984,12 +984,12 @@
     for (const [id, s] of [['shadeImg', shade], ['cordImg', cord]]) { const e = document.getElementById(id); e.removeAttribute('filter'); e.setAttribute('href', url(s)); }
   })();
 
-  // REDRAWN FRAMES (no shimmer): the lines are re-drawn - a new one of 3 versions - only on a stop-motion frame where
-  // something moved (see render); while nothing moves the drawing stays perfectly still
+  // LINE BOIL on the intro: a gentle, constant shimmer (3 versions, 10 a second), also while it waits at the door
   (() => {
     const noise = document.getElementById('boilNoise'), figNoise = document.getElementById('boilFigNoise');
     let f = 0;
     window.__redraw = () => { f = (f + 1) % 3; noise.setAttribute('seed', 1 + f); figNoise.setAttribute('seed', 4 + f); };
+    setInterval(() => { if (!document.hidden && !document.documentElement.classList.contains('app-mode')) window.__redraw(); }, 100);   // (always boiling, gently - waiting at the door too)
   })();
 </script>
 
@@ -2124,7 +2124,7 @@
   // object's colour is scribbled in. One drawing can send out several threads (the door draws the laptop, phone, book and
   // paper; the lamp the camera and sketchbook; the cord the pencil, marker and scissors; the figure the film).
   const morph = (() => {
-    const NS = 'http://www.w3.org/2000/svg', N = 120, STAG = 0.03, RUN = 1.8, FILL = 0.45;
+    const NS = 'http://www.w3.org/2000/svg', N = 120, STAG = 0.02, RUN = 1.3, FILL = 0.32;
     const svg = document.createElementNS(NS, 'svg');
     svg.setAttribute('id', 'morphSvg');
     svg.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;overflow:visible;display:none';
@@ -2195,7 +2195,9 @@
         for (const k in SRC) { const o = SRC[k]; o.M = unitM(o.el); o.ring = o.im ? outline(o.im, o.M) : null; }
         { const M = SRC.cord.M; SRC.cord.ring = shapeOf([ap(M, 0.1, 0.45), ap(M, 0.9, 0.45), ap(M, 0.9, 1), ap(M, 0.1, 1)]); }
         if (figPts) { const dense = []; figPts.forEach((p, i) => { const q2 = figPts[(i + 1) % figPts.length]; for (let k = 0; k < 8; k++) dense.push([p[0] + (q2[0] - p[0]) * k / 8, p[1] + (q2[1] - p[1]) * k / 8]); }); SRC.fig = { ring: shapeOf(dense) }; }
-        svg.innerHTML = ''; const pics = document.createElementNS(NS, 'g'), lines = document.createElementNS(NS, 'g'); lines.setAttribute('filter', 'url(#crayonLine)'); svg.appendChild(pics); svg.appendChild(lines);
+        svg.innerHTML = '<filter id="mBoil" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence id="mBoilN" type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="1"/><feDisplacementMap in="SourceGraphic" scale="2.2" xChannelSelector="R" yChannelSelector="G"/></filter>';
+        const all = document.createElementNS(NS, 'g'); all.setAttribute('filter', 'url(#mBoil)'); svg.appendChild(all);   // (it keeps boiling while it changes)
+        const pics = document.createElementNS(NS, 'g'), lines = document.createElementNS(NS, 'g'); lines.setAttribute('filter', 'url(#crayonLine)'); all.appendChild(pics); all.appendChild(lines);
         // a copy of a picture behind a mask (in the picture's parent's units): erase = the mask takes it away where drawn
         const masked = (el, id, erase) => {
           const W = of(el.parentNode.getScreenCTM()), wrap = document.createElementNS(NS, 'g'); wrap.setAttribute('transform', 'matrix(' + W.join(' ') + ')');
@@ -2233,7 +2235,7 @@
         svg.style.display = 'block'; svg.style.opacity = 1;
         const t0 = performance.now(), total = Math.max(RUN * 0.92 + 0.3, RUN * 0.72 + FILL) + STAG * threads.length + 0.03; let tick = -1, J = [wobble(2), wobble(2.8)];
         const step = () => {
-          const tt = (performance.now() - t0) / 1000; if (Math.floor(tt * 12) !== tick) { tick = Math.floor(tt * 12); J = [wobble(2), wobble(2.8)]; }
+          const tt = (performance.now() - t0) / 1000; if (Math.floor(tt * 10) !== tick) { tick = Math.floor(tt * 10); J = [wobble(1.6), wobble(2.2)]; const bn = svg.querySelector('#mBoilN'); if (bn) bn.setAttribute('seed', 1 + tick % 3); }
           threads.forEach(th => {
             const t = tt - th.d, u = ease(clamp01(t / RUN));
             const head = th.Ls + (th.Lt - th.Ls) * u, tail = Math.min(head, th.Lb * ease(clamp01(t / (RUN * 0.9))));   // (the tail always leaves the intro drawing completely and arrives at the object)
@@ -5797,7 +5799,7 @@
     const make = (im, el) => {
       const W = im.naturalWidth, H = im.naturalHeight, c = document.createElement('canvas'); c.width = W; c.height = H;
       const g = c.getContext('2d'); g.drawImage(im, 0, 0); const src = g.getImageData(0, 0, W, H), s = src.data;
-      const A = Math.max(2.5, Math.max(W, H) / 170), CELL = Math.max(16, Math.round(Math.max(W, H) / 22)), gw = Math.ceil(W / CELL) + 2, gh = Math.ceil(H / CELL) + 2;
+      const A = Math.max(1.6, Math.max(W, H) / 250), CELL = Math.max(16, Math.round(Math.max(W, H) / 22)), gw = Math.ceil(W / CELL) + 2, gh = Math.ceil(H / CELL) + 2;
       const one = () => {
         const nx = Float32Array.from({ length: gw * gh }, () => (Math.random() - 0.5) * 2 * A), ny = Float32Array.from({ length: gw * gh }, () => (Math.random() - 0.5) * 2 * A);
         const out = g.createImageData(W, H), o = out.data;
