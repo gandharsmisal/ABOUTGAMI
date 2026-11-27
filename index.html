@@ -6146,8 +6146,8 @@
     // it hangs from the top of the screen down to just beside the main page's figure, its shade at the figure's head
     const svgEl = cord.querySelector('svg'), cordPath = cord.querySelector('.cord'), glow = cord.querySelector('.glow'), shadeEl = cord.querySelector('.shade');
     const place = () => { const fb = document.getElementById('hfBody'); if (!fb) return; const r = fb.getBoundingClientRect(); if (!r.width && !r.height) return;
-      const s = Math.max(0.6, Math.min(1.4, r.height / 120)), w = 52 * s, shadeH = 33.4 * s, bp = document.getElementById('hfBubblePath'), bb = bp && bp.getBoundingClientRect(), top = bb && bb.height ? bb.top + bb.height * 0.55 : r.top + 30 * s, H = Math.max(80, top);   // (on the figure's right, beside its bubble, shade at about head height)
-      cord.style.left = (Math.max(r.right, bb && bb.width ? bb.right : 0) + 10 * s) + 'px'; cord.style.width = w + 'px'; cord.style.height = H + 'px';
+      const s = Math.max(0.6, Math.min(1.4, r.height / 120)), w = 52 * s, shadeH = 33.4 * s, bp = document.getElementById('hfBubblePath'), bb = bp && bp.getBoundingClientRect(), top = r.top + r.height * 0.32, H = Math.max(80, top);   // (lower: the shade at about the figure's shoulders)
+      cord.style.left = Math.max(6, r.left - w - 4 * s) + 'px'; cord.style.width = w + 'px'; cord.style.height = H + 'px';   // (on the figure's left, towards the logo)
       svgEl.setAttribute('viewBox', '0 0 ' + w.toFixed(1) + ' ' + H.toFixed(1)); svgEl.setAttribute('preserveAspectRatio', 'none');
       cordPath.setAttribute('d', 'M ' + (w / 2).toFixed(1) + ' -6 C ' + (w / 2 + 0.6).toFixed(1) + ' ' + (H * 0.3).toFixed(1) + ', ' + (w / 2 - 0.6).toFixed(1) + ' ' + (H * 0.6).toFixed(1) + ', ' + (w / 2).toFixed(1) + ' ' + (H - shadeH + 2).toFixed(1));
       shadeEl.setAttribute('x', (w * 2 / 52).toFixed(1)); shadeEl.setAttribute('y', (H - shadeH).toFixed(1)); shadeEl.setAttribute('width', (w * 48 / 52).toFixed(1)); shadeEl.setAttribute('height', shadeH.toFixed(1));
