@@ -5380,14 +5380,12 @@
     };
     const KEYS = ['href', 'x', 'y', 'width', 'height', 'transform', 'style'], LIGHT = {};
     for (const s in DARK) { const e = q(s); if (e) LIGHT[s] = Object.fromEntries(KEYS.map(k => [k, e.getAttribute(k)])); }
-    let mode; try { mode = localStorage.getItem('gami-theme'); } catch (e) {}
-    if (mode !== 'dark') mode = 'light';
+    let mode = 'light';   // (every visit starts in light mode - the site as it is; dark is the option)
     const apply = m => {
       mode = m; html.classList.toggle('theme-dark', m === 'dark');
       for (const s in DARK) { const e = q(s); if (!e || !LIGHT[s]) continue; const A = m === 'dark' ? DARK[s] : LIGHT[s];
         for (const k of KEYS) { const v = A[k]; if (v === undefined || v === null) e.removeAttribute(k); else e.setAttribute(k, v); } }
       const w = document.getElementById('whiteout'); if (w) w.setAttribute('fill', m === 'dark' ? '#000' : '#F5F1E6');
-      try { localStorage.setItem('gami-theme', m); } catch (e) {}
       cord.setAttribute('aria-pressed', m === 'dark');
     };
     apply(mode);
