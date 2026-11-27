@@ -753,6 +753,7 @@
   html.theme-dark #heroLine .hword { fill: #ece8dc; }
   @media (min-width: 821px), (min-aspect-ratio: 85/100) { html.theme-dark #workPage { --pen: #ece8dc; } html.theme-dark #workPage .wpFrame { stroke: #ece8dc; } }
   html.theme-dark.app-mode #grain { mix-blend-mode: multiply; opacity: 0.35; }
+  html.theme-dark #workPage .wpFrame { stroke: #ece8dc; stroke-width: 4.6px; filter: url(#wpFrameFx); }   /* (dark mode: the Work picture's frame hand-drawn in crayon) */
   html.theme-dark #heroDecor image, html.theme-dark #heroDecor #dk-paper image, html.theme-dark #heroDecor #dk-camera image, html.theme-dark #heroProps .hprop { filter: none !important; }
   html.theme-dark #heroScreen { display: none; }
   /* the switch: the intro's lamp, hanging down by the figure - it drops in after the first scroll */
@@ -1386,7 +1387,7 @@
       <svg class="pill-icon" viewBox="0 0 24 24" aria-hidden="true"><g class="heart"><path class="ink" d="M12.6 20.3 C 8.2 17.6, 4.4 14.3, 3.7 9.8 C 3.2 6.1, 5.8 4, 8.6 4.4 C 10.6 4.9, 11.7 6.6, 12 8.4 C 12.6 5.6, 14.6 4.1, 16.8 4.5 C 19.4 5, 20.7 7.4, 20.2 10.1 C 19.4 14.4, 15.6 17.1, 11.2 19.9 M 12.6 20.3 C 12.1 20.6, 11.6 20.4, 11.2 19.9"></path></g></svg>
       <span class="label">Contact</span>
     </button>
-    <button type="button" id="themePill" aria-label="Lights off"><svg class="pill-icon" viewBox="0 0 24 24" aria-hidden="true"><defs><radialGradient id="pillGlow" cx="0.5" cy="0.2" r="0.75"><stop offset="0" stop-color="#ffd98a" stop-opacity="0.9"></stop><stop offset="1" stop-color="#ffd98a" stop-opacity="0"></stop></radialGradient></defs><path class="ink pcord" d="M12 -6.6 C 12.3 -2.2, 11.8 3.2, 12.1 8.6"></path><g class="lampTug"><g class="lampMove"><ellipse class="pglow" cx="12" cy="19.5" rx="9" ry="5" fill="url(#pillGlow)"></ellipse><path class="ink" d="M4.4 15.3 C 5 11.2, 8.2 8.6, 12.2 8.3 M 11.6 8.4 C 15.6 8.5, 18.8 11.2, 19.7 15.4 M 20 14.9 C 14.8 15.7, 9.6 15.4, 4.1 15.6"></path><path class="ink" d="M7.4 12.1 C 9.7 10.7, 13.5 10.4, 16.7 11.9"></path><path class="ink" d="M9.8 15.9 C 10 18.3, 14 18.4, 14.3 15.7"></path></g></g></svg><span class="label">off</span></button>
+    <button type="button" id="themePill" aria-label="Lights off"><svg class="pill-icon" viewBox="0 0 24 24" aria-hidden="true"><defs><radialGradient id="pillGlow" cx="0.5" cy="0.2" r="0.75"><stop offset="0" stop-color="#ffd98a" stop-opacity="0.9"></stop><stop offset="1" stop-color="#ffd98a" stop-opacity="0"></stop></radialGradient></defs><path class="ink pcord" d="M12 -6.6 C 12.3 -2.2, 11.8 3.2, 12.1 8.6"></path><g class="lampTug"><g class="lampMove"><ellipse class="pglow" cx="12" cy="19.5" rx="9" ry="5" fill="url(#pillGlow)"></ellipse><path class="ink" d="M4.4 15.3 C 5 11.2, 8.2 8.6, 12.2 8.3 M 11.6 8.4 C 15.6 8.5, 18.8 11.2, 19.7 15.4 M 20 14.9 C 14.8 15.7, 9.6 15.4, 4.1 15.6"></path><path class="ink" d="M9.8 15.9 C 10 18.3, 14 18.4, 14.3 15.7"></path></g></g></svg><span class="label">off</span></button>
       </div>
 </nav>
 <!-- phones: a "menu" button, top right; it opens a drawer from the right with the sections in it -->
