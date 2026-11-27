@@ -3961,8 +3961,8 @@
   const caseFrame = (() => {
     const NS = 'http://www.w3.org/2000/svg', s = document.createElementNS(NS, 'svg');
     s.setAttribute('id', 'caseFrame'); s.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:46;pointer-events:none;display:none;overflow:visible';
-    const bk = document.createElement('div'); bk.id = 'caseBlack'; bk.style.cssText = 'position:fixed;inset:0;z-index:39;background:#F5F1E6;pointer-events:none;display:none;opacity:0'; document.body.appendChild(bk);   // (behind the case: all black, no objects)
-    s.innerHTML = '<path fill="none" stroke="#1c1a17" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" filter="url(#wpFrameFx)"></path>';
+    const bk = document.createElement('div'); bk.id = 'caseBlack'; bk.style.cssText = 'position:fixed;inset:0;z-index:39;background:#000;pointer-events:none;display:none;opacity:0'; document.body.appendChild(bk);   // (behind the case: all black, no objects)
+    s.innerHTML = '<path fill="none" stroke="#ece8dc" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" filter="url(#wpFrameFx)"></path>';
     document.body.appendChild(s);
     const p = s.querySelector('path'), J = Array.from({ length: 96 }, () => (Math.random() - 0.5) * 2.2);
     const draw = (x, y, w, h, rr) => {               // a hand-drawn rounded rectangle (a slight wobble all round)
@@ -3983,12 +3983,17 @@
     addEventListener('resize', () => { if (s.style.display === 'block' && !s._anim) draw(...edge()); });
     return {
       grow(fromEl, done) {                            // (the screen goes black and a crayon border is drawn round it by hand, then the case opens in it)
-        bk.style.display = 'block'; gsap.to(bk, { opacity: 1, duration: 0.35, ease: 'sine.out' });
-        s.style.display = 'block'; s.style.opacity = 1; s._anim = true; draw(...edge());
+        // (the background turns black behind the pen: a sweep round the middle that follows the border as it is drawn)
+        const E = edge(), A0 = Math.atan2(E[0] + E[4] - innerWidth / 2, innerHeight / 2 - E[1]) * 180 / Math.PI;
+        const sweep = u => { const g = u >= 1 ? 'none' : 'conic-gradient(from ' + A0.toFixed(1) + 'deg at 50% 50%, #000 ' + (u * 360).toFixed(1) + 'deg, transparent ' + (u * 360 + 3).toFixed(1) + 'deg)'; bk.style.webkitMaskImage = bk.style.maskImage = g; };
+        bk.style.display = 'block'; bk.style.opacity = 1; sweep(0);
+        s.style.display = 'block'; s.style.opacity = 1; s._anim = true; draw(...E);
         const L = p.getTotalLength(); p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L;
-        gsap.to(p.style, { strokeDashoffset: 0, duration: 0.9, delay: 0.15, ease: 'power1.inOut', onComplete: () => { p.style.strokeDasharray = ''; p.style.strokeDashoffset = ''; s._anim = false; done(); } });
+        const o = { u: 0 };
+        gsap.to(o, { u: 1, duration: 1.0, ease: 'power1.inOut', onUpdate: () => { p.style.strokeDashoffset = L * (1 - o.u); sweep(o.u); },
+          onComplete: () => { p.style.strokeDasharray = ''; p.style.strokeDashoffset = ''; sweep(1); s._anim = false; done(); } });
       },
-      show() { s.style.display = 'block'; s.style.opacity = 1; bk.style.display = 'block'; bk.style.opacity = 1; draw(...edge()); const L = document.getElementById('csLoader'); if (L) L.style.clipPath = 'inset(' + INSET + 'px round ' + R_END + 'px)'; },   // (the loading screen inside the border too)
+      show() { s.style.display = 'block'; s.style.opacity = 1; bk.style.display = 'block'; bk.style.opacity = 1; bk.style.webkitMaskImage = bk.style.maskImage = 'none'; draw(...edge()); const L = document.getElementById('csLoader'); if (L) L.style.clipPath = 'inset(' + INSET + 'px round ' + R_END + 'px)'; },   // (the loading screen inside the border too)
       hide() { gsap.to(bk, { opacity: 0, duration: 0.35, onComplete: () => { bk.style.display = 'none'; } }); gsap.to(s, { opacity: 0, duration: 0.3, onComplete: () => { s.style.display = 'none'; const L = document.getElementById('csLoader'); if (L) L.style.clipPath = ''; } }); },
       clip: 'inset(' + INSET + 'px round ' + R_END + 'px)'
     };
