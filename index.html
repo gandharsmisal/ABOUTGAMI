@@ -743,6 +743,27 @@
     #menu { right: 16px; }
     #logo { left: 16px; }
   }
+  /* DARK MODE: pulling the lamp by the figure turns the light off - the dark room with the hand-drawn desk; light mode is
+     the site exactly as it was */
+  #hero { transition: background-color 0.5s ease; }
+  html.theme-dark #hero { background: #000; }
+  html.theme-dark #hero, html.theme-dark #figSvg { --pen: #ece8dc; }
+  html.theme-dark #hero .hsolid, html.theme-dark #figSvg .hsolid { fill: #000; }
+  html.theme-dark #figSvg .hpen, html.theme-dark #hero .hpen { stroke: #ece8dc; }
+  html.theme-dark #heroLine .hword { fill: #ece8dc; }
+  @media (min-width: 821px), (min-aspect-ratio: 85/100) { html.theme-dark #workPage { --pen: #ece8dc; } html.theme-dark #workPage .wpFrame { stroke: #ece8dc; } }
+  html.theme-dark.app-mode #grain { mix-blend-mode: multiply; opacity: 0.35; }
+  html.theme-dark #heroDecor image, html.theme-dark #heroDecor #dk-paper image, html.theme-dark #heroDecor #dk-camera image, html.theme-dark #heroProps .hprop { filter: none !important; }
+  html.theme-dark #heroScreen { display: none; }
+  /* the switch: the intro's lamp, hanging down by the figure - it drops in after the first scroll */
+  #themeCord { position: fixed; z-index: 50; top: 0; left: 200px; width: 52px; height: 104px; border: 0; padding: 0; background: none; cursor: pointer; display: none; -webkit-tap-highlight-color: transparent; }
+  html.app-mode #themeCord { display: block; }
+  #themeCord svg { width: 100%; height: 100%; overflow: visible; }
+  #themeCord .cord { fill: none; stroke: #6f6a60; stroke-width: 1.3; stroke-linecap: round; }
+  html.theme-dark #themeCord .cord { stroke: #b9b3a6; }
+  #themeCord .glow { opacity: 1; transition: opacity 0.4s ease; }
+  html.theme-dark #themeCord .glow { opacity: 0; }
+  #themeCord:focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }
 </style>
 </head>
 <body>
@@ -1357,6 +1378,7 @@
   <div id="drawerList"></div>
 </aside>
 <!-- the GA.MI logo, top left (white ink, flipped dark on the white scenes like the menu) -->
+<button type="button" id="themeCord" aria-label="Pull the lamp: light or dark mode" title="lights"><svg viewBox="0 0 52 104" aria-hidden="true"><defs><radialGradient id="lampGlow" cx="0.5" cy="0.2" r="0.7"><stop offset="0" stop-color="#ffe7b0" stop-opacity="0.75"></stop><stop offset="1" stop-color="#ffe7b0" stop-opacity="0"></stop></radialGradient></defs><g class="pull"><path class="cord" d="M 26 -6 L 26 70"></path><ellipse class="glow" cx="26" cy="96" rx="30" ry="16" fill="url(#lampGlow)"></ellipse><image class="shade" x="2" y="66" width="48" height="33.4" preserveAspectRatio="none"></image></g></svg></button>
 <a id="logo" href="#" aria-label="GA.MI - back to the start"><img src="assets/logo.png" alt="GA.MI" width="312" height="106"></a>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -3397,7 +3419,7 @@
         //  - and the border light - then the case opens in it)
         const E = edge(); bk.style.webkitMaskImage = bk.style.maskImage = 'none';
         bk.style.display = 'block'; bk.style.opacity = 1; bk.style.background = 'rgba(245,241,230,0)'; bk.style.inset = '0px'; bk.style.borderRadius = '0px';
-        s.style.display = 'block'; s.style.opacity = 1; s._anim = true; draw(...E); p.setAttribute('stroke', '#1c1a17');
+        s.style.display = 'block'; s.style.opacity = 1; s._anim = true; draw(...E); p.setAttribute('stroke', '#f3efe4');
         const L = p.getTotalLength(); p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L;
         const o = { u: 0 };
         gsap.to(o, { u: 1, duration: 1.0, ease: 'power1.inOut', onUpdate: () => { p.style.strokeDashoffset = L * (1 - o.u); },
@@ -3407,13 +3429,13 @@
             gsap.to(c, { k: 1, duration: 0.4, ease: 'power2.out', onUpdate: () => { bk.style.background = 'rgba(245,241,230,' + c.k.toFixed(3) + ')'; bk.style.inset = (INSET * c.k).toFixed(1) + 'px'; bk.style.borderRadius = (R_END * c.k).toFixed(1) + 'px'; },
               onComplete: () => { s._anim = false; done(); } }); } });
       },
-      show() { s.style.display = 'block'; s.style.opacity = 1; bk.style.display = 'block'; bk.style.opacity = 1; bk.style.webkitMaskImage = bk.style.maskImage = 'none'; bk.style.background = '#F5F1E6'; bk.style.inset = INSET + 'px'; bk.style.borderRadius = R_END + 'px'; p.setAttribute('stroke', '#1c1a17'); draw(...edge()); const L = document.getElementById('csLoader'); if (L) L.style.clipPath = 'inset(' + INSET + 'px round ' + R_END + 'px)'; },   // (the loading screen inside the border too)
+      show() { s.style.display = 'block'; s.style.opacity = 1; bk.style.display = 'block'; bk.style.opacity = 1; bk.style.webkitMaskImage = bk.style.maskImage = 'none'; bk.style.background = '#F5F1E6'; bk.style.inset = INSET + 'px'; bk.style.borderRadius = R_END + 'px'; p.setAttribute('stroke', '#f3efe4'); draw(...edge()); const L = document.getElementById('csLoader'); if (L) L.style.clipPath = 'inset(' + INSET + 'px round ' + R_END + 'px)'; },   // (the loading screen inside the border too)
       hide() { gsap.to(bk, { opacity: 0, duration: 0.35, onComplete: () => { bk.style.display = 'none'; } }); gsap.to(s, { opacity: 0, duration: 0.3, onComplete: () => { s.style.display = 'none'; const L = document.getElementById('csLoader'); if (L) L.style.clipPath = ''; } }); },
       clip: 'inset(' + INSET + 'px round ' + R_END + 'px)'
     };
   })();
   workPage.addEventListener('click', e => { if (canOpen() && overPicture(e)) {
-    if (isMob()) return openCase(W.cur);
+    if (isMob() || !document.documentElement.classList.contains('theme-dark')) return openCase(W.cur);   // (the drawn border only in dark mode)
     const i = W.cur; caseFrame.grow(document.getElementById('wpFrame'), () => openCase(i, true));   // (the frame swells to the screen, then the case scrolls up in it)
   } });
   function openCase(i, framed) {
@@ -5337,6 +5359,83 @@
   document.querySelector('#figure path').setAttribute('d', bodyPath(0));
   render();
 })();
+</script>
+<script>
+  // DARK / LIGHT MODE: light is the site as it always was; pulling the lamp by the figure turns the light off (the dark room with
+  // the hand-drawn desk) and on again. Remembered. The lamp comes in step by step: "scroll" first; after the first scroll it
+  // drops down above the figure, flickers, and the figure says "pull me"; once pulled, the figure is quiet.
+  (() => {
+    const html = document.documentElement, cord = document.getElementById('themeCord'), q = s => document.querySelector(s);
+    const DARK = {
+      '#hpLaptop .hprop': { href: 'assets/drawn/laptop.webp', x: 753.6, y: 349.3, width: 418.1, height: 331.9 },
+      '#hpPhone .hprop': { href: 'assets/drawn/phone.webp', x: 530.0, y: 503.3, width: 84.8, height: 170.2, transform: 'rotate(1.4 573.7 583)' },
+      '#hpBook .hprop': { href: 'assets/drawn/sketchbook.webp', x: 1244.2, y: 405.8, width: 246.0, height: 261.3 },
+      '#dk-paper > image': { href: 'assets/drawn/doc.webp', x: -201.4, y: -162.5, width: 391.8, height: 297.5, transform: 'rotate(3.4 -6.8 -4.5)' },
+      '#dk-marker > image': { href: 'assets/drawn/marker.webp', x: -95.9, y: -59.1, width: 192.4, height: 140.3, transform: 'rotate(105.2 2.9 7.9)' },
+      '#dk-scissors > image': { href: 'assets/drawn/film.webp', x: -127.7, y: -42.7, width: 244.3, height: 227.9, transform: 'rotate(14 -2.2 68.2)' },
+      '#dkp-scissors image': { href: 'assets/drawn/scissors.webp', x: -114.6, y: -99.6, width: 250, height: 97.3, transform: 'rotate(-49.6 14.5 -41.2)' },
+      '#dk-sketchbook > image': { href: 'assets/drawn/grid.webp', x: -156.5, y: -152.0, width: 243.5, height: 300.9, transform: 'rotate(11.7 -54.1 0.8)' },
+      '#dkp-sketchbook image': { href: 'assets/drawn/pencil.webp', x: 14.8, y: -164.8, width: 115.6, height: 323.1, transform: 'rotate(6.4 74.9 -1.1)' },
+      '#dk-camera > image': { href: 'assets/drawn/camera.webp', x: -81.9, y: -147.3, width: 193.2, height: 281.9, transform: 'rotate(4 6.6 1.6)' }
+    };
+    const KEYS = ['href', 'x', 'y', 'width', 'height', 'transform', 'style'], LIGHT = {};
+    for (const s in DARK) { const e = q(s); if (e) LIGHT[s] = Object.fromEntries(KEYS.map(k => [k, e.getAttribute(k)])); }
+    let mode; try { mode = localStorage.getItem('gami-theme'); } catch (e) {}
+    if (mode !== 'dark') mode = 'light';
+    const apply = m => {
+      mode = m; html.classList.toggle('theme-dark', m === 'dark');
+      for (const s in DARK) { const e = q(s); if (!e || !LIGHT[s]) continue; const A = m === 'dark' ? DARK[s] : LIGHT[s];
+        for (const k of KEYS) { const v = A[k]; if (v === undefined || v === null) e.removeAttribute(k); else e.setAttribute(k, v); } }
+      const w = document.getElementById('whiteout'); if (w) w.setAttribute('fill', m === 'dark' ? '#000' : '#F5F1E6');
+      try { localStorage.setItem('gami-theme', m); } catch (e) {}
+      cord.setAttribute('aria-pressed', m === 'dark');
+    };
+    apply(mode);
+    { const si = document.getElementById('shadeImg'), sh = cord.querySelector('.shade'), set = () => sh.setAttribute('href', si.getAttribute('href') || 'assets/lamp-shade.webp'); set(); addEventListener('load', () => setTimeout(set, 500)); }
+    // it hangs from the top of the screen down to just above the figure's head
+    const svgEl = cord.querySelector('svg'), cordPath = cord.querySelector('.cord'), glow = cord.querySelector('.glow'), shadeEl = cord.querySelector('.shade');
+    const place = () => { const fb = document.getElementById('hfBody'); if (!fb) return; const r = fb.getBoundingClientRect(); if (!r.width && !r.height) return;
+      const s = Math.max(0.6, Math.min(1.3, r.height / 150)), w = 50 * s, shadeH = 32 * s, H = Math.max(80, r.top - 10 * s);
+      cord.style.left = Math.max(6, r.left + r.width / 2 - w / 2 + 30 * s) + 'px'; cord.style.width = w + 'px'; cord.style.height = H + 'px';
+      svgEl.setAttribute('viewBox', '0 0 ' + w.toFixed(1) + ' ' + H.toFixed(1)); svgEl.setAttribute('preserveAspectRatio', 'none');
+      cordPath.setAttribute('d', 'M ' + (w / 2).toFixed(1) + ' -6 L ' + (w / 2).toFixed(1) + ' ' + (H - shadeH + 2).toFixed(1));
+      shadeEl.setAttribute('x', (w * 2 / 52).toFixed(1)); shadeEl.setAttribute('y', (H - shadeH).toFixed(1)); shadeEl.setAttribute('width', (w * 48 / 52).toFixed(1)); shadeEl.setAttribute('height', shadeH.toFixed(1));
+      glow.setAttribute('cx', (w / 2).toFixed(1)); glow.setAttribute('cy', (H + 2).toFixed(1)); glow.setAttribute('rx', (w * 0.6).toFixed(1)); glow.setAttribute('ry', (shadeH * 0.5).toFixed(1)); };
+    place(); addEventListener('resize', place); addEventListener('load', () => setTimeout(place, 300));
+    setInterval(() => { if (html.classList.contains('app-mode') && !document.hidden) place(); }, 250);
+    // step by step
+    const pullG = cord.querySelector('.pull'), hero = document.getElementById('hero');
+    let scrolled = false, shown = false, pulled = false, say = null;
+    cord.style.visibility = 'hidden';
+    const onMain = () => hero && hero.style.visibility === 'visible' && html.classList.contains('app-mode') && !html.classList.contains('wk-open') && !html.classList.contains('in-case');
+    const firstScroll = () => { if (!scrolled && onMain()) { scrolled = true; setTimeout(entrance, 1400); } };
+    addEventListener('wheel', firstScroll, { passive: true }); addEventListener('touchmove', firstScroll, { passive: true });
+    addEventListener('keydown', e => { if (/^(Arrow(Up|Down)|Page(Up|Down))$/.test(e.key)) firstScroll(); });
+    const bubbleSay = text => {
+      const src = document.getElementById('hfBubble'); if (!src) return null;
+      const g = src.cloneNode(true); g.removeAttribute('id'); g.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+      g.style.opacity = 0; g.querySelectorAll('*').forEach(n => { n.style.opacity = ''; });
+      const tx = g.querySelector('text'), st = document.getElementById('heroScroll'); if (tx) { tx.textContent = text; if (st) { const cs = getComputedStyle(st); tx.style.cssText = 'font-family:' + cs.fontFamily + ';font-size:' + cs.fontSize + ';fill:' + cs.fill + ';letter-spacing:' + cs.letterSpacing + ';text-transform:' + cs.textTransform + ';filter:' + cs.filter; } }
+      src.parentNode.appendChild(g); gsap.to(g, { opacity: 1, duration: 0.35, ease: 'sine.out' }); return g; };
+    function entrance() {
+      if (shown || !onMain()) { if (!shown) scrolled = false; return; }
+      shown = true; place(); cord.style.visibility = '';
+      const H = parseFloat(cord.style.height) || 200, lit = mode === 'light', tl = gsap.timeline();
+      tl.fromTo(pullG, { y: -H - 40 }, { y: 0, duration: 0.9, ease: 'bounce.out' })
+        .to(pullG, { y: 14, duration: 0.14, ease: 'power2.in' }, '+=0.35')
+        .to(pullG, { y: 0, duration: 0.6, ease: 'elastic.out(1, 0.32)' });
+      [[0, 0], [0.12, 1], [0.26, 0], [0.4, lit ? 1 : 0]].forEach(([at, on]) => tl.call(() => { glow.style.opacity = on; }, null, 1.45 + at));   // (only the lamp flickers)
+      tl.call(() => { glow.style.opacity = ''; }, null, 2.0);
+      tl.call(() => { if (!pulled) say = bubbleSay('pull me'); }, null, 1.0);
+    }
+    setInterval(() => { if (say) say.style.opacity = onMain() ? 1 : 0; }, 300);
+    cord.addEventListener('click', () => {
+      pulled = true; if (say) { const g = say; say = null; gsap.to(g, { opacity: 0, duration: 0.3, onComplete: () => g.remove() }); }
+      gsap.timeline().to(pullG, { y: 16, duration: 0.14, ease: 'power2.in' }).to(pullG, { y: 0, duration: 0.7, ease: 'elastic.out(1, 0.32)' });
+      const cam = document.getElementById('heroCam');
+      gsap.to(cam, { opacity: 0, duration: 0.22, ease: 'sine.in', onComplete: () => { apply(mode === 'dark' ? 'light' : 'dark'); gsap.to(cam, { opacity: 1, duration: 0.3, ease: 'sine.out' }); } });
+    });
+  })();
 </script>
 </body>
 </html>
