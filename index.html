@@ -3793,6 +3793,93 @@
     gsap.to('#hnLaptop, #hnBook, #hnMug', { opacity: 0, duration: 0.25, overwrite: true });
     gsap.to(cam, { lift: 0, duration: 0.8, ease: 'power2.inOut', overwrite: true });
   }
+  // SCROLL AS A DRAWN CHANGE (experiment): a scroll gesture moves the desk one stop - but instead of sliding there, every
+  // object's outline unravels from where it lies and a crayon line runs to where it will lie and draws its own lines
+  // there, then its colours are coloured in (as the intro turns into the desk). One step at a time.
+  (() => {
+    const NS = 'http://www.w3.org/2000/svg', N = 96, RUN = 0.95, FILL = 0.35;
+    const SEL = ['#hpLaptop .hprop', '#hpPhone .hprop', '#hpBook .hprop', '#dk-paper > image', '#dk-marker > image', '#dk-scissors > image', '#dkp-scissors image', '#dk-sketchbook > image', '#dkp-sketchbook image', '#dk-camera > image'];
+    const ov = document.createElementNS(NS, 'svg'), lv = document.createElementNS(NS, 'svg');
+    for (const [s, z] of [[ov, 40], [lv, 41]]) { s.style.cssText = `position:fixed;inset:0;width:100%;height:100%;z-index:${z};pointer-events:none;display:none;overflow:visible`; document.body.appendChild(s); }
+    const of = M => [M.a, M.b, M.c, M.d, M.e, M.f], mul = (m, n) => [m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1], m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3], m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]];
+    const ap = (m, x, y) => [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]], A = (e, k) => +e.getAttribute(k) || 0;
+    const cum = P => { const L = [0]; for (let i = 1; i < P.length; i++) L.push(L[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1])); return L; };
+    const even = poly => { const P = poly.concat([poly[0]]), L = cum(P), out = []; let k = 1; for (let i = 0; i < N; i++) { const d = L[L.length - 1] * i / N; while (k < L.length - 1 && L[k] < d) k++; const f = (d - L[k - 1]) / ((L[k] - L[k - 1]) || 1); out.push([P[k - 1][0] + (P[k][0] - P[k - 1][0]) * f, P[k - 1][1] + (P[k][1] - P[k - 1][1]) * f]); } return out; };
+    const hull = pts => { const P = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]), cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lo = [], up = [];
+      for (const p of P) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+      for (let i = P.length - 1; i >= 0; i--) { const p = P[i]; while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); } up.pop(); lo.pop(); return lo.concat(up); };
+    const HULL = {};                                  // each picture's outline in its own 0-1 box (worked out once)
+    const hullOf = src => HULL[src] || (HULL[src] = new Promise(res => { const im = new Image(); im.crossOrigin = 'anonymous'; im.onload = () => {
+      const W = 90, H = Math.max(8, Math.round(90 * im.naturalHeight / im.naturalWidth)), c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(im, 0, 0, W, H);
+      let d; try { d = g.getImageData(0, 0, W, H).data; } catch (e) { return res([[0, 0], [1, 0], [1, 1], [0, 1]]); }
+      const p = []; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 70) p.push([(x + 0.5) / W, (y + 0.5) / H]);
+      res(p.length > 3 ? hull(p) : [[0, 0], [1, 0], [1, 1], [0, 1]]); }; im.onerror = () => res([[0, 0], [1, 0], [1, 1], [0, 1]]); im.src = src; }));
+    const srcOf = el => el.dataset.orig || el.getAttribute('href');
+    addEventListener('load', () => setTimeout(() => SEL.forEach(s => { const e = document.querySelector(s); if (e) hullOf(srcOf(e)); }), 1200));
+    const shot = el => { const M = of(el.getScreenCTM()), U = mul(M, [A(el, 'width'), 0, 0, A(el, 'height'), A(el, 'x'), A(el, 'y')]); return { P: of(el.parentNode.getScreenCTM()), U }; };
+    const ring = (h, U) => even(h.map(q => ap(U, q[0], q[1])));
+    const near = (R, p) => { let b = 0, bd = 1e9; R.forEach((q, i) => { const d = Math.hypot(q[0] - p[0], q[1] - p[1]); if (d < bd) { bd = d; b = i; } }); return b; };
+    const rot = (R, k) => R.slice(k).concat(R.slice(0, k));
+    const slice = (P, L, a, b) => { if (b <= a) return []; const at = d => { let i = 1; while (i < L.length - 1 && L[i] < d) i++; const f = (d - L[i - 1]) / ((L[i] - L[i - 1]) || 1); return [P[i - 1][0] + (P[i][0] - P[i - 1][0]) * f, P[i - 1][1] + (P[i][1] - P[i - 1][1]) * f]; };
+      const out = [at(a)]; for (let i = 0; i < P.length; i++) if (L[i] > a && L[i] < b) out.push(P[i]); out.push(at(b)); return out; };
+    const pd = P => P.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+    const span = R => { const xs = R.map(p => p[0]), ys = R.map(p => p[1]); return Math.min(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)); };
+    const ease = x => 0.65 * x + 0.35 * x * x * (3 - 2 * x), c01 = x => Math.min(1, Math.max(0, x));
+    let busy = false, acc = 0, accT = 0, n = 0;
+    const copy = (el, s, id, erase) => {               // a copy of the picture where it was / will be, behind a mask in screen units
+      const mk = document.createElementNS(NS, 'mask'); mk.setAttribute('id', id); mk.setAttribute('maskUnits', 'userSpaceOnUse'); mk.setAttribute('x', -1e4); mk.setAttribute('y', -1e4); mk.setAttribute('width', 2e4); mk.setAttribute('height', 2e4);
+      if (erase) mk.innerHTML = '<rect x="-10000" y="-10000" width="20000" height="20000" fill="#fff"/>';
+      const outer = document.createElementNS(NS, 'g'), inner = document.createElementNS(NS, 'g'); outer.setAttribute('mask', `url(#${id})`); inner.setAttribute('transform', 'matrix(' + s.P.join(' ') + ')');
+      const c = el.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('class'); c.setAttribute('href', srcOf(el)); inner.appendChild(c); outer.appendChild(inner); ov.appendChild(mk); ov.appendChild(outer); return mk;
+    };
+    const stroke = (mk, P, col, w, grain) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', pd(P)); p.setAttribute('fill', 'none'); p.setAttribute('stroke', col); p.setAttribute('stroke-width', w); p.setAttribute('stroke-linejoin', 'round'); p.setAttribute('stroke-linecap', grain ? 'butt' : 'round'); mk.appendChild(p); const L = p.getTotalLength(); p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L; return { p, L }; };
+    async function step(dir) {
+      busy = true;
+      const els = SEL.map(s => document.querySelector(s)).filter(e => e && e.getScreenCTM() && (e.closest('g') || e).style.display !== 'none');
+      const hs = await Promise.all(els.map(e => hullOf(srcOf(e))));
+      const before = els.map(shot);
+      cam.target = cam.pos = Math.round(cam.pos) + dir; for (const q in LAG) cam.lag[q] = cam.pos; cam.kv = 0.07; hideNotes(); camDraw();   // (straight to the next stop - unseen)
+      const after = els.map(shot);
+      ov.innerHTML = ''; lv.innerHTML = ''; const lines = document.createElementNS(NS, 'g'); lines.setAttribute('filter', 'url(#crayonLine)'); lv.appendChild(lines);
+      const T = els.map((el, i) => {
+        const S0 = ring(hs[i], before[i].U), T0 = ring(hs[i], after[i].U), cS = S0.reduce((a, p) => [a[0] + p[0] / N, a[1] + p[1] / N], [0, 0]), cT = T0.reduce((a, p) => [a[0] + p[0] / N, a[1] + p[1] / N], [0, 0]);
+        const S = rot(S0, near(S0, cT)); S.push(S[0]); const Tt = rot(T0, near(T0, cS));
+        const a = S[N], b = Tt[0], dx = b[0] - a[0], dy = b[1] - a[1], mx = (a[0] + b[0]) / 2 - dy * 0.15 * (i % 2 ? 1 : -1), my = (a[1] + b[1]) / 2 + dx * 0.15 * (i % 2 ? 1 : -1);
+        const br = Array.from({ length: 14 }, (_, k) => { const u = (k + 1) / 15; return [(1 - u) ** 2 * a[0] + 2 * (1 - u) * u * mx + u * u * b[0], (1 - u) ** 2 * a[1] + 2 * (1 - u) * u * my + u * u * b[1]]; });
+        const P = S.concat(br, Tt, [Tt[0]]), L = cum(P), Ls = L[N], Lb = L[N + 15], Lt = L[L.length - 1];
+        const er = stroke(copy(el, before[i], 'sm' + (++n), true), S, '#000', Math.max(24, span(S0) * 1.35));
+        const mk = copy(el, after[i], 'sm' + (++n), false), sz = span(T0);
+        const bandCore = stroke(mk, Tt.concat([Tt[0]]), '#fff', Math.max(30, sz * 1.25) * 0.82), band = stroke(mk, Tt.concat([Tt[0]]), '#fff', Math.max(30, sz * 1.25), true);
+        const ls = document.createElementNS(NS, 'path'); ls.setAttribute('fill', 'none'); ls.setAttribute('stroke', '#f3f1ea'); ls.setAttribute('stroke-width', 1.2); ls.setAttribute('stroke-linecap', 'round'); ls.setAttribute('stroke-linejoin', 'round'); lines.appendChild(ls);
+        return { P, L, Ls, Lb, Lt, er, band, bandCore, ls, d: i * 0.02 };
+      });
+      const camEl = document.getElementById('heroCam'); camEl.style.visibility = 'hidden';
+      ov.style.display = lv.style.display = 'block';
+      const t0 = performance.now(), total = RUN + FILL * 0.5 + 0.02 * T.length;
+      const tick = () => {
+        const tt = (performance.now() - t0) / 1000;
+        for (const th of T) {
+          const t = tt - th.d, u = ease(c01(t / RUN)), head = th.Ls + (th.Lt - th.Ls) * u, tail = Math.min(head, th.Lb * ease(c01(t / (RUN * 0.9))));
+          const K = 140 * (1 - u * u), seg = slice(th.P, th.L, Math.max(th.Ls, head - K), head);
+          th.ls.setAttribute('d', seg.length > 1 ? pd(seg) : '');
+          th.er.p.style.strokeDashoffset = th.er.L * (1 - c01(tail / th.Ls));
+          const on = c01((head - th.Lb) / (th.Lt - th.Lb)); for (const b of [th.band, th.bandCore]) b.p.style.strokeDashoffset = b.L * (1 - on);
+        }
+        if (tt < total) requestAnimationFrame(tick);
+        else { camEl.style.visibility = ''; ov.style.display = lv.style.display = 'none'; ov.innerHTML = lv.innerHTML = ''; busy = false; acc = 0; }
+      };
+      tick();
+    }
+    // a scroll gesture (wheel, trackpad or swipe) -> one step; nothing else moves the desk meanwhile
+    window.__stepMorph = (dy, touch) => {
+      if (isMobMain()) return false;
+      if (busy) return true;
+      const now = performance.now(); if (now - accT > 400) acc = 0; accT = now;
+      acc += touch ? -dy * 3 : dy;
+      if (Math.abs(acc) >= 40) { const d = Math.sign(acc); acc = 0; step(d); }
+      return true;
+    };
+  })();
   gsap.ticker.add((time, dt) => {
     if (!heroState.shown || caseOpen || about.open || contact.open) return;   // (Work open: still drawn - the objects sit at the edges round it)   // (covered by another page: nothing to redraw)
     const f = Math.min(3, dt / 16.67);                                      // frame-rate independent easing
@@ -3874,6 +3961,7 @@
     // normal swipe all the way there (soft landing); swiping again soon after goes a little quicker
     onRelease: self => {
       if (!mainActive() || !(self.event && /^(touch|pointer|mouse)/.test(self.event.type))) return;
+      if (KJ && window.__stepMorph && !isMobMain()) return;   // (no glide after a swipe: steps only)
       if (KJ) { cam.target += Math.max(-1, Math.min(1, -self.velocityY * 0.0022 * 0.05)); cam.kv = 0.06; return; }   // (the reference: a flick adds a little, at most one stop)   // (no extra from the flick speed: a swipe moves exactly as far as the finger went, so equal swipes travel equally; it then settles softly)   // (the reference: a flick adds a little, at most one stop)
       const dist = Math.abs(cam.tSum || 0), dir = Math.sign(cam.tSum || 0), now = performance.now();
       if (dist < 14 || !dir) return;
@@ -3890,6 +3978,7 @@
     onChangeY: self => {
     if (!mainActive()) return;
     const now = performance.now(), touch = !!(self.event && /^(touch|pointer|mouse)/.test(self.event.type));   // (finger or mouse drag, as the reference)
+    if (KJ && window.__stepMorph && window.__stepMorph(self.deltaY, touch)) return;   // (experiment: a scroll is one drawn step)
     if (KJ) { if (touch) { cam.target -= self.deltaY * 0.0022; cam.kv = 0.16;   /* (the reference) */ } else {
       // a trackpad (its steps aren't whole mouse notches, or they're small) moves at less than half the wheel's rate
       const ev0 = self.event || {}, pad = (ev0.wheelDeltaY !== undefined && ev0.wheelDeltaY % 120 !== 0) || Math.abs(self.deltaY) < 30, notches = Math.max(1, Math.round(Math.abs(self.deltaY) / (Math.abs(ev0.deltaY) || Math.abs(self.deltaY) || 1))), dS = self.deltaY * 0.0008;   // (wheel and trackpad alike, as the reference)   // (a mouse: every notch exactly 1/12 of the way, so 12 notches land exactly on the next stop)
