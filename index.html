@@ -6154,6 +6154,29 @@
       glow.setAttribute('cx', (w / 2).toFixed(1)); glow.setAttribute('cy', (H + 2).toFixed(1)); glow.setAttribute('rx', (w * 0.6).toFixed(1)); glow.setAttribute('ry', (shadeH * 0.5).toFixed(1)); };
     place(); addEventListener('resize', place); addEventListener('load', () => setTimeout(place, 300));
     setInterval(() => { if (html.classList.contains('app-mode') && !document.hidden) place(); }, 250);   // (follows the figure as it walks in)
+    // THE LAMP'S ENTRANCE: hidden until the figure has walked in and stands with its bubble up; then the lamp drops down
+    // beside it, the cord is given a tug, the lamp flickers on and off once (lighting the room for a blink), and the
+    // bubble says "pull me" for a moment - so the visitor sees what the lamp is for
+    const pullG = cord.querySelector('.pull'), bubble = document.getElementById('hfBubble'), say = document.getElementById('heroScroll'), hero = document.getElementById('hero');
+    const flash = document.createElement('div'); flash.style.cssText = 'position:fixed;inset:0;z-index:49;pointer-events:none;background:#fff1cf;opacity:0'; document.body.appendChild(flash);
+    let shown = false;
+    cord.style.visibility = 'hidden';
+    setInterval(() => {
+      const onMain = hero && hero.style.visibility === 'visible';
+      if (!onMain) { if (shown && !html.classList.contains('app-mode')) { shown = false; cord.style.visibility = 'hidden'; } return; }
+      if (shown || !bubble || +getComputedStyle(bubble).opacity < 0.5) return;
+      shown = true; place(); cord.style.visibility = '';
+      const H = parseFloat(cord.style.height) || 200, glowEl = cord.querySelector('.glow'), was = say ? say.textContent : '';
+      const tl = gsap.timeline();
+      tl.fromTo(pullG, { y: -H - 40 }, { y: 0, duration: 0.9, ease: 'bounce.out' })                       // (drops down beside the figure)
+        .to(pullG, { y: 14, duration: 0.14, ease: 'power2.in' }, '+=0.35')                                // (the cord is tugged)
+        .to(pullG, { y: 0, duration: 0.6, ease: 'elastic.out(1, 0.32)' })
+        .call(() => { if (say) say.textContent = 'pull me'; }, null, '-=0.6');
+      const lit = html.classList.contains('theme-light');
+      [[0, 1], [0.12, 0], [0.26, 1], [0.4, lit ? 1 : 0]].forEach(([at, on]) => tl.call(() => { glowEl.style.opacity = on; flash.style.opacity = on && !lit ? 0.22 : 0; }, null, 1.45 + at));   // (a flicker on and off)
+      tl.call(() => { glowEl.style.opacity = ''; flash.style.opacity = 0; }, null, 2.0);
+      tl.call(() => { if (say) say.textContent = was || 'scroll'; }, null, 4.2);
+    }, 200);
     cord.addEventListener('click', () => {
       const pull = cord.querySelector('.pull'), cam = document.getElementById('heroCam');
       gsap.timeline().to(pull, { y: 16, duration: 0.14, ease: 'power2.in' }).to(pull, { y: 0, duration: 0.7, ease: 'elastic.out(1, 0.32)' });
