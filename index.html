@@ -2179,7 +2179,7 @@
   // object's colour is scribbled in. One drawing can send out several threads (the door draws the laptop, phone, book and
   // paper; the lamp the camera and sketchbook; the cord the pencil, marker and scissors; the figure the film).
   const morph = (() => {
-    const NS = 'http://www.w3.org/2000/svg', N = 120, STAG = 0.04, RUN = 2.0, FILL = 0.5;
+    const NS = 'http://www.w3.org/2000/svg', N = 120, STAG = 0.03, RUN = 1.6, FILL = 0.4;
     const svg = document.createElementNS(NS, 'svg');
     svg.setAttribute('id', 'morphSvg');
     svg.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;overflow:visible;display:none';
@@ -2193,7 +2193,7 @@
     const ap = (m, x, y) => [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]];
     const attr = (e, k) => +e.getAttribute(k) || 0;
     const href = el => el.getAttribute('href') || el.getAttribute('xlink:href');
-    const ease = x => x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2;
+    const ease = x => 0.65 * x + 0.35 * x * x * (3 - 2 * x);   // (an even, continuous move: no slow start, no stop)
     const clamp01 = x => Math.min(1, Math.max(0, x));
     const cache = {};
     const load = src => cache[src] || (cache[src] = new Promise(res => {
@@ -2294,7 +2294,7 @@
         }).filter(Boolean);
         document.getElementById('boilG').style.visibility = 'hidden';          // (the copies take over, unseen)
         svg.style.display = 'block'; svg.style.opacity = 1; svgL.style.display = 'block';
-        const t0 = performance.now(), total = Math.max(RUN * 0.92 + 0.3, RUN * 0.72 + FILL) + STAG * threads.length + 0.03; let tick = -1, J = [wobble(2), wobble(2.8)];
+        const t0 = performance.now(), total = Math.max(RUN * 0.92 + 0.12, RUN * 0.72 + FILL) + STAG * threads.length;   // (hands straight over: no wait) let tick = -1, J = [wobble(2), wobble(2.8)];
         const step = () => {
           const tt = (performance.now() - t0) / 1000; if (Math.floor(tt * 10) !== tick) { tick = Math.floor(tt * 10); J = [wobble(1.8), wobble(2.6)]; for (const [c, u] of boilers) c.setAttribute('href', u[tick % 3]); }
           const maskNow = Math.floor(tt * 12) !== step.m; step.m = Math.floor(tt * 12);   // (the reveals on twos - 12 a second: much lighter, and hand-drawn)
@@ -2302,7 +2302,7 @@
             const t = tt - th.d, u = ease(clamp01(t / RUN));
             const head = th.Ls + (th.Lt - th.Ls) * u, tail = Math.min(head, th.Lb * ease(clamp01(t / (RUN * 0.9))));   // (the tail always leaves the intro drawing completely and arrives at the object)
             const K = 150 * (1 - u * u), seg = slice(th.P, th.L, Math.max(th.Ls, head - K), head);   // (shrinks to nothing as it arrives: nothing left by the objects)   // (a short stroke, from where it leaves the drawing)
-            const after = clamp01((t - RUN * 0.92) / 0.3);
+            const after = clamp01((t - RUN * 0.9) / 0.12);
             th.ls.forEach((p, k) => { p.setAttribute('d', seg.length > 1 ? poly(seg, J[k]) : ''); p.style.opacity = 1 - after; });
             if ((maskNow || tt >= total) && !th.settled) {
               const eV = clamp01(tail / th.Ls), onT = clamp01((head - th.Lb) / (th.Lt - th.Lb)), fV = clamp01((t - RUN * 0.72) / FILL);
@@ -4004,7 +4004,9 @@
     document.documentElement.classList.add('in-case');            // the menu gives way to "close"
     if (framed || document.getElementById('caseFrame').style.display === 'block') {   // (inside the crayon border: it scrolls up into it)
       caseFrame.show(); page.style.clipPath = caseFrame.clip;
-      gsap.fromTo(page, { autoAlpha: 1, yPercent: 100 }, { yPercent: 0, duration: 0.75, ease: 'power3.out' });
+      const sp = { r: 0 }, setM = () => { const g = 'radial-gradient(circle at 50% 50%, #000 ' + sp.r + '%, transparent ' + (sp.r + 9) + '%)'; page.style.webkitMaskImage = page.style.maskImage = g; };
+      gsap.set(page, { autoAlpha: 1, yPercent: 0 }); setM();
+      gsap.to(sp, { r: 80, duration: 0.85, ease: 'power2.out', onUpdate: setM, onComplete: () => { page.style.webkitMaskImage = page.style.maskImage = ''; } });   // (it spreads open from the middle, like the Work picture)
     } else gsap.fromTo(page, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, ease: 'sine.out' });
     page.focus({ preventScroll: true });
     page.classList.add('sand');                                   // no plain picture before the sand starts
