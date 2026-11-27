@@ -2294,7 +2294,7 @@
         }).filter(Boolean);
         document.getElementById('boilG').style.visibility = 'hidden';          // (the copies take over, unseen)
         svg.style.display = 'block'; svg.style.opacity = 1; svgL.style.display = 'block';
-        const t0 = performance.now(), total = Math.max(RUN * 0.92 + 0.12, RUN * 0.72 + FILL) + STAG * threads.length;   // (hands straight over: no wait) let tick = -1, J = [wobble(2), wobble(2.8)];
+        const t0 = performance.now(), total = Math.max(RUN * 0.92 + 0.12, RUN * 0.72 + FILL) + STAG * threads.length; let tick = -1, J = [wobble(2), wobble(2.8)];   // (hands straight over: no wait)
         const step = () => {
           const tt = (performance.now() - t0) / 1000; if (Math.floor(tt * 10) !== tick) { tick = Math.floor(tt * 10); J = [wobble(1.8), wobble(2.6)]; for (const [c, u] of boilers) c.setAttribute('href', u[tick % 3]); }
           const maskNow = Math.floor(tt * 12) !== step.m; step.m = Math.floor(tt * 12);   // (the reveals on twos - 12 a second: much lighter, and hand-drawn)
