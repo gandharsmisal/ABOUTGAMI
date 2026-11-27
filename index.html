@@ -3793,88 +3793,63 @@
     gsap.to('#hnLaptop, #hnBook, #hnMug', { opacity: 0, duration: 0.25, overwrite: true });
     gsap.to(cam, { lift: 0, duration: 0.8, ease: 'power2.inOut', overwrite: true });
   }
-  // SCROLL AS A DRAWN CHANGE (experiment) - the same transformation as the intro into the desk: a scroll gesture moves the desk one stop - but instead of sliding there, every
-  // object's outline unravels from where it lies and a crayon line runs to where it will lie and draws its own lines
-  // there, then its colours are coloured in (as the intro turns into the desk). One step at a time.
+  // SCROLL AS A MORPH (experiment): a scroll gesture moves the desk one stop, and each object morphs into its next place -
+  // its colour drains away leaving its own crayon lines, the lines carry it smoothly on a curve to where it goes (turning
+  // and changing size on the way), and there the colour comes back into the lines. One continuous change, no fades of the
+  // lines, nothing rubbed out or popping in.
   (() => {
-    const NS = 'http://www.w3.org/2000/svg', N = 96, RUN = 1.6, FILL = 0.4;   // (the intro's pace)
+    const NS = 'http://www.w3.org/2000/svg', RUN = 1.5;
     const SEL = ['#hpLaptop .hprop', '#hpPhone .hprop', '#hpBook .hprop', '#dk-paper > image', '#dk-marker > image', '#dk-scissors > image', '#dkp-scissors image', '#dk-sketchbook > image', '#dkp-sketchbook image', '#dk-camera > image'];
-    const ov = document.createElementNS(NS, 'svg'), lv = document.createElementNS(NS, 'svg');
-    for (const [s, z] of [[ov, 40], [lv, 41]]) { s.style.cssText = `position:fixed;inset:0;width:100%;height:100%;z-index:${z};pointer-events:none;display:none;overflow:visible`; document.body.appendChild(s); }
+    const ov = document.createElementNS(NS, 'svg');
+    ov.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;display:none;overflow:visible'; document.body.appendChild(ov);
     const of = M => [M.a, M.b, M.c, M.d, M.e, M.f], mul = (m, n) => [m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1], m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3], m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]];
-    const ap = (m, x, y) => [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]], A = (e, k) => +e.getAttribute(k) || 0;
-    const cum = P => { const L = [0]; for (let i = 1; i < P.length; i++) L.push(L[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1])); return L; };
-    const even = poly => { const P = poly.concat([poly[0]]), L = cum(P), out = []; let k = 1; for (let i = 0; i < N; i++) { const d = L[L.length - 1] * i / N; while (k < L.length - 1 && L[k] < d) k++; const f = (d - L[k - 1]) / ((L[k] - L[k - 1]) || 1); out.push([P[k - 1][0] + (P[k][0] - P[k - 1][0]) * f, P[k - 1][1] + (P[k][1] - P[k - 1][1]) * f]); } return out; };
-    const hull = pts => { const P = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]), cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lo = [], up = [];
-      for (const p of P) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
-      for (let i = P.length - 1; i >= 0; i--) { const p = P[i]; while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); } up.pop(); lo.pop(); return lo.concat(up); };
-    const HULL = {};                                  // each picture's outline in its own 0-1 box (worked out once)
-    const hullOf = src => HULL[src] || (HULL[src] = new Promise(res => { const im = new Image(); im.crossOrigin = 'anonymous'; im.onload = () => {
-      const W = 90, H = Math.max(8, Math.round(90 * im.naturalHeight / im.naturalWidth)), c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(im, 0, 0, W, H);
-      let d; try { d = g.getImageData(0, 0, W, H).data; } catch (e) { return res([[0, 0], [1, 0], [1, 1], [0, 1]]); }
-      const p = []; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 70) p.push([(x + 0.5) / W, (y + 0.5) / H]);
-      res(p.length > 3 ? hull(p) : [[0, 0], [1, 0], [1, 1], [0, 1]]); }; im.onerror = () => res([[0, 0], [1, 0], [1, 1], [0, 1]]); im.src = src; }));
-    const srcOf = el => el.dataset.orig || el.getAttribute('href');
-    addEventListener('load', () => setTimeout(() => SEL.forEach(s => { const e = document.querySelector(s); if (e) hullOf(srcOf(e)); }), 1200));
-    const shot = el => { const M = of(el.getScreenCTM()), U = mul(M, [A(el, 'width'), 0, 0, A(el, 'height'), A(el, 'x'), A(el, 'y')]); return { P: of(el.parentNode.getScreenCTM()), U }; };
-    const ring = (h, U) => even(h.map(q => ap(U, q[0], q[1])));
-    const near = (R, p) => { let b = 0, bd = 1e9; R.forEach((q, i) => { const d = Math.hypot(q[0] - p[0], q[1] - p[1]); if (d < bd) { bd = d; b = i; } }); return b; };
-    const rot = (R, k) => R.slice(k).concat(R.slice(0, k));
-    const slice = (P, L, a, b) => { if (b <= a) return []; const at = d => { let i = 1; while (i < L.length - 1 && L[i] < d) i++; const f = (d - L[i - 1]) / ((L[i] - L[i - 1]) || 1); return [P[i - 1][0] + (P[i][0] - P[i - 1][0]) * f, P[i - 1][1] + (P[i][1] - P[i - 1][1]) * f]; };
-      const out = [at(a)]; for (let i = 0; i < P.length; i++) if (L[i] > a && L[i] < b) out.push(P[i]); out.push(at(b)); return out; };
-    const pd = P => P.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
-    const span = R => { const xs = R.map(p => p[0]), ys = R.map(p => p[1]); return Math.min(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)); };
-    const ease = x => 0.65 * x + 0.35 * x * x * (3 - 2 * x), c01 = x => Math.min(1, Math.max(0, x));
-    let busy = false, acc = 0, accT = 0, n = 0;
-    const copy = (el, s, id, erase) => {               // a copy of the picture where it was / will be, behind a mask in screen units
-      const mk = document.createElementNS(NS, 'mask'); mk.setAttribute('id', id); mk.setAttribute('maskUnits', 'userSpaceOnUse'); mk.setAttribute('x', -1e4); mk.setAttribute('y', -1e4); mk.setAttribute('width', 2e4); mk.setAttribute('height', 2e4);
-      if (erase) mk.innerHTML = '<rect x="-10000" y="-10000" width="20000" height="20000" fill="#fff"/>';
-      const outer = document.createElementNS(NS, 'g'), inner = document.createElementNS(NS, 'g'); outer.setAttribute('mask', `url(#${id})`); inner.setAttribute('transform', 'matrix(' + s.P.join(' ') + ')');
-      const c = el.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('class'); c.setAttribute('href', srcOf(el)); inner.appendChild(c); outer.appendChild(inner); ov.appendChild(mk); ov.appendChild(outer); return mk;
-    };
-    const stroke = (mk, P, col, w, grain) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', pd(P)); p.setAttribute('fill', 'none'); p.setAttribute('stroke', col); p.setAttribute('stroke-width', w); p.setAttribute('stroke-linejoin', 'round'); p.setAttribute('stroke-linecap', grain ? 'butt' : 'round'); mk.appendChild(p); const L = p.getTotalLength(); p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L; return { p, L }; };
+    const inv = m => { const d = m[0] * m[3] - m[1] * m[2]; return [m[3] / d, -m[1] / d, -m[2] / d, m[0] / d, (m[2] * m[5] - m[3] * m[4]) / d, (m[1] * m[4] - m[0] * m[5]) / d]; };
+    const A = (e, k) => +e.getAttribute(k) || 0;
+    const pose = M => { const sx = Math.hypot(M[0], M[1]), r = Math.atan2(M[1], M[0]); return { cx: M[0] * 0.5 + M[2] * 0.5 + M[4], cy: M[1] * 0.5 + M[3] * 0.5 + M[5], r, sx, sy: (M[0] * M[3] - M[1] * M[2]) / sx }; };
+    const fromPose = p => { const c = Math.cos(p.r), s = Math.sin(p.r); return mul([c * p.sx, s * p.sx, -s * p.sy, c * p.sy, p.cx, p.cy], [1, 0, 0, 1, -0.5, -0.5]); };
+    // each drawing's own lines: the drawing with its colour taken out (the chalk/crayon lines kept)
+    const LINES = {}, srcOf = el => el.dataset.orig || el.getAttribute('href');
+    const linesOf = src => LINES[src] || (LINES[src] = new Promise(res => { const im = new Image(); im.crossOrigin = 'anonymous'; im.onload = () => {
+      const W = im.naturalWidth, H = im.naturalHeight, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(im, 0, 0);
+      let D; try { D = g.getImageData(0, 0, W, H); } catch (e) { return res(src); }
+      const d = D.data; for (let i = 0; i < d.length; i += 4) { const mx = Math.max(d[i], d[i + 1], d[i + 2]), mn = Math.min(d[i], d[i + 1], d[i + 2]), sat = mx ? (mx - mn) / mx : 0; if (sat > 0.28) d[i + 3] = Math.round(d[i + 3] * Math.max(0, 1 - (sat - 0.28) * 4)); }
+      g.putImageData(D, 0, 0); c.toBlob(b => res(b ? URL.createObjectURL(b) : src), 'image/webp', 0.9); }; im.onerror = () => res(src); im.src = src; }));
+    addEventListener('load', () => setTimeout(() => SEL.forEach(s => { const e = document.querySelector(s); if (e) linesOf(srcOf(e)); }), 1500));
+    const shot = el => ({ P: of(el.parentNode.getScreenCTM()), U: mul(of(el.getScreenCTM()), [A(el, 'width'), 0, 0, A(el, 'height'), A(el, 'x'), A(el, 'y')]) });
+    const ease = x => x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2, c01 = x => Math.min(1, Math.max(0, x)), sm = x => x * x * (3 - 2 * x);
+    let busy = false, acc = 0, accT = 0;
     async function step(dir) {
       busy = true;
       const els = SEL.map(s => document.querySelector(s)).filter(e => e && e.getScreenCTM() && (e.closest('g') || e).style.display !== 'none');
-      const hs = await Promise.all(els.map(e => hullOf(srcOf(e))));
+      const lineSrc = await Promise.all(els.map(e => linesOf(srcOf(e))));
       const before = els.map(shot);
-      cam.target = cam.pos = Math.round(cam.pos) + dir; for (const q in LAG) cam.lag[q] = cam.pos; cam.kv = 0.07; hideNotes(); camDraw();   // (straight to the next stop - unseen)
+      cam.target = cam.pos = Math.round(cam.pos) + dir; for (const q in LAG) cam.lag[q] = cam.pos; cam.kv = 0.07; hideNotes(); camDraw();
       const after = els.map(shot);
-      ov.innerHTML = '<filter id="smCrayon" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" seed="6" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2.6 0 0 0 1.85" result="w"/><feComposite in="SourceGraphic" in2="w" operator="in"/></filter>'; lv.innerHTML = ''; const lines = document.createElementNS(NS, 'g'); lines.setAttribute('filter', 'url(#crayonLine)'); lv.appendChild(lines);
+      ov.innerHTML = '';
       const T = els.map((el, i) => {
-        const S0 = ring(hs[i], before[i].U), T0 = ring(hs[i], after[i].U), cS = S0.reduce((a, p) => [a[0] + p[0] / N, a[1] + p[1] / N], [0, 0]), cT = T0.reduce((a, p) => [a[0] + p[0] / N, a[1] + p[1] / N], [0, 0]);
-        const S = rot(S0, near(S0, cT)); S.push(S[0]); const Tt = rot(T0, near(T0, cS));
-        const a = S[N], b = Tt[0], dx = b[0] - a[0], dy = b[1] - a[1], mx = (a[0] + b[0]) / 2 - dy * 0.15 * (i % 2 ? 1 : -1), my = (a[1] + b[1]) / 2 + dx * 0.15 * (i % 2 ? 1 : -1);
-        const br = Array.from({ length: 14 }, (_, k) => { const u = (k + 1) / 15; return [(1 - u) ** 2 * a[0] + 2 * (1 - u) * u * mx + u * u * b[0], (1 - u) ** 2 * a[1] + 2 * (1 - u) * u * my + u * u * b[1]]; });
-        const P = S.concat(br, Tt, [Tt[0]]), L = cum(P), Ls = L[N], Lb = L[N + 15], Lt = L[L.length - 1];
-        // (the object goes - and comes - only as far round as its line has gone: a slice from its middle to the line, sweeping round)
-        const slicer = (mk, col) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('fill', col); p.setAttribute('stroke', col); p.setAttribute('stroke-width', 10); p.setAttribute('stroke-linejoin', 'round'); mk.appendChild(p); return p; };
-        const er = slicer(copy(el, before[i], 'sm' + (++n), true), '#000'), rv = slicer(copy(el, after[i], 'sm' + (++n), false), '#fff');
-        const ls = document.createElementNS(NS, 'path'); ls.setAttribute('fill', 'none'); ls.setAttribute('stroke', '#f3f1ea'); ls.setAttribute('stroke-width', 1.2); ls.setAttribute('stroke-linecap', 'round'); ls.setAttribute('stroke-linejoin', 'round'); lines.appendChild(ls);
-        return { P, L, Ls, Lb, Lt, er, rv, S, Tt, cS, cT, ls, d: i * 0.03 };
+        const g = document.createElementNS(NS, 'g'), lines = el.cloneNode(true), full = el.cloneNode(true);
+        for (const c of [lines, full]) { c.removeAttribute('id'); c.removeAttribute('class'); }
+        full.setAttribute('href', srcOf(el)); lines.setAttribute('href', lineSrc[i]);
+        g.appendChild(lines); g.appendChild(full); ov.appendChild(g);
+        const a = pose(before[i].U), b = pose(after[i].U); let dr = b.r - a.r; while (dr > Math.PI) dr -= 2 * Math.PI; while (dr < -Math.PI) dr += 2 * Math.PI;
+        const dist = Math.hypot(b.cx - a.cx, b.cy - a.cy);
+        return { g, full, a, b, dr, base: mul(inv(before[i].U), before[i].P), arc: (i % 2 ? 1 : -1) * Math.min(120, dist * 0.18), d: i * 0.025 };
       });
-      const camEl = document.getElementById('heroCam'); camEl.style.visibility = 'hidden';
-      ov.style.display = lv.style.display = 'block';
-      const sector = (c, R, f) => { if (f <= 0) return ''; const k = f * (R.length - 1), j = Math.floor(k), q = k - j, out = [c];
-        for (let m = 0; m <= j; m++) out.push(R[m]); if (j < R.length - 1) out.push([R[j][0] + (R[j + 1][0] - R[j][0]) * q, R[j][1] + (R[j + 1][1] - R[j][1]) * q]);
-        return 'M' + out.map(p => { const x = c[0] + (p[0] - c[0]) * 1.12, y = c[1] + (p[1] - c[1]) * 1.12; return x.toFixed(1) + ' ' + y.toFixed(1); }).join(' L') + ' Z'; };
-      const t0 = performance.now(), total = RUN + 0.03 * T.length + 0.05;
+      const camEl = document.getElementById('heroCam'); camEl.style.visibility = 'hidden'; ov.style.display = 'block';
+      const t0 = performance.now(), total = RUN + 0.025 * T.length;
       const tick = () => {
         const tt = (performance.now() - t0) / 1000;
         for (const th of T) {
-          const t = tt - th.d, u = ease(c01(t / RUN)), head = th.Ls + (th.Lt - th.Ls) * u, tail = Math.min(head, th.Lb * ease(c01(t / (RUN * 0.9))));
-          const K = 140 * (1 - u * u), seg = slice(th.P, th.L, Math.max(th.Ls, head - K), head);
-          th.ls.setAttribute('d', seg.length > 1 ? pd(seg) : '');
-          th.er.setAttribute('d', sector(th.cS, th.S, c01(tail / th.Ls)));
-          th.rv.setAttribute('d', sector(th.cT, th.Tt.concat([th.Tt[0]]), c01((head - th.Lb) / (th.Lt - th.Lb))));
-          th.ls.style.opacity = 1 - c01((t - RUN * 0.94) / 0.08);
+          const t = c01((tt - th.d) / RUN), u = ease(t), k = Math.sin(Math.PI * u) * th.arc, dx = th.b.cx - th.a.cx, dy = th.b.cy - th.a.cy, L = Math.hypot(dx, dy) || 1;
+          const P = { cx: th.a.cx + dx * u - dy / L * k, cy: th.a.cy + dy * u + dx / L * k, r: th.a.r + th.dr * u, sx: th.a.sx + (th.b.sx - th.a.sx) * u, sy: th.a.sy + (th.b.sy - th.a.sy) * u };
+          th.g.setAttribute('transform', 'matrix(' + mul(fromPose(P), th.base).join(' ') + ')');
+          th.full.setAttribute('opacity', (t < 0.5 ? 1 - sm(c01(t / 0.22)) : sm(c01((t - 0.78) / 0.22))).toFixed(3));   // (the colour drains into the lines, and comes back into them)
         }
         if (tt < total) requestAnimationFrame(tick);
-        else { camEl.style.visibility = ''; ov.style.display = lv.style.display = 'none'; ov.innerHTML = lv.innerHTML = ''; busy = false; acc = 0; }
+        else { camEl.style.visibility = ''; ov.style.display = 'none'; ov.innerHTML = ''; busy = false; acc = 0; }
       };
       tick();
     }
-    // a scroll gesture (wheel, trackpad or swipe) -> one step; nothing else moves the desk meanwhile
     window.__stepMorph = (dy, touch) => {
       if (isMobMain()) return false;
       if (busy) return true;
