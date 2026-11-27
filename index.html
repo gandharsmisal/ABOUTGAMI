@@ -3830,7 +3830,7 @@
       const mk = document.createElementNS(NS, 'mask'); mk.setAttribute('id', id); mk.setAttribute('maskUnits', 'userSpaceOnUse'); mk.setAttribute('x', -1e4); mk.setAttribute('y', -1e4); mk.setAttribute('width', 2e4); mk.setAttribute('height', 2e4);
       if (erase) mk.innerHTML = '<rect x="-10000" y="-10000" width="20000" height="20000" fill="#fff"/>';
       const outer = document.createElementNS(NS, 'g'), inner = document.createElementNS(NS, 'g'); outer.setAttribute('mask', `url(#${id})`); inner.setAttribute('transform', 'matrix(' + s.P.join(' ') + ')');
-      const c = el.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('class'); c.setAttribute('href', srcOf(el)); inner.appendChild(c); outer.appendChild(inner); ov.appendChild(mk); ov.appendChild(outer); return mk;
+      const c = el.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('class'); c.setAttribute('href', srcOf(el)); inner.appendChild(c); outer.appendChild(inner); ov.appendChild(mk); ov.appendChild(outer); mk._outer = outer; return mk;
     };
     const stroke = (mk, P, col, w, grain) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', pd(P)); p.setAttribute('fill', 'none'); p.setAttribute('stroke', col); p.setAttribute('stroke-width', w); p.setAttribute('stroke-linejoin', 'round'); p.setAttribute('stroke-linecap', grain ? 'butt' : 'round'); mk.appendChild(p); const L = p.getTotalLength(); p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L; return { p, L }; };
     async function step(dir) {
@@ -3850,11 +3850,12 @@
         const bx = Math.min(...T0.map(p => p[0])), by = Math.min(...T0.map(p => p[1])), bw = Math.max(...T0.map(p => p[0])) - bx, bh = Math.max(...T0.map(p => p[1])) - by;
         const rows = Math.max(5, Math.min(12, Math.round(bh / 22))), zig = []; for (let k = 0; k <= rows; k++) { const y = by + bh * (k + 0.5) / rows; zig.push(k % 2 ? [bx + bw * 0.97, y] : [bx + bw * 0.03, y], k % 2 ? [bx + bw * 0.03, y] : [bx + bw * 0.97, y]); }
         const P = S.concat(br, Tt, [Tt[0]], zig), L = cum(P), Ls = L[N], Lb = L[N + 15], Lz = L[N + 15 + Tt.length], Lt = L[L.length - 1];
-        const er = stroke(copy(el, before[i], 'sm' + (++n), true), S, '#000', Math.max(24, span(S0) * 1.35));
+        const oldPic = copy(el, before[i], 'sm' + (++n), true)._outer;   // (the object as it was: its colour fades out where it stands)
+        const rest = document.createElementNS(NS, 'path'); rest.setAttribute('fill', 'none'); rest.setAttribute('stroke', '#f3f1ea'); rest.setAttribute('stroke-width', 1.2); rest.setAttribute('stroke-linecap', 'round'); rest.setAttribute('stroke-linejoin', 'round'); lines.appendChild(rest);   // (its outline, unwinding into the line)
         const mk = copy(el, after[i], 'sm' + (++n), false), sz = span(T0);
         const band = stroke(mk, Tt.concat([Tt[0]]), '#fff', Math.max(14, sz * 0.16)), fill = stroke(mk, zig, '#fff', bh / rows * 2.1);
         const ls = document.createElementNS(NS, 'path'); ls.setAttribute('fill', 'none'); ls.setAttribute('stroke', '#f3f1ea'); ls.setAttribute('stroke-width', 1.2); ls.setAttribute('stroke-linecap', 'round'); ls.setAttribute('stroke-linejoin', 'round'); lines.appendChild(ls);
-        return { P, L, Ls, Lb, Lz, Lt, er, band, fill, ls, d: i * 0.025 };
+        return { P, L, Ls, Lb, Lz, Lt, oldPic, rest, band, fill, ls, d: i * 0.025 };
       });
       const camEl = document.getElementById('heroCam'); camEl.style.visibility = 'hidden';
       ov.style.display = lv.style.display = 'block';
@@ -3862,10 +3863,11 @@
       const tick = () => {
         const tt = (performance.now() - t0) / 1000;
         for (const th of T) {
-          const t = tt - th.d, u = ease(c01(t / RUN)), head = th.Ls + (th.Lt - th.Ls) * u, tail = Math.min(head, th.Lb * ease(c01(t / (RUN * 0.9))));
+          const t = tt - th.d, u = ease(c01(t / RUN)), head = th.Ls + (th.Lt - th.Ls) * u, tail = th.Ls * ease(c01((t - RUN * 0.15) / (RUN * 0.55)));
           const K = (head > th.Lz ? 55 : 150) * (1 - c01((u - 0.94) / 0.06)), seg = slice(th.P, th.L, Math.max(th.Ls, head - K), head);
           th.ls.setAttribute('d', seg.length > 1 ? pd(seg) : ''); th.ls.style.opacity = 1 - c01((t - RUN) / 0.12);
-          th.er.p.style.strokeDashoffset = th.er.L * (1 - c01(tail / th.Ls));
+          th.oldPic.setAttribute('opacity', (1 - c01(t / (RUN * 0.22))).toFixed(3));                    // (colour fades, leaving its outline)
+          th.rest.setAttribute('d', tail < th.Ls ? pd(slice(th.P, th.L, tail, th.Ls)) : '');             // (the outline that hasn't unwound yet)
           th.band.p.style.strokeDashoffset = th.band.L * (1 - c01((head - th.Lb) / (th.Lz - th.Lb)));
           th.fill.p.style.strokeDashoffset = th.fill.L * (1 - c01((head - th.Lz) / (th.Lt - th.Lz)));
         }
