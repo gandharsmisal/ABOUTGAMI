@@ -71,6 +71,9 @@
   #heroLine .hword { filter: url(#pencil); font: 400 50px "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); fill: #3b3a37; letter-spacing: 0.01em; stroke: none !important;
     stroke: var(--pen); stroke-width: 0.4px; }
   #heroProps > g { pointer-events: auto; cursor: pointer; }
+  #heroDecor image { filter: grayscale(1) brightness(1.12); }   /* (experiment: only the laptop, phone and book in colour - the rest are just there) */
+  #heroProps > g .hprop { transition: filter 0.25s ease; }
+  #heroProps > g:hover .hprop { filter: drop-shadow(0 0 9px rgba(255, 238, 200, 0.45)) brightness(1.08); }   /* (experiment: the three answer the pointer) */
   /* the grid paper and the camera toned down to sit like the other printed pieces (softer contrast, less colour, warm) */
   #dk-paper image { filter: saturate(0.68) contrast(0.84) brightness(1.04) sepia(0.14); }
   #dk-camera image { filter: saturate(0.5) contrast(0.66) brightness(1.11) sepia(0.15); }   /* (the camera softer still) */
@@ -2265,7 +2268,7 @@
           const W = of(el.parentNode.getScreenCTM()), wrap = document.createElementNS(NS, 'g'); wrap.setAttribute('transform', 'matrix(' + W.join(' ') + ')');
           const m = document.createElementNS(NS, 'mask'); m.setAttribute('id', id); m.setAttribute('maskUnits', 'userSpaceOnUse'); m.setAttribute('x', -1e4); m.setAttribute('y', -1e4); m.setAttribute('width', 2e4); m.setAttribute('height', 2e4);
           if (erase) m.innerHTML = '<rect x="-10000" y="-10000" width="20000" height="20000" fill="#fff"/>';
-          wrap.appendChild(m); const c = el.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('clip-path'); if (c.querySelectorAll) c.querySelectorAll('[id]').forEach(n => n.removeAttribute('id')); if (el.tagName.toLowerCase() === 'image') { c.removeAttribute('class'); c.removeAttribute('filter'); c.removeAttribute('opacity'); } c.setAttribute('mask', `url(#${id})`); wrap.appendChild(c); pics.appendChild(wrap); if (el.__boil) boilers.push([c, el.__boil]);
+          wrap.appendChild(m); const c = el.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('clip-path'); if (c.querySelectorAll) c.querySelectorAll('[id]').forEach(n => n.removeAttribute('id')); if (el.tagName.toLowerCase() === 'image') { c.removeAttribute('class'); c.removeAttribute('filter'); c.removeAttribute('opacity'); if (el.closest('#heroDecor')) c.style.filter = 'grayscale(1) brightness(1.12)'; } c.setAttribute('mask', `url(#${id})`); wrap.appendChild(c); pics.appendChild(wrap); if (el.__boil) boilers.push([c, el.__boil]);
           const sc = Math.hypot(W[0], W[1]) || 1; return { m, W, sc };
         };
         const addStroke = (mk, P, color, wScreen) => { if (color !== '#000') { const q = document.createElementNS(NS, 'path'); q.setAttribute('d', pathD(local(mk.W, P))); q.setAttribute('fill', 'none'); q.setAttribute('stroke', color); q.setAttribute('stroke-width', wScreen * 0.82 / mk.sc); q.setAttribute('stroke-linejoin', 'round'); mk.m.appendChild(q); mk.solid = q; }   /* (a solid core: the object as it will look; the grain only at the edge) */
@@ -3713,6 +3716,9 @@
   // HAND-DRAWN MOTION (experiment, as the animation references): while the desk travels between stops it is drawn on
   // twos - a new drawing 12 times a second, not 60 - and each drawing places every object a hair differently, as if
   // redrawn by hand. The places and the paths are exactly the same; at rest nothing jumps.
+  const HOVER = {}; ['hpLaptop', 'hpPhone', 'hpBook'].forEach(id => { const e = document.getElementById(id); if (!e) return;
+    e.addEventListener('pointerenter', () => { const o = { v: HOVER[id] || 0 }; gsap.to(o, { v: 1, duration: 0.25, ease: 'back.out(2)', onUpdate: () => { HOVER[id] = o.v; } }); });
+    e.addEventListener('pointerleave', () => { const o = { v: HOVER[id] || 0 }; gsap.to(o, { v: 0, duration: 0.3, ease: 'sine.out', onUpdate: () => { HOVER[id] = o.v; } }); }); });
   const HANDJIT = id => { const s = cam.jseed || 0; if (!s) return [0, 0, 0]; let h = 0; for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) | 0; const f = k => { const v = Math.sin(s * 12.9898 + h * 0.737 + k * 78.233) * 43758.5453; return (v - Math.floor(v)) * 2 - 1; };
     return [f(1) * 0.5, f(2) * 0.5, f(3) * 0.15]; };   // (only a hair)
   function camDraw() {
@@ -3753,8 +3759,9 @@
     const SZ = isMobMain() ? { hpBook: 1.0, hpPhone: 1.45, hpCup: 1.1 } : { hpLaptop: 1, hpBook: 0.86, hpPhone: 1.32, hpCup: 1 };   /* (the F1 card a little smaller) */   /* (the phone a little bigger, the mug gone) */   // (the notebook and the mug and phone a little bigger)
     if (SZ.hpPhone) { P.hpCup[0] = P.hpPhone[0] + (P.hpCup[0] - P.hpPhone[0]) * SZ.hpPhone; P.hpCup[1] = P.hpPhone[1] + (P.hpCup[1] - P.hpPhone[1]) * SZ.hpPhone; }
     for (const id in PROPS) {
-      const [x, y, r, s0] = P[id], c = PROPS[id], s = s0 * (SZ[id] || 1);
-      const hj = HANDJIT(id); $(id).setAttribute('transform', `translate(${x + hj[0]} ${y + hj[1]}) rotate(${r + hj[2]}) scale(${s * (isMobMain() ? 1.155 * MOB_K : 0.95 * 0.9)}) translate(${-c[0]} ${-c[1]})`);   // (phones: 15.5% bigger)
+      const [x, y, r, s0] = P[id], c = PROPS[id], hv = HOVER[id] || 0, s = s0 * (SZ[id] || 1) * (1 + 0.05 * hv);
+      const hj = HANDJIT(id).slice(); hj[1] -= 14 * hv; hj[2] += Math.sin((cam.t || 0) * 13) * 2.2 * hv;   // (experiment: lifts and wiggles under the pointer)
+      $(id).setAttribute('transform', `translate(${x + hj[0]} ${y + hj[1]}) rotate(${r + hj[2]}) scale(${s * (isMobMain() ? 1.155 * MOB_K : 0.95 * 0.9)}) translate(${-c[0]} ${-c[1]})`);   // (phones: 15.5% bigger)
     }
     for (const n in DESK) {
       const dAt = i => { const [x, y, rr, s = 1] = onMobRow(i, n) ? mobSlot(i, n) : DESK[n][i];
@@ -3830,16 +3837,17 @@
       const mk = document.createElementNS(NS, 'mask'); mk.setAttribute('id', id); mk.setAttribute('maskUnits', 'userSpaceOnUse'); mk.setAttribute('x', -1e4); mk.setAttribute('y', -1e4); mk.setAttribute('width', 2e4); mk.setAttribute('height', 2e4);
       if (erase) mk.innerHTML = '<rect x="-10000" y="-10000" width="20000" height="20000" fill="#fff"/>';
       const outer = document.createElementNS(NS, 'g'), inner = document.createElementNS(NS, 'g'); outer.setAttribute('mask', `url(#${id})`); inner.setAttribute('transform', 'matrix(' + s.P.join(' ') + ')');
-      const c = el.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('class'); c.setAttribute('href', srcOf(el)); inner.appendChild(c); outer.appendChild(inner); ov.appendChild(mk); ov.appendChild(outer); mk._outer = outer; return mk;
+      const c = el.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('class'); c.setAttribute('href', srcOf(el)); if (el.closest && el.closest('#heroDecor')) c.style.filter = 'grayscale(1) brightness(1.12)'; inner.appendChild(c); outer.appendChild(inner); ov.appendChild(mk); ov.appendChild(outer); mk._outer = outer; return mk;
     };
     const stroke = (mk, P, col, w, grain) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', pd(P)); p.setAttribute('fill', 'none'); p.setAttribute('stroke', col); p.setAttribute('stroke-width', w); p.setAttribute('stroke-linejoin', 'round'); p.setAttribute('stroke-linecap', grain ? 'butt' : 'round'); mk.appendChild(p); const L = p.getTotalLength(); p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L; return { p, L }; };
     async function step(dir) {
       busy = true;
       const els = SEL.map(s => document.querySelector(s)).filter(e => e && e.getScreenCTM() && (e.closest('g') || e).style.display !== 'none');
       const hs = await Promise.all(els.map(e => hullOf(srcOf(e))));
+      const hl = document.getElementById('heroLineMove'), hlIn = document.getElementById('heroLine'), lineBox = () => { const b = hlIn.getBoundingClientRect(); return { M: of(hl.getScreenCTM()), b }; }, lb0 = lineBox();
       const before = els.map(shot);
       cam.target = cam.pos = Math.round(cam.pos) + dir; for (const q in LAG) cam.lag[q] = cam.pos; cam.kv = 0.07; hideNotes(); camDraw();   // (straight to the next stop - unseen)
-      const after = els.map(shot);
+      const after = els.map(shot), lb1 = lineBox();
       ov.innerHTML = '<filter id="smCrayon" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" seed="6" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2.6 0 0 0 1.85" result="w"/><feComposite in="SourceGraphic" in2="w" operator="in"/></filter>'; lv.innerHTML = ''; const lines = document.createElementNS(NS, 'g'); lines.setAttribute('filter', 'url(#crayonLine)'); lv.appendChild(lines);
       const T = els.map((el, i) => {
         const S0 = ring(hs[i], before[i].U), T0 = ring(hs[i], after[i].U), cS = S0.reduce((a, p) => [a[0] + p[0] / N, a[1] + p[1] / N], [0, 0]), cT = T0.reduce((a, p) => [a[0] + p[0] / N, a[1] + p[1] / N], [0, 0]);
@@ -3857,6 +3865,26 @@
         const ls = document.createElementNS(NS, 'path'); ls.setAttribute('fill', 'none'); ls.setAttribute('stroke', '#f3f1ea'); ls.setAttribute('stroke-width', 1.2); ls.setAttribute('stroke-linecap', 'round'); ls.setAttribute('stroke-linejoin', 'round'); lines.appendChild(ls);
         return { P, L, Ls, Lb, Lz, Lt, oldPic, rest, band, fill, ls, d: i * 0.025 };
       });
+      // the text: a copy (styled as the real one) where it was, fading, and one where it goes, written in by its line
+      if (lb0.b.width > 4 && lb1.b.width > 4) {
+        const styled = () => { const g = hlIn.cloneNode(true); g.removeAttribute('id'); const src = hlIn.querySelectorAll('text'), dst = g.querySelectorAll('text');
+          dst.forEach((d, k) => { const cs = getComputedStyle(src[k]); d.removeAttribute('id'); d.style.cssText = 'font:' + cs.font + ';fill:' + cs.fill + ';letter-spacing:' + cs.letterSpacing + ';filter:' + cs.filter + ';opacity:' + cs.opacity; }); return g; };
+        const tcopy = (lb, id, erase) => { const mk = document.createElementNS(NS, 'mask'); mk.setAttribute('id', id); mk.setAttribute('maskUnits', 'userSpaceOnUse'); mk.setAttribute('x', -1e4); mk.setAttribute('y', -1e4); mk.setAttribute('width', 2e4); mk.setAttribute('height', 2e4);
+          if (erase) mk.innerHTML = '<rect x="-10000" y="-10000" width="20000" height="20000" fill="#fff"/>';
+          const outer = document.createElementNS(NS, 'g'), inner = document.createElementNS(NS, 'g'); outer.setAttribute('mask', 'url(#' + id + ')'); inner.setAttribute('transform', 'matrix(' + lb.M.join(' ') + ')'); inner.appendChild(styled()); outer.appendChild(inner); ov.appendChild(mk); ov.appendChild(outer); mk._outer = outer; return mk; };
+        const box = b => even([[b.left, b.top], [b.right, b.top], [b.right, b.bottom], [b.left, b.bottom]]);
+        const S0 = box(lb0.b), T0 = box(lb1.b), cS = S0.reduce((a, p) => [a[0] + p[0] / N, a[1] + p[1] / N], [0, 0]), cT = T0.reduce((a, p) => [a[0] + p[0] / N, a[1] + p[1] / N], [0, 0]);
+        const S = rot(S0, near(S0, cT)); S.push(S[0]); const Tt = rot(T0, near(T0, cS));
+        const a = S[N], b = Tt[0], dx = b[0] - a[0], dy = b[1] - a[1], mx = (a[0] + b[0]) / 2 - dy * 0.15, my = (a[1] + b[1]) / 2 + dx * 0.15;
+        const br = Array.from({ length: 14 }, (_, k) => { const u = (k + 1) / 15; return [(1 - u) ** 2 * a[0] + 2 * (1 - u) * u * mx + u * u * b[0], (1 - u) ** 2 * a[1] + 2 * (1 - u) * u * my + u * u * b[1]]; });
+        const B = lb1.b, rows = 2, zig = []; for (let k = 0; k <= rows; k++) { const y = B.top + B.height * (k + 0.5) / (rows + 1); zig.push(k % 2 ? [B.right, y] : [B.left, y], k % 2 ? [B.left, y] : [B.right, y]); }
+        const P = S.concat(br, [Tt[0]], zig), L = cum(P), Ls = L[N], Lb = L[N + 15], Lz = L[N + 16], Lt = L[L.length - 1];
+        const oldPic = tcopy(lb0, 'sm' + (++n), true)._outer, mk = tcopy(lb1, 'sm' + (++n), false);
+        const band = stroke(mk, [Tt[0], [Tt[0][0] + 0.5, Tt[0][1]]], '#fff', 1), fill = stroke(mk, zig, '#fff', B.height * 0.75);
+        const ls = document.createElementNS(NS, 'path'); ls.setAttribute('fill', 'none'); ls.setAttribute('stroke', '#f3f1ea'); ls.setAttribute('stroke-width', 1.2); ls.setAttribute('stroke-linecap', 'round'); ls.setAttribute('stroke-linejoin', 'round'); lines.appendChild(ls);
+        T.push({ P, L, Ls, Lb, Lz, Lt, oldPic, band, fill, ls, d: T.length * 0.025 });
+        hl.style.visibility = 'hidden';
+      }
       const camEl = document.getElementById('heroCam'); camEl.style.visibility = 'hidden';
       ov.style.display = lv.style.display = 'block';
       const t0 = performance.now(), total = RUN + 0.15 + 0.025 * T.length;
@@ -3872,7 +3900,7 @@
           th.fill.p.style.strokeDashoffset = th.fill.L * (1 - c01((head - th.Lz) / (th.Lt - th.Lz)));
         }
         if (tt < total) requestAnimationFrame(tick);
-        else { camEl.style.visibility = ''; ov.style.display = lv.style.display = 'none'; ov.innerHTML = lv.innerHTML = ''; busy = false; acc = 0; }
+        else { camEl.style.visibility = ''; hl.style.visibility = ''; ov.style.display = lv.style.display = 'none'; ov.innerHTML = lv.innerHTML = ''; busy = false; acc = 0; }
       };
       tick();
     }
