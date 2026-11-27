@@ -6145,9 +6145,9 @@
     { const si = document.getElementById('shadeImg'), sh = cord.querySelector('.shade'), set = () => sh.setAttribute('href', si.getAttribute('href') || 'assets/lamp-shade.webp'); set(); addEventListener('load', () => setTimeout(set, 500)); }
     // it hangs from the top of the screen down to just beside the main page's figure, its shade at the figure's head
     const svgEl = cord.querySelector('svg'), cordPath = cord.querySelector('.cord'), glow = cord.querySelector('.glow'), shadeEl = cord.querySelector('.shade');
-    const place = () => { const fb = document.getElementById('hfBody'); if (!fb) return; const r = fb.getBoundingClientRect(); if (!r.width && !r.height) return;
-      const s = Math.max(0.6, Math.min(1.4, r.height / 120)), w = 52 * s, shadeH = 33.4 * s, bp = document.getElementById('hfBubblePath'), bb = bp && bp.getBoundingClientRect(), top = r.top + r.height * 0.32, H = Math.max(80, top);   // (lower: the shade at about the figure's shoulders)
-      cord.style.left = Math.max(6, r.left - w - 4 * s) + 'px'; cord.style.width = w + 'px'; cord.style.height = H + 'px';   // (on the figure's left, towards the logo)
+    const place = () => { const lg = document.querySelector('#logo img'); if (!lg) return; const r = lg.getBoundingClientRect(); if (!r.width) return;
+      const s = Math.max(0.75, Math.min(1.1, r.height / 28)), w = 44 * s, shadeH = 28 * s, H = r.bottom + 34 * s;   // (right after the logo, on a short cord)
+      cord.style.left = (r.right + 18 * s) + 'px'; cord.style.width = w + 'px'; cord.style.height = H + 'px';
       svgEl.setAttribute('viewBox', '0 0 ' + w.toFixed(1) + ' ' + H.toFixed(1)); svgEl.setAttribute('preserveAspectRatio', 'none');
       cordPath.setAttribute('d', 'M ' + (w / 2).toFixed(1) + ' -6 C ' + (w / 2 + 0.6).toFixed(1) + ' ' + (H * 0.3).toFixed(1) + ', ' + (w / 2 - 0.6).toFixed(1) + ' ' + (H * 0.6).toFixed(1) + ', ' + (w / 2).toFixed(1) + ' ' + (H - shadeH + 2).toFixed(1));
       shadeEl.setAttribute('x', (w * 2 / 52).toFixed(1)); shadeEl.setAttribute('y', (H - shadeH).toFixed(1)); shadeEl.setAttribute('width', (w * 48 / 52).toFixed(1)); shadeEl.setAttribute('height', shadeH.toFixed(1));
@@ -6178,7 +6178,7 @@
       tl.fromTo(pullG, { y: -H - 40 }, { y: 0, duration: 0.9, ease: 'bounce.out' })
         .to(pullG, { y: 14, duration: 0.14, ease: 'power2.in' }, '+=0.35')
         .to(pullG, { y: 0, duration: 0.6, ease: 'elastic.out(1, 0.32)' });
-      [[0, 1], [0.12, 0], [0.26, 1], [0.4, lit ? 1 : 0]].forEach(([at, on]) => tl.call(() => { glowEl.style.opacity = on; flash.style.opacity = on && !lit ? 0.22 : 0; }, null, 1.45 + at));
+      [[0, 1], [0.12, 0], [0.26, 1], [0.4, lit ? 1 : 0]].forEach(([at, on]) => tl.call(() => { glowEl.style.opacity = on; }, null, 1.45 + at));
       tl.call(() => { glowEl.style.opacity = ''; flash.style.opacity = 0; }, null, 2.0);
       tl.call(() => { if (!pulled) say = bubbleSay('pull me'); }, null, 1.0);
     }
