@@ -746,9 +746,9 @@
     #logo { left: 16px; }
   }
   /* EXPERIMENT: the lamp lights the room white; the line, notes and figure in dark crayon */
-  #hero { background: #fff; }
+  #hero { background: #F5F1E6; }
   #hero, #figSvg { --pen: #1c1a17; }
-  #hero .hsolid, #figSvg .hsolid { fill: #fff; }
+  #hero .hsolid, #figSvg .hsolid { fill: #F5F1E6; }
   #figSvg .hpen, #hero .hpen { stroke: #1c1a17; }
   #heroLine .hword { fill: #2b2926; }
   /* the character and the "scroll" bubble: as they were, only in a waxier crayon (same lines, same size, same colours) */
@@ -843,7 +843,8 @@
     </g>
 
     <!-- light: the room turns white -->
-    <rect id="whiteout" x="-2000" y="-2000" width="6000" height="6000" fill="#FFFFFF" opacity="0"></rect>
+    <clipPath id="lightClip" clipPathUnits="userSpaceOnUse"><circle id="lightCircle" cx="686" cy="400" r="0"></circle></clipPath>
+    <rect id="whiteout" x="-2000" y="-2000" width="6000" height="6000" fill="#F5F1E6" opacity="0" clip-path="url(#lightClip)"></rect>
   </svg>
 </section>
 <script>
@@ -2044,7 +2045,9 @@
     drawOn(el.arm, S.reach);
 
     // light
-    el.whiteout.setAttribute('opacity', S.white);
+    { const w = S.white || 0, lc = document.getElementById('lightCircle');   // (the light spreads from the lamp: a growing circle of cream, no grey in between)
+      el.whiteout.setAttribute('opacity', w > 0.001 ? 1 : 0);
+      if (lc) { lc.setAttribute('cx', LX); lc.setAttribute('cy', ly + 40 * LS); lc.setAttribute('r', (w * w * (3 - 2 * w) * 2600).toFixed(1)); } }
   }
 
   // STOP-MOTION: however often the animation asks, the intro shows a new drawing at most 8 times a second (each one
