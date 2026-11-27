@@ -2266,7 +2266,8 @@
           wrap.appendChild(m); const c = el.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('clip-path'); if (c.querySelectorAll) c.querySelectorAll('[id]').forEach(n => n.removeAttribute('id')); if (el.tagName.toLowerCase() === 'image') { c.removeAttribute('class'); c.removeAttribute('filter'); c.removeAttribute('opacity'); } c.setAttribute('mask', `url(#${id})`); wrap.appendChild(c); pics.appendChild(wrap); if (el.__boil) boilers.push([c, el.__boil]);
           const sc = Math.hypot(W[0], W[1]) || 1; return { m, W, sc };
         };
-        const addStroke = (mk, P, color, wScreen) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', pathD(local(mk.W, P))); p.setAttribute('fill', 'none'); p.setAttribute('stroke', color); p.setAttribute('stroke-width', wScreen / mk.sc); p.setAttribute('stroke-linecap', 'butt'); p.setAttribute('stroke-linejoin', 'round'); if (color !== '#000') p.setAttribute('filter', 'url(#mCrayon)'); mk.m.appendChild(p); /* (grainy crayon edge where it is coloured in; erasing stays clean) */ const L = p.getTotalLength(); p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L; return { p, L }; };
+        const addStroke = (mk, P, color, wScreen) => { if (color !== '#000') { const q = document.createElementNS(NS, 'path'); q.setAttribute('d', pathD(local(mk.W, P))); q.setAttribute('fill', 'none'); q.setAttribute('stroke', color); q.setAttribute('stroke-width', wScreen * 0.82 / mk.sc); q.setAttribute('stroke-linejoin', 'round'); mk.m.appendChild(q); mk.solid = q; }   /* (a solid core: the object as it will look; the grain only at the edge) */
+          const p = document.createElementNS(NS, 'path'); p.setAttribute('d', pathD(local(mk.W, P))); p.setAttribute('fill', 'none'); p.setAttribute('stroke', color); p.setAttribute('stroke-width', wScreen / mk.sc); p.setAttribute('stroke-linecap', 'butt'); p.setAttribute('stroke-linejoin', 'round'); if (color !== '#000') p.setAttribute('filter', 'url(#mCrayon)'); mk.m.appendChild(p); /* (grainy crayon edge where it is coloured in; erasing stays clean) */ const L = p.getTotalLength(); p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L; const core = color !== '#000' ? mk.solid : null; if (core) { core.style.strokeDasharray = L + ' ' + L; core.style.strokeDashoffset = L; } return { p, L, core }; };
         const span = ring => { const xs = ring.map(p => p[0]), ys = ring.map(p => p[1]); return Math.min(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)); };
         const erasers = {}; for (const k of ['door', 'shade', 'cord']) erasers[k] = { mk: masked(SRC[k].el, 'mE' + k, true) };
         { const w = q('#walker'); if (w && SRC.fig) erasers.fig = { mk: masked(w, 'mEfig', true) }; }
@@ -2305,9 +2306,9 @@
             th.ls.forEach((p, k) => { p.setAttribute('d', seg.length > 1 ? poly(seg, J[k]) : ''); p.style.opacity = 1 - after; });
             if ((maskNow || tt >= total) && !th.settled) {
               const eV = clamp01(tail / th.Ls), onT = clamp01((head - th.Lb) / (th.Lt - th.Lb)), fV = clamp01((t - RUN * 0.72) / FILL);
-              if (th.er && th.er.v !== eV) { th.er.v = eV; th.er.p.style.strokeDashoffset = th.er.L * (1 - eV); }
-              if (th.band.v !== onT) { th.band.v = onT; th.band.p.style.strokeDashoffset = th.band.L * (1 - onT); }
-              if (th.fill.v !== fV) { th.fill.v = fV; th.fill.p.style.strokeDashoffset = th.fill.L * (1 - fV); }
+              if (th.er && th.er.v !== eV) { th.er.v = eV; { const o = th.er.L * (1 - eV); th.er.p.style.strokeDashoffset = o; if (th.er.core) th.er.core.style.strokeDashoffset = o; } }
+              if (th.band.v !== onT) { th.band.v = onT; { const o = th.band.L * (1 - onT); th.band.p.style.strokeDashoffset = o; if (th.band.core) th.band.core.style.strokeDashoffset = o; } }
+              if (th.fill.v !== fV) { th.fill.v = fV; { const o = th.fill.L * (1 - fV); th.fill.p.style.strokeDashoffset = o; if (th.fill.core) th.fill.core.style.strokeDashoffset = o; } }
               if (eV === 1 && onT === 1 && fV === 1) th.settled = true;            // (finished: no more redrawing it)
             }
           });
@@ -3976,15 +3977,15 @@
         pts.push([px + nx * J[i], py + ny * J[i]]); }
       p.setAttribute('d', 'M' + pts.map(q => q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' L') + ' Z');
     };
-    const INSET = 40, R_END = 30;   // (the case window a little smaller)
+    const INSET = 14, R_END = 30;
     const edge = () => [INSET, INSET, innerWidth - 2 * INSET, innerHeight - 2 * INSET, R_END];
     addEventListener('resize', () => { if (s.style.display === 'block' && !s._anim) draw(...edge()); });
     return {
-      grow(fromEl, done) {                            // (the screen goes black, the border is drawn round it by hand, then the case opens in it)
-        bk.style.display = 'block'; gsap.to(bk, { opacity: 1, duration: 0.35, ease: 'sine.out' });
-        s.style.display = 'block'; s.style.opacity = 1; s._anim = true; draw(...edge());
-        const L = p.getTotalLength(); p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L;
-        gsap.to(p.style, { strokeDashoffset: 0, duration: 0.9, delay: 0.15, ease: 'power1.inOut', onComplete: () => { p.style.strokeDasharray = ''; p.style.strokeDashoffset = ''; s._anim = false; done(); } });
+      grow(fromEl, done) {                            // (the project's frame swells out to the screen, over black, then the case opens in it)
+        const b = fromEl.getBoundingClientRect(), A = [b.left, b.top, b.width, b.height, Math.min(34, b.height * 0.06)], B = edge(), o = { u: 0 };
+        bk.style.display = 'block'; gsap.to(bk, { opacity: 1, duration: 0.45, ease: 'sine.out' });
+        s.style.display = 'block'; s.style.opacity = 1; s._anim = true; draw(...A);
+        gsap.to(o, { u: 1, duration: 0.7, ease: 'power2.inOut', onUpdate: () => draw(...A.map((v, i) => v + (B[i] - v) * o.u)), onComplete: () => { s._anim = false; done(); } });
       },
       show() { s.style.display = 'block'; s.style.opacity = 1; bk.style.display = 'block'; bk.style.opacity = 1; draw(...edge()); const L = document.getElementById('csLoader'); if (L) L.style.clipPath = 'inset(' + INSET + 'px round ' + R_END + 'px)'; },   // (the loading screen inside the border too)
       hide() { gsap.to(bk, { opacity: 0, duration: 0.35, onComplete: () => { bk.style.display = 'none'; } }); gsap.to(s, { opacity: 0, duration: 0.3, onComplete: () => { s.style.display = 'none'; const L = document.getElementById('csLoader'); if (L) L.style.clipPath = ''; } }); },
