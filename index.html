@@ -1028,10 +1028,10 @@
     <g id="heroProps">
       <!-- each prop 1.2x, spread apart and set down a little off-square (own height and tilt) so they look dropped there -->
       <!-- each prop is placed by JS (translate / rotate / scale about its own centre) for each scroll step -->
-      <g id="hpPhone" data-open="contact"><image href="assets/drawn/phone.webp" x="522.9" y="490.3" width="98.6" height="197.9" transform="rotate(1.4 573.7 583)" class="hprop"></image></g>
+      <g id="hpPhone" data-open="contact"><image href="assets/drawn/phone.webp" x="530.0" y="503.3" width="84.8" height="170.2" transform="rotate(1.4 573.7 583)" class="hprop"></image></g>
       <g id="hpCup" data-open="contact" style="display: none"><image class="hprop" href="assets/photo/hero-cup-bright-hq.webp" x="462.3" y="424.3" width="178.3" height="159.3"></image></g>
       <g id="hpLaptop" data-open="work">
-        <image href="assets/drawn/laptop.webp" x="780.9" y="358.2" width="363.6" height="288.6" class="hprop"></image>
+        <image href="assets/drawn/laptop.webp" x="753.6" y="349.3" width="418.1" height="331.9" class="hprop"></image>
         <!-- on the laptop step its screen shows the Work page -->
         <clipPath id="heroScreenClip"><rect x="795" y="372" width="327" height="198" rx="2"></rect></clipPath>
         <g id="heroScreen" clip-path="url(#heroScreenClip)" opacity="0" style="display:none">
@@ -1042,7 +1042,7 @@
         </g>
       </g>
       <g id="hpBook" data-open="about">
-        <image href="assets/drawn/sketchbook.webp" x="1257.4" y="419.8" width="219.6" height="233.3" class="hprop"></image>
+        <image href="assets/drawn/sketchbook.webp" x="1244.2" y="405.8" width="246.0" height="261.3" class="hprop"></image>
       </g>
     </g>
     </g>
@@ -3699,7 +3699,7 @@
       if (id !== 'hpCup') return mobSlot(i, id);
       const p = mobSlot(i, 'hpPhone'); return [p[0] + (CAM[i].hpCup[0] - CAM[i].hpPhone[0]) * MOB_ROW_K, p[1] + (CAM[i].hpCup[1] - CAM[i].hpPhone[1]) * MOB_ROW_K, CAM[i].hpCup[2], CAM[i].hpCup[3] * MOB_ROW_K]; }
     return CAM[i][id]; };   // (each layout as designed, as the reference)
-  const at = (i, id) => { let [x, y, r, s] = placeOf(i, id);
+  const at = (i, id) => { let [x, y, r, s] = placeOf(i, id); if (id === 'hpBook' && mod(i) === 2 && !isMobMain()) r += 14;   /* (playground: the book lies like the F1 card here) */
     if (i) { x += x < 300 ? -cam.ex : x > 1620 ? cam.ex : 0; y += y < 150 ? -cam.ey : y > 930 ? cam.ey : 0; }   // peeking props stay at the real edges
     return [x, y, r, s]; };
   // through the middle in straight lines: from where it was straight to its meeting point near the centre (62% of the way
