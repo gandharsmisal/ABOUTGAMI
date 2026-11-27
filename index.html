@@ -2250,7 +2250,7 @@
         ['shade', '#dk-camera > image'], ['shade', '#dk-sketchbook > image'], ['cord', '#dkp-sketchbook image'], ['cord', '#dk-marker > image'], ['cord', '#dkp-scissors image'], ['fig', '#dk-scissors > image']];
       const jobs = PAIRS.map(([s, t], i) => { const te = q(t); return te && te.getScreenCTM() && te.closest('g').style.display !== 'none' ? { s, te } : null; }).filter(Boolean);
       running = true;
-      Promise.all([...Object.values(SRC).map(o => load(href(o.el)).then(im => { o.im = im; })), ...jobs.map(j => load(j.te.dataset.orig || href(j.te)).then(im => { j.im = im; })), ...jobs.map(j => window.__strokesOf ? window.__strokesOf(j.te.dataset.orig || href(j.te)).then(v => { j.st = v; }) : null)]).then(() => {
+      Promise.all([...Object.values(SRC).map(o => load(href(o.el)).then(im => { o.im = im; })), ...jobs.map(j => load(j.te.dataset.orig || href(j.te)).then(im => { j.im = im; }))]).then(() => {
         for (const k in SRC) { const o = SRC[k]; o.M = unitM(o.el); o.ring = o.im ? outline(o.im, o.M) : null; }
         { const M = SRC.cord.M; SRC.cord.ring = shapeOf([ap(M, 0.1, 0.45), ap(M, 0.9, 0.45), ap(M, 0.9, 1), ap(M, 0.1, 1)]); }
         if (figPts) { const dense = []; figPts.forEach((p, i) => { const q2 = figPts[(i + 1) % figPts.length]; for (let k = 0; k < 8; k++) dense.push([p[0] + (q2[0] - p[0]) * k / 8, p[1] + (q2[1] - p[1]) * k / 8]); }); SRC.fig = { ring: shapeOf(dense) }; }
@@ -2280,25 +2280,23 @@
           const a = S[N], b = T[0], mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, dx = b[0] - a[0], dy = b[1] - a[1], arc = (n % 2 ? 1 : -1) * 0.18;
           const bridge = Array.from({ length: 16 }, (_, k) => { const u = (k + 1) / 17; const cx = mx - dy * arc, cy = my + dx * arc; return [(1 - u) ** 2 * a[0] + 2 * (1 - u) * u * cx + u * u * b[0], (1 - u) ** 2 * a[1] + 2 * (1 - u) * u * cy + u * u * b[1]]; });
           const P = S.concat(bridge, T, [T[0]]), L = cum(P), Ls = L[N], Lb = L[N + 17], Lt = L[L.length - 1];
-          // the object is built by lines: where the line arrives, the drawing's own strokes are drawn one after another (like a
-          // hand drawing it), and then its colour comes in under them
-          const pic = document.createElementNS(NS, 'g'); pic.setAttribute('transform', 'matrix(' + of(j.te.parentNode.getScreenCTM()).join(' ') + ')');
-          { const c = j.te.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('class'); c.setAttribute('href', j.te.dataset.orig || href(j.te)); pic.appendChild(c); } pic.setAttribute('opacity', 0); pics.appendChild(pic);
-          const UT = unitM(j.te), drawn = document.createElementNS(NS, 'path');
-          drawn.setAttribute('d', (j.st || []).map(st => 'M' + st.map(p => ap(UT, p[0], p[1]).map(v => v.toFixed(1)).join(' ')).join(' L')).join(' '));
-          drawn.setAttribute('fill', 'none'); drawn.setAttribute('stroke', '#f3f1ea'); drawn.setAttribute('stroke-width', Math.max(1, Math.hypot(UT[0], UT[1]) / 150 * 1.4).toFixed(2)); drawn.setAttribute('stroke-linecap', 'round'); drawn.setAttribute('stroke-linejoin', 'round'); lines.appendChild(drawn);
-          drawn.style.opacity = 0; const DL = 0;   // (measured once its layer is showing)
+          // where the head runs round the object, the object's own lines come up (a band along its outline), then the colour is scribbled in
+          const mk = masked(j.te, 'mT' + n, false), sz = span(T0);
+          const band = addStroke(mk, T.concat([T[0]]), '#fff', Math.max(30, sz * 1.25));
+          const bx = Math.min(...T0.map(p => p[0])), by = Math.min(...T0.map(p => p[1])), bw = Math.max(...T0.map(p => p[0])) - bx, bh = Math.max(...T0.map(p => p[1])) - by;
+          const rows = 8, zig = []; for (let i = 0; i <= rows; i++) { zig.push([i % 2 ? bx - bw * 0.1 : bx + bw * 1.1, by + bh * (i + 0.5) / rows]); }
+          const fill = addStroke(mk, zig, '#fff', bh / rows * 2.2);
           // the source drawing is taken away where the tail has gone round it (only the first thread from each drawing does this)
           const er = erasers[j.s] && !erasers[j.s].used ? (erasers[j.s].used = 1, j.s === 'cord'
             ? addStroke(erasers.cord.mk, [ap(SRC.cord.M, 0.5, 1.02), ap(SRC.cord.M, 0.5, -0.02)], '#000', 24)        // (the whole cord is pulled up and away)
             : j.s === 'fig' ? (() => { const r = q('#walker').getBoundingClientRect(); return addStroke(erasers.fig.mk, [[r.left + r.width / 2, r.top - 6], [r.left + r.width / 2, r.bottom + 6]], '#000', r.width * 1.6 + 30); })()   // (the whole figure, legs too)
             : addStroke(erasers[j.s].mk, S.slice(0, N + 1), '#000', Math.max(24, span(S0) * 1.35))) : null;   // (wide enough to take the whole drawing)
           const ls = [0, 1].map(k => { const p = document.createElementNS(NS, 'path'); p.setAttribute('fill', 'none'); p.setAttribute('stroke', '#f3f1ea'); p.setAttribute('stroke-width', k ? 0.6 : 1.1); p.setAttribute('stroke-opacity', k ? 0.55 : 0.9); p.setAttribute('stroke-linejoin', 'round'); p.setAttribute('stroke-linecap', 'round'); lines.appendChild(p); return p; });
-          return { P, L, Ls, Lb, Lt, pic, drawn, DL, er, ls, d: n * STAG };
+          return { P, L, Ls, Lb, Lt, band, fill, er, ls, d: n * STAG };
         }).filter(Boolean);
         document.getElementById('boilG').style.visibility = 'hidden';          // (the copies take over, unseen)
         svg.style.display = 'block'; svg.style.opacity = 1; svgL.style.display = 'block';
-        const t0 = performance.now(), total = RUN + 0.6 + STAG * threads.length; let tick = -1, J = [wobble(2), wobble(2.8)];   // (hands straight over: no wait)
+        const t0 = performance.now(), total = Math.max(RUN * 0.92 + 0.12, RUN * 0.72 + FILL) + STAG * threads.length; let tick = -1, J = [wobble(2), wobble(2.8)];   // (hands straight over: no wait)
         const step = () => {
           const tt = (performance.now() - t0) / 1000; if (Math.floor(tt * 10) !== tick) { tick = Math.floor(tt * 10); J = [wobble(1.8), wobble(2.6)]; for (const [c, u] of boilers) c.setAttribute('href', u[tick % 3]); }
           const maskNow = Math.floor(tt * 12) !== step.m; step.m = Math.floor(tt * 12);   // (the reveals on twos - 12 a second: much lighter, and hand-drawn)
@@ -2309,14 +2307,12 @@
             const after = clamp01((t - RUN * 0.9) / 0.12);
             { const w = Math.min(1, Math.max(0, S.white || 0)), c = '#f3f1ea'; /* (the room stays dark: the lines stay light) */ th.ls.forEach((p, k) => { p.setAttribute('d', seg.length > 1 ? poly(seg, J[k]) : ''); p.style.opacity = 1 - after; p.setAttribute('stroke', c); }); }   // (white on the dark, going dark as the room lights up)
             if ((maskNow || tt >= total) && !th.settled) {
-              const eV = clamp01(tail / th.Ls);
+              const eV = clamp01(tail / th.Ls), onT = clamp01((head - th.Lb) / (th.Lt - th.Lb)), fV = clamp01((t - RUN * 0.72) / FILL);
               if (th.er && th.er.v !== eV) { th.er.v = eV; { const o = th.er.L * (1 - eV); th.er.p.style.strokeDashoffset = o; if (th.er.core) th.er.core.style.strokeDashoffset = o; } }
+              if (th.band.v !== onT) { th.band.v = onT; { const o = th.band.L * (1 - onT); th.band.p.style.strokeDashoffset = o; if (th.band.core) th.band.core.style.strokeDashoffset = o; } }
+              if (th.fill.v !== fV) { th.fill.v = fV; { const o = th.fill.L * (1 - fV); th.fill.p.style.strokeDashoffset = o; if (th.fill.core) th.fill.core.style.strokeDashoffset = o; } }
+              if (eV === 1 && onT === 1 && fV === 1) th.settled = true;            // (finished: no more redrawing it)
             }
-            { const dv = clamp01((head - th.Lb) / (th.Lt - th.Lb)), sm2 = x => x * x * (3 - 2 * x), cv = sm2(clamp01((t - RUN * 0.92) / 0.4));
-              if (!th.DL) { th.DL = th.drawn.getTotalLength() || 1; th.drawn.style.strokeDasharray = th.DL + ' ' + th.DL; }
-              th.drawn.style.strokeDashoffset = th.DL * (1 - dv);                                         // (its lines drawn as the line goes round)
-              th.pic.setAttribute('opacity', cv.toFixed(3));                                               // (then its colour comes in under them)
-              th.drawn.style.opacity = dv > 0 ? 1 - sm2(clamp01((t - RUN * 0.92 - 0.25) / 0.3)) : 0; }
           });
           if (tt < total) requestAnimationFrame(step);
           else { running = false; const fn = done; done = null; svg.style.display = 'none'; svgL.style.display = 'none'; if (fn) fn();   // (swapped in one go: no frame with both)
@@ -3828,7 +3824,6 @@
       for (let pass = 0; pass < 2; pass++) for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const k = y * W + x; if (!B[k] || seen[k]) continue; if (pass === 0 && nb(x, y).length !== 1) continue;
         const s = walk(x, y); if (s.length >= 4) out.push(s.filter((_, i) => i % 2 === 0 || i === s.length - 1).map(([a, b]) => [(a + 0.5) / W, (b + 0.5) / H])); }
       res(out); }; im.onerror = () => res([]); im.src = src; }));
-    window.__strokesOf = strokesOf;   // (the intro draws the desk with these strokes too)
     addEventListener('load', () => setTimeout(() => SEL.forEach(s => { const e = document.querySelector(s); if (e) strokesOf(srcOf(e)); }), 1500));
     const shot = el => ({ P: of(el.parentNode.getScreenCTM()), U: mul(of(el.getScreenCTM()), [A(el, 'width'), 0, 0, A(el, 'height'), A(el, 'x'), A(el, 'y')]) });
     const ease = x => x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2, c01 = x => Math.min(1, Math.max(0, x)), sm = x => x * x * (3 - 2 * x);
