@@ -758,6 +758,7 @@
   @media (min-width: 821px), (min-aspect-ratio: 85/100) { #workPage { --pen: #ece8dc; } #workPage .wpFrame { stroke: #ece8dc; } }
   html.wk-open #grain { opacity: 0; }   /* (the picture clear: no paper grain over it) */
   #workPage .wpFrame { filter: url(#wpFrameFx); stroke-width: 3px; }   /* (the frame hand-drawn in crayon, shimmering) */
+  #wpWriting, #wpDots { filter: url(#boilMain); }   /* (the Work page's writing shimmers too) */
 </style>
 </head>
 <body>
@@ -1001,7 +1002,7 @@
       window.__boilTick = (window.__boilTick + 1) % 3;
       if (!document.documentElement.classList.contains('app-mode')) window.__redraw();
       const c = document.getElementById('crayonFigNoise'); if (c && window.__calm !== false) c.setAttribute('seed', 1 + window.__boilTick);
-      { const wf = document.getElementById('wpFrameNoise'); if (wf && document.documentElement.classList.contains('wk-open')) wf.setAttribute('seed', 1 + window.__boilTick); }   // (the Work frame boils while it is open)
+      if (document.documentElement.classList.contains('wk-open')) for (const id of ['wpFrameNoise', 'boilMainNoise']) { const n = document.getElementById(id); if (n) n.setAttribute('seed', 1 + window.__boilTick); }   // (the Work frame and writing boil while it is open)
       const calm = window.__calm !== false && !document.documentElement.classList.contains('in-case');   // (busy: scrolling, Work open - no shimmer work at all)
       if (calm && window.__deskBoil) window.__deskBoil(window.__boilTick);
       if (calm && window.__logoBoil) window.__logoBoil(window.__boilTick);
@@ -1630,7 +1631,7 @@
       <feMerge><feMergeNode in="fill"></feMergeNode><feMergeNode in="drawn"></feMergeNode></feMerge>
     </filter>
     <!-- the one shimmer, for the main page character (as the intro's) and the logo (scaled to its size) -->
-    <filter id="boilMain" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence id="boilMainNoise" type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="1" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
+    <filter id="boilMain" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence id="boilMainNoise" type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="1" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="2" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
     <filter id="boilLogo" x="-10%" y="-20%" width="120%" height="140%"><feTurbulence id="boilLogoNoise" type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="1" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="1.5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
     <!-- crayon for the character: the waxy crayon edge, light (one noise), boiling on the one clock at rest -->
     <filter id="crayonFig" x="-20%" y="-10%" width="140%" height="120%">   <!-- the character drawn by hand: a wobbly line, a faint second pass beside it, crayon grain -->
@@ -2253,8 +2254,9 @@
         if (figPts) { const dense = []; figPts.forEach((p, i) => { const q2 = figPts[(i + 1) % figPts.length]; for (let k = 0; k < 8; k++) dense.push([p[0] + (q2[0] - p[0]) * k / 8, p[1] + (q2[1] - p[1]) * k / 8]); }); SRC.fig = { ring: shapeOf(dense) }; }
         // (light: no live filters - the drawings boil by swapping their ready-made shimmer versions, the strokes by their hand wobble)
         svg.innerHTML = '';
+        svg.innerHTML = '<filter id="mCrayon" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" seed="6" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2.6 0 0 0 1.85" result="w"/><feComposite in="SourceGraphic" in2="w" operator="in"/></filter>';   // (crayon grain for the reveals: coloured in, not ink)
         const all = document.createElementNS(NS, 'g'); svg.appendChild(all);
-        const pics = document.createElementNS(NS, 'g'), lines = document.createElementNS(NS, 'g'); all.appendChild(pics); svgL.innerHTML = ''; svgL.appendChild(lines);
+        const pics = document.createElementNS(NS, 'g'), lines = document.createElementNS(NS, 'g'); lines.setAttribute('filter', 'url(#crayonLine)'); all.appendChild(pics); svgL.innerHTML = ''; svgL.appendChild(lines);   // (the strokes in crayon)
         const boilers = [];
         // a copy of a picture behind a mask (in the picture's parent's units): erase = the mask takes it away where drawn
         const masked = (el, id, erase) => {
@@ -2264,7 +2266,7 @@
           wrap.appendChild(m); const c = el.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('clip-path'); if (c.querySelectorAll) c.querySelectorAll('[id]').forEach(n => n.removeAttribute('id')); if (el.tagName.toLowerCase() === 'image') { c.removeAttribute('class'); c.removeAttribute('filter'); c.removeAttribute('opacity'); } c.setAttribute('mask', `url(#${id})`); wrap.appendChild(c); pics.appendChild(wrap); if (el.__boil) boilers.push([c, el.__boil]);
           const sc = Math.hypot(W[0], W[1]) || 1; return { m, W, sc };
         };
-        const addStroke = (mk, P, color, wScreen) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', pathD(local(mk.W, P))); p.setAttribute('fill', 'none'); p.setAttribute('stroke', color); p.setAttribute('stroke-width', wScreen / mk.sc); p.setAttribute('stroke-linecap', 'round'); p.setAttribute('stroke-linejoin', 'round'); mk.m.appendChild(p); const L = p.getTotalLength(); p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L; return { p, L }; };
+        const addStroke = (mk, P, color, wScreen) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', pathD(local(mk.W, P))); p.setAttribute('fill', 'none'); p.setAttribute('stroke', color); p.setAttribute('stroke-width', wScreen / mk.sc); p.setAttribute('stroke-linecap', 'butt'); p.setAttribute('stroke-linejoin', 'round'); if (color !== '#000') p.setAttribute('filter', 'url(#mCrayon)'); mk.m.appendChild(p); /* (grainy crayon edge where it is coloured in; erasing stays clean) */ const L = p.getTotalLength(); p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L; return { p, L }; };
         const span = ring => { const xs = ring.map(p => p[0]), ys = ring.map(p => p[1]); return Math.min(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)); };
         const erasers = {}; for (const k of ['door', 'shade', 'cord']) erasers[k] = { mk: masked(SRC[k].el, 'mE' + k, true) };
         { const w = q('#walker'); if (w && SRC.fig) erasers.fig = { mk: masked(w, 'mEfig', true) }; }
@@ -3805,7 +3807,7 @@
       // on twos while moving (a new drawing 12 times a second, each one redrawn a little); every frame otherwise
       const step12 = Math.floor(time * 12);
       cam.jseed = 0; camDraw();   // (smooth, every frame, as the live site: light to scroll)
-      window.__calm = !moving && !(cam.side > 0.001);   // (the shimmer rests while the desk moves or Work is open)
+      window.__calm = !moving;   // (the shimmer rests only while the desk moves)
       return;
     }
     const arrived = Math.abs(cam.target - cam.pos) < 0.04 && Object.entries(cam.lag).every(([k, v]) => k === 'desk' || Math.abs(cam.target - v) < 0.06);   // (the notes don't wait for the side objects)
