@@ -757,7 +757,7 @@
   #figSvg #hfBubblePath, #figSvg #heroScroll { filter: url(#crayon); }
   @media (min-width: 821px), (min-aspect-ratio: 85/100) { #workPage { --pen: #ece8dc; } #workPage .wpFrame { stroke: #ece8dc; } }
   html.wk-open #grain { opacity: 0; }   /* (the picture clear: no paper grain over it) */
-  #workPage .wpFrame { filter: url(#wpFrameFx); stroke-width: 3px; }   /* (the frame hand-drawn in crayon, shimmering) */
+  #workPage .wpFrame { filter: url(#wpFrameFx); stroke-width: 4.6px; }   /* (the frame hand-drawn in crayon, shimmering) */
   #wpWriting, #wpDots { filter: url(#boilMain); }   /* (the Work page's writing shimmers too) */
 </style>
 </head>
@@ -2645,11 +2645,11 @@
      a dark blurred copy of the picture with the sharp picture in the middle. */
   const WORK = [
     // kind: the kind of project; role: what I did; open: the colour of "Click to open project"
-    { img: 'assets/work-cybersmart.webp', fx: 0.56, name: 'Cybersmart', desc: 'The dashboard that notices what people miss.',
+    { img: 'assets/work-cybersmart.png', fx: 0.56, name: 'Cybersmart', desc: 'The dashboard that notices what people miss.',
       kind: 'Industry Project', role: 'Role: Sole designer', open: '#1F9C7F' },
-    { img: 'assets/work-music.webp', fx: 0.72, name: 'Music App', desc: 'For people who never needed sound to feel a song.',
+    { img: 'assets/work-music.png', fx: 0.72, name: 'Music App', desc: 'For people who never needed sound to feel a song.',
       kind: 'Inclusive Design', role: 'Role: Almost everything', open: '#F08A2C' },
-    { img: 'assets/work-hobby.webp', fx: 0.5, name: 'P2P Hobby Sharing App', desc: 'Most hobbies die as ideas, with no one to start them with.',
+    { img: 'assets/work-hobby.png', fx: 0.5, name: 'P2P Hobby Sharing App', desc: 'Most hobbies die as ideas, with no one to start them with.',
       kind: 'Service Design', role: 'Role: Almost everything', open: '#1A1A3E' }
   ];
   const workPage = $('workPage'), wpStage = $('wpStage'), wpBody = $('wpBody'), wpCanvas = $('wpCanvas'), wpCtx = wpCanvas.getContext('2d');
@@ -2800,7 +2800,13 @@
     const c = cv.getContext('2d'), m = 44;
     cover(c, p.image, PAD - m, PAD - m, FR.w + 2 * m, FR.h + 2 * m, p.fx);
     const src = c.getImageData(0, 0, CV.w, CV.h), out = c.createImageData(CV.w, CV.h), s = src.data, o = out.data;
-    if (true) out.data.set(s); else                                // (EXPERIMENT: the picture clean - no grain texture; the hover sand stays)
+    if (true) {                                                   // (EXPERIMENT: the picture clean and clear - no grain, a light sharpen; the hover sand stays)
+      const W2 = CV.w, H2 = CV.h, o2 = out.data, K = 0.55;
+      for (let y = 0; y < H2; y++) for (let x = 0; x < W2; x++) { const k = (y * W2 + x) * 4;
+        if (x === 0 || y === 0 || x === W2 - 1 || y === H2 - 1) { o2[k] = s[k]; o2[k + 1] = s[k + 1]; o2[k + 2] = s[k + 2]; o2[k + 3] = s[k + 3]; continue; }
+        for (let c = 0; c < 3; c++) { const v = s[k + c], n = (s[k + c - 4] + s[k + c + 4] + s[k + c - W2 * 4] + s[k + c + W2 * 4]) / 4; o2[k + c] = v + K * (v - n); }
+        o2[k + 3] = s[k + 3]; }
+    } else
     for (let y = 0; y < CV.h; y++) for (let x = 0; x < CV.w; x++) {
       const r1 = hash(x, y, 300 + i), r2 = hash(x, y, 400 + i), r3 = hash(x, y, 500 + i);
       const sx = Math.min(CV.w - 1, Math.max(0, x + Math.round((r1 - 0.5) * 2)));
@@ -3948,14 +3954,55 @@
   }
   const canOpen = () => work.open && work.ready && !W.trans && W.fat < 0.2 && CASES[W.cur];
   workPage.addEventListener('pointermove', e => { workPage.style.cursor = canOpen() && overPicture(e) ? 'pointer' : ''; });
-  workPage.addEventListener('click', e => { if (canOpen() && overPicture(e)) openCase(W.cur); });
-  function openCase(i) {
+  // OPENING A CASE STUDY (experiment): the project's crayon frame swells out to the edges of the screen, and the case
+  // study then scrolls up inside that crayon border (which stays round it while it is open)
+  const caseFrame = (() => {
+    const NS = 'http://www.w3.org/2000/svg', s = document.createElementNS(NS, 'svg');
+    s.setAttribute('id', 'caseFrame'); s.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:46;pointer-events:none;display:none;overflow:visible';
+    s.innerHTML = '<path fill="none" stroke="#ece8dc" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" filter="url(#wpFrameFx)"></path>';
+    document.body.appendChild(s);
+    const p = s.querySelector('path'), J = Array.from({ length: 96 }, () => (Math.random() - 0.5) * 2.2);
+    const draw = (x, y, w, h, rr) => {               // a hand-drawn rounded rectangle (a slight wobble all round)
+      const pts = [], n = 96, per = 2 * (w + h - 4 * rr) + 2 * Math.PI * rr;
+      for (let i = 0; i < n; i++) { let d = per * i / n, px, py, nx, ny;
+        const seg = [w - 2 * rr, Math.PI * rr / 2, h - 2 * rr, Math.PI * rr / 2, w - 2 * rr, Math.PI * rr / 2, h - 2 * rr, Math.PI * rr / 2];
+        let k = 0; while (k < 7 && d > seg[k]) { d -= seg[k]; k++; }
+        const a = d / rr;
+        switch (k) { case 0: px = x + rr + d; py = y; nx = 0; ny = -1; break; case 1: px = x + w - rr + Math.sin(a) * rr; py = y + rr - Math.cos(a) * rr; nx = Math.sin(a); ny = -Math.cos(a); break;
+          case 2: px = x + w; py = y + rr + d; nx = 1; ny = 0; break; case 3: px = x + w - rr + Math.cos(a) * rr; py = y + h - rr + Math.sin(a) * rr; nx = Math.cos(a); ny = Math.sin(a); break;
+          case 4: px = x + w - rr - d; py = y + h; nx = 0; ny = 1; break; case 5: px = x + rr - Math.sin(a) * rr; py = y + h - rr + Math.cos(a) * rr; nx = -Math.sin(a); ny = Math.cos(a); break;
+          case 6: px = x; py = y + h - rr - d; nx = -1; ny = 0; break; default: px = x + rr - Math.cos(a) * rr; py = y + rr - Math.sin(a) * rr; nx = -Math.cos(a); ny = -Math.sin(a); }
+        pts.push([px + nx * J[i], py + ny * J[i]]); }
+      p.setAttribute('d', 'M' + pts.map(q => q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' L') + ' Z');
+    };
+    const INSET = 14, R_END = 30;
+    const edge = () => [INSET, INSET, innerWidth - 2 * INSET, innerHeight - 2 * INSET, R_END];
+    addEventListener('resize', () => { if (s.style.display === 'block' && !s._anim) draw(...edge()); });
+    return {
+      grow(fromEl, done) {
+        const b = fromEl.getBoundingClientRect(), A = [b.left, b.top, b.width, b.height, Math.min(34, b.height * 0.06)], B = edge(), o = { u: 0 };
+        s.style.display = 'block'; s.style.opacity = 1; s._anim = true; draw(...A);
+        gsap.to(o, { u: 1, duration: 0.7, ease: 'power2.inOut', onUpdate: () => draw(...A.map((v, i) => v + (B[i] - v) * o.u)), onComplete: () => { s._anim = false; done(); } });
+      },
+      show() { s.style.display = 'block'; s.style.opacity = 1; draw(...edge()); const L = document.getElementById('csLoader'); if (L) L.style.clipPath = 'inset(' + INSET + 'px round ' + R_END + 'px)'; },   // (the loading screen inside the border too)
+      hide() { gsap.to(s, { opacity: 0, duration: 0.3, onComplete: () => { s.style.display = 'none'; const L = document.getElementById('csLoader'); if (L) L.style.clipPath = ''; } }); },
+      clip: 'inset(' + INSET + 'px round ' + R_END + 'px)'
+    };
+  })();
+  workPage.addEventListener('click', e => { if (canOpen() && overPicture(e)) {
+    if (isMob()) return openCase(W.cur);
+    const i = W.cur; caseFrame.grow(document.getElementById('wpFrame'), () => openCase(i, true));   // (the frame swells to the screen, then the case scrolls up in it)
+  } });
+  function openCase(i, framed) {
     const page = CASES[i];
     if (!page || caseOpen) return;
     caseOpen = page;
     caseScrollTop(page);
     document.documentElement.classList.add('in-case');            // the menu gives way to "close"
-    gsap.fromTo(page, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, ease: 'sine.out' });
+    if (framed || document.getElementById('caseFrame').style.display === 'block') {   // (inside the crayon border: it scrolls up into it)
+      caseFrame.show(); page.style.clipPath = caseFrame.clip;
+      gsap.fromTo(page, { autoAlpha: 1, yPercent: 100 }, { yPercent: 0, duration: 0.75, ease: 'power3.out' });
+    } else gsap.fromTo(page, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, ease: 'sine.out' });
     page.focus({ preventScroll: true });
     page.classList.add('sand');                                   // no plain picture before the sand starts
     const cv = page.querySelector('.csSand'); cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
@@ -5553,7 +5600,8 @@
   function closeCase() {
     if (!caseOpen) return false;
     if (caseSandTw) { caseSandTw.kill(); caseSandTw = null; }
-    gsap.to(caseOpen, { autoAlpha: 0, duration: 0.35, ease: 'sine.inOut' });
+    { const pg = caseOpen; gsap.to(pg, { autoAlpha: 0, duration: 0.35, ease: 'sine.inOut', onComplete: () => { pg.style.clipPath = ''; gsap.set(pg, { yPercent: 0 }); } }); }
+    caseFrame.hide();
     if (caseOpen._lenis) caseOpen._lenis.stop();
     caseOpen = null;
     document.documentElement.classList.remove('in-case');
