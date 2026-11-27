@@ -761,7 +761,7 @@
   html.theme-light #heroLine .hword { fill: #2b2926; }
   html.theme-light #workPage { --pen: #1c1a17; } html.theme-light #workPage .wpFrame { stroke: #1c1a17; }
   /* the switch: the intro's own lamp, small, hanging from the top by the menu - pull it: light on (light mode) / off (dark) */
-  #themeCord { position: fixed; z-index: 50; top: 0; right: 520px; width: 52px; height: 104px; border: 0; padding: 0; background: none; cursor: pointer; display: none; -webkit-tap-highlight-color: transparent; }
+  #themeCord { position: fixed; z-index: 50; top: 0; left: 200px; width: 52px; height: 104px; border: 0; padding: 0; background: none; cursor: pointer; display: none; -webkit-tap-highlight-color: transparent; }
   html.app-mode #themeCord { display: block; }
   #themeCord svg { width: 100%; height: 100%; overflow: visible; }
   #themeCord .cord { fill: none; stroke: #ece8dc; stroke-width: 1.4; stroke-linecap: round; filter: url(#crayonLine); }
@@ -1780,7 +1780,7 @@
   <div id="drawerList"></div>
 </aside>
 <!-- the GA.MI logo, top left (white ink, flipped dark on the white scenes like the menu) -->
-<button type="button" id="themeCord" aria-label="Pull the lamp: light or dark mode" title="lights"><svg viewBox="0 0 52 104" aria-hidden="true"><defs><radialGradient id="lampGlow" cx="0.5" cy="0.2" r="0.7"><stop offset="0" stop-color="#ffe7b0" stop-opacity="0.75"></stop><stop offset="1" stop-color="#ffe7b0" stop-opacity="0"></stop></radialGradient></defs><g class="pull"><path class="cord" d="M 26 -6 C 26.6 20, 25.4 44, 26 70"></path><ellipse class="glow" cx="26" cy="96" rx="30" ry="16" fill="url(#lampGlow)"></ellipse><image class="shade" x="2" y="66" width="48" height="33.4" preserveAspectRatio="none"></image></g></svg></button>
+<button type="button" id="themeCord" aria-label="Pull the lamp: light or dark mode" title="lights"><svg viewBox="0 0 52 104" preserveAspectRatio="xMidYMax meet" aria-hidden="true"><defs><radialGradient id="lampGlow" cx="0.5" cy="0.2" r="0.7"><stop offset="0" stop-color="#ffe7b0" stop-opacity="0.75"></stop><stop offset="1" stop-color="#ffe7b0" stop-opacity="0"></stop></radialGradient></defs><g class="pull"><path class="cord" d="M 26 -6 C 26.6 20, 25.4 44, 26 70"></path><ellipse class="glow" cx="26" cy="96" rx="30" ry="16" fill="url(#lampGlow)"></ellipse><image class="shade" x="2" y="66" width="48" height="33.4" preserveAspectRatio="none"></image></g></svg></button>
 <a id="logo" href="#" aria-label="GA.MI - back to the start"><img src="assets/logo.png" alt="GA.MI" width="312" height="106"></a>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -6143,11 +6143,17 @@
     };
     apply(mode, true);
     { const si = document.getElementById('shadeImg'), sh = cord.querySelector('.shade'), set = () => sh.setAttribute('href', si.getAttribute('href') || 'assets/lamp-shade.webp'); set(); addEventListener('load', () => setTimeout(set, 500)); }
-    const place = () => { const ml = document.getElementById('menu-list'), mb = document.querySelector('#menu .menu-toggle'), rl = ml && ml.getBoundingClientRect(), rb = mb && mb.getBoundingClientRect();
-      const r = rl && rl.width > 0 && getComputedStyle(ml).display !== 'none' && rl.top < 120 ? rl : rb && rb.width > 0 ? rb : null;
-      if (r) cord.style.right = Math.max(8, innerWidth - r.left + 10) + 'px'; };
+    // it hangs from the top of the screen down to just beside the main page's figure, its shade at the figure's head
+    const svgEl = cord.querySelector('svg'), cordPath = cord.querySelector('.cord'), glow = cord.querySelector('.glow'), shadeEl = cord.querySelector('.shade');
+    const place = () => { const fb = document.getElementById('hfBody'); if (!fb) return; const r = fb.getBoundingClientRect(); if (!r.width && !r.height) return;
+      const s = Math.max(0.6, Math.min(1.4, r.height / 120)), w = 52 * s, shadeH = 33.4 * s, bp = document.getElementById('hfBubblePath'), bb = bp && bp.getBoundingClientRect(), top = Math.min(r.top, bb && bb.height ? bb.top : 1e9), H = Math.max(80, top - 10 * s);   // (the shade just above the figure's head and its bubble)
+      cord.style.left = (r.right + 14 * s) + 'px'; cord.style.width = w + 'px'; cord.style.height = H + 'px';
+      svgEl.setAttribute('viewBox', '0 0 ' + w.toFixed(1) + ' ' + H.toFixed(1)); svgEl.setAttribute('preserveAspectRatio', 'none');
+      cordPath.setAttribute('d', 'M ' + (w / 2).toFixed(1) + ' -6 C ' + (w / 2 + 0.6).toFixed(1) + ' ' + (H * 0.3).toFixed(1) + ', ' + (w / 2 - 0.6).toFixed(1) + ' ' + (H * 0.6).toFixed(1) + ', ' + (w / 2).toFixed(1) + ' ' + (H - shadeH + 2).toFixed(1));
+      shadeEl.setAttribute('x', (w * 2 / 52).toFixed(1)); shadeEl.setAttribute('y', (H - shadeH).toFixed(1)); shadeEl.setAttribute('width', (w * 48 / 52).toFixed(1)); shadeEl.setAttribute('height', shadeH.toFixed(1));
+      glow.setAttribute('cx', (w / 2).toFixed(1)); glow.setAttribute('cy', (H + 2).toFixed(1)); glow.setAttribute('rx', (w * 0.6).toFixed(1)); glow.setAttribute('ry', (shadeH * 0.5).toFixed(1)); };
     place(); addEventListener('resize', place); addEventListener('load', () => setTimeout(place, 300));
-    if (window.ResizeObserver) { const ml = document.getElementById('menu-list'); if (ml) new ResizeObserver(place).observe(ml); }
+    setInterval(() => { if (html.classList.contains('app-mode') && !document.hidden) place(); }, 250);   // (follows the figure as it walks in)
     cord.addEventListener('click', () => {
       const pull = cord.querySelector('.pull'), cam = document.getElementById('heroCam');
       gsap.timeline().to(pull, { y: 16, duration: 0.14, ease: 'power2.in' }).to(pull, { y: 0, duration: 0.7, ease: 'elastic.out(1, 0.32)' });
