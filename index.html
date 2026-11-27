@@ -5413,25 +5413,48 @@
       const src = document.getElementById('hfBubble'); if (!src) return null;
       const g = src.cloneNode(true); g.removeAttribute('id'); g.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
       g.style.opacity = 0; g.querySelectorAll('*').forEach(n => { n.style.opacity = ''; });
+      g.querySelectorAll('path').forEach(p => p.setAttribute('transform', 'translate(216 0) scale(1.45 1) translate(-216 0)'));   // (a wider bubble for the longer words)
+      g.setAttribute('transform', 'translate(46 0) ' + (g.getAttribute('transform') || ''));   // (moved right, clear of the lamp)
       const tx = g.querySelector('text'), st = document.getElementById('heroScroll'); if (tx) { tx.textContent = text; if (st) { const cs = getComputedStyle(st); tx.style.cssText = 'font-family:' + cs.fontFamily + ';font-size:' + cs.fontSize + ';fill:' + cs.fill + ';letter-spacing:' + cs.letterSpacing + ';text-transform:' + cs.textTransform + ';filter:' + cs.filter; } }
       src.parentNode.appendChild(g); gsap.to(g, { opacity: 1, duration: 0.35, ease: 'sine.out' }); return g; };
+    const NS = 'http://www.w3.org/2000/svg', figS = document.getElementById('figSvg'), armReal = document.getElementById('hfArm'), bodyEl = document.getElementById('hfBody');
+    let pulling = false;
+    const charPull = onPulled => {                     // the figure's arm reaches up to the lamp, tugs it down, lets go
+      if (pulling) return; const sb = shadeEl.getBoundingClientRect(), ctm = figS && figS.getScreenCTM();
+      if (!sb.width || !ctm || !bodyEl) { if (onPulled) onPulled(); return; }
+      pulling = true;
+      const inv = ctm.inverse(), P = (x, y) => { const p = figS.createSVGPoint(); p.x = x; p.y = y; return p.matrixTransform(inv); };
+      const b = bodyEl.getBBox(), S = [b.x + b.width * 0.62, b.y + b.height * 0.2], E0 = P(sb.left + sb.width * 0.45, sb.bottom - 3), px = 1 / ctm.a;
+      const arm = document.createElementNS(NS, 'path'); arm.setAttribute('class', 'hpen'); arm.setAttribute('fill', 'none'); document.getElementById('heroFig').appendChild(arm);
+      if (armReal) armReal.style.opacity = 0;
+      const o = { reach: 0, pull: 0 }, draw = () => {
+        const E = [E0.x, E0.y + o.pull * 16 * px], C = [(S[0] + E[0]) / 2 + 14 * px * 1.5, (S[1] + E[1]) / 2 + 8 * px];
+        let d = ''; for (let k = 0; k <= 12; k++) { const u = o.reach * k / 12, x = (1 - u) ** 2 * S[0] + 2 * (1 - u) * u * C[0] + u * u * E[0], y = (1 - u) ** 2 * S[1] + 2 * (1 - u) * u * C[1] + u * u * E[1]; d += (k ? ' L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); }
+        arm.setAttribute('d', d); };
+      gsap.timeline({ onUpdate: draw, onComplete: () => { arm.remove(); if (armReal) armReal.style.opacity = ''; pulling = false; } })
+        .to(o, { reach: 1, duration: 0.28, ease: 'power2.out' })
+        .to(o, { pull: 1, duration: 0.14, ease: 'power2.in' }).to(pullG, { y: 16, duration: 0.14, ease: 'power2.in' }, '<')
+        .call(() => { if (onPulled) onPulled(); })
+        .to(o, { pull: 0, duration: 0.5, ease: 'elastic.out(1, 0.35)' }).to(pullG, { y: 0, duration: 0.6, ease: 'elastic.out(1, 0.32)' }, '<')
+        .to(o, { reach: 0, duration: 0.3, ease: 'power2.in' }, '-=0.2');
+    };
     function entrance() {
       if (shown || !onMain()) { if (!shown) scrolled = false; return; }
       shown = true; place(); cord.style.visibility = '';
       const H = parseFloat(cord.style.height) || 200, lit = mode === 'light', tl = gsap.timeline();
       tl.fromTo(pullG, { y: -H - 40 }, { y: 0, duration: 0.9, ease: 'bounce.out' })
-        .to(pullG, { y: 14, duration: 0.14, ease: 'power2.in' }, '+=0.35')
-        .to(pullG, { y: 0, duration: 0.6, ease: 'elastic.out(1, 0.32)' });
-      [[0, 0], [0.12, 1], [0.26, 0], [0.4, lit ? 1 : 0]].forEach(([at, on]) => tl.call(() => { glow.style.opacity = on; }, null, 1.45 + at));   // (only the lamp flickers)
-      tl.call(() => { glow.style.opacity = ''; }, null, 2.0);
-      tl.call(() => { if (!pulled) say = bubbleSay('pull me'); }, null, 1.0);
+;
+      tl.call(() => charPull(null), null, 1.2);   // (the figure gives it a tug)
+      [[0, 0], [0.12, 1], [0.26, 0], [0.4, lit ? 1 : 0]].forEach(([at, on]) => tl.call(() => { glow.style.opacity = on; }, null, 1.65 + at));   // (only the lamp flickers)
+      tl.call(() => { glow.style.opacity = ''; }, null, 2.2);
+      tl.call(() => { if (!pulled) say = bubbleSay(mode === 'dark' ? 'lights on?' : 'lights off?'); }, null, 2.3);
     }
     setInterval(() => { if (say) say.style.opacity = onMain() ? 1 : 0; }, 300);
     cord.addEventListener('click', () => {
       pulled = true; if (say) { const g = say; say = null; gsap.to(g, { opacity: 0, duration: 0.3, onComplete: () => g.remove() }); }
-      gsap.timeline().to(pullG, { y: 16, duration: 0.14, ease: 'power2.in' }).to(pullG, { y: 0, duration: 0.7, ease: 'elastic.out(1, 0.32)' });
+      if (pulling) return;
       const cam = document.getElementById('heroCam');
-      gsap.to(cam, { opacity: 0, duration: 0.22, ease: 'sine.in', onComplete: () => { apply(mode === 'dark' ? 'light' : 'dark'); gsap.to(cam, { opacity: 1, duration: 0.3, ease: 'sine.out' }); } });
+      charPull(() => gsap.to(cam, { opacity: 0, duration: 0.2, ease: 'sine.in', onComplete: () => { apply(mode === 'dark' ? 'light' : 'dark'); gsap.to(cam, { opacity: 1, duration: 0.3, ease: 'sine.out' }); } }));   // (the figure pulls it: lights off / on)
     });
   })();
 </script>
