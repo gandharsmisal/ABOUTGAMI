@@ -567,10 +567,6 @@
     background-image: var(--mottle), var(--grain), var(--mottle); background-size: 90px, 140px, 210px; mix-blend-mode: multiply; opacity: 0; transition: opacity 0.3s ease; }
   #menu button:hover::before, #menu button:focus-visible::before { opacity: 0.55; }
   #menu .scribble { display: none !important; }
-  /* EXPERIMENT: the menu buttons hand-drawn in crayon - coloured in with loose crayon strokes inside a wobbly crayon outline */
-  #menu button { background: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 50' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cfilter id='c' x='-5%' y='-10%' width='110%' height='120%'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='5' result='n'/%3E%3CfeColorMatrix in='n' type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -1.3 0 0 0 1.75' result='w'/%3E%3CfeComposite in='SourceGraphic' in2='w' operator='in'/%3E%3C/filter%3E%3CclipPath id='k'%3E%3Cpath d='M24 4 C 70 2, 140 3, 178 5 C 196 7, 198 43, 177 46 C 130 48, 66 47, 23 45 C 3 43, 2 7, 24 4 Z'/%3E%3C/clipPath%3E%3C/defs%3E%3Cg filter='url(%23c)'%3E%3Cg clip-path='url(%23k)' fill='none' stroke-linecap='round'%3E%3Cpath d='M-60 50 L -18 0 M-55 50 L -13 0 M-50 50 L -8 0 M-45 50 L -3 0 M-40 50 L 2 0 M-35 50 L 7 0 M-30 50 L 12 0 M-25 50 L 17 0 M-20 50 L 22 0 M-15 50 L 27 0 M-10 50 L 32 0 M-5 50 L 37 0 M0 50 L 42 0 M5 50 L 47 0 M10 50 L 52 0 M15 50 L 57 0 M20 50 L 62 0 M25 50 L 67 0 M30 50 L 72 0 M35 50 L 77 0 M40 50 L 82 0 M45 50 L 87 0 M50 50 L 92 0 M55 50 L 97 0 M60 50 L 102 0 M65 50 L 107 0 M70 50 L 112 0 M75 50 L 117 0 M80 50 L 122 0 M85 50 L 127 0 M90 50 L 132 0 M95 50 L 137 0 M100 50 L 142 0 M105 50 L 147 0 M110 50 L 152 0 M115 50 L 157 0 M120 50 L 162 0 M125 50 L 167 0 M130 50 L 172 0 M135 50 L 177 0 M140 50 L 182 0 M145 50 L 187 0 M150 50 L 192 0 M155 50 L 197 0 M160 50 L 202 0 M165 50 L 207 0 M170 50 L 212 0 M175 50 L 217 0 M180 50 L 222 0 M185 50 L 227 0 M190 50 L 232 0 M195 50 L 237 0 M200 50 L 242 0 M205 50 L 247 0 M210 50 L 252 0 M215 50 L 257 0 M220 50 L 262 0 M225 50 L 267 0 ' stroke='%23efe3c1' stroke-width='6.5'/%3E%3Cpath d='M-40 0 L -10 50 M-29 0 L 1 50 M-18 0 L 12 50 M-7 0 L 23 50 M4 0 L 34 50 M15 0 L 45 50 M26 0 L 56 50 M37 0 L 67 50 M48 0 L 78 50 M59 0 L 89 50 M70 0 L 100 50 M81 0 L 111 50 M92 0 L 122 50 M103 0 L 133 50 M114 0 L 144 50 M125 0 L 155 50 M136 0 L 166 50 M147 0 L 177 50 M158 0 L 188 50 M169 0 L 199 50 M180 0 L 210 50 M191 0 L 221 50 M202 0 L 232 50 M213 0 L 243 50 M224 0 L 254 50 ' stroke='%23b9a776' stroke-width='2.2' opacity='0.35'/%3E%3C/g%3E%3Cpath d='M24 4 C 70 2, 140 3, 178 5 C 196 7, 198 43, 177 46 C 130 48, 66 47, 23 45 C 3 43, 2 7, 24 4 Z' fill='none' stroke='%23231d18' stroke-width='2.2'/%3E%3Cpath d='M27 6 C 72 4, 138 5, 175 7 C 193 10, 195 41, 175 44 C 128 46, 68 45, 26 43 C 7 41, 6 9, 27 6' fill='none' stroke='%23231d18' stroke-width='1' opacity='0.5'/%3E%3C/g%3E%3C/svg%3E") center / 100% 100% no-repeat !important; }
-  #menu button:hover, #menu button:focus-visible { background: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 50' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cfilter id='c' x='-5%' y='-10%' width='110%' height='120%'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='5' result='n'/%3E%3CfeColorMatrix in='n' type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -1.3 0 0 0 1.75' result='w'/%3E%3CfeComposite in='SourceGraphic' in2='w' operator='in'/%3E%3C/filter%3E%3CclipPath id='k'%3E%3Cpath d='M24 4 C 70 2, 140 3, 178 5 C 196 7, 198 43, 177 46 C 130 48, 66 47, 23 45 C 3 43, 2 7, 24 4 Z'/%3E%3C/clipPath%3E%3C/defs%3E%3Cg filter='url(%23c)'%3E%3Cg clip-path='url(%23k)' fill='none' stroke-linecap='round'%3E%3Cpath d='M-60 50 L -18 0 M-55 50 L -13 0 M-50 50 L -8 0 M-45 50 L -3 0 M-40 50 L 2 0 M-35 50 L 7 0 M-30 50 L 12 0 M-25 50 L 17 0 M-20 50 L 22 0 M-15 50 L 27 0 M-10 50 L 32 0 M-5 50 L 37 0 M0 50 L 42 0 M5 50 L 47 0 M10 50 L 52 0 M15 50 L 57 0 M20 50 L 62 0 M25 50 L 67 0 M30 50 L 72 0 M35 50 L 77 0 M40 50 L 82 0 M45 50 L 87 0 M50 50 L 92 0 M55 50 L 97 0 M60 50 L 102 0 M65 50 L 107 0 M70 50 L 112 0 M75 50 L 117 0 M80 50 L 122 0 M85 50 L 127 0 M90 50 L 132 0 M95 50 L 137 0 M100 50 L 142 0 M105 50 L 147 0 M110 50 L 152 0 M115 50 L 157 0 M120 50 L 162 0 M125 50 L 167 0 M130 50 L 172 0 M135 50 L 177 0 M140 50 L 182 0 M145 50 L 187 0 M150 50 L 192 0 M155 50 L 197 0 M160 50 L 202 0 M165 50 L 207 0 M170 50 L 212 0 M175 50 L 217 0 M180 50 L 222 0 M185 50 L 227 0 M190 50 L 232 0 M195 50 L 237 0 M200 50 L 242 0 M205 50 L 247 0 M210 50 L 252 0 M215 50 L 257 0 M220 50 L 262 0 M225 50 L 267 0 ' stroke='%23d3bf86' stroke-width='6.5'/%3E%3Cpath d='M-40 0 L -10 50 M-29 0 L 1 50 M-18 0 L 12 50 M-7 0 L 23 50 M4 0 L 34 50 M15 0 L 45 50 M26 0 L 56 50 M37 0 L 67 50 M48 0 L 78 50 M59 0 L 89 50 M70 0 L 100 50 M81 0 L 111 50 M92 0 L 122 50 M103 0 L 133 50 M114 0 L 144 50 M125 0 L 155 50 M136 0 L 166 50 M147 0 L 177 50 M158 0 L 188 50 M169 0 L 199 50 M180 0 L 210 50 M191 0 L 221 50 M202 0 L 232 50 M213 0 L 243 50 M224 0 L 254 50 ' stroke='%238f7f4f' stroke-width='2.2' opacity='0.35'/%3E%3C/g%3E%3Cpath d='M24 4 C 70 2, 140 3, 178 5 C 196 7, 198 43, 177 46 C 130 48, 66 47, 23 45 C 3 43, 2 7, 24 4 Z' fill='none' stroke='%23231d18' stroke-width='2.2'/%3E%3Cpath d='M27 6 C 72 4, 138 5, 175 7 C 193 10, 195 41, 175 44 C 128 46, 68 45, 26 43 C 7 41, 6 9, 27 6' fill='none' stroke='%23231d18' stroke-width='1' opacity='0.5'/%3E%3C/g%3E%3C/svg%3E") center / 100% 100% no-repeat !important; }
-  #menu button::before { display: none; }
   /* thin pen lines, like the logo and the drawings */
   #menu .pill-icon .ink { fill: none; stroke: #050403; stroke-width: 1.8px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
   #menu .pill-icon .dot { fill: currentColor; transition: transform 0.12s ease-out; }
@@ -756,8 +752,8 @@
   #figSvg .hpen, #hero .hpen { stroke: #ece8dc; }
   #heroLine .hword { fill: #ece8dc; }
   /* the character and the "scroll" bubble: as they were, only in a waxier crayon (same lines, same size, same colours) */
-  #scene #figure .ln, #scene #leg0, #scene #leg1, #scene #arm { stroke-width: 1.5; filter: url(#crayon); }
-  #figSvg #hfLeg0, #figSvg #hfLeg1, #figSvg #hfBody, #figSvg #hfArm { stroke-width: 2.4px; filter: url(#crayonFig); }   /* (the character in crayon) */
+  #scene #figure .ln, #scene #leg0, #scene #leg1, #scene #arm { filter: url(#crayonFig); }
+  #figSvg #hfLeg0, #figSvg #hfLeg1, #figSvg #hfBody, #figSvg #hfArm { filter: url(#crayonFig); }   /* (the character as it was, thin, drawn by hand in crayon) */
   #figSvg #hfBubblePath, #figSvg #heroScroll { filter: url(#crayon); }
   @media (min-width: 821px), (min-aspect-ratio: 85/100) { #workPage { --pen: #ece8dc; } #workPage .wpFrame { stroke: #ece8dc; } }
 </style>
@@ -1634,11 +1630,17 @@
     <filter id="boilMain" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence id="boilMainNoise" type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="1" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
     <filter id="boilLogo" x="-10%" y="-20%" width="120%" height="140%"><feTurbulence id="boilLogoNoise" type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="1" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="1.5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
     <!-- crayon for the character: the waxy crayon edge, light (one noise), boiling on the one clock at rest -->
-    <filter id="crayonFig" x="-10%" y="-10%" width="120%" height="120%">
-      <feTurbulence id="crayonFigNoise" type="fractalNoise" baseFrequency="0.32" numOctaves="2" seed="1" result="n"></feTurbulence>
-      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -1.5 0 0 0 1.85" result="wax"></feColorMatrix>
-      <feComposite in="SourceGraphic" in2="wax" operator="in" result="c"></feComposite>
-      <feDisplacementMap in="c" in2="n" scale="2.4" xChannelSelector="G" yChannelSelector="B"></feDisplacementMap>
+    <filter id="crayonFig" x="-20%" y="-10%" width="140%" height="120%">   <!-- the character drawn by hand: a wobbly line, a faint second pass beside it, crayon grain -->
+      <feTurbulence id="crayonFigNoise" type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="1" result="w1"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="w1" scale="3.4" xChannelSelector="R" yChannelSelector="G" result="pass1"></feDisplacementMap>
+      <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="7" result="w2"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="w2" scale="4.2" xChannelSelector="G" yChannelSelector="R" result="p2"></feDisplacementMap>
+      <feOffset in="p2" dx="0.7" dy="-0.5" result="p2o"></feOffset>
+      <feColorMatrix in="p2o" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.45 0" result="pass2"></feColorMatrix>
+      <feMerge result="both"><feMergeNode in="pass2"></feMergeNode><feMergeNode in="pass1"></feMergeNode></feMerge>
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="8" result="g"></feTurbulence>
+      <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2 0 0 0 1.7" result="wax"></feColorMatrix>
+      <feComposite in="both" in2="wax" operator="in"></feComposite>
     </filter>
     <!-- crayon: coarser, waxier gaps -->
     <filter id="crayon" x="-5%" y="-5%" width="110%" height="110%">
@@ -2165,7 +2167,7 @@
   // object's colour is scribbled in. One drawing can send out several threads (the door draws the laptop, phone, book and
   // paper; the lamp the camera and sketchbook; the cord the pencil, marker and scissors; the figure the film).
   const morph = (() => {
-    const NS = 'http://www.w3.org/2000/svg', N = 120, STAG = 0.02, RUN = 1.3, FILL = 0.32;
+    const NS = 'http://www.w3.org/2000/svg', N = 120, STAG = 0.04, RUN = 2.0, FILL = 0.5;
     const svg = document.createElementNS(NS, 'svg');
     svg.setAttribute('id', 'morphSvg');
     svg.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;overflow:visible;display:none';
