@@ -72,8 +72,7 @@
     stroke: var(--pen); stroke-width: 0.4px; }
   #heroProps > g { pointer-events: auto; cursor: pointer; }
   #heroDecor image { filter: grayscale(1) brightness(1.12); }   /* (experiment: only the laptop, phone and book in colour - the rest are just there) */
-  #heroProps > g .hprop { transition: filter 0.25s ease; }
-  #heroProps > g:hover .hprop { filter: drop-shadow(0 0 9px rgba(255, 238, 200, 0.45)) brightness(1.08); }   /* (experiment: the three answer the pointer) */
+  #heroProps > g:hover .hprop { filter: url(#hoverBoil); }   /* (experiment: under the pointer the object shimmers strongly) */
   /* the grid paper and the camera toned down to sit like the other printed pieces (softer contrast, less colour, warm) */
   #dk-paper image { filter: saturate(0.68) contrast(0.84) brightness(1.04) sepia(0.14); }
   #dk-camera image { filter: saturate(0.5) contrast(0.66) brightness(1.11) sepia(0.15); }   /* (the camera softer still) */
@@ -1009,6 +1008,7 @@
       if (document.documentElement.classList.contains('wk-open')) for (const id of ['wpFrameNoise', 'boilMainNoise']) { const n = document.getElementById(id); if (n) n.setAttribute('seed', 1 + window.__boilTick); }   // (the Work frame and writing boil while it is open)
       const calm = window.__calm !== false && !document.documentElement.classList.contains('in-case');   // (busy: scrolling, Work open - no shimmer work at all)
       if (calm && window.__deskBoil) window.__deskBoil(window.__boilTick);
+      { const hb = document.getElementById('hoverBoilNoise'); if (hb) hb.setAttribute('seed', 1 + window.__boilTick); }   // (the hover shimmer)
       if (calm && window.__logoBoil) window.__logoBoil(window.__boilTick);
     }, 100);
   })();
@@ -1635,6 +1635,7 @@
       <feMerge><feMergeNode in="fill"></feMergeNode><feMergeNode in="drawn"></feMergeNode></feMerge>
     </filter>
     <!-- the one shimmer, for the main page character (as the intro's) and the logo (scaled to its size) -->
+    <filter id="hoverBoil" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence id="hoverBoilNoise" type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="1" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="9" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
     <filter id="boilMain" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence id="boilMainNoise" type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="1" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="2" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
     <filter id="boilLogo" x="-10%" y="-20%" width="120%" height="140%"><feTurbulence id="boilLogoNoise" type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="1" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="1.5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
     <!-- crayon for the character: the waxy crayon edge, light (one noise), boiling on the one clock at rest -->
@@ -3759,8 +3760,8 @@
     const SZ = isMobMain() ? { hpBook: 1.0, hpPhone: 1.45, hpCup: 1.1 } : { hpLaptop: 1, hpBook: 0.86, hpPhone: 1.32, hpCup: 1 };   /* (the F1 card a little smaller) */   /* (the phone a little bigger, the mug gone) */   // (the notebook and the mug and phone a little bigger)
     if (SZ.hpPhone) { P.hpCup[0] = P.hpPhone[0] + (P.hpCup[0] - P.hpPhone[0]) * SZ.hpPhone; P.hpCup[1] = P.hpPhone[1] + (P.hpCup[1] - P.hpPhone[1]) * SZ.hpPhone; }
     for (const id in PROPS) {
-      const [x, y, r, s0] = P[id], c = PROPS[id], hv = HOVER[id] || 0, s = s0 * (SZ[id] || 1) * (1 + 0.05 * hv);
-      const hj = HANDJIT(id).slice(); hj[1] -= 14 * hv; hj[2] += Math.sin((cam.t || 0) * 13) * 2.2 * hv;   // (experiment: lifts and wiggles under the pointer)
+      const [x, y, r, s0] = P[id], c = PROPS[id], s = s0 * (SZ[id] || 1);
+      const hj = HANDJIT(id);
       $(id).setAttribute('transform', `translate(${x + hj[0]} ${y + hj[1]}) rotate(${r + hj[2]}) scale(${s * (isMobMain() ? 1.155 * MOB_K : 0.95 * 0.9)}) translate(${-c[0]} ${-c[1]})`);   // (phones: 15.5% bigger)
     }
     for (const n in DESK) {
