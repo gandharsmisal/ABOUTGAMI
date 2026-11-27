@@ -758,11 +758,11 @@
   /* the switch: the intro's lamp, hanging down by the figure - it drops in after the first scroll */
   /* the lamp pill (by the menu): the switch for dark mode */
   #menu #themePill { padding: 0 21px 0 12px; gap: 8px; overflow: visible; }
-  #themePill svg { width: 34px; height: 44px; overflow: visible; display: block; }
   #themePill .lampMove, #themePill .pcord { transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
-  #themePill .pcord { stroke: #3b3730; stroke-width: 1.1; stroke-linecap: round; transform-box: fill-box; transform-origin: 50% 0; }
-  #themePill:hover .lampMove, #themePill:focus-visible .lampMove { transform: translateY(34px); }   /* (hover: the cord pays out, the lamp comes down out of the pill) */
-  #themePill:hover .pcord, #themePill:focus-visible .pcord { transform: scaleY(3.6); }
+  #themePill .pcord { transform-box: fill-box; transform-origin: 50% 0; }   /* (drawn like the other menu icons) */
+  #themePill .lampMove { transform-box: view-box; transform-origin: 12px 8.4px; }
+  #themePill:hover .lampMove, #themePill:focus-visible .lampMove { transform: translateY(40px) scale(1.65); }   /* (hover: the lamp grows as it comes down out of the pill) */   /* (hover: the cord pays out, the lamp comes down out of the pill) */
+  #themePill:hover .pcord, #themePill:focus-visible .pcord { transform: scaleY(5.26); }
   #themePill .pglow { opacity: 1; transition: opacity 0.35s ease; }
   html.theme-dark #themePill .pglow { opacity: 0; }
   @media (max-width: 820px) { #menu #themePill { display: none; } }
@@ -1383,7 +1383,7 @@
       <svg class="pill-icon" viewBox="0 0 24 24" aria-hidden="true"><g class="heart"><path class="ink" d="M12.6 20.3 C 8.2 17.6, 4.4 14.3, 3.7 9.8 C 3.2 6.1, 5.8 4, 8.6 4.4 C 10.6 4.9, 11.7 6.6, 12 8.4 C 12.6 5.6, 14.6 4.1, 16.8 4.5 C 19.4 5, 20.7 7.4, 20.2 10.1 C 19.4 14.4, 15.6 17.1, 11.2 19.9 M 12.6 20.3 C 12.1 20.6, 11.6 20.4, 11.2 19.9"></path></g></svg>
       <span class="label">Contact</span>
     </button>
-    <button type="button" id="themePill" aria-label="Lights off"><svg viewBox="0 0 34 44" aria-hidden="true"><defs><radialGradient id="pillGlow" cx="0.5" cy="0.25" r="0.7"><stop offset="0" stop-color="#ffe7b0" stop-opacity="0.85"></stop><stop offset="1" stop-color="#ffe7b0" stop-opacity="0"></stop></radialGradient></defs><line class="pcord" x1="17" y1="1" x2="17" y2="14"></line><g class="lampMove"><ellipse class="pglow" cx="17" cy="34" rx="15" ry="7" fill="url(#pillGlow)"></ellipse><image class="pshade" href="assets/drawn/lamp-shade-sketch.svg" x="4" y="12" width="26" height="18.1" preserveAspectRatio="none"></image></g></svg><span class="label">lights off</span></button>
+    <button type="button" id="themePill" aria-label="Lights off"><svg class="pill-icon" viewBox="0 0 24 24" aria-hidden="true"><defs><radialGradient id="pillGlow" cx="0.5" cy="0.2" r="0.75"><stop offset="0" stop-color="#ffd98a" stop-opacity="0.9"></stop><stop offset="1" stop-color="#ffd98a" stop-opacity="0"></stop></radialGradient></defs><line class="ink pcord" x1="12" y1="-1" x2="12" y2="8.4"></line><g class="lampTug"><g class="lampMove"><ellipse class="pglow" cx="12" cy="19.5" rx="9" ry="5" fill="url(#pillGlow)"></ellipse><path class="ink" d="M4.6 15.3 C 5.3 11.5, 8.3 8.7, 12 8.4 C 15.8 8.6, 18.7 11.4, 19.5 15.1 C 14.7 15.7, 9.6 15.8, 4.6 15.3 Z"></path><path class="ink" d="M9.9 15.7 C 10.1 18, 13.9 18.1, 14.2 15.6"></path></g></g></svg><span class="label">off</span></button>
       </div>
 </nav>
 <!-- phones: a "menu" button, top right; it opens a drawer from the right with the sections in it -->
@@ -5488,9 +5488,9 @@
     setInterval(() => { if (say) say.style.opacity = onMain() ? 1 : 0; }, 300);
     { const pill = document.getElementById('themePill'), ps = pill && pill.querySelector('.pshade');
       if (pill) {
-        const label = () => { const l = mode === 'dark' ? 'lights on' : 'lights off'; pill.setAttribute('aria-label', l[0].toUpperCase() + l.slice(1)); pill.removeAttribute('title'); const sp = pill.querySelector('.label'); if (sp) sp.textContent = l; }; label();   // (the words: what a click will do)
+        const label = () => { const l = mode === 'dark' ? 'lights on' : 'lights off'; pill.setAttribute('aria-label', l[0].toUpperCase() + l.slice(1)); pill.removeAttribute('title'); const sp = pill.querySelector('.label'); if (sp) sp.textContent = mode === 'dark' ? 'on' : 'off'; }; label();   // (the words: what a click will do)
         pill.addEventListener('click', () => {
-          const mv = pill.querySelector('.lampMove'), cam = document.getElementById('heroCam');
+          const mv = pill.querySelector('.lampTug'), cam = document.getElementById('heroCam');   // (the tug on its own group: the hover's grow is left alone)
           gsap.timeline().to(mv, { y: 12, duration: 0.12, ease: 'power2.in' }).to(mv, { y: 0, duration: 0.6, ease: 'elastic.out(1, 0.35)' });   // (a tug)
           gsap.to(cam, { opacity: 0, duration: 0.2, ease: 'sine.in', onComplete: () => { apply(mode === 'dark' ? 'light' : 'dark'); label(); gsap.to(cam, { opacity: 1, duration: 0.3, ease: 'sine.out' }); } });
         });
