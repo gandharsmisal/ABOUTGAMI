@@ -752,6 +752,24 @@
   #hero .hsolid, #figSvg .hsolid { fill: #000; }
   #figSvg .hpen, #hero .hpen { stroke: #ece8dc; }
   #heroLine .hword { fill: #ece8dc; }
+  /* LIGHT MODE (experiment): the lamp's cord top left switches it - crayon on cream */
+  #hero { transition: background-color 0.5s ease; }
+  html.theme-light #hero { background: #F5F1E6; }
+  html.theme-light #hero, html.theme-light #figSvg { --pen: #1c1a17; }
+  html.theme-light #hero .hsolid, html.theme-light #figSvg .hsolid { fill: #F5F1E6; }
+  html.theme-light #figSvg .hpen, html.theme-light #hero .hpen { stroke: #1c1a17; }
+  html.theme-light #heroLine .hword { fill: #2b2926; }
+  html.theme-light #workPage { --pen: #1c1a17; } html.theme-light #workPage .wpFrame { stroke: #1c1a17; }
+  /* the switch: a hand-drawn lamp cord hanging from the top, pulled to turn the light on / off */
+  #themeCord { position: fixed; z-index: 50; top: 0; left: 172px; width: 46px; height: 96px; border: 0; padding: 0; background: none; cursor: pointer;
+    mix-blend-mode: difference; display: none; -webkit-tap-highlight-color: transparent; }
+  html.app-mode #themeCord { display: block; }
+  #themeCord svg { width: 100%; height: 100%; overflow: visible; filter: url(#crayonLine); }
+  #themeCord .cord { fill: none; stroke: #fff; stroke-width: 1.6; stroke-linecap: round; }
+  #themeCord .knob { fill: none; stroke: #fff; stroke-width: 1.8; }
+  #themeCord .lbl { fill: #fff; font: 400 15px "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", cursive; letter-spacing: 0.04em; }
+  #themeCord:focus-visible { outline: 1px solid #fff; outline-offset: 4px; }
+  @media (max-width: 820px) { #themeCord { left: 104px; height: 80px; } }
   /* the character and the "scroll" bubble: as they were, only in a waxier crayon (same lines, same size, same colours) */
   #scene #figure .ln, #scene #leg0, #scene #leg1, #scene #arm { filter: url(#crayonFig); }
   #figSvg #hfLeg0, #figSvg #hfLeg1, #figSvg #hfBody, #figSvg #hfArm { filter: url(#crayonFig); }   /* (the character as it was, thin, drawn by hand in crayon) */
@@ -1763,6 +1781,7 @@
   <div id="drawerList"></div>
 </aside>
 <!-- the GA.MI logo, top left (white ink, flipped dark on the white scenes like the menu) -->
+<button type="button" id="themeCord" aria-label="Switch the lights (dark or light mode)"><svg viewBox="0 0 46 96" aria-hidden="true"><g class="pull"><path class="cord" d="M 14 -4 C 15 20, 13 44, 14 62"></path><ellipse class="knob" cx="14" cy="68" rx="4.2" ry="6"></ellipse></g><text class="lbl" x="23" y="88">lights</text></svg></button>
 <a id="logo" href="#" aria-label="GA.MI - back to the start"><img src="assets/logo.png" alt="GA.MI" width="312" height="106"></a>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -2308,7 +2327,7 @@
             const head = th.Ls + (th.Lt - th.Ls) * u, tail = Math.min(head, th.Lb * ease(clamp01(t / (RUN * 0.9))));   // (the tail always leaves the intro drawing completely and arrives at the object)
             const K = (head > th.Lz ? 55 : 150) * (1 - clamp01((u - 0.94) / 0.06)), seg = slice(th.P, th.L, Math.max(th.Ls, head - K), head);   // (the line stays until it has finished colouring)   // (shrinks to nothing as it arrives: nothing left by the objects)   // (a short stroke, from where it leaves the drawing)
             const after = clamp01((t - RUN) / 0.12);
-            { const w = Math.min(1, Math.max(0, S.white || 0)), c = '#f3f1ea'; /* (the room stays dark: the lines stay light) */ th.ls.forEach((p, k) => { p.setAttribute('d', seg.length > 1 ? poly(seg, J[k]) : ''); p.style.opacity = 1 - after; p.setAttribute('stroke', c); }); }   // (white on the dark, going dark as the room lights up)
+            { const w = Math.min(1, Math.max(0, S.white || 0)), c = document.documentElement.classList.contains('theme-light') ? 'rgb(' + [243, 241, 234].map((v, i) => Math.round(v + ([40, 37, 33][i] - v) * w)).join(',') + ')' : '#f3f1ea'; /* (white on the dark; going dark as the room lights up in light mode) */ th.ls.forEach((p, k) => { p.setAttribute('d', seg.length > 1 ? poly(seg, J[k]) : ''); p.style.opacity = 1 - after; p.setAttribute('stroke', c); }); }   // (white on the dark, going dark as the room lights up)
             if ((maskNow || tt >= total) && !th.settled) {
               const eV = clamp01(tail / th.Ls), onT = clamp01((head - th.Lb) / (th.Lz - th.Lb)), fV = clamp01((head - th.Lz) / (th.Lt - th.Lz));   // (everything appears only under the moving line)
               if (th.er && th.er.v !== eV) { th.er.v = eV; { const o = th.er.L * (1 - eV); th.er.p.style.strokeDashoffset = o; if (th.er.core) th.er.core.style.strokeDashoffset = o; } }
@@ -3995,7 +4014,7 @@
     // normal swipe all the way there (soft landing); swiping again soon after goes a little quicker
     onRelease: self => {
       if (!mainActive() || !(self.event && /^(touch|pointer|mouse)/.test(self.event.type))) return;
-      if (KJ && window.__stepMorph && !isMobMain()) return;   // (no glide after a swipe: steps only)
+      if (KJ && window.__STEP_SCROLL && window.__stepMorph && !isMobMain()) return;   // (experiment, off)
       if (KJ) { cam.target += Math.max(-1, Math.min(1, -self.velocityY * 0.0022 * 0.05)); cam.kv = 0.06; return; }   // (the reference: a flick adds a little, at most one stop)   // (no extra from the flick speed: a swipe moves exactly as far as the finger went, so equal swipes travel equally; it then settles softly)   // (the reference: a flick adds a little, at most one stop)
       const dist = Math.abs(cam.tSum || 0), dir = Math.sign(cam.tSum || 0), now = performance.now();
       if (dist < 14 || !dir) return;
@@ -4012,7 +4031,7 @@
     onChangeY: self => {
     if (!mainActive()) return;
     const now = performance.now(), touch = !!(self.event && /^(touch|pointer|mouse)/.test(self.event.type));   // (finger or mouse drag, as the reference)
-    if (KJ && window.__stepMorph && window.__stepMorph(self.deltaY, touch)) return;   // (experiment: a scroll is one drawn step)
+    if (KJ && window.__STEP_SCROLL && window.__stepMorph && window.__stepMorph(self.deltaY, touch)) return;   // (experiment, off: a scroll as one drawn step)
     if (KJ) { if (touch) { cam.target -= self.deltaY * 0.0022; cam.kv = 0.16;   /* (the reference) */ } else {
       // a trackpad (its steps aren't whole mouse notches, or they're small) moves at less than half the wheel's rate
       const ev0 = self.event || {}, pad = (ev0.wheelDeltaY !== undefined && ev0.wheelDeltaY % 120 !== 0) || Math.abs(self.deltaY) < 30, notches = Math.max(1, Math.round(Math.abs(self.deltaY) / (Math.abs(ev0.deltaY) || Math.abs(self.deltaY) || 1))), dS = self.deltaY * 0.0008;   // (wheel and trackpad alike, as the reference)   // (a mouse: every notch exactly 1/12 of the way, so 12 notches land exactly on the next stop)
@@ -4111,7 +4130,7 @@
         //  - and the border light - then the case opens in it)
         const E = edge(); bk.style.webkitMaskImage = bk.style.maskImage = 'none';
         bk.style.display = 'block'; bk.style.opacity = 1; bk.style.background = 'rgba(245,241,230,0)'; bk.style.inset = '0px'; bk.style.borderRadius = '0px';
-        s.style.display = 'block'; s.style.opacity = 1; s._anim = true; draw(...E); p.setAttribute('stroke', '#f3efe4');   /* (light: it draws over the dark room) */
+        s.style.display = 'block'; s.style.opacity = 1; s._anim = true; draw(...E); p.setAttribute('stroke', document.documentElement.classList.contains('theme-light') ? '#1c1a17' : '#f3efe4');   /* (light: it draws over the dark room) */
         const L = p.getTotalLength(); p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L;
         const o = { u: 0 };
         gsap.to(o, { u: 1, duration: 1.0, ease: 'power1.inOut', onUpdate: () => { p.style.strokeDashoffset = L * (1 - o.u); },
@@ -4121,7 +4140,7 @@
             gsap.to(c, { k: 1, duration: 0.4, ease: 'power2.out', onUpdate: () => { bk.style.background = 'rgba(245,241,230,' + c.k.toFixed(3) + ')'; bk.style.inset = (INSET * c.k).toFixed(1) + 'px'; bk.style.borderRadius = (R_END * c.k).toFixed(1) + 'px'; },
               onComplete: () => { s._anim = false; done(); } }); } });
       },
-      show() { s.style.display = 'block'; s.style.opacity = 1; bk.style.display = 'block'; bk.style.opacity = 1; bk.style.webkitMaskImage = bk.style.maskImage = 'none'; bk.style.background = '#F5F1E6'; bk.style.inset = INSET + 'px'; bk.style.borderRadius = R_END + 'px'; p.setAttribute('stroke', '#f3efe4'); draw(...edge()); const L = document.getElementById('csLoader'); if (L) L.style.clipPath = 'inset(' + INSET + 'px round ' + R_END + 'px)'; },   // (the loading screen inside the border too)
+      show() { s.style.display = 'block'; s.style.opacity = 1; bk.style.display = 'block'; bk.style.opacity = 1; bk.style.webkitMaskImage = bk.style.maskImage = 'none'; bk.style.background = '#F5F1E6'; bk.style.inset = INSET + 'px'; bk.style.borderRadius = R_END + 'px'; p.setAttribute('stroke', document.documentElement.classList.contains('theme-light') ? '#1c1a17' : '#f3efe4'); draw(...edge()); const L = document.getElementById('csLoader'); if (L) L.style.clipPath = 'inset(' + INSET + 'px round ' + R_END + 'px)'; },   // (the loading screen inside the border too)
       hide() { gsap.to(bk, { opacity: 0, duration: 0.35, onComplete: () => { bk.style.display = 'none'; } }); gsap.to(s, { opacity: 0, duration: 0.3, onComplete: () => { s.style.display = 'none'; const L = document.getElementById('csLoader'); if (L) L.style.clipPath = ''; } }); },
       clip: 'inset(' + INSET + 'px round ' + R_END + 'px)'
     };
@@ -6102,8 +6121,33 @@
       }
     };
     addEventListener('load', () => setTimeout(begin, 1500));
+    window.__rebuildBoil = () => { sets.length = 0; setTimeout(begin, 60); };   // (after the drawings are swapped for the other mode)
     let f = 0;
     window.__deskBoil = k => { if (!sets.length || hero.style.visibility !== 'visible') return; for (const s of sets) s.el.setAttribute('href', s.urls[k]); };   // (on the site's one shimmer clock)
+  })();
+</script>
+<script>
+  // DARK / LIGHT MODE (experiment): the cord by the logo switches it; it starts as the device is set, and is remembered.
+  // Light mode swaps every desk drawing for its crayon-on-cream version (assets/drawn/light/), dark for chalk-on-black.
+  (() => {
+    const html = document.documentElement, cord = document.getElementById('themeCord');
+    let mode; try { mode = localStorage.getItem('gami-theme'); } catch (e) {}
+    if (mode !== 'light' && mode !== 'dark') mode = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    const srcFor = (h, m) => { const f = h.replace(/^assets\/drawn\/(light\/)?/, ''); return 'assets/drawn/' + (m === 'light' ? 'light/' : '') + f; };
+    const apply = (m, first) => {
+      mode = m; html.classList.toggle('theme-light', m === 'light');
+      document.querySelectorAll('#hero image').forEach(im => { const h = im.dataset.orig || im.getAttribute('href') || ''; if (!/^assets\/drawn\//.test(h)) return; const n = srcFor(h, m); im.dataset.orig = n; im.setAttribute('href', n); });
+      const w = document.getElementById('whiteout'); if (w) w.setAttribute('fill', m === 'light' ? '#F5F1E6' : '#000');
+      if (!first && window.__rebuildBoil) window.__rebuildBoil();
+      try { localStorage.setItem('gami-theme', m); } catch (e) {}
+      cord.setAttribute('aria-pressed', m === 'light');
+    };
+    apply(mode, true);
+    cord.addEventListener('click', () => {
+      const pull = cord.querySelector('.pull'), cam = document.getElementById('heroCam');
+      gsap.timeline().to(pull, { y: 14, duration: 0.12, ease: 'power2.in' }).to(pull, { y: 0, duration: 0.6, ease: 'elastic.out(1, 0.35)' });
+      gsap.to(cam, { opacity: 0, duration: 0.22, ease: 'sine.in', onComplete: () => { apply(mode === 'light' ? 'dark' : 'light'); gsap.to(cam, { opacity: 1, duration: 0.3, ease: 'sine.out' }); } });
+    });
   })();
 </script>
 </body>
