@@ -71,7 +71,7 @@
   #heroLine .hword { filter: url(#pencil); font: 400 50px "Gandhar Hand Thin", "Gandhar Hand", "Indie Flower", var(--hand); fill: #3b3a37; letter-spacing: 0.01em; stroke: none !important;
     stroke: var(--pen); stroke-width: 0.4px; }
   #heroProps > g { pointer-events: auto; cursor: pointer; }
-  #heroDecor image { filter: grayscale(1) contrast(1.5) brightness(1.3); }   /* (experiment: only the laptop, phone and book in colour - the rest are just there) */
+  #heroDecor image, #heroDecor #dk-paper image, #heroDecor #dk-camera image { filter: grayscale(1) contrast(1.5) brightness(1.3); }   /* (experiment: only the laptop, phone and book in colour - the rest are just there) */
   #heroProps > g:hover .hprop { filter: url(#hoverBoil); }   /* (experiment: under the pointer the object shimmers strongly) */
   /* the grid paper and the camera toned down to sit like the other printed pieces (softer contrast, less colour, warm) */
   #dk-paper image { filter: saturate(0.68) contrast(0.84) brightness(1.04) sepia(0.14); }
