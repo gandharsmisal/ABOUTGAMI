@@ -2174,78 +2174,149 @@
     figSvg.style.opacity = o; figSvg.style.visibility = hero.style.visibility;   // the figure (own layer) goes with it
   }
   whiteTween.eventCallback('onReverseComplete', heroReset);
-  // MORPH (experiment): pulling the lamp, the intro unravels into its own lines and they make the desk. The door, the lamp
-  // shade, its cord and the figure come apart into their drawn strokes; every stroke flies on its own curve and timing to
-  // a desk object's place, where the strokes take the shapes of that drawing's own strokes - the lines become the objects -
-  // and then the objects' colour comes into them. (The door makes the laptop, phone, About book and grid paper; the
-  // shade the camera and sketchbook; the cord the pencil, marker and scissors; the figure the film.)
+  // MORPH (experiment): the intro's lines unravel and draw the desk. When the lamp is pulled, each intro drawing's outline
+  // becomes a moving crayon thread: its tail runs round the intro drawing, pulling its lines away (the drawing goes as the
+  // thread leaves it); its head flies over and runs round a desk object's outline - and wherever it passes, that object's
+  // own crayon lines are there under it. So what you see is the intro's lines turning into the desk's lines. Then the
+  // object's colour is scribbled in. One drawing can send out several threads (the door draws the laptop, phone, book and
+  // paper; the lamp the camera and sketchbook; the cord the pencil, marker and scissors; the figure the film).
   const morph = (() => {
-    const NS = 'http://www.w3.org/2000/svg', RUN = 2.0;
-    const svg = document.createElementNS(NS, 'svg'), lv = document.createElementNS(NS, 'svg');
-    for (const [s, z] of [[svg, 40], [lv, 41]]) { s.style.cssText = `position:fixed;inset:0;width:100%;height:100%;z-index:${z};pointer-events:none;display:none;overflow:visible`; document.body.appendChild(s); }
+    const NS = 'http://www.w3.org/2000/svg', N = 120, STAG = 0.03, RUN = 1.6, FILL = 0.4;
+    const svg = document.createElementNS(NS, 'svg');
     svg.setAttribute('id', 'morphSvg');
-    const of = M => [M.a, M.b, M.c, M.d, M.e, M.f], mul = (m, n) => [m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1], m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3], m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]];
-    const ap = (m, x, y) => [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]], A = (e, k) => +e.getAttribute(k) || 0;
-    const unitM = el => mul(of(el.getScreenCTM()), [A(el, 'width'), 0, 0, A(el, 'height'), A(el, 'x'), A(el, 'y')]);
-    const href = el => el.dataset.orig || el.getAttribute('href') || el.getAttribute('xlink:href');
-    const ease = x => x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2, c01 = x => Math.min(1, Math.max(0, x)), sm = x => x * x * (3 - 2 * x);
-    // a polyline resampled to n points along its length
-    const resample = (P, n) => { const L = [0]; for (let i = 1; i < P.length; i++) L.push(L[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
-      const out = []; let k = 1; for (let i = 0; i < n; i++) { const d = L[L.length - 1] * (n > 1 ? i / (n - 1) : 0); while (k < L.length - 1 && L[k] < d) k++; const f = (d - L[k - 1]) / ((L[k] - L[k - 1]) || 1); out.push([P[k - 1][0] + (P[k][0] - P[k - 1][0]) * f, P[k - 1][1] + (P[k][1] - P[k - 1][1]) * f]); } return out; };
+    svg.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;overflow:visible;display:none';
+    document.body.appendChild(svg);
+    const svgL = svg.cloneNode(false); svgL.setAttribute('id', 'morphLines'); svgL.style.zIndex = 41; document.body.appendChild(svgL);   // (the strokes on a layer of their own: moving them never repaints the drawings)
+    svg.style.willChange = svgL.style.willChange = 'transform';
+    { const st = document.createElement('style'); st.textContent = '#morphSvg .ln{fill:none;stroke:#fff;stroke-width:0.9;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;filter:url(#crayonLine)}#morphSvg .solid{fill:#000}'; document.head.appendChild(st); }
+    const mul = (m, n) => [m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1], m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3], m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]];
+    const inv = m => { const d = m[0] * m[3] - m[1] * m[2]; return [m[3] / d, -m[1] / d, -m[2] / d, m[0] / d, (m[2] * m[5] - m[3] * m[4]) / d, (m[1] * m[4] - m[0] * m[5]) / d]; };
+    const of = M => [M.a, M.b, M.c, M.d, M.e, M.f];
+    const ap = (m, x, y) => [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]];
+    const attr = (e, k) => +e.getAttribute(k) || 0;
+    const href = el => el.getAttribute('href') || el.getAttribute('xlink:href');
+    const ease = x => 0.65 * x + 0.35 * x * x * (3 - 2 * x);   // (an even, continuous move: no slow start, no stop)
+    const clamp01 = x => Math.min(1, Math.max(0, x));
+    const cache = {};
+    const load = src => cache[src] || (cache[src] = new Promise(res => {
+      if (src.startsWith('data:image/svg+xml')) {
+        let s = decodeURIComponent(src.slice(src.indexOf(',') + 1)); const vb = s.match(/viewBox="([-\d.]+) ([-\d.]+) ([\d.]+) ([\d.]+)"/), head = s.slice(0, s.indexOf('>'));
+        if (vb && !/\swidth=/.test(head)) { const k = Math.max(1, 600 / Math.max(+vb[3], +vb[4])); s = s.replace('<svg ', '<svg width="' + Math.round(vb[3] * k) + '" height="' + Math.round(vb[4] * k) + '" '); src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s); }
+      }
+      const im = new Image(); if (!src.startsWith('data:')) im.crossOrigin = 'anonymous'; im.onload = () => res(im); im.onerror = () => res(null); im.src = src;
+    }));
+    addEventListener('load', () => setTimeout(() => document.querySelectorAll('#doorOpenImg image, #shadeImg, #cordImg, #hero image').forEach(el => { const h = el.getAttribute('href'); if (h && !h.startsWith('blob:')) load(h); }), 800));   // (ready before the lamp is pulled)
+    const star = pts => {
+      const cx = pts.reduce((q, p) => q + p[0], 0) / pts.length, cy = pts.reduce((q, p) => q + p[1], 0) / pts.length, R = new Array(N).fill(0);
+      for (const [x, y] of pts) { const a = (Math.atan2(y - cy, x - cx) + Math.PI * 2) % (Math.PI * 2), k = Math.floor(a / (Math.PI * 2) * N) % N, r = Math.hypot(x - cx, y - cy); if (r > R[k]) R[k] = r; }
+      const R0 = R.slice(); for (let k = 0; k < N; k++) if (!R0[k]) { let a = 1, b = 1; while (!R0[(k + a) % N] && a < N) a++; while (!R0[(k - b + N) % N] && b < N) b++; R[k] = Math.min(R0[(k + a) % N], R0[(k - b + N) % N]) * 0.12; }
+      const S = R.map((r, k) => Math.min(r, (R[(k + N - 1) % N] + 2 * r + R[(k + 1) % N]) / 4 * 1.08));
+      return S.map((r, k) => { const a = k / N * Math.PI * 2; return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]; });
+    };
+    const outline = (im, M) => {
+      const W = 90, H = Math.max(8, Math.round(90 * im.naturalHeight / im.naturalWidth)), c = document.createElement('canvas'); c.width = W; c.height = H;
+      const g = c.getContext('2d'); g.drawImage(im, 0, 0, W, H); let d;
+      try { d = g.getImageData(0, 0, W, H).data; } catch (e) { return shapeOf([ap(M, 0.02, 0.02), ap(M, 0.98, 0.02), ap(M, 0.98, 0.98), ap(M, 0.02, 0.98)]); }
+      const pts = []; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 70) pts.push(ap(M, (x + 0.5) / W, (y + 0.5) / H));
+      return pts.length > 3 ? shapeOf(pts) : null;
+    };
+    const hull = pts => { const P = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]), cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lo = [], up = [];
+      for (const p of P) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+      for (let i = P.length - 1; i >= 0; i--) { const p = P[i]; while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); }
+      up.pop(); lo.pop(); return lo.concat(up); };
+    const even = poly => { const P = poly.concat([poly[0]]), L = cum(P), out = []; let k = 1; for (let i = 0; i < N; i++) { const d = L[L.length - 1] * i / N; while (k < L.length - 1 && L[k] < d) k++; const f = (d - L[k - 1]) / ((L[k] - L[k - 1]) || 1); out.push([P[k - 1][0] + (P[k][0] - P[k - 1][0]) * f, P[k - 1][1] + (P[k][1] - P[k - 1][1]) * f]); } return out; };
+    const shapeOf = pts => even(hull(pts));
+    const near = (ring, p) => { let b = 0, bd = 1e9; ring.forEach((q, i) => { const d = Math.hypot(q[0] - p[0], q[1] - p[1]); if (d < bd) { bd = d; b = i; } }); return b; };
+    const rot = (ring, k) => ring.slice(k).concat(ring.slice(0, k));
+    const cum = P => { const L = [0]; for (let i = 1; i < P.length; i++) L.push(L[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1])); return L; };
+    const slice = (P, L, a, b) => {                     // the stretch of a line between lengths a and b
+      if (b <= a) return [];
+      const at = d => { let i = 1; while (i < L.length - 1 && L[i] < d) i++; const f = (d - L[i - 1]) / ((L[i] - L[i - 1]) || 1); return [P[i - 1][0] + (P[i][0] - P[i - 1][0]) * f, P[i - 1][1] + (P[i][1] - P[i - 1][1]) * f]; };
+      const out = [at(a)]; for (let i = 0; i < P.length; i++) if (L[i] > a && L[i] < b) out.push(P[i]); out.push(at(b)); return out;
+    };
+    const poly = (P, J) => P.map((p, i) => (i ? 'L' : 'M') + (p[0] + J[i % J.length][0]).toFixed(1) + ' ' + (p[1] + J[i % J.length][1]).toFixed(1)).join(' ');
+    const wobble = a => Array.from({ length: 64 }, () => [(Math.random() - 0.5) * a, (Math.random() - 0.5) * a]);
+    const local = (wrapM, P) => { const iv = inv(wrapM); return P.map(p => ap(iv, p[0], p[1])); };
+    const pathD = P => P.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
     let running = false, done = null;
     function start() {
-      const q = s => document.querySelector(s), ST = window.__strokesOf;
+      const q = s => document.querySelector(s);
       const door = q('#doorOpenImg image'), shade = q('#shadeImg'), cord = q('#cordImg'), fig = q('#figure');
-      if (!ST || !door || !door.getScreenCTM()) return false;
-      running = true;
-      const srcs = { door: door, shade: shade, cord: cord };
+      if (!door || !shade || !cord || !door.getScreenCTM()) return false;
+      const unitM = el => mul(of(el.getScreenCTM()), [attr(el, 'width'), 0, 0, attr(el, 'height'), attr(el, 'x'), attr(el, 'y')]);
+      const SRC = { door: { el: door }, shade: { el: shade }, cord: { el: cord } };
+      const figPts = fig && fig.getScreenCTM() ? [[-9, 0], [9, 0], [1.6, -112], [5.5, -132], [3, -144], [-3, -144], [-5.5, -132], [-1.6, -112]].map(p => ap(of(fig.getScreenCTM()), p[0], p[1])) : null;
       const PAIRS = [['door', '#hpLaptop .hprop'], ['door', '#hpPhone .hprop'], ['door', '#hpBook .hprop'], ['door', '#dk-paper > image'],
         ['shade', '#dk-camera > image'], ['shade', '#dk-sketchbook > image'], ['cord', '#dkp-sketchbook image'], ['cord', '#dk-marker > image'], ['cord', '#dkp-scissors image'], ['fig', '#dk-scissors > image']];
-      const jobs = PAIRS.map(([s, t]) => { const te = q(t); return te && te.getScreenCTM() && te.closest('g').style.display !== 'none' ? { s, te } : null; }).filter(Boolean);
-      Promise.all([...Object.keys(srcs).map(k => ST(href(srcs[k])).then(v => { srcs[k] = { el: srcs[k], st: v, M: unitM(srcs[k]) }; })), ...jobs.map(j => ST(href(j.te)).then(v => { j.st = v; }))]).then(() => {
-        // the source drawings' strokes on screen (the figure: its body's outline and its legs)
-        const SRC = {};
-        for (const k of ['door', 'shade', 'cord']) { const s = srcs[k]; SRC[k] = (s.st && s.st.length ? s.st : [[[0.5, 0], [0.5, 1]]]).map(st => st.map(p => ap(s.M, p[0], p[1]))); }
-        { const F = []; if (fig && fig.getScreenCTM()) { const m = of(fig.getScreenCTM()); F.push([[-9, 0], [-1.6, -112], [-5.5, -132], [-3, -144], [3, -144], [5.5, -132], [1.6, -112], [9, 0], [-9, 0]].map(p => ap(m, p[0], p[1]))); }
-          for (const id of ['leg0', 'leg1']) { const e = document.getElementById(id); if (!e || !e.getScreenCTM()) continue; const m = of(e.getScreenCTM()), pts = (e.getAttribute('points') || '').trim().split(/\s+/).map(s => s.split(',').map(Number)).filter(p => p.length === 2 && !isNaN(p[0])); if (pts.length > 1) F.push(pts.map(p => ap(m, p[0], p[1]))); }
-          SRC.fig = F.length ? F : [[[0, 0], [1, 1]]]; }
-        svg.innerHTML = ''; lv.innerHTML = '';
-        const lines = document.createElementNS(NS, 'g'); lines.setAttribute('filter', 'url(#crayonLine)'); lv.appendChild(lines);
-        // the intro drawings, as they are, giving way to their lines
-        const fromPics = ['door', 'shade', 'cord'].map(k => { const el = srcs[k].el, g = document.createElementNS(NS, 'g'); g.setAttribute('transform', 'matrix(' + of(el.parentNode.getScreenCTM()).join(' ') + ')'); const c = el.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('class'); c.removeAttribute('filter'); c.removeAttribute('opacity'); g.appendChild(c); svg.appendChild(g); return g; });
-        const W = jobs.map((j, ji) => {
-          const pic = document.createElementNS(NS, 'g'), c = j.te.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('class'); c.setAttribute('href', href(j.te)); pic.appendChild(c); pic.setAttribute('opacity', 0); svg.appendChild(pic);
-          const src = SRC[j.s], tgt = (j.st && j.st.length ? j.st : [[[0, 0.5], [1, 0.5]]]);
-          const S = tgt.map((st, k) => { const from = resample(src[(k * 7 + ji * 3) % src.length], st.length), r = Math.random();
-            const p = document.createElementNS(NS, 'path'); p.setAttribute('fill', 'none'); p.setAttribute('stroke', '#f3f1ea'); p.setAttribute('stroke-linecap', 'round'); p.setAttribute('stroke-linejoin', 'round'); lines.appendChild(p);
-            return { p, from, to: st, arc: (r - 0.5) * 2, d: r * 0.3, spin: (Math.random() - 0.5) * 1.2 }; });
-          return { te: j.te, pic, S, d: ji * 0.03 };
-        });
-        document.getElementById('boilG').style.visibility = 'hidden';
-        svg.style.display = lv.style.display = 'block';
-        const t0 = performance.now(), total = RUN + 0.03 * W.length;
+      const jobs = PAIRS.map(([s, t], i) => { const te = q(t); return te && te.getScreenCTM() && te.closest('g').style.display !== 'none' ? { s, te } : null; }).filter(Boolean);
+      running = true;
+      Promise.all([...Object.values(SRC).map(o => load(href(o.el)).then(im => { o.im = im; })), ...jobs.map(j => load(j.te.dataset.orig || href(j.te)).then(im => { j.im = im; }))]).then(() => {
+        for (const k in SRC) { const o = SRC[k]; o.M = unitM(o.el); o.ring = o.im ? outline(o.im, o.M) : null; }
+        { const M = SRC.cord.M; SRC.cord.ring = shapeOf([ap(M, 0.1, 0.45), ap(M, 0.9, 0.45), ap(M, 0.9, 1), ap(M, 0.1, 1)]); }
+        if (figPts) { const dense = []; figPts.forEach((p, i) => { const q2 = figPts[(i + 1) % figPts.length]; for (let k = 0; k < 8; k++) dense.push([p[0] + (q2[0] - p[0]) * k / 8, p[1] + (q2[1] - p[1]) * k / 8]); }); SRC.fig = { ring: shapeOf(dense) }; }
+        // (light: no live filters - the drawings boil by swapping their ready-made shimmer versions, the strokes by their hand wobble)
+        svg.innerHTML = '';
+        svg.innerHTML = '<filter id="mCrayon" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" seed="6" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2.6 0 0 0 1.85" result="w"/><feComposite in="SourceGraphic" in2="w" operator="in"/></filter>';   // (crayon grain for the reveals: coloured in, not ink)
+        const all = document.createElementNS(NS, 'g'); svg.appendChild(all);
+        const pics = document.createElementNS(NS, 'g'), lines = document.createElementNS(NS, 'g'); lines.setAttribute('filter', 'url(#crayonLine)'); all.appendChild(pics); svgL.innerHTML = ''; svgL.appendChild(lines);   // (the strokes in crayon)
+        const boilers = [];
+        // a copy of a picture behind a mask (in the picture's parent's units): erase = the mask takes it away where drawn
+        const masked = (el, id, erase) => {
+          const W = of(el.parentNode.getScreenCTM()), wrap = document.createElementNS(NS, 'g'); wrap.setAttribute('transform', 'matrix(' + W.join(' ') + ')');
+          const m = document.createElementNS(NS, 'mask'); m.setAttribute('id', id); m.setAttribute('maskUnits', 'userSpaceOnUse'); m.setAttribute('x', -1e4); m.setAttribute('y', -1e4); m.setAttribute('width', 2e4); m.setAttribute('height', 2e4);
+          if (erase) m.innerHTML = '<rect x="-10000" y="-10000" width="20000" height="20000" fill="#fff"/>';
+          wrap.appendChild(m); const c = el.cloneNode(true); c.removeAttribute('id'); c.removeAttribute('clip-path'); if (c.querySelectorAll) c.querySelectorAll('[id]').forEach(n => n.removeAttribute('id')); if (el.tagName.toLowerCase() === 'image') { c.removeAttribute('class'); c.removeAttribute('filter'); c.removeAttribute('opacity'); } c.setAttribute('mask', `url(#${id})`); wrap.appendChild(c); pics.appendChild(wrap); if (el.__boil) boilers.push([c, el.__boil]);
+          const sc = Math.hypot(W[0], W[1]) || 1; return { m, W, sc };
+        };
+        const addStroke = (mk, P, color, wScreen) => { if (color !== '#000') { const q = document.createElementNS(NS, 'path'); q.setAttribute('d', pathD(local(mk.W, P))); q.setAttribute('fill', 'none'); q.setAttribute('stroke', color); q.setAttribute('stroke-width', wScreen * 0.82 / mk.sc); q.setAttribute('stroke-linejoin', 'round'); mk.m.appendChild(q); mk.solid = q; }   /* (a solid core: the object as it will look; the grain only at the edge) */
+          const p = document.createElementNS(NS, 'path'); p.setAttribute('d', pathD(local(mk.W, P))); p.setAttribute('fill', 'none'); p.setAttribute('stroke', color); p.setAttribute('stroke-width', wScreen / mk.sc); p.setAttribute('stroke-linecap', 'butt'); p.setAttribute('stroke-linejoin', 'round'); if (color !== '#000') p.setAttribute('filter', 'url(#mCrayon)'); mk.m.appendChild(p); /* (grainy crayon edge where it is coloured in; erasing stays clean) */ const L = p.getTotalLength(); p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L; const core = color !== '#000' ? mk.solid : null; if (core) { core.style.strokeDasharray = L + ' ' + L; core.style.strokeDashoffset = L; } return { p, L, core }; };
+        const span = ring => { const xs = ring.map(p => p[0]), ys = ring.map(p => p[1]); return Math.min(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)); };
+        const erasers = {}; for (const k of ['door', 'shade', 'cord']) erasers[k] = { mk: masked(SRC[k].el, 'mE' + k, true) };
+        { const w = q('#walker'); if (w && SRC.fig) erasers.fig = { mk: masked(w, 'mEfig', true) }; }
+        const threads = jobs.map((j, n) => {
+          const S0 = SRC[j.s] && SRC[j.s].ring, T0 = j.im ? outline(j.im, unitM(j.te)) : null; if (!S0 || !T0) return null;
+          const cS = S0.reduce((a, p) => [a[0] + p[0] / N, a[1] + p[1] / N], [0, 0]), cT = T0.reduce((a, p) => [a[0] + p[0] / N, a[1] + p[1] / N], [0, 0]);
+          const S = rot(S0, near(S0, cT)).concat([null]), T = rot(T0, near(T0, cS)); S[N] = S[0];          // (leaves the intro drawing on its side facing the object, joins the object on its side facing back)
+          const a = S[N], b = T[0], mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, dx = b[0] - a[0], dy = b[1] - a[1], arc = (n % 2 ? 1 : -1) * 0.18;
+          const bridge = Array.from({ length: 16 }, (_, k) => { const u = (k + 1) / 17; const cx = mx - dy * arc, cy = my + dx * arc; return [(1 - u) ** 2 * a[0] + 2 * (1 - u) * u * cx + u * u * b[0], (1 - u) ** 2 * a[1] + 2 * (1 - u) * u * cy + u * u * b[1]]; });
+          const P = S.concat(bridge, T, [T[0]]), L = cum(P), Ls = L[N], Lb = L[N + 17], Lt = L[L.length - 1];
+          // where the head runs round the object, the object's own lines come up (a band along its outline), then the colour is scribbled in
+          const mk = masked(j.te, 'mT' + n, false), sz = span(T0);
+          const band = addStroke(mk, T.concat([T[0]]), '#fff', Math.max(30, sz * 1.25));
+          const bx = Math.min(...T0.map(p => p[0])), by = Math.min(...T0.map(p => p[1])), bw = Math.max(...T0.map(p => p[0])) - bx, bh = Math.max(...T0.map(p => p[1])) - by;
+          const rows = 8, zig = []; for (let i = 0; i <= rows; i++) { zig.push([i % 2 ? bx - bw * 0.1 : bx + bw * 1.1, by + bh * (i + 0.5) / rows]); }
+          const fill = addStroke(mk, zig, '#fff', bh / rows * 2.2);
+          // the source drawing is taken away where the tail has gone round it (only the first thread from each drawing does this)
+          const er = erasers[j.s] && !erasers[j.s].used ? (erasers[j.s].used = 1, j.s === 'cord'
+            ? addStroke(erasers.cord.mk, [ap(SRC.cord.M, 0.5, 1.02), ap(SRC.cord.M, 0.5, -0.02)], '#000', 24)        // (the whole cord is pulled up and away)
+            : j.s === 'fig' ? (() => { const r = q('#walker').getBoundingClientRect(); return addStroke(erasers.fig.mk, [[r.left + r.width / 2, r.top - 6], [r.left + r.width / 2, r.bottom + 6]], '#000', r.width * 1.6 + 30); })()   // (the whole figure, legs too)
+            : addStroke(erasers[j.s].mk, S.slice(0, N + 1), '#000', Math.max(24, span(S0) * 1.35))) : null;   // (wide enough to take the whole drawing)
+          const ls = [0, 1].map(k => { const p = document.createElementNS(NS, 'path'); p.setAttribute('fill', 'none'); p.setAttribute('stroke', '#f3f1ea'); p.setAttribute('stroke-width', k ? 0.6 : 1.1); p.setAttribute('stroke-opacity', k ? 0.55 : 0.9); p.setAttribute('stroke-linejoin', 'round'); p.setAttribute('stroke-linecap', 'round'); lines.appendChild(p); return p; });
+          return { P, L, Ls, Lb, Lt, band, fill, er, ls, d: n * STAG };
+        }).filter(Boolean);
+        document.getElementById('boilG').style.visibility = 'hidden';          // (the copies take over, unseen)
+        svg.style.display = 'block'; svg.style.opacity = 1; svgL.style.display = 'block';
+        const t0 = performance.now(), total = Math.max(RUN * 0.92 + 0.12, RUN * 0.72 + FILL) + STAG * threads.length; let tick = -1, J = [wobble(2), wobble(2.8)];   // (hands straight over: no wait)
         const step = () => {
-          const tt = (performance.now() - t0) / 1000;
-          fromPics.forEach(g => g.setAttribute('opacity', (1 - sm(c01(tt / 0.3))).toFixed(3)));   // (the intro gives way to its lines)
-          let minT = 1;
-          for (const w of W) {
-            const t = c01((tt - w.d) / RUN); minT = Math.min(minT, t);
-            const U = unitM(w.te), sw = Math.max(1, Math.hypot(U[0], U[1]) / 150 * 1.4);
-            w.pic.setAttribute('transform', 'matrix(' + of(w.te.parentNode.getScreenCTM()).join(' ') + ')');
-            w.pic.setAttribute('opacity', sm(c01((t - 0.84) / 0.16)).toFixed(3));                 // (the lines become the object: its colour comes in)
-            for (const s of w.S) {
-              const u = ease(c01((t - s.d * 0.5) / (1 - s.d))), to = s.to.map(p => ap(U, p[0], p[1]));
-              const ma = s.from[s.from.length >> 1], mb = to[to.length >> 1], dx = mb[0] - ma[0], dy = mb[1] - ma[1], L = Math.hypot(dx, dy) || 1, k = Math.sin(Math.PI * u) * s.arc * Math.min(220, L * 0.4);
-              const cx = ma[0] + dx * u - dy / L * k, cy = ma[1] + dy * u + dx / L * k, ang = Math.sin(Math.PI * u) * s.spin, ca = Math.cos(ang), sa = Math.sin(ang);
-              const mx = ma[0] + dx * u, my = ma[1] + dy * u; let d = '';
-              for (let j = 0; j < to.length; j++) { const x = s.from[j][0] + (to[j][0] - s.from[j][0]) * u - mx, y = s.from[j][1] + (to[j][1] - s.from[j][1]) * u - my; d += (j ? ' L' : 'M') + (cx + x * ca - y * sa).toFixed(1) + ' ' + (cy + x * sa + y * ca).toFixed(1); }
-              s.p.setAttribute('d', d); s.p.setAttribute('stroke-width', sw.toFixed(2));
+          const tt = (performance.now() - t0) / 1000; if (Math.floor(tt * 10) !== tick) { tick = Math.floor(tt * 10); J = [wobble(1.8), wobble(2.6)]; for (const [c, u] of boilers) c.setAttribute('href', u[tick % 3]); }
+          const maskNow = Math.floor(tt * 12) !== step.m; step.m = Math.floor(tt * 12);   // (the reveals on twos - 12 a second: much lighter, and hand-drawn)
+          threads.forEach(th => {
+            const t = tt - th.d, u = ease(clamp01(t / RUN));
+            const head = th.Ls + (th.Lt - th.Ls) * u, tail = Math.min(head, th.Lb * ease(clamp01(t / (RUN * 0.9))));   // (the tail always leaves the intro drawing completely and arrives at the object)
+            const K = 150 * (1 - u * u), seg = slice(th.P, th.L, Math.max(th.Ls, head - K), head);   // (shrinks to nothing as it arrives: nothing left by the objects)   // (a short stroke, from where it leaves the drawing)
+            const after = clamp01((t - RUN * 0.9) / 0.12);
+            { const w = Math.min(1, Math.max(0, S.white || 0)), c = '#f3f1ea'; /* (the room stays dark: the lines stay light) */ th.ls.forEach((p, k) => { p.setAttribute('d', seg.length > 1 ? poly(seg, J[k]) : ''); p.style.opacity = 1 - after; p.setAttribute('stroke', c); }); }   // (white on the dark, going dark as the room lights up)
+            if ((maskNow || tt >= total) && !th.settled) {
+              const eV = clamp01(tail / th.Ls), onT = clamp01((head - th.Lb) / (th.Lt - th.Lb)), fV = clamp01((t - RUN * 0.72) / FILL);
+              if (th.er && th.er.v !== eV) { th.er.v = eV; { const o = th.er.L * (1 - eV); th.er.p.style.strokeDashoffset = o; if (th.er.core) th.er.core.style.strokeDashoffset = o; } }
+              if (th.band.v !== onT) { th.band.v = onT; { const o = th.band.L * (1 - onT); th.band.p.style.strokeDashoffset = o; if (th.band.core) th.band.core.style.strokeDashoffset = o; } }
+              if (th.fill.v !== fV) { th.fill.v = fV; { const o = th.fill.L * (1 - fV); th.fill.p.style.strokeDashoffset = o; if (th.fill.core) th.fill.core.style.strokeDashoffset = o; } }
+              if (eV === 1 && onT === 1 && fV === 1) th.settled = true;            // (finished: no more redrawing it)
             }
-          }
-          lines.setAttribute('opacity', (1 - sm(c01((minT - 0.88) / 0.12))).toFixed(3));
+          });
           if (tt < total) requestAnimationFrame(step);
-          else { running = false; const fn = done; done = null; svg.style.display = lv.style.display = 'none'; if (fn) fn();
-            requestAnimationFrame(() => { svg.innerHTML = lv.innerHTML = ''; document.getElementById('boilG').style.visibility = ''; }); }
+          else { running = false; const fn = done; done = null; svg.style.display = 'none'; svgL.style.display = 'none'; if (fn) fn();   // (swapped in one go: no frame with both)
+            requestAnimationFrame(() => { svg.innerHTML = ''; svgL.innerHTML = ''; document.getElementById('boilG').style.visibility = ''; }); }
         };
         step();
       });
@@ -3726,7 +3797,7 @@
   // lines - every stroke of the drawing (traced from it) travels on its own curve and timing - and the strokes come
   // together again as the same drawing at its next place, where its colour comes back. Line by line, smooth.
   (() => {
-    const NS = 'http://www.w3.org/2000/svg', RUN = 2.0, GW = 150;   // (the intro's timing)
+    const NS = 'http://www.w3.org/2000/svg', RUN = 1.7, GW = 150;
     const SEL = ['#hpLaptop .hprop', '#hpPhone .hprop', '#hpBook .hprop', '#dk-paper > image', '#dk-marker > image', '#dk-scissors > image', '#dkp-scissors image', '#dk-sketchbook > image', '#dkp-sketchbook image', '#dk-camera > image'];
     const ov = document.createElementNS(NS, 'svg'), lv = document.createElementNS(NS, 'svg');
     for (const [s, z] of [[ov, 40], [lv, 41]]) { s.style.cssText = `position:fixed;inset:0;width:100%;height:100%;z-index:${z};pointer-events:none;display:none;overflow:visible`; document.body.appendChild(s); }
@@ -3735,8 +3806,7 @@
     const srcOf = el => el.dataset.orig || el.getAttribute('href');
     // a drawing traced into its strokes: its light (uncoloured) lines thinned to one pixel and followed into polylines (0-1 box)
     const STK = {};
-    const sized = src => { if (!src.startsWith('data:image/svg+xml')) return src; let s = decodeURIComponent(src.slice(src.indexOf(',') + 1)); const vb = s.match(/viewBox="([-d.]+) ([-d.]+) ([d.]+) ([d.]+)"/), head = s.slice(0, s.indexOf('>')); if (vb && !/swidth=/.test(head)) { const k = Math.max(1, 600 / Math.max(+vb[3], +vb[4])); s = s.replace('<svg ', '<svg width="' + Math.round(vb[3] * k) + '" height="' + Math.round(vb[4] * k) + '" '); return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s); } return src; };
-    const strokesOf = src => STK[src] || (STK[src] = new Promise(res => { const im = new Image(); if (!src.startsWith('data:')) im.crossOrigin = 'anonymous'; im.onload = () => {
+    const strokesOf = src => STK[src] || (STK[src] = new Promise(res => { const im = new Image(); im.crossOrigin = 'anonymous'; im.onload = () => {
       const W = GW, H = Math.max(8, Math.round(GW * im.naturalHeight / im.naturalWidth)), c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(im, 0, 0, W, H);
       let d; try { d = g.getImageData(0, 0, W, H).data; } catch (e) { return res([]); }
       const B = new Uint8Array(W * H); for (let i = 0; i < W * H; i++) { const r = d[i * 4], gg = d[i * 4 + 1], b = d[i * 4 + 2], a = d[i * 4 + 3], mx = Math.max(r, gg, b), mn = Math.min(r, gg, b); B[i] = a > 110 ? 1 : 0; void mx; void mn; }
@@ -3753,13 +3823,10 @@
       const out = [], walk = (x, y) => { const s = [[x, y]]; seen[y * W + x] = 1; for (;;) { const nx = nb(x, y).find(([a, b]) => !seen[b * W + a]); if (!nx) break; [x, y] = nx; seen[y * W + x] = 1; s.push([x, y]); } return s; };
       for (let pass = 0; pass < 2; pass++) for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const k = y * W + x; if (!B[k] || seen[k]) continue; if (pass === 0 && nb(x, y).length !== 1) continue;
         const s = walk(x, y); if (s.length >= 4) out.push(s.filter((_, i) => i % 2 === 0 || i === s.length - 1).map(([a, b]) => [(a + 0.5) / W, (b + 0.5) / H])); }
-      res(out); }; im.onerror = () => res([]); im.src = sized(src); }));
-    window.__strokesOf = strokesOf;   // (the intro's morph uses it too)
+      res(out); }; im.onerror = () => res([]); im.src = src; }));
     addEventListener('load', () => setTimeout(() => SEL.forEach(s => { const e = document.querySelector(s); if (e) strokesOf(srcOf(e)); }), 1500));
     const shot = el => ({ P: of(el.parentNode.getScreenCTM()), U: mul(of(el.getScreenCTM()), [A(el, 'width'), 0, 0, A(el, 'height'), A(el, 'x'), A(el, 'y')]) });
     const ease = x => x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2, c01 = x => Math.min(1, Math.max(0, x)), sm = x => x * x * (3 - 2 * x);
-    const resample = (P, n) => { const L = [0]; for (let i = 1; i < P.length; i++) L.push(L[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
-      const out = []; let k = 1; for (let i = 0; i < n; i++) { const d = L[L.length - 1] * (n > 1 ? i / (n - 1) : 0); while (k < L.length - 1 && L[k] < d) k++; const f = (d - L[k - 1]) / ((L[k] - L[k - 1]) || 1); out.push([P[k - 1][0] + (P[k][0] - P[k - 1][0]) * f, P[k - 1][1] + (P[k][1] - P[k - 1][1]) * f]); } return out; };
     let busy = false, acc = 0, accT = 0;
     async function step(dir) {
       busy = true;
@@ -3775,8 +3842,8 @@
         const from = mkPic(before[i]), to = mkPic(after[i]); to.setAttribute('opacity', 0);
         const Ua = before[i].U, Ub = after[i].U, w = Math.max(1, Math.hypot(Ub[0], Ub[1]) / GW * 1.4);
         const S = strokes[i].map((st, k) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('fill', 'none'); p.setAttribute('stroke', '#f3f1ea'); p.setAttribute('stroke-width', w.toFixed(2)); p.setAttribute('stroke-linecap', 'round'); p.setAttribute('stroke-linejoin', 'round'); lines.appendChild(p);
-          const src = strokes[i][(k * 7 + i * 3) % strokes[i].length], a = resample(src.map(q => ap(Ua, q[0], q[1])), st.length), b = st.map(q => ap(Ub, q[0], q[1])), ma = a[a.length >> 1], mb = b[b.length >> 1], dx = mb[0] - ma[0], dy = mb[1] - ma[1], L = Math.hypot(dx, dy) || 1, r = Math.random();
-          return { p, a, b, nx: -dy / L, ny: dx / L, arc: (r - 0.5) * 2 * Math.min(220, L * 0.4), d: r * 0.3, spin: (Math.random() - 0.5) * 1.2 }; });
+          const a = st.map(q => ap(Ua, q[0], q[1])), b = st.map(q => ap(Ub, q[0], q[1])), ma = a[a.length >> 1], mb = b[b.length >> 1], dx = mb[0] - ma[0], dy = mb[1] - ma[1], L = Math.hypot(dx, dy) || 1, r = Math.random();
+          return { p, a, b, nx: -dy / L, ny: dx / L, arc: (r - 0.5) * Math.min(220, L * 0.45), d: r * 0.28, spin: (Math.random() - 0.5) * 0.9 }; });
         return { from, to, S, d: i * 0.02 };
       });
       const camEl = document.getElementById('heroCam'); camEl.style.visibility = 'hidden'; ov.style.display = lv.style.display = 'block';
@@ -3785,7 +3852,7 @@
         const tt = (performance.now() - t0) / 1000;
         for (const th of T) {
           const t = c01((tt - th.d) / RUN);
-          th.from.setAttribute('opacity', (1 - sm(c01((tt - th.d) / 0.3))).toFixed(3));   // (the drawing gives way to its lines, as the intro)
+          th.from.setAttribute('opacity', (1 - sm(c01(t / 0.16))).toFixed(3));            // (the drawing gives way to its own lines)
           th.to.setAttribute('opacity', sm(c01((t - 0.84) / 0.16)).toFixed(3));           // (and its lines become the drawing again)
           for (const s of th.S) {
             const u = ease(c01((t - s.d * 0.5) / (1 - s.d))), k = Math.sin(Math.PI * u) * s.arc, ang = Math.sin(Math.PI * u) * s.spin;
