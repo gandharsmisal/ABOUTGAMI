@@ -3851,7 +3851,7 @@
         const rows = Math.max(5, Math.min(12, Math.round(bh / 22))), zig = []; for (let k = 0; k <= rows; k++) { const y = by + bh * (k + 0.5) / rows; zig.push(k % 2 ? [bx + bw * 0.97, y] : [bx + bw * 0.03, y], k % 2 ? [bx + bw * 0.03, y] : [bx + bw * 0.97, y]); }
         const P = S.concat(br, Tt, [Tt[0]], zig), L = cum(P), Ls = L[N], Lb = L[N + 15], Lz = L[N + 15 + Tt.length], Lt = L[L.length - 1];
         const oldPic = copy(el, before[i], 'sm' + (++n), true)._outer;   // (the object as it was: its colour fades out where it stands)
-        const rest = document.createElementNS(NS, 'path'); rest.setAttribute('fill', 'none'); rest.setAttribute('stroke', '#f3f1ea'); rest.setAttribute('stroke-width', 1.2); rest.setAttribute('stroke-linecap', 'round'); rest.setAttribute('stroke-linejoin', 'round'); lines.appendChild(rest);   // (its outline, unwinding into the line)
+        const rest = document.createElementNS(NS, 'path'); rest.setAttribute('fill', 'none'); rest.setAttribute('stroke', '#f3f1ea'); rest.setAttribute('stroke-width', 1.2); rest.setAttribute('stroke-linecap', 'round'); rest.setAttribute('stroke-linejoin', 'round'); /* (no outline drawn) */
         const mk = copy(el, after[i], 'sm' + (++n), false), sz = span(T0);
         const band = stroke(mk, Tt.concat([Tt[0]]), '#fff', Math.max(14, sz * 0.16)), fill = stroke(mk, zig, '#fff', bh / rows * 2.1);
         const ls = document.createElementNS(NS, 'path'); ls.setAttribute('fill', 'none'); ls.setAttribute('stroke', '#f3f1ea'); ls.setAttribute('stroke-width', 1.2); ls.setAttribute('stroke-linecap', 'round'); ls.setAttribute('stroke-linejoin', 'round'); lines.appendChild(ls);
@@ -3867,7 +3867,7 @@
           const K = (head > th.Lz ? 55 : 150) * (1 - c01((u - 0.94) / 0.06)), seg = slice(th.P, th.L, Math.max(th.Ls, head - K), head);
           th.ls.setAttribute('d', seg.length > 1 ? pd(seg) : ''); th.ls.style.opacity = 1 - c01((t - RUN) / 0.12);
           th.oldPic.setAttribute('opacity', (1 - c01(t / (RUN * 0.22))).toFixed(3));                    // (colour fades, leaving its outline)
-          th.rest.setAttribute('d', tail < th.Ls ? pd(slice(th.P, th.L, tail, th.Ls)) : '');             // (the outline that hasn't unwound yet)
+          void tail;   // (no outline left behind: the object simply fades where it was)
           th.band.p.style.strokeDashoffset = th.band.L * (1 - c01((head - th.Lb) / (th.Lz - th.Lb)));
           th.fill.p.style.strokeDashoffset = th.fill.L * (1 - c01((head - th.Lz) / (th.Lt - th.Lz)));
         }
