@@ -3964,9 +3964,9 @@
     const bk = document.createElement('div'); bk.id = 'caseBlack'; bk.style.cssText = 'position:fixed;inset:0;z-index:39;background:#F5F1E6;pointer-events:none;display:none;opacity:0;border-radius:0;box-shadow:0 0 0 4000px #000'; document.body.appendChild(bk);   // (cream inside, black only outside the border)   // (behind the case: all black, no objects)
     s.innerHTML = '<path fill="none" stroke="#ece8dc" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" filter="url(#wpFrameFx)"></path>';
     document.body.appendChild(s);
-    const p = s.querySelector('path'), J = Array.from({ length: 96 }, () => (Math.random() - 0.5) * 2.2);
+    const p = s.querySelector('path'), NP = 480, J = (() => { const a = []; let v = 0; for (let i = 0; i < NP; i++) { v = v * 0.85 + (Math.random() - 0.5) * 0.9; a.push(v); } return a; })();   // (enough points that the rounded corners stay round; a smooth hand wobble)
     const draw = (x, y, w, h, rr) => {               // a hand-drawn rounded rectangle (a slight wobble all round)
-      const pts = [], n = 96, per = 2 * (w + h - 4 * rr) + 2 * Math.PI * rr;
+      const pts = [], n = NP, per = 2 * (w + h - 4 * rr) + 2 * Math.PI * rr;
       for (let i = 0; i < n; i++) { let d = per * i / n, px, py, nx, ny;
         const seg = [w - 2 * rr, Math.PI * rr / 2, h - 2 * rr, Math.PI * rr / 2, w - 2 * rr, Math.PI * rr / 2, h - 2 * rr, Math.PI * rr / 2];
         let k = 0; while (k < 7 && d > seg[k]) { d -= seg[k]; k++; }
