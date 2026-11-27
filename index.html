@@ -743,14 +743,6 @@
     #menu { right: 16px; }
     #logo { left: 16px; }
   }
-  /* DARK MODE (experiment): the main page stays the intro's dark room; the line, notes, figure and Work page in light ink */
-  #hero { background: #000; }
-  #hero, #figSvg { --pen: #ece8dc; }
-  #hero .hsolid, #figSvg .hsolid { fill: #000; }
-  #figSvg .hpen, #hero .hpen { stroke: #ece8dc; }
-  #heroLine .hword { fill: #ece8dc; }
-  @media (min-width: 821px), (min-aspect-ratio: 85/100) { #workPage { --pen: #ece8dc; } #workPage .wpFrame { stroke: #ece8dc; } }
-  html.app-mode #grain { mix-blend-mode: multiply; opacity: 0.35; }   /* (no pale veil over the dark room) */
 </style>
 </head>
 <body>
@@ -821,7 +813,7 @@
     <path id="arm" class="ln" d="M 0 0" style="visibility:hidden"></path>
 
     <!-- light: the room turns white -->
-    <rect id="whiteout" x="-2000" y="-2000" width="6000" height="6000" fill="#000" opacity="0"></rect>
+    <rect id="whiteout" x="-2000" y="-2000" width="6000" height="6000" fill="#F5F1E6" opacity="0"></rect>
   </svg>
 </section>
 
@@ -3380,7 +3372,7 @@
     const NS = 'http://www.w3.org/2000/svg', s = document.createElementNS(NS, 'svg');
     s.setAttribute('id', 'caseFrame'); s.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:46;pointer-events:none;display:none;overflow:visible';
     const bk = document.createElement('div'); bk.id = 'caseBlack'; bk.style.cssText = 'position:fixed;inset:0;z-index:39;background:#F5F1E6;pointer-events:none;display:none;opacity:0;border-radius:0;box-shadow:0 0 0 4000px #000'; document.body.appendChild(bk);   // (cream inside, black only outside the border)   // (behind the case: all black, no objects)
-    s.innerHTML = '<path fill="none" stroke="#f3efe4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" filter="url(#wpFrameFx)"></path>';
+    s.innerHTML = '<path fill="none" stroke="#ece8dc" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" filter="url(#wpFrameFx)"></path>';
     document.body.appendChild(s);
     const p = s.querySelector('path'), NP = 480, J = (() => { const a = []; let v = 0; for (let i = 0; i < NP; i++) { v = v * 0.85 + (Math.random() - 0.5) * 0.9; a.push(v); } return a; })();   // (enough points that the rounded corners stay round; a smooth hand wobble)
     const draw = (x, y, w, h, rr) => {               // a hand-drawn rounded rectangle (a slight wobble all round)
@@ -3405,7 +3397,7 @@
         //  - and the border light - then the case opens in it)
         const E = edge(); bk.style.webkitMaskImage = bk.style.maskImage = 'none';
         bk.style.display = 'block'; bk.style.opacity = 1; bk.style.background = 'rgba(245,241,230,0)'; bk.style.inset = '0px'; bk.style.borderRadius = '0px';
-        s.style.display = 'block'; s.style.opacity = 1; s._anim = true; draw(...E); p.setAttribute('stroke', '#f3efe4');
+        s.style.display = 'block'; s.style.opacity = 1; s._anim = true; draw(...E); p.setAttribute('stroke', '#1c1a17');
         const L = p.getTotalLength(); p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L;
         const o = { u: 0 };
         gsap.to(o, { u: 1, duration: 1.0, ease: 'power1.inOut', onUpdate: () => { p.style.strokeDashoffset = L * (1 - o.u); },
@@ -3415,7 +3407,7 @@
             gsap.to(c, { k: 1, duration: 0.4, ease: 'power2.out', onUpdate: () => { bk.style.background = 'rgba(245,241,230,' + c.k.toFixed(3) + ')'; bk.style.inset = (INSET * c.k).toFixed(1) + 'px'; bk.style.borderRadius = (R_END * c.k).toFixed(1) + 'px'; },
               onComplete: () => { s._anim = false; done(); } }); } });
       },
-      show() { s.style.display = 'block'; s.style.opacity = 1; bk.style.display = 'block'; bk.style.opacity = 1; bk.style.webkitMaskImage = bk.style.maskImage = 'none'; bk.style.background = '#F5F1E6'; bk.style.inset = INSET + 'px'; bk.style.borderRadius = R_END + 'px'; p.setAttribute('stroke', '#f3efe4'); draw(...edge()); const L = document.getElementById('csLoader'); if (L) L.style.clipPath = 'inset(' + INSET + 'px round ' + R_END + 'px)'; },   // (the loading screen inside the border too)
+      show() { s.style.display = 'block'; s.style.opacity = 1; bk.style.display = 'block'; bk.style.opacity = 1; bk.style.webkitMaskImage = bk.style.maskImage = 'none'; bk.style.background = '#F5F1E6'; bk.style.inset = INSET + 'px'; bk.style.borderRadius = R_END + 'px'; p.setAttribute('stroke', '#1c1a17'); draw(...edge()); const L = document.getElementById('csLoader'); if (L) L.style.clipPath = 'inset(' + INSET + 'px round ' + R_END + 'px)'; },   // (the loading screen inside the border too)
       hide() { gsap.to(bk, { opacity: 0, duration: 0.35, onComplete: () => { bk.style.display = 'none'; } }); gsap.to(s, { opacity: 0, duration: 0.3, onComplete: () => { s.style.display = 'none'; const L = document.getElementById('csLoader'); if (L) L.style.clipPath = ''; } }); },
       clip: 'inset(' + INSET + 'px round ' + R_END + 'px)'
     };
