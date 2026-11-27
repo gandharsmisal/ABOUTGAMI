@@ -756,7 +756,8 @@
   #figSvg #hfLeg0, #figSvg #hfLeg1, #figSvg #hfBody, #figSvg #hfArm { filter: url(#crayonFig); }   /* (the character as it was, thin, drawn by hand in crayon) */
   #figSvg #hfBubblePath, #figSvg #heroScroll { filter: url(#crayon); }
   @media (min-width: 821px), (min-aspect-ratio: 85/100) { #workPage .wpFrame { stroke: #1c1a17; } }
-  html.wk-open #grain { opacity: 0; }   /* (the picture clear: no paper grain over it) */
+  html.wk-open #grain { opacity: 0; }
+  html.app-mode #grain { mix-blend-mode: multiply; opacity: 0.35; }   /* (the paper grain no longer veils the drawings: it only darkens, lightly) */   /* (the picture clear: no paper grain over it) */
   #workPage .wpFrame { filter: url(#wpFrameFx); stroke-width: 4.6px; }   /* (the frame hand-drawn in crayon, shimmering) */
   #wpWriting, #wpDots { filter: url(#boilMain); }   /* (the Work page's writing shimmers too) */
 </style>
@@ -3815,7 +3816,7 @@
       // on twos while moving (a new drawing 12 times a second, each one redrawn a little); every frame otherwise
       const step12 = Math.floor(time * 12);
       cam.jseed = 0; camDraw();   // (smooth, every frame, as the live site: light to scroll)
-      window.__calm = !moving;   // (the shimmer rests only while the desk moves)
+      window.__calm = true;   // (the shimmer keeps going while the desk moves too)
       return;
     }
     const arrived = Math.abs(cam.target - cam.pos) < 0.04 && Object.entries(cam.lag).every(([k, v]) => k === 'desk' || Math.abs(cam.target - v) < 0.06);   // (the notes don't wait for the side objects)
