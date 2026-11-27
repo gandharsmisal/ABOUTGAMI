@@ -3961,8 +3961,8 @@
   const caseFrame = (() => {
     const NS = 'http://www.w3.org/2000/svg', s = document.createElementNS(NS, 'svg');
     s.setAttribute('id', 'caseFrame'); s.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:46;pointer-events:none;display:none;overflow:visible';
-    const bk = document.createElement('div'); bk.id = 'caseBlack'; bk.style.cssText = 'position:fixed;inset:0;z-index:39;background:#000;pointer-events:none;display:none;opacity:0'; document.body.appendChild(bk);   // (behind the case: all black, no objects)
-    s.innerHTML = '<path fill="none" stroke="#ece8dc" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" filter="url(#wpFrameFx)"></path>';
+    const bk = document.createElement('div'); bk.id = 'caseBlack'; bk.style.cssText = 'position:fixed;inset:0;z-index:39;background:#F5F1E6;pointer-events:none;display:none;opacity:0'; document.body.appendChild(bk);   // (behind the case: all black, no objects)
+    s.innerHTML = '<path fill="none" stroke="#1c1a17" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" filter="url(#wpFrameFx)"></path>';
     document.body.appendChild(s);
     const p = s.querySelector('path'), J = Array.from({ length: 96 }, () => (Math.random() - 0.5) * 2.2);
     const draw = (x, y, w, h, rr) => {               // a hand-drawn rounded rectangle (a slight wobble all round)
