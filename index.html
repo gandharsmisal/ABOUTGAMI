@@ -655,7 +655,7 @@
     position: fixed; z-index: 50; left: 36px; top: calc(env(safe-area-inset-top, 0px) + 28px);
     display: block; mix-blend-mode: difference; cursor: pointer; -webkit-tap-highlight-color: transparent;
   }
-  #logo img { display: block; height: 28px; width: auto; user-select: none; -webkit-user-drag: none; filter: url(#pencil) opacity(0.82); }   /* in pencil, like the word in the line */
+  #logo img { display: block; height: 28px; width: auto; user-select: none; -webkit-user-drag: none; filter: url(#pencil) opacity(0.82); }   /* (shimmers with everything else: 3 ready-made versions swapped on the one clock) */   /* in pencil, like the word in the line */
   #logo:focus-visible { outline: 1px solid #fff; outline-offset: 4px; }
   /* the phone menu icon: three wobbly pen lines, which turn into a hand-drawn cross while the menu is open */
   #menu .menu-toggle { display: none; width: 46px; height: 46px; padding: 0; justify-content: center; }
@@ -988,12 +988,20 @@
     for (const [id, s] of [['shadeImg', shade], ['cordImg', cord]]) { const e = document.getElementById(id); e.removeAttribute('filter'); e.setAttribute('href', url(s)); }
   })();
 
-  // LINE BOIL on the intro: a gentle, constant shimmer (3 versions, 10 a second), also while it waits at the door
+  // LINE BOIL: one gentle, constant shimmer for the whole site (3 versions, 10 a second) - intro, logo, character, desk
   (() => {
     const noise = document.getElementById('boilNoise'), figNoise = document.getElementById('boilFigNoise');
     let f = 0;
     window.__redraw = () => { f = (f + 1) % 3; noise.setAttribute('seed', 1 + f); figNoise.setAttribute('seed', 4 + f); };
-    setInterval(() => { if (!document.hidden && !document.documentElement.classList.contains('app-mode')) window.__redraw(); }, 100);   // (always boiling, gently - waiting at the door too)
+    const mainN = () => document.getElementById('boilMainNoise'), logoN = () => document.getElementById('boilLogoNoise');
+    window.__boilTick = 0;
+    setInterval(() => { if (document.hidden) return;                // ONE clock for every shimmer on the site (10 a second)
+      window.__boilTick = (window.__boilTick + 1) % 3;
+      if (!document.documentElement.classList.contains('app-mode')) window.__redraw();
+      const m = mainN(), l = logoN(), c = document.getElementById('chalkBoilNoise'); for (const n of [m, l, c]) if (n) n.setAttribute('seed', 1 + window.__boilTick);
+      if (window.__deskBoil) window.__deskBoil(window.__boilTick);
+      if (window.__logoBoil) window.__logoBoil(window.__boilTick);
+    }, 100);
   })();
 </script>
 
@@ -1611,12 +1619,15 @@
       <feTurbulence type="fractalNoise" baseFrequency="1.3" numOctaves="2" seed="9" result="g"></feTurbulence>
       <feColorMatrix in="g" type="matrix" values="0 0 0 0 0.95  0 0 0 0 0.9  0 0 0 0 0.85  -2.6 0 0 0 1.9" result="grain"></feColorMatrix>
       <feComposite in="grain" in2="lines" operator="in" result="chalk"></feComposite>
-      <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="4" result="w"></feTurbulence>
-      <feDisplacementMap in="chalk" in2="w" scale="2.6" xChannelSelector="R" yChannelSelector="G" result="drawn"></feDisplacementMap>
+      <feTurbulence id="chalkBoilNoise" type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="1" result="w"></feTurbulence>   <!-- (its wobble boils on the site's one shimmer clock) -->
+      <feDisplacementMap in="chalk" in2="w" scale="3.2" xChannelSelector="R" yChannelSelector="G" result="drawn"></feDisplacementMap>
       <feFlood flood-color="#000" result="ink"></feFlood>
       <feComposite in="ink" in2="SourceAlpha" operator="in" result="fill"></feComposite>
       <feMerge><feMergeNode in="fill"></feMergeNode><feMergeNode in="drawn"></feMergeNode></feMerge>
     </filter>
+    <!-- the one shimmer, for the main page character (as the intro's) and the logo (scaled to its size) -->
+    <filter id="boilMain" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence id="boilMainNoise" type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="1" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
+    <filter id="boilLogo" x="-10%" y="-20%" width="120%" height="140%"><feTurbulence id="boilLogoNoise" type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="1" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="1.5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
     <!-- crayon: coarser, waxier gaps -->
     <filter id="crayon" x="-5%" y="-5%" width="110%" height="110%">
       <feTurbulence type="fractalNoise" baseFrequency="0.32" numOctaves="2" seed="8" result="n"></feTurbulence>
@@ -5837,7 +5848,7 @@
     const make = (im, el) => {
       const W = im.naturalWidth, H = im.naturalHeight, c = document.createElement('canvas'); c.width = W; c.height = H;
       const g = c.getContext('2d'); g.drawImage(im, 0, 0); const src = g.getImageData(0, 0, W, H), s = src.data;
-      const A = Math.max(1.1, Math.max(W, H) / 380),   /* (a gentle shimmer) */ CELL = Math.max(16, Math.round(Math.max(W, H) / 22)), gw = Math.ceil(W / CELL) + 2, gh = Math.ceil(H / CELL) + 2;
+      const u = W / Math.max(1, +el.getAttribute('width') || W), A = 0.9 * u, CELL = Math.max(8, Math.round(26 * u)),   /* (the intro's shimmer, measured in the page's units) */ gw = Math.ceil(W / CELL) + 2, gh = Math.ceil(H / CELL) + 2;
       const one = () => {
         const nx = Float32Array.from({ length: gw * gh }, () => (Math.random() - 0.5) * 2 * A), ny = Float32Array.from({ length: gw * gh }, () => (Math.random() - 0.5) * 2 * A);
         const out = g.createImageData(W, H), o = out.data;
@@ -5852,7 +5863,26 @@
       };
       return (async () => { const urls = [el.getAttribute('href')]; for (let n = 0; n < 2; n++) { urls.push(await one()); await new Promise(r => setTimeout(r, 30)); } sets.push({ el, urls }); el.__boil = urls; })();   // (the morph boils with these too)
     };
+    const logoBoil = async () => {
+      const el = document.querySelector('#logo img'); if (!el) return;
+      const im = new Image(); im.crossOrigin = 'anonymous'; im.src = el.getAttribute('src'); try { await im.decode(); } catch (e) { return; }
+      const W = im.naturalWidth, H = im.naturalHeight, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(im, 0, 0);
+      let s; try { s = g.getImageData(0, 0, W, H).data; } catch (e) { return; }
+      const A = 0.8 * H / 28, CELL = Math.max(6, Math.round(5 * H / 28)), gw = Math.ceil(W / CELL) + 2, gh = Math.ceil(H / CELL) + 2;   // (~0.8px on screen, like everything else)
+      const urls = [el.getAttribute('src')];
+      for (let n = 0; n < 2; n++) {
+        const nx = Float32Array.from({ length: gw * gh }, () => (Math.random() - 0.5) * 2 * A), ny = Float32Array.from({ length: gw * gh }, () => (Math.random() - 0.5) * 2 * A);
+        const out = g.createImageData(W, H), o = out.data;
+        for (let y = 0; y < H; y++) { const gy = y / CELL, j = gy | 0, fy = gy - j; for (let x = 0; x < W; x++) { const gx = x / CELL, i = gx | 0, fx = gx - i, k = j * gw + i;
+          const dx = (nx[k] * (1 - fx) + nx[k + 1] * fx) * (1 - fy) + (nx[k + gw] * (1 - fx) + nx[k + gw + 1] * fx) * fy, dy = (ny[k] * (1 - fx) + ny[k + 1] * fx) * (1 - fy) + (ny[k + gw] * (1 - fx) + ny[k + gw + 1] * fx) * fy;
+          const sx = Math.min(W - 1, Math.max(0, Math.round(x + dx))), sy = Math.min(H - 1, Math.max(0, Math.round(y + dy))), p = (y * W + x) * 4, q = (sy * W + sx) * 4; o[p] = s[q]; o[p + 1] = s[q + 1]; o[p + 2] = s[q + 2]; o[p + 3] = s[q + 3]; } }
+        const c2 = document.createElement('canvas'); c2.width = W; c2.height = H; c2.getContext('2d').putImageData(out, 0, 0);
+        urls.push(await new Promise(res => c2.toBlob(b => res(URL.createObjectURL(b)), 'image/png')));
+      }
+      window.__logoBoil = k => el.setAttribute('src', urls[k]);
+    };
     const begin = async () => {
+      await logoBoil();
       for (const el of document.querySelectorAll('#hero image[href^="assets/drawn/"]')) {
         const im = new Image(); im.crossOrigin = 'anonymous'; im.src = el.getAttribute('href'); el.dataset.orig = el.getAttribute('href'); try { await im.decode(); } catch (e) { continue; }
         try { await make(im, el); } catch (e) { /* (a picture that can't be read just doesn't shimmer) */ } await new Promise(r => setTimeout(r, 60));          // (one at a time, never in the way)
@@ -5860,7 +5890,7 @@
     };
     addEventListener('load', () => setTimeout(begin, 1500));
     let f = 0;
-    setInterval(() => { if (document.hidden || !sets.length || hero.style.visibility !== 'visible') return; f = (f + 1) % 3; for (const s of sets) s.el.setAttribute('href', s.urls[f]); }, 1000 / 12);   // (on the same beat as the bob)
+    window.__deskBoil = k => { if (!sets.length || hero.style.visibility !== 'visible') return; for (const s of sets) s.el.setAttribute('href', s.urls[k]); };   // (on the site's one shimmer clock)
   })();
 </script>
 </body>
