@@ -767,10 +767,20 @@
         <feBlend in="SourceGraphic" in2="specks" mode="multiply" result="grained"></feBlend>
         <feComposite in="grained" in2="SourceGraphic" operator="in"></feComposite>
       </filter>
+      <!-- line boil: the drawing nudged by a soft noise whose seed steps through 3 values (the one shimmer clock) -->
+      <filter id="boilFx" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence id="boilNoise" type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="1" result="n"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      </filter>
+      <filter id="boilFig" x="-30%" y="-10%" width="160%" height="120%">
+        <feTurbulence id="boilFigNoise" type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="4" result="n"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      </filter>
       <!-- while it stands in the doorway the figure is kept inside the door frame; the clip opens as it steps out -->
       <clipPath id="doorwayClip" clipPathUnits="userSpaceOnUse"><rect id="doorwayClipRect" x="901" y="0" width="118" height="663"></rect></clipPath>
     </defs>
 
+    <g id="boilG" filter="url(#boilFx)">
     <!-- "click to enter" under the door; fades as the door opens -->
     <g id="label">
       <text id="enterText" x="960" y="716" text-anchor="middle">click to enter</text>
@@ -785,9 +795,9 @@
 
     <!-- figure -->
     <g id="walker" clip-path="url(#doorwayClip)">
-      <polyline id="leg0" class="ln"></polyline>
-      <polyline id="leg1" class="ln"></polyline>
-      <g id="figure">
+      <g filter="url(#boilFig)"><polyline id="leg0" class="ln"></polyline>
+      <polyline id="leg1" class="ln"></polyline></g>
+      <g id="figure" filter="url(#boilFig)">
         <path class="ln solid" d="M -1.1 -112.8 L -9 0 L 9 0 L 1.1 -112.8 M 0 -112.8 C 2.5 -120 6.5 -131 5 -137.5 C 3.5 -144.5 -3.5 -144.5 -5 -137.5 C -6.5 -131 -2.5 -120 0 -112.8 Z"></path>
       </g>
     </g>
@@ -810,7 +820,9 @@
     </g>
 
     <!-- arm -->
-    <path id="arm" class="ln" d="M 0 0" style="visibility:hidden"></path>
+    <g filter="url(#boilFig)"><path id="arm" class="ln" d="M 0 0" style="visibility:hidden"></path></g>
+
+    </g>
 
     <!-- light: the room turns white -->
     <rect id="whiteout" x="-2000" y="-2000" width="6000" height="6000" fill="#F5F1E6" opacity="0"></rect>
@@ -1187,7 +1199,7 @@
 
 <!-- the figure pointing at "scroll": on its own layer over the main page and the Work page, so it stays on both -->
 <svg id="figSvg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-  <g id="heroFig">
+  <g id="heroFig" filter="url(#boilMain)">
     <!-- the figure (drawn like assets/hero-figure.png): walks in from the left edge to its spot, stops, raises its
          arm, and a hand-drawn speech bubble with "scroll" appears beside the hand (paths set in JS) -->
     <polyline id="hfLeg0" class="hpen"></polyline>
@@ -1244,6 +1256,15 @@
       <feComposite in="SourceGraphic" in2="wax" operator="in" result="c"></feComposite>
       <feDisplacementMap in="c" in2="n" scale="2.2" xChannelSelector="G" yChannelSelector="B"></feDisplacementMap>
     </filter>
+    <!-- the Work frame in crayon: a hand wobble (boiling on the one clock) and waxy grain -->
+    <filter id="wpFrameFx" x="-3%" y="-3%" width="106%" height="106%">
+      <feTurbulence id="wpFrameNoise" type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="1" result="w"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="w" scale="4" xChannelSelector="R" yChannelSelector="G" result="d"></feDisplacementMap>
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="8" result="g"></feTurbulence>
+      <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2.1 0 0 0 1.7" result="wax"></feColorMatrix>
+      <feComposite in="d" in2="wax" operator="in"></feComposite>
+    </filter>
+    <filter id="boilMain" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence id="boilMainNoise" type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="1" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
     <!-- crayon: coarser, waxier gaps -->
     <filter id="crayon" x="-5%" y="-5%" width="110%" height="110%">
       <feTurbulence type="fractalNoise" baseFrequency="0.32" numOctaves="2" seed="8" result="n"></feTurbulence>
@@ -3358,14 +3379,68 @@
   }
   const canOpen = () => work.open && work.ready && !W.trans && W.fat < 0.2 && CASES[W.cur];
   workPage.addEventListener('pointermove', e => { workPage.style.cursor = canOpen() && overPicture(e) ? 'pointer' : ''; });
-  workPage.addEventListener('click', e => { if (canOpen() && overPicture(e)) openCase(W.cur); });
-  function openCase(i) {
+  // OPENING A CASE STUDY: the project's crayon frame swells out to the edges of the screen, and the case
+  // study then scrolls up inside that crayon border (which stays round it while it is open)
+  const caseFrame = (() => {
+    const NS = 'http://www.w3.org/2000/svg', s = document.createElementNS(NS, 'svg');
+    s.setAttribute('id', 'caseFrame'); s.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:46;pointer-events:none;display:none;overflow:visible';
+    const bk = document.createElement('div'); bk.id = 'caseBlack'; bk.style.cssText = 'position:fixed;inset:0;z-index:39;background:#F5F1E6;pointer-events:none;display:none;opacity:0;border-radius:0;box-shadow:0 0 0 4000px #000'; document.body.appendChild(bk);   // (cream inside, black only outside the border)   // (behind the case: all black, no objects)
+    s.innerHTML = '<path fill="none" stroke="#ece8dc" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" filter="url(#wpFrameFx)"></path>';
+    document.body.appendChild(s);
+    const p = s.querySelector('path'), NP = 480, J = (() => { const a = []; let v = 0; for (let i = 0; i < NP; i++) { v = v * 0.85 + (Math.random() - 0.5) * 0.9; a.push(v); } return a; })();   // (enough points that the rounded corners stay round; a smooth hand wobble)
+    const draw = (x, y, w, h, rr) => {               // a hand-drawn rounded rectangle (a slight wobble all round)
+      const pts = [], n = NP, per = 2 * (w + h - 4 * rr) + 2 * Math.PI * rr;
+      for (let i = 0; i < n; i++) { let d = per * i / n, px, py, nx, ny;
+        const seg = [w - 2 * rr, Math.PI * rr / 2, h - 2 * rr, Math.PI * rr / 2, w - 2 * rr, Math.PI * rr / 2, h - 2 * rr, Math.PI * rr / 2];
+        let k = 0; while (k < 7 && d > seg[k]) { d -= seg[k]; k++; }
+        const a = d / rr;
+        switch (k) { case 0: px = x + rr + d; py = y; nx = 0; ny = -1; break; case 1: px = x + w - rr + Math.sin(a) * rr; py = y + rr - Math.cos(a) * rr; nx = Math.sin(a); ny = -Math.cos(a); break;
+          case 2: px = x + w; py = y + rr + d; nx = 1; ny = 0; break; case 3: px = x + w - rr + Math.cos(a) * rr; py = y + h - rr + Math.sin(a) * rr; nx = Math.cos(a); ny = Math.sin(a); break;
+          case 4: px = x + w - rr - d; py = y + h; nx = 0; ny = 1; break; case 5: px = x + rr - Math.sin(a) * rr; py = y + h - rr + Math.cos(a) * rr; nx = -Math.sin(a); ny = Math.cos(a); break;
+          case 6: px = x; py = y + h - rr - d; nx = -1; ny = 0; break; default: px = x + rr - Math.cos(a) * rr; py = y + rr - Math.sin(a) * rr; nx = -Math.cos(a); ny = -Math.sin(a); }
+        pts.push([px + nx * J[i], py + ny * J[i]]); }
+      p.setAttribute('d', 'M' + pts.map(q => q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' L') + ' Z');
+    };
+    const INSET = 14, R_END = 30;
+    const edge = () => [INSET, INSET, innerWidth - 2 * INSET, innerHeight - 2 * INSET, R_END];
+    addEventListener('resize', () => { if (s.style.display === 'block' && !s._anim) draw(...edge()); });
+    return {
+      grow(fromEl, done) {                            // (the screen goes black and a crayon border is drawn round it by hand, then the case opens in it)
+        // (the border is drawn in dark crayon over the cream page; only once it is complete does the background turn black
+        //  - and the border light - then the case opens in it)
+        const E = edge(); bk.style.webkitMaskImage = bk.style.maskImage = 'none';
+        bk.style.display = 'block'; bk.style.opacity = 1; bk.style.background = 'rgba(245,241,230,0)'; bk.style.inset = '0px'; bk.style.borderRadius = '0px';
+        s.style.display = 'block'; s.style.opacity = 1; s._anim = true; draw(...E); p.setAttribute('stroke', '#1c1a17');
+        const L = p.getTotalLength(); p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L;
+        const o = { u: 0 };
+        gsap.to(o, { u: 1, duration: 1.0, ease: 'power1.inOut', onUpdate: () => { p.style.strokeDashoffset = L * (1 - o.u); },
+          onComplete: () => { p.style.strokeDasharray = ''; p.style.strokeDashoffset = '';
+            // once the line is complete: inside goes cream, and black grows in from the screen's edges up to the border (never a grey fade)
+            const c = { k: 0 };
+            gsap.to(c, { k: 1, duration: 0.4, ease: 'power2.out', onUpdate: () => { bk.style.background = 'rgba(245,241,230,' + c.k.toFixed(3) + ')'; bk.style.inset = (INSET * c.k).toFixed(1) + 'px'; bk.style.borderRadius = (R_END * c.k).toFixed(1) + 'px'; },
+              onComplete: () => { s._anim = false; done(); } }); } });
+      },
+      show() { s.style.display = 'block'; s.style.opacity = 1; bk.style.display = 'block'; bk.style.opacity = 1; bk.style.webkitMaskImage = bk.style.maskImage = 'none'; bk.style.background = '#F5F1E6'; bk.style.inset = INSET + 'px'; bk.style.borderRadius = R_END + 'px'; p.setAttribute('stroke', '#1c1a17'); draw(...edge()); const L = document.getElementById('csLoader'); if (L) L.style.clipPath = 'inset(' + INSET + 'px round ' + R_END + 'px)'; },   // (the loading screen inside the border too)
+      hide() { gsap.to(bk, { opacity: 0, duration: 0.35, onComplete: () => { bk.style.display = 'none'; } }); gsap.to(s, { opacity: 0, duration: 0.3, onComplete: () => { s.style.display = 'none'; const L = document.getElementById('csLoader'); if (L) L.style.clipPath = ''; } }); },
+      clip: 'inset(' + INSET + 'px round ' + R_END + 'px)'
+    };
+  })();
+  workPage.addEventListener('click', e => { if (canOpen() && overPicture(e)) {
+    if (isMob()) return openCase(W.cur);
+    const i = W.cur; caseFrame.grow(document.getElementById('wpFrame'), () => openCase(i, true));   // (the frame swells to the screen, then the case scrolls up in it)
+  } });
+  function openCase(i, framed) {
     const page = CASES[i];
     if (!page || caseOpen) return;
     caseOpen = page;
     caseScrollTop(page);
     document.documentElement.classList.add('in-case');            // the menu gives way to "close"
-    gsap.fromTo(page, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, ease: 'sine.out' });
+    if (framed || document.getElementById('caseFrame').style.display === 'block') {   // (inside the crayon border: it scrolls up into it)
+      caseFrame.show(); page.style.clipPath = caseFrame.clip;
+      const sp = { r: 0 }, setM = () => { const g = 'radial-gradient(circle at 50% 50%, #000 ' + sp.r + '%, transparent ' + (sp.r + 9) + '%)'; page.style.webkitMaskImage = page.style.maskImage = g; };
+      gsap.set(page, { autoAlpha: 1, yPercent: 0 }); setM();
+      gsap.to(sp, { r: 80, duration: 0.85, ease: 'power2.out', onUpdate: setM, onComplete: () => { page.style.webkitMaskImage = page.style.maskImage = ''; } });   // (it spreads open from the middle, like the Work picture)
+    } else gsap.fromTo(page, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, ease: 'sine.out' });
     page.focus({ preventScroll: true });
     page.classList.add('sand');                                   // no plain picture before the sand starts
     const cv = page.querySelector('.csSand'); cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
@@ -4963,7 +5038,8 @@
   function closeCase() {
     if (!caseOpen) return false;
     if (caseSandTw) { caseSandTw.kill(); caseSandTw = null; }
-    gsap.to(caseOpen, { autoAlpha: 0, duration: 0.35, ease: 'sine.inOut' });
+    { const pg = caseOpen; gsap.to(pg, { autoAlpha: 0, duration: 0.35, ease: 'sine.inOut', onComplete: () => { pg.style.clipPath = ''; gsap.set(pg, { yPercent: 0 }); } }); }
+    caseFrame.hide();
     if (caseOpen._lenis) caseOpen._lenis.stop();
     caseOpen = null;
     document.documentElement.classList.remove('in-case');
@@ -5276,6 +5352,43 @@
   document.querySelector('#figure path').setAttribute('d', bodyPath(0));
   render();
 })();
+</script>
+<script>
+  // LINE BOIL (experiment): one gentle shimmer for the whole site, 3 versions swapped 10 times a second - the intro
+  // (also while it waits at the door), the main page's character, its pictures and the logo
+  (() => {
+    const html = document.documentElement, hero = document.getElementById('hero'), sets = [];
+    const shift = (W, H, s, A, CELL) => {             // a version of a picture with every pixel nudged by a smooth random field
+      const gw = Math.ceil(W / CELL) + 2, nx = Float32Array.from({ length: gw * (Math.ceil(H / CELL) + 2) }, () => (Math.random() - 0.5) * 2 * A), ny = nx.map(() => (Math.random() - 0.5) * 2 * A);
+      const out = new ImageData(W, H), o = out.data;
+      for (let y = 0; y < H; y++) { const gy = y / CELL, j = gy | 0, fy = gy - j; for (let x = 0; x < W; x++) { const gx = x / CELL, i = gx | 0, fx = gx - i, k = j * gw + i;
+        const dx = (nx[k] * (1 - fx) + nx[k + 1] * fx) * (1 - fy) + (nx[k + gw] * (1 - fx) + nx[k + gw + 1] * fx) * fy, dy = (ny[k] * (1 - fx) + ny[k + 1] * fx) * (1 - fy) + (ny[k + gw] * (1 - fx) + ny[k + gw + 1] * fx) * fy;
+        const sx = Math.min(W - 1, Math.max(0, Math.round(x + dx))), sy = Math.min(H - 1, Math.max(0, Math.round(y + dy))), p = (y * W + x) * 4, q = (sy * W + sx) * 4; o[p] = s[q]; o[p + 1] = s[q + 1]; o[p + 2] = s[q + 2]; o[p + 3] = s[q + 3]; } }
+      const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').putImageData(out, 0, 0);
+      return new Promise(res => c.toBlob(b => res(URL.createObjectURL(b)), 'image/webp', 0.85));
+    };
+    const versions = async (el, attr, unitsW) => {
+      const src = el.getAttribute(attr); if (!src || src.startsWith('blob:')) return;
+      const im = new Image(); im.crossOrigin = 'anonymous'; im.src = src; try { await im.decode(); } catch (e) { return; }
+      const W = im.naturalWidth, H = im.naturalHeight, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(im, 0, 0);
+      let s; try { s = g.getImageData(0, 0, W, H).data; } catch (e) { return; }
+      const u = W / Math.max(1, unitsW), urls = [src];
+      for (let n = 0; n < 2; n++) { urls.push(await shift(W, H, s, 0.9 * u, Math.max(6, Math.round(26 * u)))); await new Promise(r => setTimeout(r, 30)); }
+      sets.push({ el, attr, urls });
+    };
+    addEventListener('load', () => setTimeout(async () => {
+      const logo = document.querySelector('#logo img'); if (logo) await versions(logo, 'src', logo.getBoundingClientRect().width || 82);
+      for (const el of document.querySelectorAll('#hero image')) { await versions(el, 'href', +el.getAttribute('width') || 300); await new Promise(r => setTimeout(r, 60)); }
+    }, 1500));
+    let k = 0;
+    setInterval(() => {
+      if (document.hidden) return; k = (k + 1) % 3;
+      for (const id of ['boilNoise', 'boilMainNoise']) { const n = document.getElementById(id); if (n) n.setAttribute('seed', 1 + k); }
+      const f = document.getElementById('boilFigNoise'); if (f) f.setAttribute('seed', 4 + k);
+      const onMain = hero && hero.style.visibility === 'visible';
+      for (const s of sets) if (s.attr === 'src' || onMain) s.el.setAttribute(s.attr, s.urls[k]);
+    }, 100);
+  })();
 </script>
 </body>
 </html>
