@@ -745,17 +745,17 @@
     #menu { right: 16px; }
     #logo { left: 16px; }
   }
-  /* EXPERIMENT: the lamp lights the room white; the line, notes and figure in dark crayon */
-  #hero { background: #F5F1E6; }
-  #hero, #figSvg { --pen: #1c1a17; }
-  #hero .hsolid, #figSvg .hsolid { fill: #F5F1E6; }
-  #figSvg .hpen, #hero .hpen { stroke: #1c1a17; }
-  #heroLine .hword { fill: #2b2926; }
+  /* EXPERIMENT: the main page stays the intro's dark room (plain black); the line, notes and figure in light crayon */
+  #hero { background: #000; }
+  #hero, #figSvg { --pen: #ece8dc; }
+  #hero .hsolid, #figSvg .hsolid { fill: #000; }
+  #figSvg .hpen, #hero .hpen { stroke: #ece8dc; }
+  #heroLine .hword { fill: #ece8dc; }
   /* the character and the "scroll" bubble: as they were, only in a waxier crayon (same lines, same size, same colours) */
   #scene #figure .ln, #scene #leg0, #scene #leg1, #scene #arm { filter: url(#crayonFig); }
   #figSvg #hfLeg0, #figSvg #hfLeg1, #figSvg #hfBody, #figSvg #hfArm { filter: url(#crayonFig); }   /* (the character as it was, thin, drawn by hand in crayon) */
   #figSvg #hfBubblePath, #figSvg #heroScroll { filter: url(#crayon); }
-  @media (min-width: 821px), (min-aspect-ratio: 85/100) { #workPage .wpFrame { stroke: #1c1a17; } }
+  @media (min-width: 821px), (min-aspect-ratio: 85/100) { #workPage { --pen: #ece8dc; } #workPage .wpFrame { stroke: #ece8dc; } }
   html.wk-open #grain { opacity: 0; }
   html.app-mode #grain { mix-blend-mode: multiply; opacity: 0.35; }   /* (the paper grain no longer veils the drawings: it only darkens, lightly) */   /* (the picture clear: no paper grain over it) */
   #workPage .wpFrame { filter: url(#wpFrameFx); stroke-width: 4.6px; }   /* (the frame hand-drawn in crayon, shimmering) */
@@ -844,7 +844,7 @@
     </g>
 
     <!-- light: the room turns white -->
-    <rect id="whiteout" x="-2000" y="-2000" width="6000" height="6000" fill="#F5F1E6" opacity="0"></rect>
+    <rect id="whiteout" x="-2000" y="-2000" width="6000" height="6000" fill="#000" opacity="0"></rect>
   </svg>
 </section>
 <script>
@@ -2305,7 +2305,7 @@
             const head = th.Ls + (th.Lt - th.Ls) * u, tail = Math.min(head, th.Lb * ease(clamp01(t / (RUN * 0.9))));   // (the tail always leaves the intro drawing completely and arrives at the object)
             const K = 150 * (1 - u * u), seg = slice(th.P, th.L, Math.max(th.Ls, head - K), head);   // (shrinks to nothing as it arrives: nothing left by the objects)   // (a short stroke, from where it leaves the drawing)
             const after = clamp01((t - RUN * 0.9) / 0.12);
-            { const w = Math.min(1, Math.max(0, S.white || 0)), c = 'rgb(' + [243, 241, 234].map((v, i) => Math.round(v + ([40, 37, 33][i] - v) * w)).join(',') + ')'; th.ls.forEach((p, k) => { p.setAttribute('d', seg.length > 1 ? poly(seg, J[k]) : ''); p.style.opacity = 1 - after; p.setAttribute('stroke', c); }); }   // (white on the dark, going dark as the room lights up)
+            { const w = Math.min(1, Math.max(0, S.white || 0)), c = '#f3f1ea'; /* (the room stays dark: the lines stay light) */ th.ls.forEach((p, k) => { p.setAttribute('d', seg.length > 1 ? poly(seg, J[k]) : ''); p.style.opacity = 1 - after; p.setAttribute('stroke', c); }); }   // (white on the dark, going dark as the room lights up)
             if ((maskNow || tt >= total) && !th.settled) {
               const eV = clamp01(tail / th.Ls), onT = clamp01((head - th.Lb) / (th.Lt - th.Lb)), fV = clamp01((t - RUN * 0.72) / FILL);
               if (th.er && th.er.v !== eV) { th.er.v = eV; { const o = th.er.L * (1 - eV); th.er.p.style.strokeDashoffset = o; if (th.er.core) th.er.core.style.strokeDashoffset = o; } }
@@ -4015,9 +4015,7 @@
     document.documentElement.classList.add('in-case');            // the menu gives way to "close"
     if (framed || document.getElementById('caseFrame').style.display === 'block') {   // (inside the crayon border: it scrolls up into it)
       caseFrame.show(); page.style.clipPath = caseFrame.clip;
-      const sp = { r: 0 }, setM = () => { const g = 'radial-gradient(circle at 50% 50%, #000 ' + sp.r + '%, transparent ' + (sp.r + 9) + '%)'; page.style.webkitMaskImage = page.style.maskImage = g; };
-      gsap.set(page, { autoAlpha: 1, yPercent: 0 }); setM();
-      gsap.to(sp, { r: 80, duration: 0.85, ease: 'power2.out', onUpdate: setM, onComplete: () => { page.style.webkitMaskImage = page.style.maskImage = ''; } });   // (it spreads open from the middle, like the Work picture)
+      gsap.fromTo(page, { autoAlpha: 0, yPercent: 0 }, { autoAlpha: 1, duration: 0.3, ease: 'sine.out' });   // (it simply appears inside the drawn window - no spread, no scaling)
     } else gsap.fromTo(page, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, ease: 'sine.out' });
     page.focus({ preventScroll: true });
     page.classList.add('sand');                                   // no plain picture before the sand starts
