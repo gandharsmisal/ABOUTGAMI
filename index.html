@@ -3981,11 +3981,11 @@
     const edge = () => [INSET, INSET, innerWidth - 2 * INSET, innerHeight - 2 * INSET, R_END];
     addEventListener('resize', () => { if (s.style.display === 'block' && !s._anim) draw(...edge()); });
     return {
-      grow(fromEl, done) {                            // (the project's frame swells out to the screen, over black, then the case opens in it)
-        const b = fromEl.getBoundingClientRect(), A = [b.left, b.top, b.width, b.height, Math.min(34, b.height * 0.06)], B = edge(), o = { u: 0 };
-        bk.style.display = 'block'; gsap.to(bk, { opacity: 1, duration: 0.45, ease: 'sine.out' });
-        s.style.display = 'block'; s.style.opacity = 1; s._anim = true; draw(...A);
-        gsap.to(o, { u: 1, duration: 0.7, ease: 'power2.inOut', onUpdate: () => draw(...A.map((v, i) => v + (B[i] - v) * o.u)), onComplete: () => { s._anim = false; done(); } });
+      grow(fromEl, done) {                            // (the screen goes black and a crayon border is drawn round it by hand, then the case opens in it)
+        bk.style.display = 'block'; gsap.to(bk, { opacity: 1, duration: 0.35, ease: 'sine.out' });
+        s.style.display = 'block'; s.style.opacity = 1; s._anim = true; draw(...edge());
+        const L = p.getTotalLength(); p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L;
+        gsap.to(p.style, { strokeDashoffset: 0, duration: 0.9, delay: 0.15, ease: 'power1.inOut', onComplete: () => { p.style.strokeDasharray = ''; p.style.strokeDashoffset = ''; s._anim = false; done(); } });
       },
       show() { s.style.display = 'block'; s.style.opacity = 1; bk.style.display = 'block'; bk.style.opacity = 1; draw(...edge()); const L = document.getElementById('csLoader'); if (L) L.style.clipPath = 'inset(' + INSET + 'px round ' + R_END + 'px)'; },   // (the loading screen inside the border too)
       hide() { gsap.to(bk, { opacity: 0, duration: 0.35, onComplete: () => { bk.style.display = 'none'; } }); gsap.to(s, { opacity: 0, duration: 0.3, onComplete: () => { s.style.display = 'none'; const L = document.getElementById('csLoader'); if (L) L.style.clipPath = ''; } }); },
