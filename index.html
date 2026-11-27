@@ -6146,37 +6146,44 @@
     // it hangs from the top of the screen down to just beside the main page's figure, its shade at the figure's head
     const svgEl = cord.querySelector('svg'), cordPath = cord.querySelector('.cord'), glow = cord.querySelector('.glow'), shadeEl = cord.querySelector('.shade');
     const place = () => { const fb = document.getElementById('hfBody'); if (!fb) return; const r = fb.getBoundingClientRect(); if (!r.width && !r.height) return;
-      const s = Math.max(0.6, Math.min(1.4, r.height / 120)), w = 52 * s, shadeH = 33.4 * s, bp = document.getElementById('hfBubblePath'), bb = bp && bp.getBoundingClientRect(), top = Math.min(r.top, bb && bb.height ? bb.top : 1e9), H = Math.max(80, top - 10 * s);   // (the shade just above the figure's head and its bubble)
-      cord.style.left = (r.right + 14 * s) + 'px'; cord.style.width = w + 'px'; cord.style.height = H + 'px';
+      const s = Math.max(0.6, Math.min(1.4, r.height / 120)), w = 52 * s, shadeH = 33.4 * s, bp = document.getElementById('hfBubblePath'), bb = bp && bp.getBoundingClientRect(), top = bb && bb.height ? bb.top + bb.height * 0.55 : r.top + 30 * s, H = Math.max(80, top);   // (on the figure's right, beside its bubble, shade at about head height)
+      cord.style.left = (Math.max(r.right, bb && bb.width ? bb.right : 0) + 10 * s) + 'px'; cord.style.width = w + 'px'; cord.style.height = H + 'px';
       svgEl.setAttribute('viewBox', '0 0 ' + w.toFixed(1) + ' ' + H.toFixed(1)); svgEl.setAttribute('preserveAspectRatio', 'none');
       cordPath.setAttribute('d', 'M ' + (w / 2).toFixed(1) + ' -6 C ' + (w / 2 + 0.6).toFixed(1) + ' ' + (H * 0.3).toFixed(1) + ', ' + (w / 2 - 0.6).toFixed(1) + ' ' + (H * 0.6).toFixed(1) + ', ' + (w / 2).toFixed(1) + ' ' + (H - shadeH + 2).toFixed(1));
       shadeEl.setAttribute('x', (w * 2 / 52).toFixed(1)); shadeEl.setAttribute('y', (H - shadeH).toFixed(1)); shadeEl.setAttribute('width', (w * 48 / 52).toFixed(1)); shadeEl.setAttribute('height', shadeH.toFixed(1));
       glow.setAttribute('cx', (w / 2).toFixed(1)); glow.setAttribute('cy', (H + 2).toFixed(1)); glow.setAttribute('rx', (w * 0.6).toFixed(1)); glow.setAttribute('ry', (shadeH * 0.5).toFixed(1)); };
     place(); addEventListener('resize', place); addEventListener('load', () => setTimeout(place, 300));
     setInterval(() => { if (html.classList.contains('app-mode') && !document.hidden) place(); }, 250);   // (follows the figure as it walks in)
-    // THE LAMP'S ENTRANCE: hidden until the figure has walked in and stands with its bubble up; then the lamp drops down
-    // beside it, the cord is given a tug, the lamp flickers on and off once (lighting the room for a blink), and the
-    // bubble says "pull me" for a moment - so the visitor sees what the lamp is for
-    const pullG = cord.querySelector('.pull'), bubble = document.getElementById('hfBubble'), say = document.getElementById('heroScroll'), hero = document.getElementById('hero');
+    // THE LAMP, STEP BY STEP: first the figure says "scroll"; after the visitor's first scroll the lamp drops down beside it,
+    // is tugged and flickers once, and the figure says "pull me" (a bubble of its own); once the lamp is pulled it is quiet
+    const pullG = cord.querySelector('.pull'), hero = document.getElementById('hero'), fsvg = document.getElementById('figSvg');
     const flash = document.createElement('div'); flash.style.cssText = 'position:fixed;inset:0;z-index:49;pointer-events:none;background:#fff1cf;opacity:0'; document.body.appendChild(flash);
-    let shown = false;
+    let scrolled = false, shown = false, pulled = false, say = null;
     cord.style.visibility = 'hidden';
-    setInterval(() => {
-      const onMain = hero && hero.style.visibility === 'visible';
-      if (!onMain) { if (shown && !html.classList.contains('app-mode')) { shown = false; cord.style.visibility = 'hidden'; } return; }
-      if (shown || !bubble || +getComputedStyle(bubble).opacity < 0.5) return;
+    const onMain = () => hero && hero.style.visibility === 'visible' && html.classList.contains('app-mode') && !html.classList.contains('wk-open') && !html.classList.contains('in-case');
+    const firstScroll = () => { if (!scrolled && onMain()) { scrolled = true; setTimeout(entrance, 1400); } };
+    addEventListener('wheel', firstScroll, { passive: true }); addEventListener('touchmove', firstScroll, { passive: true });
+    addEventListener('keydown', e => { if (/^(Arrow(Up|Down)|Page(Up|Down))$/.test(e.key)) firstScroll(); });
+    const bubbleSay = text => {                        // the figure's own bubble, saying something else
+      const src = document.getElementById('hfBubble'); if (!src || !fsvg) return null;
+      const g = src.cloneNode(true); g.removeAttribute('id'); g.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+      g.style.opacity = 0; g.querySelectorAll('*').forEach(n => { n.style.opacity = ''; });
+      const tx = g.querySelector('text'), st = document.getElementById('heroScroll'); if (tx) { tx.textContent = text; if (st) { const cs = getComputedStyle(st); tx.style.cssText = 'font-family:' + cs.fontFamily + ';font-size:' + cs.fontSize + ';fill:' + cs.fill + ';letter-spacing:' + cs.letterSpacing + ';text-transform:' + cs.textTransform + ';filter:' + cs.filter; } }   // (styled as the figure's own words)
+      src.parentNode.appendChild(g); gsap.to(g, { opacity: 1, duration: 0.35, ease: 'sine.out' }); return g; };
+    function entrance() {
+      if (shown || !onMain()) { if (!shown) scrolled = false; return; }
       shown = true; place(); cord.style.visibility = '';
-      const H = parseFloat(cord.style.height) || 200, glowEl = cord.querySelector('.glow'), was = say ? say.textContent : '';
+      const H = parseFloat(cord.style.height) || 200, glowEl = cord.querySelector('.glow'), lit = html.classList.contains('theme-light');
       const tl = gsap.timeline();
-      tl.fromTo(pullG, { y: -H - 40 }, { y: 0, duration: 0.9, ease: 'bounce.out' })                       // (drops down beside the figure)
-        .to(pullG, { y: 14, duration: 0.14, ease: 'power2.in' }, '+=0.35')                                // (the cord is tugged)
-        .to(pullG, { y: 0, duration: 0.6, ease: 'elastic.out(1, 0.32)' })
-        .call(() => { if (say) say.textContent = 'pull me'; }, null, '-=0.6');
-      const lit = html.classList.contains('theme-light');
-      [[0, 1], [0.12, 0], [0.26, 1], [0.4, lit ? 1 : 0]].forEach(([at, on]) => tl.call(() => { glowEl.style.opacity = on; flash.style.opacity = on && !lit ? 0.22 : 0; }, null, 1.45 + at));   // (a flicker on and off)
+      tl.fromTo(pullG, { y: -H - 40 }, { y: 0, duration: 0.9, ease: 'bounce.out' })
+        .to(pullG, { y: 14, duration: 0.14, ease: 'power2.in' }, '+=0.35')
+        .to(pullG, { y: 0, duration: 0.6, ease: 'elastic.out(1, 0.32)' });
+      [[0, 1], [0.12, 0], [0.26, 1], [0.4, lit ? 1 : 0]].forEach(([at, on]) => tl.call(() => { glowEl.style.opacity = on; flash.style.opacity = on && !lit ? 0.22 : 0; }, null, 1.45 + at));
       tl.call(() => { glowEl.style.opacity = ''; flash.style.opacity = 0; }, null, 2.0);
-      tl.call(() => { if (say) say.textContent = was || 'scroll'; }, null, 4.2);
-    }, 200);
+      tl.call(() => { if (!pulled) say = bubbleSay('pull me'); }, null, 1.0);
+    }
+    cord.addEventListener('click', () => { pulled = true; if (say) { const g = say; say = null; gsap.to(g, { opacity: 0, duration: 0.3, onComplete: () => g.remove() }); } });   // (pulled: it is quiet now)
+    setInterval(() => { if (say && !onMain()) say.style.opacity = 0; else if (say) say.style.opacity = 1; }, 300);
     cord.addEventListener('click', () => {
       const pull = cord.querySelector('.pull'), cam = document.getElementById('heroCam');
       gsap.timeline().to(pull, { y: 16, duration: 0.14, ease: 'power2.in' }).to(pull, { y: 0, duration: 0.7, ease: 'elastic.out(1, 0.32)' });
