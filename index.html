@@ -3726,7 +3726,7 @@
   // lines - every stroke of the drawing (traced from it) travels on its own curve and timing - and the strokes come
   // together again as the same drawing at its next place, where its colour comes back. Line by line, smooth.
   (() => {
-    const NS = 'http://www.w3.org/2000/svg', RUN = 1.7, GW = 150;
+    const NS = 'http://www.w3.org/2000/svg', RUN = 2.0, GW = 150;   // (the intro's timing)
     const SEL = ['#hpLaptop .hprop', '#hpPhone .hprop', '#hpBook .hprop', '#dk-paper > image', '#dk-marker > image', '#dk-scissors > image', '#dkp-scissors image', '#dk-sketchbook > image', '#dkp-sketchbook image', '#dk-camera > image'];
     const ov = document.createElementNS(NS, 'svg'), lv = document.createElementNS(NS, 'svg');
     for (const [s, z] of [[ov, 40], [lv, 41]]) { s.style.cssText = `position:fixed;inset:0;width:100%;height:100%;z-index:${z};pointer-events:none;display:none;overflow:visible`; document.body.appendChild(s); }
@@ -3758,6 +3758,8 @@
     addEventListener('load', () => setTimeout(() => SEL.forEach(s => { const e = document.querySelector(s); if (e) strokesOf(srcOf(e)); }), 1500));
     const shot = el => ({ P: of(el.parentNode.getScreenCTM()), U: mul(of(el.getScreenCTM()), [A(el, 'width'), 0, 0, A(el, 'height'), A(el, 'x'), A(el, 'y')]) });
     const ease = x => x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2, c01 = x => Math.min(1, Math.max(0, x)), sm = x => x * x * (3 - 2 * x);
+    const resample = (P, n) => { const L = [0]; for (let i = 1; i < P.length; i++) L.push(L[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
+      const out = []; let k = 1; for (let i = 0; i < n; i++) { const d = L[L.length - 1] * (n > 1 ? i / (n - 1) : 0); while (k < L.length - 1 && L[k] < d) k++; const f = (d - L[k - 1]) / ((L[k] - L[k - 1]) || 1); out.push([P[k - 1][0] + (P[k][0] - P[k - 1][0]) * f, P[k - 1][1] + (P[k][1] - P[k - 1][1]) * f]); } return out; };
     let busy = false, acc = 0, accT = 0;
     async function step(dir) {
       busy = true;
@@ -3773,8 +3775,8 @@
         const from = mkPic(before[i]), to = mkPic(after[i]); to.setAttribute('opacity', 0);
         const Ua = before[i].U, Ub = after[i].U, w = Math.max(1, Math.hypot(Ub[0], Ub[1]) / GW * 1.4);
         const S = strokes[i].map((st, k) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('fill', 'none'); p.setAttribute('stroke', '#f3f1ea'); p.setAttribute('stroke-width', w.toFixed(2)); p.setAttribute('stroke-linecap', 'round'); p.setAttribute('stroke-linejoin', 'round'); lines.appendChild(p);
-          const a = st.map(q => ap(Ua, q[0], q[1])), b = st.map(q => ap(Ub, q[0], q[1])), ma = a[a.length >> 1], mb = b[b.length >> 1], dx = mb[0] - ma[0], dy = mb[1] - ma[1], L = Math.hypot(dx, dy) || 1, r = Math.random();
-          return { p, a, b, nx: -dy / L, ny: dx / L, arc: (r - 0.5) * Math.min(220, L * 0.45), d: r * 0.28, spin: (Math.random() - 0.5) * 0.9 }; });
+          const src = strokes[i][(k * 7 + i * 3) % strokes[i].length], a = resample(src.map(q => ap(Ua, q[0], q[1])), st.length), b = st.map(q => ap(Ub, q[0], q[1])), ma = a[a.length >> 1], mb = b[b.length >> 1], dx = mb[0] - ma[0], dy = mb[1] - ma[1], L = Math.hypot(dx, dy) || 1, r = Math.random();
+          return { p, a, b, nx: -dy / L, ny: dx / L, arc: (r - 0.5) * 2 * Math.min(220, L * 0.4), d: r * 0.3, spin: (Math.random() - 0.5) * 1.2 }; });
         return { from, to, S, d: i * 0.02 };
       });
       const camEl = document.getElementById('heroCam'); camEl.style.visibility = 'hidden'; ov.style.display = lv.style.display = 'block';
@@ -3783,7 +3785,7 @@
         const tt = (performance.now() - t0) / 1000;
         for (const th of T) {
           const t = c01((tt - th.d) / RUN);
-          th.from.setAttribute('opacity', (1 - sm(c01(t / 0.16))).toFixed(3));            // (the drawing gives way to its own lines)
+          th.from.setAttribute('opacity', (1 - sm(c01((tt - th.d) / 0.3))).toFixed(3));   // (the drawing gives way to its lines, as the intro)
           th.to.setAttribute('opacity', sm(c01((t - 0.84) / 0.16)).toFixed(3));           // (and its lines become the drawing again)
           for (const s of th.S) {
             const u = ease(c01((t - s.d * 0.5) / (1 - s.d))), k = Math.sin(Math.PI * u) * s.arc, ang = Math.sin(Math.PI * u) * s.spin;
