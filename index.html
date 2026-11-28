@@ -753,7 +753,7 @@
   html.theme-dark #figSvg .hpen, html.theme-dark #hero .hpen { stroke: #ece8dc; }
   html.theme-dark #heroLine .hword { fill: #ece8dc; }
   @media (min-width: 821px), (min-aspect-ratio: 85/100) { html.theme-dark #workPage { --pen: #ece8dc; } html.theme-dark #workPage .wpFrame { stroke: #ece8dc; } }
-  html.theme-dark.app-mode #grain { mix-blend-mode: multiply; opacity: 0.35; }
+  html.theme-dark.app-mode #grain { display: none; }   /* (dark: no paper grain - on the black it could not be seen anyway, and blending it over the whole screen every frame was heavy) */
   html.theme-dark #workPage .wpFrame { stroke: #ece8dc; stroke-width: 4.6px; filter: url(#wpFrameFx); }   /* (dark mode: the Work picture's frame hand-drawn in crayon) */
   html.theme-dark #heroDecor image, html.theme-dark #heroDecor #dk-paper image, html.theme-dark #heroDecor #dk-camera image, html.theme-dark #heroProps .hprop { filter: none !important; }
   html.theme-dark #heroScreen { display: none; }
@@ -2308,9 +2308,9 @@
     const src = c.getImageData(0, 0, CV.w, CV.h), out = c.createImageData(CV.w, CV.h), s = src.data, o = out.data;
     for (let y = 0; y < CV.h; y++) for (let x = 0; x < CV.w; x++) {
       const r1 = hash(x, y, 300 + i), r2 = hash(x, y, 400 + i), r3 = hash(x, y, 500 + i);
-      const sx = Math.min(CV.w - 1, Math.max(0, x + Math.round((r1 - 0.5) * 2)));
-      const sy = Math.min(CV.h - 1, Math.max(0, y + Math.round((r2 - 0.5) * 2)));
-      const j = (sy * CV.w + sx) * 4, k = (y * CV.w + x) * 4, g = (r3 - 0.5) * 18;
+      const sx = Math.min(CV.w - 1, Math.max(0, x + Math.round((r1 - 0.5) * 1.2)));   // (clearer: most grains stay in place, a few move a pixel)
+      const sy = Math.min(CV.h - 1, Math.max(0, y + Math.round((r2 - 0.5) * 1.2)));
+      const j = (sy * CV.w + sx) * 4, k = (y * CV.w + x) * 4, g = (r3 - 0.5) * 8;   // (and only a touch lighter / darker)
       o[k] = s[j] + g; o[k + 1] = s[j + 1] + g; o[k + 2] = s[j + 2] + g; o[k + 3] = s[j + 3];
     }
     c.putImageData(out, 0, 0);
