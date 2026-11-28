@@ -3471,6 +3471,8 @@
       p.setAttribute('d', 'M' + pts.map(q => q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' L') + ' Z');
     };
     const INSET = 14, R_END = 30;
+    // the black outside the border, laid over the open case (instead of clipping the scrolling page, which made every scroll frame repaint)
+    const cm = document.createElement('div'); cm.id = 'caseMask'; cm.style.cssText = 'position:fixed;inset:' + INSET + 'px;border-radius:' + R_END + 'px;box-shadow:0 0 0 4000px #000;z-index:44;pointer-events:none;display:none;opacity:1'; document.body.appendChild(cm);
     const edge = () => [INSET, INSET, innerWidth - 2 * INSET, innerHeight - 2 * INSET, R_END];
     addEventListener('resize', () => { if (s.style.display === 'block' && !s._anim) draw(...edge()); });
     return {
@@ -3489,8 +3491,8 @@
             gsap.to(c, { k: 1, duration: 0.4, ease: 'power2.out', onUpdate: () => { bk.style.background = 'rgba(245,241,230,' + c.k.toFixed(3) + ')'; bk.style.inset = (INSET * c.k).toFixed(1) + 'px'; bk.style.borderRadius = (R_END * c.k).toFixed(1) + 'px'; },
               onComplete: () => { s._anim = false; done(); } }); } });
       },
-      show() { s.style.display = 'block'; s.style.opacity = 1; bk.style.display = 'block'; bk.style.opacity = 1; bk.style.webkitMaskImage = bk.style.maskImage = 'none'; bk.style.background = '#F5F1E6'; bk.style.inset = INSET + 'px'; bk.style.borderRadius = R_END + 'px'; p.setAttribute('stroke', '#f3efe4'); draw(...edge()); const L = document.getElementById('csLoader'); if (L) L.style.clipPath = 'inset(' + INSET + 'px round ' + R_END + 'px)'; },   // (the loading screen inside the border too)
-      hide() { gsap.to(bk, { opacity: 0, duration: 0.35, onComplete: () => { bk.style.display = 'none'; } }); gsap.to(s, { opacity: 0, duration: 0.3, onComplete: () => { s.style.display = 'none'; const L = document.getElementById('csLoader'); if (L) L.style.clipPath = ''; } }); },
+      show() { cm.style.display = 'block'; cm.style.opacity = 1; s.style.display = 'block'; s.style.opacity = 1; bk.style.display = 'block'; bk.style.opacity = 1; bk.style.webkitMaskImage = bk.style.maskImage = 'none'; bk.style.background = '#F5F1E6'; bk.style.inset = INSET + 'px'; bk.style.borderRadius = R_END + 'px'; p.setAttribute('stroke', '#f3efe4'); draw(...edge()); const L = document.getElementById('csLoader'); if (L) L.style.clipPath = 'inset(' + INSET + 'px round ' + R_END + 'px)'; },   // (the loading screen inside the border too)
+      hide() { gsap.to(cm, { opacity: 0, duration: 0.3, onComplete: () => { cm.style.display = 'none'; } }); gsap.to(bk, { opacity: 0, duration: 0.35, onComplete: () => { bk.style.display = 'none'; } }); gsap.to(s, { opacity: 0, duration: 0.3, onComplete: () => { s.style.display = 'none'; const L = document.getElementById('csLoader'); if (L) L.style.clipPath = ''; } }); },
       clip: 'inset(' + INSET + 'px round ' + R_END + 'px)'
     };
   })();
@@ -3505,7 +3507,7 @@
     caseScrollTop(page);
     document.documentElement.classList.add('in-case');            // the menu gives way to "close"
     if (framed || document.getElementById('caseFrame').style.display === 'block') {   // (inside the crayon border: it scrolls up into it)
-      caseFrame.show(); page.style.clipPath = caseFrame.clip;
+      caseFrame.show();   // (the black outside the border is laid over it - the page itself is not clipped)
       gsap.fromTo(page, { autoAlpha: 0, yPercent: 0 }, { autoAlpha: 1, duration: 0.3, ease: 'sine.out' });   // (it simply appears inside the drawn window - no spread, no scaling)
     } else gsap.fromTo(page, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, ease: 'sine.out' });
     page.focus({ preventScroll: true });
