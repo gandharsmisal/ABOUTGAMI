@@ -772,7 +772,8 @@
   #themePill .pglow { filter: blur(1.4px); transform-box: fill-box; transform-origin: 50% 0%; transition: opacity 0.35s ease, transform 0.45s ease; }
   #themePill:hover .pglow, #themePill:focus-visible .pglow { transform: scale(1.7, 2.1); }   /* (hover: the U of light spreads down and out) */
   html.theme-dark #pageBack:hover .csNextArrow path, html.theme-dark #pageBack:focus-visible .csNextArrow path { stroke: #F5F1E6; }   /* (dark mode: back's arrow turns cream too) */
-  html.theme-dark #menu button:hover .pill-icon .ink, html.theme-dark #menu button:focus-visible .pill-icon .ink { stroke: #F5F1E6; transition: stroke 0.2s ease; }   /* (dark mode: the menu's icons turn white under the pointer) */
+  html.theme-dark #menu button:hover .pill-icon .ink, html.theme-dark #menu button:focus-visible .pill-icon .ink { stroke: #F5F1E6; transition: stroke 0.2s ease; }
+  html.theme-dark #themePill .pcord { transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.2s ease !important; }   /* (the cord keeps moving with the lamp in dark mode too) */   /* (dark mode: the menu's icons turn white under the pointer) */
   html.theme-dark #menu button:hover .pill-icon .dot, html.theme-dark #menu button:focus-visible .pill-icon .dot { fill: #F5F1E6; }
   @media (max-width: 820px) { #menu #themePill { display: none; } }
   /* the switch: the lamp hangs from the top in the middle of the screen, its shade level with the menu; a tug switches the light */
