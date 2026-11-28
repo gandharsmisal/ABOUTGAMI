@@ -5429,6 +5429,7 @@
         for (const k of KEYS) { const v = A[k]; if (v === undefined || v === null) e.removeAttribute(k); else e.setAttribute(k, v); } }
       const w = document.getElementById('whiteout'); if (w) w.setAttribute('fill', m === 'dark' ? '#000' : '#F5F1E6');
       cord.setAttribute('aria-pressed', m === 'dark');
+      if (window.__darkBoilShow) window.__darkBoilShow(m);
       if (m === 'dark' && window.__darkBoilBuild) window.__darkBoilBuild();   // (the shimmer versions are made the first time the lights go off)
     };
     apply(mode);
@@ -5459,17 +5460,20 @@
           try { const im = new Image(); im.crossOrigin = 'anonymous'; im.src = DARK[s].href; await im.decode(); const bmp = await createImageBitmap(im);   // (crossOrigin: on a host like the preview link the picture can only be read this way)
             const u = bmp.width / Math.max(1, DARK[s].width), A = 1.8 * u, CELL = Math.max(8, Math.round(26 * u));   // (the playground's shimmer, in the page's units)
             const blobs = await new Promise(res => { wk.onmessage = e => res(e.data.blobs); wk.postMessage({ id: s, bmp, A, CELL }, [bmp]); });
-            if (blobs) sets.push({ s, urls: [DARK[s].href, ...blobs.map(b => URL.createObjectURL(b))] });
+            const o = q(s); if (blobs && o) { const els = [o]; for (const b of blobs) { const c = o.cloneNode(false); for (const k2 of KEYS) { const v = DARK[s][k2]; if (v === undefined || v === null) c.removeAttribute(k2); else c.setAttribute(k2, v); }
+                c.setAttribute('href', URL.createObjectURL(b)); c.removeAttribute('id'); c.classList.add('boilCopy'); c.setAttribute('aria-hidden', 'true'); c.style.visibility = 'hidden'; c.style.pointerEvents = 'none'; o.after(c); els.push(c); }
+              sets.push({ els }); }
           } catch (e) { /* (a drawing that can't be read just doesn't shimmer) */ }
         }
         wk.terminate();
       };
       window.__darkBoilBuild = build;
+      window.__darkBoilShow = m => { if (m !== 'dark') for (const st of sets) st.els.forEach((e, i) => { e.style.visibility = i ? 'hidden' : ''; }); };   // (light: only the picture itself)
       setInterval(() => {
         if (mode !== 'dark' || document.hidden || html.classList.contains('in-case')) return;
         k = (k + 1) % 3;
         for (const id of ['darkFigNoise', 'darkLogoNoise', 'wpFrameNoise']) { const n = document.getElementById(id); if (n) n.setAttribute('seed', 1 + k); }   // (the character and the logo)
-        if (!sets.length || !inView) return; for (const st of sets) { const e = q(st.s); if (e) e.setAttribute('href', st.urls[k]); }
+        if (!sets.length || !inView) return; for (const st of sets) st.els.forEach((e, i) => { e.style.visibility = i === k ? '' : 'hidden'; });   // (one of the 3 shown)
       }, 100); }   // (the drawings ready beforehand: the switch is instant, no blank spots)
     { const si = document.getElementById('shadeImg'), sh = cord.querySelector('.shade'), set = () => sh.setAttribute('href', si.getAttribute('href') || 'assets/lamp-shade.webp'); set(); addEventListener('load', () => setTimeout(set, 500)); }
     // it hangs from the top of the screen down to just above the figure's head
@@ -5488,7 +5492,7 @@
       glow.setAttribute('cx', w / 2); glow.setAttribute('cy', H); glow.setAttribute('rx', w * 0.6); glow.setAttribute('ry', shadeH * 0.5); };
     void place0;
     place(); addEventListener('resize', place); addEventListener('load', () => setTimeout(place, 300));
-    setInterval(() => { if (html.classList.contains('app-mode') && !document.hidden) place(); }, 250);
+    setInterval(() => { if (html.classList.contains('app-mode') && !document.hidden && cord.offsetParent) place(); }, 250);   // (not while it is hidden)
     // step by step
     const pullG = cord.querySelector('.pull'), hero = document.getElementById('hero');
     let scrolled = false, shown = false, pulled = false, say = null;
