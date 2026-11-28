@@ -760,6 +760,8 @@
   html.theme-dark #workPage.wk-swell .wpFrame { filter: none; }   /* (while the frame swells / changes: the lighter crayon) */
   html.theme-dark #workPage.wk-swell #wpWriting, html.theme-dark #workPage.wk-swell #wpDots { filter: none; }   /* (the writing moves with it then - no shimmer needed) */
   html.theme-dark #wpWriting, html.theme-dark #wpFrame { will-change: transform; }   /* (dark: the frame and its writing on their own layers - the rest isn't redrawn as they move) */
+  #hpBook.abAway image { opacity: 0 !important; }
+  #caseFrame, #caseMask, #caseBlack { will-change: transform; }   /* (dark case border: their own still layers over the scrolling page) */
   .wpOpen { fill: var(--o); } html.theme-dark .wpOpen { fill: var(--od); }   /* ("Click to open project" in each project's colour; one that is too dark for the dark room gets a lighter shade) */
   /* the switch: the intro's lamp, hanging down by the figure - it drops in after the first scroll */
   /* the lamp pill (by the menu): the switch for dark mode */
@@ -2707,7 +2709,7 @@
     gsap.set('#aboutPage .abBg', { opacity: 0 });
     gsap.set(aboutPage, { autoAlpha: 1 });
     document.documentElement.classList.add('in-about');
-    document.querySelectorAll("#hpBook image").forEach(e => { e.style.opacity = 0; });   // (all of it - in dark mode its shimmer copies too)
+    document.getElementById("hpBook").classList.add("abAway");   // (all of it - in dark mode its shimmer copies too - and the shimmer can't bring it back early)
     about.tl = gsap.timeline({ onStart() { this.timeScale(BOOK_PACE); } })
       .to('#aboutPage .abBg', { opacity: 1, duration: 0.6, ease: 'sine.inOut' }, 0.1)
       .to(abBook, { x: 0, y: 0, scale: 1, rotation: 0, duration: 0.95, ease: 'power3.inOut' }, 0)             // comes over from the desk...
@@ -2737,7 +2739,7 @@
     if (!contact.open && !fast) document.documentElement.classList.remove('in-about');   // the site's grain comes back as the backdrop goes
     const tl = about.tl, done = () => {
       gsap.set(aboutPage, { autoAlpha: 0 }); if (!contact.open) document.documentElement.classList.remove('in-about');
-      document.querySelectorAll('#hpBook image').forEach(e => { e.style.opacity = ''; });
+      document.getElementById('hpBook').classList.remove('abAway');   // (back on the desk only once the book has closed onto it)
       if (then) then();
     };
     if (fast || !tl) { if (tl) tl.kill(); gsap.to(aboutPage, { autoAlpha: 0, duration: 0.35, ease: 'sine.inOut', onComplete: done }); return true; }
