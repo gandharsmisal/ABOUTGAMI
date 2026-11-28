@@ -1279,11 +1279,11 @@
     <!-- dark mode shimmer for the character and the logo: a gentle wobble (about 1px), its seed stepped 10 times a second -->
     <filter id="darkFigBoil" x="-10%" y="-10%" width="120%" height="120%">
       <feTurbulence id="darkFigNoise" type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="1" result="w"></feTurbulence>
-      <feDisplacementMap in="SourceGraphic" in2="w" scale="3.4" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      <feDisplacementMap in="SourceGraphic" in2="w" scale="6" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
     </filter>
     <filter id="darkLogoBoil" x="-5%" y="-10%" width="110%" height="120%">
       <feTurbulence id="darkLogoNoise" type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="1" result="w"></feTurbulence>
-      <feDisplacementMap in="SourceGraphic" in2="w" scale="1.5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      <feDisplacementMap in="SourceGraphic" in2="w" scale="2.6" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
     </filter>
     <filter id="pencil" x="-5%" y="-5%" width="110%" height="110%">
       <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3" result="n"></feTurbulence>
@@ -5454,7 +5454,7 @@
         let wk; try { wk = new Worker(URL.createObjectURL(new Blob([WORKER], { type: 'text/javascript' }))); } catch (e) { return; }
         for (const s in DARK) {   // (one drawing at a time)
           try { const im = new Image(); im.crossOrigin = 'anonymous'; im.src = DARK[s].href; await im.decode(); const bmp = await createImageBitmap(im);   // (crossOrigin: on a host like the preview link the picture can only be read this way)
-            const u = bmp.width / Math.max(1, DARK[s].width), A = 0.9 * u, CELL = Math.max(8, Math.round(26 * u));   // (the playground's shimmer, in the page's units)
+            const u = bmp.width / Math.max(1, DARK[s].width), A = 1.8 * u, CELL = Math.max(8, Math.round(26 * u));   // (the playground's shimmer, in the page's units)
             const blobs = await new Promise(res => { wk.onmessage = e => res(e.data.blobs); wk.postMessage({ id: s, bmp, A, CELL }, [bmp]); });
             if (blobs) sets.push({ s, urls: [DARK[s].href, ...blobs.map(b => URL.createObjectURL(b))] });
           } catch (e) { /* (a drawing that can't be read just doesn't shimmer) */ }
