@@ -757,6 +757,7 @@
   html.theme-dark #workPage .wpFrame { stroke: #ece8dc; stroke-width: 4.6px; filter: url(#wpFrameFx); }   /* (dark mode: the Work picture's frame hand-drawn in crayon) */
   html.theme-dark #heroDecor image, html.theme-dark #heroDecor #dk-paper image, html.theme-dark #heroDecor #dk-camera image, html.theme-dark #heroProps .hprop { filter: none !important; }
   html.theme-dark #heroScreen { display: none; }
+  .wpOpen { fill: var(--o); } html.theme-dark .wpOpen { fill: var(--od); }   /* ("Click to open project" in each project's colour; one that is too dark for the dark room gets a lighter shade) */
   /* the switch: the intro's lamp, hanging down by the figure - it drops in after the first scroll */
   /* the lamp pill (by the menu): the switch for dark mode */
   #menu #themePill { padding: 0 21px 0 12px; gap: 8px; overflow: visible; }
@@ -2142,7 +2143,7 @@
     { img: 'assets/work-music.webp', fx: 0.72, name: 'Music App', desc: 'For people who never needed sound to feel a song.',
       kind: 'Inclusive Design', role: 'Role: Almost everything', open: '#F08A2C' },
     { img: 'assets/work-hobby.webp', fx: 0.5, name: 'P2P Hobby Sharing App', desc: 'Most hobbies die as ideas, with no one to start them with.',
-      kind: 'Service Design', role: 'Role: Almost everything', open: '#1A1A3E' }
+      kind: 'Service Design', role: 'Role: Almost everything', open: '#1A1A3E', openDark: '#8E8EE6' }   // (openDark: its colour on the dark room, where the navy can't be seen)
   ];
   const workPage = $('workPage'), wpStage = $('wpStage'), wpBody = $('wpBody'), wpCanvas = $('wpCanvas'), wpCtx = wpCanvas.getContext('2d');
   const FR = isMob() ? { x: 730, y: 160, w: 460, h: 760, r: 24 }   // a phone: narrower and taller (each picture cropped round its subject)
@@ -2218,7 +2219,7 @@
     const p = WORK[i];
     $('wpTop').innerHTML = `<tspan class="wpName">${p.name}</tspan>${STAR}<tspan dx="12">${p.desc}</tspan>${STAR}<tspan dx="12">${p.kind}</tspan>`;
     $('wpSide').innerHTML = `<tspan class="wpStar">✩</tspan><tspan dx="12">${p.role}</tspan>`;
-    $('wpBottom').innerHTML = `<tspan class="wpStar">✩</tspan><tspan dx="12" style="fill:${p.open}">Click to open project</tspan>`;
+    $('wpBottom').innerHTML = `<tspan class="wpStar">✩</tspan><tspan dx="12" class="wpOpen" style="--o:${p.open};--od:${p.openDark || p.open}">Click to open project</tspan>`;
     // every line ends bending round the top-right corner, like a long one does; the side and bottom lines follow
     // on after it (the measured lengths leave out the 12px gaps after the stars)
     const topLen = $('wpTop').getComputedTextLength() + 48, topAt = isMob() ? 0 : Math.max(0, TOP_LEN + ARC * 0.85 - topLen);   // (desktop: every top line ends bending round the top-right corner)
