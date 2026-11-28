@@ -747,7 +747,7 @@
      the site exactly as it was */
   html.theme-dark #hero { background: #000; }
   html.theme-dark #hero, html.theme-dark #figSvg { --pen: #ece8dc; }
-  html.theme-dark #heroFig { filter: url(#darkFigBoil); }   /* (dark mode: the character shimmers, as in the playground) */
+  html.theme-dark #heroFig, html.theme-dark #heroLine, html.theme-dark #heroNotes, html.theme-dark #wpWriting, html.theme-dark #wpDots { filter: url(#darkFigBoil); }   /* (dark mode: the character shimmers, as in the playground) */
   html.theme-dark #logo img { filter: url(#pencil) url(#darkLogoBoil) opacity(0.82); }   /* (and the logo) */
   html.theme-dark #hero .hsolid, html.theme-dark #figSvg .hsolid { fill: #000; }
   html.theme-dark #figSvg .hpen, html.theme-dark #hero .hpen { stroke: #ece8dc; }
@@ -5465,7 +5465,7 @@
       setInterval(() => {
         if (mode !== 'dark' || document.hidden || html.classList.contains('in-case')) return;
         k = (k + 1) % 3;
-        for (const id of ['darkFigNoise', 'darkLogoNoise']) { const n = document.getElementById(id); if (n) n.setAttribute('seed', 1 + k); }   // (the character and the logo)
+        for (const id of ['darkFigNoise', 'darkLogoNoise', 'wpFrameNoise']) { const n = document.getElementById(id); if (n) n.setAttribute('seed', 1 + k); }   // (the character and the logo)
         if (!sets.length || !inView) return; for (const st of sets) { const e = q(st.s); if (e) e.setAttribute('href', st.urls[k]); }
       }, 100); }   // (the drawings ready beforehand: the switch is instant, no blank spots)
     { const si = document.getElementById('shadeImg'), sh = cord.querySelector('.shade'), set = () => sh.setAttribute('href', si.getAttribute('href') || 'assets/lamp-shade.webp'); set(); addEventListener('load', () => setTimeout(set, 500)); }
