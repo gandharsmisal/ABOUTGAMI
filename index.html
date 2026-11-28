@@ -5416,9 +5416,45 @@
         for (const k of KEYS) { const v = A[k]; if (v === undefined || v === null) e.removeAttribute(k); else e.setAttribute(k, v); } }
       const w = document.getElementById('whiteout'); if (w) w.setAttribute('fill', m === 'dark' ? '#000' : '#F5F1E6');
       cord.setAttribute('aria-pressed', m === 'dark');
+      if (m === 'dark' && window.__darkBoilBuild) window.__darkBoilBuild();   // (the shimmer versions are made the first time the lights go off)
     };
     apply(mode);
-    for (const s in DARK) { const im = new Image(); im.src = DARK[s].href; if (im.decode) im.decode().catch(() => {}); }   // (the drawings ready beforehand: the switch is instant, no blank spots)
+    for (const s in DARK) { const im = new Image(); im.src = DARK[s].href; if (im.decode) im.decode().catch(() => {}); }
+    // DARK MODE SHIMMER (as the playground): each chalk drawing gets 2 slightly redrawn versions, made once, off the page's
+    // thread (a worker), the first time the lights go off; then the 3 versions are swapped 10 times a second while the desk
+    // is on screen in dark mode. Swapping ready pictures costs next to nothing; light mode does no shimmer work at all.
+    { let built = false; const sets = [], heroEl = document.getElementById('hero'); let inView = true, k = 0;
+      if (heroEl && 'IntersectionObserver' in window) new IntersectionObserver(es => { inView = es[0].isIntersecting; }).observe(heroEl);
+      const WORKER = `onmessage = async e => { const { id, bmp, A, CELL } = e.data; try {
+        const W = bmp.width, H = bmp.height, c = new OffscreenCanvas(W, H), g = c.getContext('2d'); g.drawImage(bmp, 0, 0);
+        const s = g.getImageData(0, 0, W, H).data, gw = Math.ceil(W / CELL) + 2, gh = Math.ceil(H / CELL) + 2, blobs = [];
+        for (let n = 0; n < 2; n++) {
+          const nx = Float32Array.from({ length: gw * gh }, () => (Math.random() - 0.5) * 2 * A), ny = Float32Array.from({ length: gw * gh }, () => (Math.random() - 0.5) * 2 * A);
+          const out = new ImageData(W, H), o = out.data;
+          for (let y = 0; y < H; y++) { const gy = y / CELL, j = gy | 0, fy = gy - j; for (let x = 0; x < W; x++) { const gx = x / CELL, i = gx | 0, fx = gx - i, q0 = j * gw + i;
+            const dx = (nx[q0] * (1 - fx) + nx[q0 + 1] * fx) * (1 - fy) + (nx[q0 + gw] * (1 - fx) + nx[q0 + gw + 1] * fx) * fy, dy = (ny[q0] * (1 - fx) + ny[q0 + 1] * fx) * (1 - fy) + (ny[q0 + gw] * (1 - fx) + ny[q0 + gw + 1] * fx) * fy;
+            const sx = Math.min(W - 1, Math.max(0, Math.round(x + dx))), sy = Math.min(H - 1, Math.max(0, Math.round(y + dy))), p = (y * W + x) * 4, q = (sy * W + sx) * 4;
+            o[p] = s[q]; o[p + 1] = s[q + 1]; o[p + 2] = s[q + 2]; o[p + 3] = s[q + 3]; } }
+          const c2 = new OffscreenCanvas(W, H); c2.getContext('2d').putImageData(out, 0, 0); blobs.push(await c2.convertToBlob({ type: 'image/webp', quality: 0.85 })); }
+        postMessage({ id, blobs }); } catch (err) { postMessage({ id, blobs: null }); } };`;
+      const build = async () => {
+        if (built) return; built = true;
+        if (!window.Worker || !window.OffscreenCanvas || !window.createImageBitmap || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        let wk; try { wk = new Worker(URL.createObjectURL(new Blob([WORKER], { type: 'text/javascript' }))); } catch (e) { return; }
+        for (const s in DARK) {   // (one drawing at a time)
+          try { const im = new Image(); im.src = DARK[s].href; await im.decode(); const bmp = await createImageBitmap(im);
+            const u = bmp.width / Math.max(1, DARK[s].width), A = 0.9 * u, CELL = Math.max(8, Math.round(26 * u));   // (the playground's shimmer, in the page's units)
+            const blobs = await new Promise(res => { wk.onmessage = e => res(e.data.blobs); wk.postMessage({ id: s, bmp, A, CELL }, [bmp]); });
+            if (blobs) sets.push({ s, urls: [DARK[s].href, ...blobs.map(b => URL.createObjectURL(b))] });
+          } catch (e) { /* (a drawing that can't be read just doesn't shimmer) */ }
+        }
+        wk.terminate();
+      };
+      window.__darkBoilBuild = build;
+      setInterval(() => {
+        if (mode !== 'dark' || !sets.length || !inView || document.hidden || html.classList.contains('in-case')) return;
+        k = (k + 1) % 3; for (const st of sets) { const e = q(st.s); if (e) e.setAttribute('href', st.urls[k]); }
+      }, 100); }   // (the drawings ready beforehand: the switch is instant, no blank spots)
     { const si = document.getElementById('shadeImg'), sh = cord.querySelector('.shade'), set = () => sh.setAttribute('href', si.getAttribute('href') || 'assets/lamp-shade.webp'); set(); addEventListener('load', () => setTimeout(set, 500)); }
     // it hangs from the top of the screen down to just above the figure's head
     const svgEl = cord.querySelector('svg'), cordPath = cord.querySelector('.cord'), glow = cord.querySelector('.glow'), shadeEl = cord.querySelector('.shade');
