@@ -772,7 +772,8 @@
   #themePill:hover .pcord, #themePill:focus-visible .pcord { transform: scaleY(3.63); }
   #themePill .pglow { opacity: 1; transition: opacity 0.35s ease; }
   html.theme-dark #themePill .pglow { opacity: 0; }
-  #themePill .pfill { fill: #F5F1E6; fill-opacity: 1; }   /* (the shade filled with the page's cream - nothing shows through it) */
+  #themePill .pfill { fill: #F5F1E6; fill-opacity: 0; transition: fill-opacity 0.25s ease; }
+  #themePill:hover .pfill, #themePill:focus-visible .pfill { fill-opacity: 1; }   /* (filled only while the pointer is on it) */   /* (the shade filled with the page's cream - nothing shows through it) */
   html.theme-dark #themePill .pfill { fill: #000; }   /* (dark: the room's black) */
   #themePill .pglow { transform-box: fill-box; transform-origin: 50% 0%; transform: scale(0.75, 0.55); transition: opacity 0.35s ease, transform 0.45s ease; }   /* (at rest: a little light under the shade) */
   #themePill:hover .pglow, #themePill:focus-visible .pglow { transform: scale(1.25, 1.35); }   /* (hover: the U of light spreads down and out) */
@@ -1284,12 +1285,12 @@
     </filter>
     <!-- dark mode shimmer for the character and the logo: a gentle wobble (about 1px), its seed stepped 10 times a second -->
     <filter id="darkFigBoil" x="-10%" y="-10%" width="120%" height="120%">
-      <feTurbulence id="darkFigNoise" type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="1" result="w"></feTurbulence>
-      <feDisplacementMap in="SourceGraphic" in2="w" scale="6" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      <feTurbulence id="darkFigNoise" type="fractalNoise" baseFrequency="0.045" numOctaves="1" seed="1" result="w"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="w" scale="3" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
     </filter>
     <filter id="darkLogoBoil" x="-5%" y="-10%" width="110%" height="120%">
-      <feTurbulence id="darkLogoNoise" type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="1" result="w"></feTurbulence>
-      <feDisplacementMap in="SourceGraphic" in2="w" scale="2.6" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      <feTurbulence id="darkLogoNoise" type="fractalNoise" baseFrequency="0.09" numOctaves="1" seed="1" result="w"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="w" scale="1.5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
     </filter>
     <filter id="pencil" x="-5%" y="-5%" width="110%" height="110%">
       <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3" result="n"></feTurbulence>
@@ -5475,7 +5476,7 @@
         let wk; try { wk = new Worker(URL.createObjectURL(new Blob([WORKER], { type: 'text/javascript' }))); } catch (e) { return; }
         for (const s in DARK) {   // (one drawing at a time)
           try { const im = new Image(); im.crossOrigin = 'anonymous'; im.src = DARK[s].href; await im.decode(); const bmp = await createImageBitmap(im);   // (crossOrigin: on a host like the preview link the picture can only be read this way)
-            const u = bmp.width / Math.max(1, DARK[s].width), A = 1.8 * u, CELL = Math.max(8, Math.round(26 * u));   // (the playground's shimmer, in the page's units)
+            const u = bmp.width / Math.max(1, DARK[s].width), A = 0.9 * u, CELL = Math.max(8, Math.round(26 * u));   // (the playground's shimmer, in the page's units)
             const blobs = await new Promise(res => { wk.onmessage = e => res(e.data.blobs); wk.postMessage({ id: s, bmp, A, CELL }, [bmp]); });
             const o = q(s); if (blobs && o) { const els = [o]; for (const b of blobs) { const c = o.cloneNode(false); for (const k2 of KEYS) { const v = DARK[s][k2]; if (v === undefined || v === null) c.removeAttribute(k2); else c.setAttribute(k2, v); }
                 c.setAttribute('href', URL.createObjectURL(b)); c.removeAttribute('id'); c.classList.add('boilCopy'); c.setAttribute('aria-hidden', 'true'); c.style.visibility = 'hidden'; c.style.pointerEvents = 'none'; o.after(c); els.push(c); }
@@ -5489,9 +5490,9 @@
       setInterval(() => {
         if (mode !== 'dark' || document.hidden || html.classList.contains('in-case') || html.classList.contains('in-about') || (window.__workBusy && window.__workBusy())) return;   // (About / Contact cover the desk: no shimmer work behind them; nor while the Work frame swells or changes)
         k = (k + 1) % 3;
-        for (const id of ['darkFigNoise', 'darkLogoNoise', 'wpFrameNoise']) { const n = document.getElementById(id); if (n) n.setAttribute('seed', 1 + k); }   // (the character and the logo)
+        for (const id of ['darkFigNoise', 'darkLogoNoise']) { const n = document.getElementById(id); if (n) n.setAttribute('seed', 1 + k); }   // (the character and the logo)
         if (!sets.length || !inView) return; for (const st of sets) st.els.forEach((e, i) => { e.style.visibility = i === k ? '' : 'hidden'; });   // (one of the 3 shown)
-      }, 100); }   // (the drawings ready beforehand: the switch is instant, no blank spots)
+      }, 160); }   // (the drawings ready beforehand: the switch is instant, no blank spots)
     { const si = document.getElementById('shadeImg'), sh = cord.querySelector('.shade'), set = () => sh.setAttribute('href', si.getAttribute('href') || 'assets/lamp-shade.webp'); set(); addEventListener('load', () => setTimeout(set, 500)); }
     // it hangs from the top of the screen down to just above the figure's head
     const svgEl = cord.querySelector('svg'), cordPath = cord.querySelector('.cord'), glow = cord.querySelector('.glow'), shadeEl = cord.querySelector('.shade');
