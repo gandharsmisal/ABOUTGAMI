@@ -1278,12 +1278,12 @@
     </filter>
     <!-- dark mode shimmer for the character and the logo: a gentle wobble (about 1px), its seed stepped 10 times a second -->
     <filter id="darkFigBoil" x="-10%" y="-10%" width="120%" height="120%">
-      <feTurbulence id="darkFigNoise" type="fractalNoise" baseFrequency="0.035" numOctaves="1" seed="1" result="w"></feTurbulence>
-      <feDisplacementMap in="SourceGraphic" in2="w" scale="2.4" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      <feTurbulence id="darkFigNoise" type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="1" result="w"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="w" scale="3.4" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
     </filter>
     <filter id="darkLogoBoil" x="-5%" y="-10%" width="110%" height="120%">
-      <feTurbulence id="darkLogoNoise" type="fractalNoise" baseFrequency="0.18" numOctaves="1" seed="1" result="w"></feTurbulence>
-      <feDisplacementMap in="SourceGraphic" in2="w" scale="1.8" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      <feTurbulence id="darkLogoNoise" type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="1" result="w"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="w" scale="1.5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
     </filter>
     <filter id="pencil" x="-5%" y="-5%" width="110%" height="110%">
       <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3" result="n"></feTurbulence>
@@ -5450,7 +5450,7 @@
         postMessage({ id, blobs }); } catch (err) { postMessage({ id, blobs: null }); } };`;
       const build = async () => {
         if (built) return; built = true;
-        if (!window.Worker || !window.OffscreenCanvas || !window.createImageBitmap || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        if (!window.Worker || !window.OffscreenCanvas || !window.createImageBitmap ) return;   // (as the playground: shimmers whatever the device's motion setting)
         let wk; try { wk = new Worker(URL.createObjectURL(new Blob([WORKER], { type: 'text/javascript' }))); } catch (e) { return; }
         for (const s in DARK) {   // (one drawing at a time)
           try { const im = new Image(); im.src = DARK[s].href; await im.decode(); const bmp = await createImageBitmap(im);
