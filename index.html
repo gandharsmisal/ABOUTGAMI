@@ -5453,7 +5453,7 @@
         if (!window.Worker || !window.OffscreenCanvas || !window.createImageBitmap ) return;   // (as the playground: shimmers whatever the device's motion setting)
         let wk; try { wk = new Worker(URL.createObjectURL(new Blob([WORKER], { type: 'text/javascript' }))); } catch (e) { return; }
         for (const s in DARK) {   // (one drawing at a time)
-          try { const im = new Image(); im.src = DARK[s].href; await im.decode(); const bmp = await createImageBitmap(im);
+          try { const im = new Image(); im.crossOrigin = 'anonymous'; im.src = DARK[s].href; await im.decode(); const bmp = await createImageBitmap(im);   // (crossOrigin: on a host like the preview link the picture can only be read this way)
             const u = bmp.width / Math.max(1, DARK[s].width), A = 0.9 * u, CELL = Math.max(8, Math.round(26 * u));   // (the playground's shimmer, in the page's units)
             const blobs = await new Promise(res => { wk.onmessage = e => res(e.data.blobs); wk.postMessage({ id: s, bmp, A, CELL }, [bmp]); });
             if (blobs) sets.push({ s, urls: [DARK[s].href, ...blobs.map(b => URL.createObjectURL(b))] });
