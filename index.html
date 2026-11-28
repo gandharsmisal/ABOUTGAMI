@@ -772,7 +772,8 @@
   #themePill:hover .pcord, #themePill:focus-visible .pcord { transform: scaleY(3.63); }
   #themePill .pglow { opacity: 1; transition: opacity 0.35s ease; }
   html.theme-dark #themePill .pglow { opacity: 0; }
-  #themePill .pfill { fill: #050403; fill-opacity: 0; transition: fill-opacity 0.25s ease; }
+  #themePill .pfill { fill: #F5F1E6; fill-opacity: 1; }   /* (the shade filled with the page's cream - nothing shows through it) */
+  html.theme-dark #themePill .pfill { fill: #000; }   /* (dark: the room's black) */
   #themePill .pglow { transform-box: fill-box; transform-origin: 50% 0%; transform: scale(0.75, 0.55); transition: opacity 0.35s ease, transform 0.45s ease; }   /* (at rest: a little light under the shade) */
   #themePill:hover .pglow, #themePill:focus-visible .pglow { transform: scale(1.25, 1.35); }   /* (hover: the U of light spreads down and out) */
   html.theme-dark #pageBack:hover .csNextArrow path, html.theme-dark #pageBack:focus-visible .csNextArrow path { stroke: #F5F1E6; }   /* (dark mode: back's arrow turns cream too) */
