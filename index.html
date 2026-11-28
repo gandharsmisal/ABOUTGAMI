@@ -4952,7 +4952,8 @@
     gsap.ticker.add(time => l.raf(time * 1000));
   });
   function caseScrollTop(page) {
-    if (page._lenis) { page._lenis.scrollTo(0, { immediate: true, force: true }); page._lenis.start(); }
+    if (page._lenis) { page._lenis.options.smoothWheel = !document.documentElement.classList.contains("theme-dark");   // (dark mode: the wheel scrolls the case natively - no smooth glide)
+      page._lenis.scrollTo(0, { immediate: true, force: true }); page._lenis.start(); }
     else page.scrollTop = 0;
   }
   // Light parallax: pictures drift about 12% slower than the page inside their own frames. Each picture is scaled up
