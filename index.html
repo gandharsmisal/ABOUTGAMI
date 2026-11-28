@@ -745,7 +745,6 @@
   }
   /* DARK MODE: pulling the lamp by the figure turns the light off - the dark room with the hand-drawn desk; light mode is
      the site exactly as it was */
-  #hero { transition: background-color 0.5s ease; }
   html.theme-dark #hero { background: #000; }
   html.theme-dark #hero, html.theme-dark #figSvg { --pen: #ece8dc; }
   html.theme-dark #hero .hsolid, html.theme-dark #figSvg .hsolid { fill: #000; }
@@ -5419,6 +5418,7 @@
       cord.setAttribute('aria-pressed', m === 'dark');
     };
     apply(mode);
+    for (const s in DARK) { const im = new Image(); im.src = DARK[s].href; if (im.decode) im.decode().catch(() => {}); }   // (the drawings ready beforehand: the switch is instant, no blank spots)
     { const si = document.getElementById('shadeImg'), sh = cord.querySelector('.shade'), set = () => sh.setAttribute('href', si.getAttribute('href') || 'assets/lamp-shade.webp'); set(); addEventListener('load', () => setTimeout(set, 500)); }
     // it hangs from the top of the screen down to just above the figure's head
     const svgEl = cord.querySelector('svg'), cordPath = cord.querySelector('.cord'), glow = cord.querySelector('.glow'), shadeEl = cord.querySelector('.shade');
@@ -5500,7 +5500,7 @@
         pill.addEventListener('click', () => {
           const mv = pill.querySelector('.lampTug'), cam = document.getElementById('heroCam');   // (the tug on its own group: the hover's grow is left alone)
           gsap.timeline().to(mv, { y: 12, duration: 0.12, ease: 'power2.in' }).to(mv, { y: 0, duration: 0.6, ease: 'elastic.out(1, 0.35)' });   // (a tug)
-          gsap.to(cam, { opacity: 0, duration: 0.2, ease: 'sine.in', onComplete: () => { apply(mode === 'dark' ? 'light' : 'dark'); label(); gsap.to(cam, { opacity: 1, duration: 0.3, delay: 0.5, ease: 'sine.out' }); } });   // (the desk comes back once the room is its new colour)
+          gsap.killTweensOf(cam, 'opacity'); gsap.set(cam, { opacity: 1 }); apply(mode === 'dark' ? 'light' : 'dark'); label();   // (instant: the room and the desk switch at once, the page stays where it is)
           pill.blur();   // (no focus left on it: the lamp goes back into the pill as soon as the pointer leaves)
         });
       } }
